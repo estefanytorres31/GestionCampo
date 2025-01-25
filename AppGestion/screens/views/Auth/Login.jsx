@@ -8,39 +8,45 @@ const LoginScreen = () => {
     <LinearGradient
       colors={['#E9E9E9', '#143168']} 
       style={styles.container}
+      start={{x: 0.5, y: 0}} 
+      end={{x: 0.5, y: 1}}
     >
-      {/* Logo */}
-      <Image
-        source={{ uri: "https://via.placeholder.com/150x80.png?text=PCS+Logo" }}
-        style={styles.logo}
-      />
-      <Text style={styles.slogan}>Sailing Into The Future Together</Text>
-
-      {/* Input Usuario */}
-      <View style={styles.inputContainer}>
-        <Ionicons name="person-outline" size={24} color="black" style={styles.icon} />
-        <TextInput
-          placeholder="Usuario"
-          style={styles.input}
-          placeholderTextColor="#aaa"
+      <View style={styles.modal}>
+        {/* Logo */}
+        <Image
+          source={{ uri: "https://www.serviciosperucontrols.com/assets/logo.png" }}
+          style={styles.logo}
         />
-      </View>
 
-      {/* Input Contraseña */}
-      <View style={styles.inputContainer}>
-        <Ionicons name="lock-closed-outline" size={24} color="black" style={styles.icon} />
-        <TextInput
-          placeholder="Contraseña"
-          secureTextEntry
-          style={styles.input}
-          placeholderTextColor="#aaa"
-        />
-      </View>
+        {/* Input Container */}
+        <View style={styles.inputContainer}>
+          {/* Username Input */}
+          <View style={[styles.inputBox, { marginBottom: 20 }]}>
+            <Ionicons name="person-outline" size={24} color="#143168" style={styles.icon} />
+            <TextInput
+              placeholder="Username"
+              style={[styles.input, { borderColor: '#143168' }]}
+              placeholderTextColor="#143168"
+            />
+          </View>
 
-      {/* Botón Iniciar Sesión */}
-      <TouchableOpacity style={styles.button}>
-        <Text style={styles.buttonText}>INICIAR SESIÓN</Text>
-      </TouchableOpacity>
+          {/* Password Input */}
+          <View style={styles.inputBox}>
+            <Ionicons name="lock-closed-outline" size={24} color="#143168" style={styles.icon} />
+            <TextInput
+              placeholder="Password"
+              secureTextEntry
+              style={[styles.input, { borderColor: '#143168' }]}
+              placeholderTextColor="#143168"
+            />
+          </View>
+        </View>
+
+        {/* Login Button */}
+        <TouchableOpacity style={styles.button}>
+            <Text style={styles.buttonText}>Iniciar sesión</Text>
+        </TouchableOpacity>
+      </View>
     </LinearGradient>
   );
 };
@@ -52,31 +58,42 @@ const styles = StyleSheet.create({
     alignItems: "center",
     padding: 20,
   },
-  logo: {
-    width: 150,
-    height: 80,
-    marginBottom: 10,
-  },
-  slogan: {
-    fontSize: 14,
-    fontStyle: "italic",
-    marginBottom: 20,
-    color: "#fff",
-  },
-  inputContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#fff",
+  modal: {
+    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    padding: 30,
     borderRadius: 10,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    marginBottom: 15,
-    width: "90%",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 5,
     elevation: 5,
+  },
+  logo: {
+    width: 200,
+    height: 200,
+    marginBottom: 20,
+    resizeMode: "contain",
+    alignSelf: "center",
+  },
+  inputContainer: {
+    marginBottom: 30,
+  },
+  inputBox: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#fff",
+    borderWidth: 2,
+    borderColor: "#E9E9E9",
+    borderRadius: 10,
+    paddingHorizontal: 15,
+    paddingVertical: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 5,
+    marginBottom: 10,
+    width: 300,
   },
   icon: {
     marginRight: 10,
@@ -84,21 +101,16 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     fontSize: 16,
-    color: "#333",
+    color: "#143168",
   },
   button: {
-    backgroundColor: "#000",
-    paddingVertical: 15,
     borderRadius: 10,
-    width: "90%",
+    overflow: "hidden",
+    paddingVertical: 15,
     alignItems: "center",
-    marginTop: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 5,
-    elevation: 5,
+    backgroundColor: "#143168",
   },
+
   buttonText: {
     color: "#fff",
     fontSize: 16,
