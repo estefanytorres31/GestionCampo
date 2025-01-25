@@ -1,114 +1,109 @@
-import React, { useState } from 'react';
-import { 
-  View, 
-  Text, 
-  TextInput, 
-  TouchableOpacity, 
-  StyleSheet, 
-  SafeAreaView, 
-  KeyboardAvoidingView, 
-  Platform 
-} from 'react-native';
-import LinearGradient from 'react-native-linear-gradient';
+import React from "react";
+import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 
 const LoginScreen = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-
-  const handleLogin = () => {
-    // Login logic here
-    console.log('Login attempt', { email, password });
-  };
-
   return (
-    <View style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <KeyboardAvoidingView 
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          style={styles.keyboardView}
-        >
-          <View style={styles.loginContainer}>
-            <Text style={styles.title}>Welcome Back</Text>
-            
-            <TextInput 
-              placeholder="Email"
-              value={email}
-              onChangeText={setEmail}
-              style={styles.input}
-              keyboardType="email-address"
-              autoCapitalize="none"
-            />
-            
-            <TextInput 
-              placeholder="Password"
-              value={password}
-              onChangeText={setPassword}
-              style={styles.input}
-              secureTextEntry
-            />
-            
-            <TouchableOpacity 
-              style={styles.loginButton}
-              onPress={handleLogin}
-            >
-              <Text style={styles.loginButtonText}>Login</Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity>
-              <Text style={styles.forgotPassword}>Forgot Password?</Text>
-            </TouchableOpacity>
-          </View>
-        </KeyboardAvoidingView>
-      </SafeAreaView>
-    </View>
+    <LinearGradient
+      colors={['#E9E9E9', '#143168']} 
+      style={styles.container}
+    >
+      {/* Logo */}
+      <Image
+        source={{ uri: "https://via.placeholder.com/150x80.png?text=PCS+Logo" }}
+        style={styles.logo}
+      />
+      <Text style={styles.slogan}>Sailing Into The Future Together</Text>
+
+      {/* Input Usuario */}
+      <View style={styles.inputContainer}>
+        <Ionicons name="person-outline" size={24} color="black" style={styles.icon} />
+        <TextInput
+          placeholder="Usuario"
+          style={styles.input}
+          placeholderTextColor="#aaa"
+        />
+      </View>
+
+      {/* Input Contraseña */}
+      <View style={styles.inputContainer}>
+        <Ionicons name="lock-closed-outline" size={24} color="black" style={styles.icon} />
+        <TextInput
+          placeholder="Contraseña"
+          secureTextEntry
+          style={styles.input}
+          placeholderTextColor="#aaa"
+        />
+      </View>
+
+      {/* Botón Iniciar Sesión */}
+      <TouchableOpacity style={styles.button}>
+        <Text style={styles.buttonText}>INICIAR SESIÓN</Text>
+      </TouchableOpacity>
+    </LinearGradient>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
   },
-  safeArea: {
-    flex: 1,
+  logo: {
+    width: 150,
+    height: 80,
+    marginBottom: 10,
   },
-  keyboardView: {
-    flex: 1,
-    justifyContent: 'center',
-  },
-  loginContainer: {
-    paddingHorizontal: 20,
-    width: '100%',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: 'black',
-    textAlign: 'center',
+  slogan: {
+    fontSize: 14,
+    fontStyle: "italic",
     marginBottom: 20,
+    color: "#fff",
+  },
+  inputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    marginBottom: 15,
+    width: "90%",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 5,
+  },
+  icon: {
+    marginRight: 10,
   },
   input: {
-    backgroundColor: 'white',
-    paddingHorizontal: 15,
-    paddingVertical: 10,
+    flex: 1,
+    fontSize: 16,
+    color: "#333",
+  },
+  button: {
+    backgroundColor: "#000",
+    paddingVertical: 15,
     borderRadius: 10,
-    marginBottom: 15,
+    width: "90%",
+    alignItems: "center",
+    marginTop: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    elevation: 5,
   },
-  loginButton: {
-    backgroundColor: '#143168',
-    padding: 15,
-    borderRadius: 10,
-    alignItems: 'center',
+  buttonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
   },
-  loginButtonText: {
-    color: 'white',
-    fontWeight: 'bold',
-  },
-  forgotPassword: {
-    color: 'white',
-    textAlign: 'center',
-    marginTop: 15,
-  }
 });
 
 export default LoginScreen;
