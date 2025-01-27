@@ -8,3 +8,5 @@ rolRouter.post('/api/rol', createRol)
 rolRouter.put('/api/rol/:id', actualizarRol)
 rolRouter.delete('/api/rol/:id', eliminarRol)
 rolRouter.get('/api/rol/:id', getRolById)
+
+export default rolRouter;

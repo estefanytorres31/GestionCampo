@@ -16,3 +16,5 @@ usuarioRouter.post('/api/usuario', createUsuario);
 usuarioRouter.get('/api/usuario/:id', getUserById);
 usuarioRouter.put('/api/usuario/:id', updateUser);
 usuarioRouter.delete('/api/usuario/:id', deleteUser);
+
+export default usuarioRouter;
