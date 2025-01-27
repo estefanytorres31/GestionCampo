@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { Button } from "@/components/Button";
+import fondo from "@/assets/images/fondo.png";
 
 export const Login = () => {
   const { login } = useAuth();
@@ -12,9 +13,12 @@ export const Login = () => {
   };
 
   return (
-    <div>
+    <div
+      className="h-screen w-screen bg-cover bg-center grid place-items-center"
+      style={{ backgroundImage: `url(${fondo})` }}
+    >
       <h1>Login</h1>
-      <Button onClick={handleLogin}>Iniciar sesión</Button> 
+      <Button onClick={handleLogin}>Iniciar sesión</Button>
     </div>
   );
 };

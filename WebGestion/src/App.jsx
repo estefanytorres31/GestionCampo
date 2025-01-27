@@ -1,4 +1,3 @@
-import fondo from "./assets/fondo.png";
 import {
   BrowserRouter as Router,
   Routes,
@@ -17,10 +16,7 @@ const PrivateRoute = ({ children }) => {
 
 const AppContent = () => {
   return (
-    <div
-      className="h-screen w-screen bg-cover bg-center grid place-items-center"
-      style={{ backgroundImage: `url(${fondo})` }}
-    >
+    <>
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route
@@ -37,7 +33,7 @@ const AppContent = () => {
         <Route path="/" element={<Navigate to="/login" />} />
         <Route path="*" element={<div>Página no encontrada</div>} />
       </Routes>
-    </div>
+    </>
   );
 };
 
