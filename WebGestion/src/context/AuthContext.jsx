@@ -4,14 +4,10 @@ const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [isAuth, setIsAuth] = useState(() => {
-    // Recupera el estado de autenticación y verifica el tiempo de expiración
     const token = localStorage.getItem("token");
     const expiration = localStorage.getItem("tokenExpiration");
 
-    if (token && expiration && new Date().getTime() < Number(expiration)) {
-      return true;
-    }
-    return false;
+    return token && expiration && new Date().getTime() < new Date(expiration).getTime();
   });
 
   useEffect(() => {
@@ -19,17 +15,18 @@ export const AuthProvider = ({ children }) => {
       // Limpia el almacenamiento si no está autenticado
       localStorage.removeItem("token");
       localStorage.removeItem("tokenExpiration");
+      localStorage.removeItem("usuario");
     }
   }, [isAuth]);
 
-  const login = () => {
-    // Parámetros predefinidos
-    const token = "mockToken123"; // Token simulado
-    const expiration = Date.now() + 5 * 1000; 
+  const login = (data) => {
+    const { token, expiracion, usuario } = data;
 
-    // Almacena el token y el tiempo de expiración en localStorage
+    // Guarda los datos en el almacenamiento local
     localStorage.setItem("token", token);
-    localStorage.setItem("tokenExpiration", expiration.toString());
+    localStorage.setItem("tokenExpiration", expiracion); // ISO string
+    localStorage.setItem("usuario", JSON.stringify(usuario)); // Guardar datos del usuario
+
     setIsAuth(true);
   };
 
@@ -37,6 +34,7 @@ export const AuthProvider = ({ children }) => {
     // Elimina los datos del almacenamiento local y desloguea
     localStorage.removeItem("token");
     localStorage.removeItem("tokenExpiration");
+    localStorage.removeItem("usuario");
     setIsAuth(false);
   };
 

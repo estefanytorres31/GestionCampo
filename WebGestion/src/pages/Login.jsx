@@ -22,28 +22,28 @@ export const Login = () => {
   const { usuario, contrasena } = formState;
 
   const handleLogin = async () => {
-    // Validación básica
     if (!usuario || !contrasena) {
       setErrorMessage("Por favor, completa todos los campos.");
-      console.log("Error al iniciar sesión.", { usuario, contrasena });
       return;
     }
 
-    login();
-    navigate("/dashboard");
+    try {
+      const response = await axiosInstance.post("/auth/login", { usuario, contrasena });
 
-    // try {
-    //const response = await axiosInstance.post("/api/login", { usuario, contrasena });
+      if (response.status === 200) {
+        const { token, expiracion, usuario: usuarioData } = response.data;
 
-    //   if (response.status === 200) {
-    //     login(response.data);
-    //     navigate("/dashboard");
-    //   }
-    // } catch (error) {
-    //   setErrorMessage(
-    //     error.response?.data?.message || "Error al iniciar sesión."
-    //   );
-    // }
+        // Llama al contexto de login
+        login({ token, expiracion, usuario: usuarioData });
+
+        // Redirige al dashboard
+        navigate("/dashboard");
+      }
+    } catch (error) {
+      setErrorMessage(
+        error.response?.data?.message || "Error al iniciar sesión."
+      );
+    }
   };
 
   return (
