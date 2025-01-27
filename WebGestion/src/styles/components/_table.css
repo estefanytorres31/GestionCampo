@@ -1,0 +1,85 @@
+
+thead,
+tbody,
+tr,
+th,
+td {
+  padding-left: 1.5rem
+    /* 24px */
+  ;
+  padding-right: 1.5rem
+    /* 24px */
+  ;
+  padding-top: 0.75rem
+    /* 12px */
+  ;
+  padding-bottom: 0.75rem
+    /* 12px */
+  ;
+  white-space: nowrap;
+}
+
+table {
+  table-layout: auto;
+  min-width: 100%;
+  background-color: inherit;
+  
+}
+
+thead {
+  color: var(--colores-texto-t-tulo, rgba(40, 76, 154, 1));
+  font-family: var(--text-xs-medium-font-family, "Inter", Helvetica);
+  font-size: var(--text-xs-medium-font-size, 12px);
+  font-style: var(--text-xs-medium-font-style, normal);
+  font-weight: var(--text-xs-medium-font-weight, 500);
+  line-height: var(--text-xs-medium-line-height, 18px);
+  text-align: left;
+  text-transform: capitalize;
+  cursor: pointer;
+}
+
+tbody {
+  color: var(--colores-texto-main, rgba(28, 44, 79, 1));
+  font-family: var(--text-sm-medium-font-family, "Inter", Helvetica);
+  font-size: var(--text-sm-medium-font-size, 14px);
+  font-style: var(--text-sm-medium-font-style, normal);
+  font-weight: var(--text-sm-medium-font-weight, 500);
+  line-height: var(--text-sm-medium-line-height, 20px);
+  text-align: left;
+}
+
+/* tr {
+  height: 1rem;
+} */
+
+.table {
+  thead {
+    tr {
+      th:last-child {
+        @apply text-center h-[44px] min-w-[140px];
+      }
+    }
+  }
+
+  tbody {
+    tr {
+      .id {
+        @apply min-w-[100px];
+      }
+
+      td {
+        @apply text-start;
+      }
+
+      @apply h-[72px];
+    }
+  }
+
+  .acciones {
+    @apply min-w-[140px] flex justify-center items-center gap-1;
+
+    button {
+      @apply w-10 h-10 flex justify-center items-center;
+    }
+  }
+}

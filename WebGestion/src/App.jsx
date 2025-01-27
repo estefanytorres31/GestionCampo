@@ -24,12 +24,21 @@ const AppContent = () => {
           element={
             <PrivateRoute>
               <PrivateLayout>
-                hola
-                {/* <Usuarios /> */}
+                <Dashboard />
               </PrivateLayout>
             </PrivateRoute>
           }
         />
+        <Route
+          path="/usuarios"
+          element={
+            <PrivateRoute>
+              <PrivateLayout>
+                Usuarios
+              </PrivateLayout>
+            </PrivateRoute>
+          }
+        />s
         <Route path="/" element={<Navigate to="/login" />} />
         <Route path="*" element={<div>Página no encontrada</div>} />
       </Routes>

@@ -1,9 +1,19 @@
-export const Button = ({ children, ...props }) => {
+export const Button = ({
+  tag: Tag = "button",
+  children,
+  className = "",
+  color = "default",
+  width = "md:w-56",
+  ...props
+}) => {
+  const computedWidth = width || (color.includes("icon") ? "" : "md:w-56");
+
   return (
-    <>
-        <button className='px-4 py-3 bg-[#0D1E4C] rounded-xl h-11 shadow-md text-sm-semibold w-[240px] flex items-center justify-center active:scale-95 focus:outline-none transition duration-300 transform text-white' {...props}>
-            {children}
-        </button>
-    </>
-  )
-}
+    <Tag
+      className={`button button-${color} ${computedWidth} ${className}`}
+      {...props}
+    >
+      {children}
+    </Tag>
+  );
+};

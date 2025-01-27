@@ -18,7 +18,7 @@ export const Login = () => {
       style={{ backgroundImage: `url(${fondo})` }}
     >
       <h1>Login</h1>
-      <Button onClick={handleLogin}>Iniciar sesión</Button>
+      <Button onClick={handleLogin} color="default md:w-[240px]]" className="mt-12">Iniciar sesión</Button>
     </div>
   );
 };

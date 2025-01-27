@@ -1,0 +1,342 @@
+// This is your Prisma schema file
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Permiso {
+  id          Int           @id @default(autoincrement())
+  nombre      String        @unique @db.VarChar(50)
+  descripcion String?       @db.VarChar(255)
+  estado       Boolean       @default(true) @map("estado")
+  creadoEn    DateTime      @default(now()) @map("creado_en")
+  actualizadoEn DateTime    @default(now()) @map("actualizado_en")
+  roles       RolPermiso[]
+
+  @@map("permisos")
+}
+
+model Roles {
+  id            Int           @id @default(autoincrement())
+  nombreRol     String        @map("nombre_rol") @db.VarChar(50)
+  descripcion   String?       @db.VarChar(255)
+  estado        Boolean       @default(true)
+  creadoEn      DateTime      @default(now()) @map("creado_en")
+  actualizadoEn DateTime      @default(now()) @map("actualizado_en")
+  usuarios      UsuarioRol[]
+  permisos      RolPermiso[]
+
+  @@map("roles")
+}
+
+// Tabla intermedia para la relación muchos a muchos entre Rol y Permiso
+model RolPermiso {
+  id        Int      @id @default(autoincrement())
+  rolId     Int      @map("rol_id")
+  permisoId Int      @map("permiso_id")
+  estado    Boolean           @default(true)
+  creadoEn  DateTime @default(now()) @map("creado_en")
+  rol       Roles     @relation(fields: [rolId], references: [id])
+  permiso   Permiso  @relation(fields: [permisoId], references: [id])
+
+  @@unique([rolId, permisoId])
+  @@map("roles_permisos")
+}
+
+// Tabla intermedia para la relación muchos a muchos entre Usuario y Rol
+model UsuarioRol {
+  id        Int      @id @default(autoincrement())
+  usuarioId Int      @map("usuario_id")
+  rolId     Int      @map("rol_id")
+  estado    Boolean  @default(true)
+  creadoEn  DateTime @default(now()) @map("creado_en")
+  usuario   Usuario  @relation(fields: [usuarioId], references: [id])
+  rol       Roles     @relation(fields: [rolId], references: [id])
+
+  @@unique([usuarioId, rolId])
+  @@map("usuario_roles")
+}
+
+model Usuario {
+  id             Int              @id @default(autoincrement())
+  nombreUsuario  String           @unique @map("nombre_usuario") @db.VarChar(50)
+  contrasenaHash String           @map("contrasena_hash") @db.VarChar(255)
+  nombreCompleto String           @map("nombre_completo") @db.VarChar(100)
+  email         String?           @db.VarChar(100)
+  estado        Boolean           @default(true)
+  creadoEn      DateTime         @default(now()) @map("creado_en")
+  actualizadoEn DateTime         @default(now()) @map("actualizado_en")
+  roles         UsuarioRol[]
+  asistencias   Asistencia[]
+  comentarios   ComentarioTarea[]
+
+  @@map("usuarios")
+}
+
+model Embarcacion {
+  id                Int            @id @default(autoincrement())
+  identificadorBarco String        @unique @map("identificador_barco") @db.VarChar(50)
+  nombre           String          @db.VarChar(100)
+  datosQrCode      String         @map("datos_qr_code") @db.VarChar(255)
+  ubicacion        String?        @db.VarChar(255)
+  estado           Boolean           @default(true)
+  creadoEn         DateTime       @default(now()) @map("creado_en")
+  actualizadoEn    DateTime       @default(now()) @map("actualizado_en")
+  asistencias      Asistencia[]
+  mantenimientos   Mantenimiento[]
+
+  @@map("embarcaciones")
+}
+
+model Asistencia {
+  id                    Int                    @id @default(autoincrement())
+  usuarioId            Int                    @map("usuario_id")
+  embarcacionId        Int                    @map("embarcacion_id")
+  horaEntrada          DateTime               @map("hora_entrada")
+  horaSalida           DateTime?              @map("hora_salida")
+  gpsEntrada           String                 @map("gps_entrada") @db.VarChar(50)
+  gpsSalida            String?                @map("gps_salida") @db.VarChar(50)
+  estadoAsistencia               EstadoAsistencia       @default(registrado)
+  estado        Boolean           @default(true)
+  creadoEn             DateTime               @default(now()) @map("creado_en")
+  actualizadoEn        DateTime               @default(now()) @map("actualizado_en")
+  usuario              Usuario                @relation(fields: [usuarioId], references: [id])
+  embarcacion         Embarcacion            @relation(fields: [embarcacionId], references: [id])
+  estadoSincronizacion EstadoSincronizacion?
+
+  @@map("asistencias")
+}
+
+enum EstadoAsistencia {
+  registrado
+  salido
+}
+
+model EstadoSincronizacion {
+  id                Int        @id @default(autoincrement())
+  asistenciaId      Int        @unique @map("asistencia_id")
+  estaSincronizado  Boolean    @default(false) @map("esta_sincronizado")
+  sincronizadoEn    DateTime?  @map("sincronizado_en")
+  asistencia        Asistencia @relation(fields: [asistenciaId], references: [id])
+
+  @@map("estados_sincronizacion")
+}
+
+model TipoMantenimiento {
+  id           Int            @id @default(autoincrement())
+  nombreTipo   String         @map("nombre_tipo") @db.VarChar(100)
+  estado        Boolean           @default(true)
+  descripcion  String?        @db.VarChar(255)
+  mantenimientos Mantenimiento[]
+
+  @@map("tipos_mantenimiento")
+}
+
+model Mantenimiento {
+  id                   Int                    @id @default(autoincrement())
+  embarcacionId        Int                   @map("embarcacion_id")
+  tipoMantenimientoId  Int                   @map("tipo_mantenimiento_id")
+  fechaProgramada      DateTime              @map("fecha_programada") @db.Date
+  estadoMantenimiento  EstadoMantenimiento    @default(Programado)
+  observaciones        String?               @db.Text
+  llevarProximoAbordaje String?              @map("llevar_proximo_abordaje") @db.Text
+  porcentajeAvance     Decimal?              @map("porcentaje_avance") @db.Decimal(5, 2)
+  estado               Boolean           @default(true)
+  creadoEn             DateTime              @default(now()) @map("creado_en")
+  actualizadoEn        DateTime              @default(now()) @map("actualizado_en")
+  embarcacion          Embarcacion           @relation(fields: [embarcacionId], references: [id])
+  tipoMantenimiento    TipoMantenimiento     @relation(fields: [tipoMantenimientoId], references: [id])
+  sistemasMantenimiento SistemaMantenimiento[]
+  materialesMantenimiento MaterialMantenimiento[]
+  mantenimientoPreventivo MantenimientoPreventivo?
+  mantenimientoCorrectivo MantenimientoCorrectivo?
+  proyecto              Proyecto?
+  desmontajeMontaje     DesmontajeMontaje?
+
+  @@map("mantenimientos")
+}
+
+enum EstadoMantenimiento {
+  Programado
+  En_Progreso @map("En Progreso")
+  Completado
+}
+
+model Sistema {
+  id                   Int                    @id @default(autoincrement())
+  nombreSistema        String                @map("nombre_sistema") @db.VarChar(100)
+  descripcion          String?               @db.VarChar(255)
+  estado               Boolean           @default(true)
+  creadoEn             DateTime              @default(now()) @map("creado_en")
+  actualizadoEn        DateTime              @default(now()) @map("actualizado_en")
+  sistemasMantenimiento SistemaMantenimiento[]
+  partes               Parte[]
+
+  @@map("sistemas")
+}
+
+model SistemaMantenimiento {
+  id                  Int           @id @default(autoincrement())
+  mantenimientoId     Int          @map("mantenimiento_id")
+  sistemaId           Int          @map("sistema_id")
+  nota                String?      @db.VarChar(255)
+  fallaEncontrada     String?      @map("falla_encontrada") @db.Text
+  porcentajeCompletado Decimal?     @map("porcentaje_completado") @db.Decimal(5, 2)
+  creadoEn            DateTime     @default(now()) @map("creado_en")
+  actualizadoEn       DateTime     @default(now()) @map("actualizado_en")
+  mantenimiento       Mantenimiento @relation(fields: [mantenimientoId], references: [id])
+  sistema             Sistema      @relation(fields: [sistemaId], references: [id])
+
+  @@map("sistemas_mantenimiento")
+}
+
+model Parte {
+  id           Int           @id @default(autoincrement())
+  sistemaId    Int          @map("sistema_id")
+  nombreParte  String       @map("nombre_parte") @db.VarChar(100)
+  descripcion  String?      @db.VarChar(255)
+  creadoEn     DateTime     @default(now()) @map("creado_en")
+  actualizadoEn DateTime     @default(now()) @map("actualizado_en")
+  sistema      Sistema      @relation(fields: [sistemaId], references: [id])
+  tareasPartes TareaParte[]
+
+  @@map("partes")
+}
+
+model TareaParte {
+  id                Int                 @id @default(autoincrement())
+  parteId           Int                @map("parte_id")
+  descripcionTarea  String             @map("descripcion_tarea") @db.VarChar(255)
+  esChecklist       Boolean            @default(false) @map("es_checklist")
+  estado            EstadoTarea        @default(Pendiente)
+  porcentajeAvance  Decimal?           @map("porcentaje_avance") @db.Decimal(5, 2)
+  creadoEn          DateTime           @default(now()) @map("creado_en")
+  actualizadoEn     DateTime           @default(now()) @map("actualizado_en")
+  parte             Parte              @relation(fields: [parteId], references: [id])
+  listasVerificacion ListaVerificacion[]
+  comentarios       ComentarioTarea[]
+  fotos            FotoTarea[]
+
+  @@map("tareas_partes")
+}
+
+enum EstadoTarea {
+  Pendiente
+  En_Progreso @map("En Progreso")
+  Completada
+}
+
+model ListaVerificacion {
+  id           Int        @id @default(autoincrement())
+  tareaParteId Int       @map("tarea_parte_id")
+  completada   Boolean    @default(false)
+  comentario   String?    @db.Text
+  urlFoto      String?    @map("url_foto") @db.VarChar(255)
+  creadoEn     DateTime   @default(now()) @map("creado_en")
+  actualizadoEn DateTime   @default(now()) @map("actualizado_en")
+  tareaParte   TareaParte @relation(fields: [tareaParteId], references: [id])
+
+  @@map("listas_verificacion")
+}
+
+model ComentarioTarea {
+  id           Int        @id @default(autoincrement())
+  tareaParteId Int       @map("tarea_parte_id")
+  usuarioId    Int       @map("usuario_id")
+  comentario   String    @db.Text
+  creadoEn     DateTime   @default(now()) @map("creado_en")
+  tareaParte   TareaParte @relation(fields: [tareaParteId], references: [id])
+  usuario      Usuario    @relation(fields: [usuarioId], references: [id])
+
+  @@map("comentarios_tarea")
+}
+
+model FotoTarea {
+  id           Int        @id @default(autoincrement())
+  tareaParteId Int       @map("tarea_parte_id")
+  urlFoto      String    @map("url_foto") @db.VarChar(255)
+  descripcion  String?   @db.VarChar(255)
+  creadoEn     DateTime   @default(now()) @map("creado_en")
+  tareaParte   TareaParte @relation(fields: [tareaParteId], references: [id])
+
+  @@map("fotos_tarea")
+}
+
+model Material {
+  id              Int                    @id @default(autoincrement())
+  nombreMaterial  String                @map("nombre_material") @db.VarChar(100)
+  descripcion     String?               @db.VarChar(255)
+  stock          Int                    @default(0)
+  creadoEn        DateTime              @default(now()) @map("creado_en")
+  actualizadoEn   DateTime              @default(now()) @map("actualizado_en")
+  materialesMantenimiento MaterialMantenimiento[]
+
+  @@map("materiales")
+}
+
+model MaterialMantenimiento {
+  id              Int           @id @default(autoincrement())
+  mantenimientoId Int          @map("mantenimiento_id")
+  materialId      Int          @map("material_id")
+  cantidad        Int          @default(1)
+  esProximo       Boolean      @default(false) @map("es_proximo")
+  creadoEn        DateTime     @default(now()) @map("creado_en")
+  actualizadoEn   DateTime     @default(now()) @map("actualizado_en")
+  mantenimiento   Mantenimiento @relation(fields: [mantenimientoId], references: [id])
+  material        Material     @relation(fields: [materialId], references: [id])
+
+  @@map("materiales_mantenimiento")
+}
+
+model MantenimientoPreventivo {
+  id              Int           @id @default(autoincrement())
+  mantenimientoId Int          @unique @map("mantenimiento_id")
+  creadoEn        DateTime     @default(now()) @map("creado_en")
+  actualizadoEn   DateTime     @default(now()) @map("actualizado_en")
+  mantenimiento   Mantenimiento @relation(fields: [mantenimientoId], references: [id])
+
+  @@map("mantenimiento_preventivo")
+}
+
+model MantenimientoCorrectivo {
+  id              Int           @id @default(autoincrement())
+  mantenimientoId Int          @unique @map("mantenimiento_id")
+  fallas         String?       @db.Text
+  causas         String?       @db.Text
+  solucion       String?       @db.Text
+  pendiente      String?       @db.Text
+  creadoEn        DateTime     @default(now()) @map("creado_en")
+  actualizadoEn   DateTime     @default(now()) @map("actualizado_en")
+  mantenimiento   Mantenimiento @relation(fields: [mantenimientoId], references: [id])
+
+  @@map("mantenimiento_correctivo")
+}
+
+model Proyecto {
+  id               Int           @id @default(autoincrement())
+  mantenimientoId  Int          @unique @map("mantenimiento_id")
+  porcentajeProceso Decimal?     @map("porcentaje_proceso") @db.Decimal(5, 2)
+  pendientes       String?       @db.Text
+  creadoEn         DateTime     @default(now()) @map("creado_en")
+  actualizadoEn    DateTime     @default(now()) @map("actualizado_en")
+  mantenimiento    Mantenimiento @relation(fields: [mantenimientoId], references: [id])
+
+  @@map("proyectos")
+}
+
+model DesmontajeMontaje {
+  id                    Int           @id @default(autoincrement())
+  mantenimientoId       Int          @unique @map("mantenimiento_id")
+  observaciones         String?       @db.Text
+  llevarProximoAbordaje String?       @map("llevar_proximo_abordaje") @db.Text
+  creadoEn              DateTime     @default(now()) @map("creado_en")
+  actualizadoEn         DateTime     @default(now()) @map("actualizado_en")
+  mantenimiento         Mantenimiento @relation(fields: [mantenimientoId], references: [id])
+
+  @@map("desmontaje_montaje")
+}

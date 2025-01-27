@@ -1,0 +1,28 @@
+@layer base {
+    body {
+      background: #101828;
+    }
+  
+    h1 {
+      /* @apply text-xl font-medium; */
+    }
+  }
+  
+  .link {
+    @apply p-2.5 flex gap-6 items-center md:cursor-pointer cursor-default duration-300 font-medium whitespace-nowrap;
+    color: #101828;
+  }
+  
+  .link:hover {
+    background-color: #f0f4ff;
+  }
+  
+  .link-active > img {
+    color: #1e3a8a;
+  }
+  
+  .link-active {
+    @apply bg-blue-900/5 border-[#1e3a8a];
+    color: #1e3a8a;
+  }
+  
