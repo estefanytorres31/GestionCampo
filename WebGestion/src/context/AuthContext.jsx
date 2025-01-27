@@ -4,17 +4,39 @@ const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [isAuth, setIsAuth] = useState(() => {
-    // Recupera el estado de autenticación del almacenamiento local
-    return localStorage.getItem("isAuth") === "true";
+    const token = localStorage.getItem("token");
+    const expiration = localStorage.getItem("tokenExpiration");
+
+    return token && expiration && new Date().getTime() < new Date(expiration).getTime();
   });
 
   useEffect(() => {
-    // Almacena el estado de autenticación en el almacenamiento local
-    localStorage.setItem("isAuth", isAuth);
+    if (!isAuth) {
+      // Limpia el almacenamiento si no está autenticado
+      localStorage.removeItem("token");
+      localStorage.removeItem("tokenExpiration");
+      localStorage.removeItem("usuario");
+    }
   }, [isAuth]);
 
-  const login = () => setIsAuth(true);
-  const logout = () => setIsAuth(false);
+  const login = (data) => {
+    const { token, expiracion, usuario } = data;
+
+    // Guarda los datos en el almacenamiento local
+    localStorage.setItem("token", token);
+    localStorage.setItem("tokenExpiration", expiracion); // ISO string
+    localStorage.setItem("usuario", JSON.stringify(usuario)); // Guardar datos del usuario
+
+    setIsAuth(true);
+  };
+
+  const logout = () => {
+    // Elimina los datos del almacenamiento local y desloguea
+    localStorage.removeItem("token");
+    localStorage.removeItem("tokenExpiration");
+    localStorage.removeItem("usuario");
+    setIsAuth(false);
+  };
 
   return (
     <AuthContext.Provider value={{ isAuth, login, logout }}>

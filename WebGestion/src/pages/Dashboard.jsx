@@ -62,7 +62,7 @@ export const Dashboard = () => {
     <>
       <main className="flex flex-col justify-start items-start h-full w-full overflow-x-auto">
         {/* Div que simula el encabezado */}
-        <div className="w-full bg-gray-200 text-gray-600 uppercase text-sm leading-normal rounded-t-lg">
+        <div className="w-full bg-[#83A6CE] leading-normal rounded-t-lg">
         </div>
         <Table columns={columns} data={data} />
       </main>

@@ -1,8 +1,12 @@
 import { PrismaClient } from "@prisma/client";
+import { getPeruTime, getUTCTime } from "../utils/Time.js";
 
 const prisma= new PrismaClient();
 
 export const createRol=async(nombre_rol)=>{
+
+    const todayISO = new Date().toISOString();
+    const fecha_creacion = getUTCTime(todayISO);
     const nuevoRol=await prisma.roles.create(
         {
             data:{
@@ -22,11 +26,11 @@ export const obtenerTodosLosRoles=async()=>{
     return roles;
 }
 
-export const actualizarRol=async(id_rol,nombre_rol)=>{
+export const actualizarRol=async(id,nombre_rol)=>{
     const rolExistente=await prisma.roles.update(
         {
             where:{
-                id:id_rol
+                id:parseInt(id),
             },
             data:{
                 nombreRol:nombre_rol
@@ -41,11 +45,11 @@ export const actualizarRol=async(id_rol,nombre_rol)=>{
     return rolActualizado;
 }
 
-export const eliminarRol=async(id_rol)=>{
+export const eliminarRol=async(id)=>{
     await prisma.roles.update(
         {
             where:{
-                id:id_rol
+                id:parseInt(id)
             },
             data:{
                 estado:false
@@ -57,7 +61,7 @@ export const eliminarRol=async(id_rol)=>{
 export const getRolById=async(id)=>{
     const rol=await prisma.roles.findOne({
         where:{
-            id:id,
+            id:parseInt(id),
             estado:true
         }
     });

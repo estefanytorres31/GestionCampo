@@ -1,21 +1,48 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
+import { getPeruTime, getUTCTime } from "../utils/Time.js";
 
 const prisma = new PrismaClient();
 
 
-export const createUser=async(nombre_usuario, contrasena_hash, nombre_completo, email)=>{
-    const hashedPassword = await bcrypt.hash(contrasena_hash, 10);
-    const newUser = await prisma.usuario.create({
-        data:{
-            nombreUsuario: nombre_usuario,
-            contrasenaHash: hashedPassword,
-            nombreCompleto: nombre_completo,
-            email: email,
-        }
+export const createUsuario = async (nombre_usuario, contrasena_hash, nombre_completo, email, roles_ids) => {
+    if (!roles_ids || roles_ids.length === 0) {
+        throw new Error("Debe proporcionar al menos un rol para el usuario");
+    }
+    const todayISO = new Date().toISOString();
+    const fecha_creacion = getUTCTime(todayISO);
+
+    const result = await prisma.$transaction(async (tx) => {
+        const hashedPassword = await bcrypt.hash(contrasena_hash, 10);
+        
+        const newUser = await tx.usuario.create({
+            data: {
+                nombreUsuario: nombre_usuario,
+                contrasenaHash: hashedPassword,
+                nombreCompleto: nombre_completo,
+                email: email,
+                roles: {
+                    create: roles_ids.map(rolId => ({
+                        rol: {
+                            connect: { id: rolId }
+                        }
+                    }))
+                }
+            },
+            include: {
+                roles: {
+                    include: {
+                        rol: true
+                    }
+                }
+            }
+        });
+
+        return newUser;
     });
-    return newUser;
-}
+
+    return result;
+};
 
 export const getUserByUsername=async(nombre_usuario)=>{
     const user = await prisma.usuario.findFirst({
