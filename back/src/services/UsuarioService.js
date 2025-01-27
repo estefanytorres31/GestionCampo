@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
+import { getPeruTime, getUTCTime } from "../utils/Time.js";
 
 const prisma = new PrismaClient();
 
@@ -8,6 +9,8 @@ export const createUsuario = async (nombre_usuario, contrasena_hash, nombre_comp
     if (!roles_ids || roles_ids.length === 0) {
         throw new Error("Debe proporcionar al menos un rol para el usuario");
     }
+    const todayISO = new Date().toISOString();
+    const fecha_creacion = getUTCTime(todayISO);
 
     const result = await prisma.$transaction(async (tx) => {
         const hashedPassword = await bcrypt.hash(contrasena_hash, 10);

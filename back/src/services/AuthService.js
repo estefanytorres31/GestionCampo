@@ -1,12 +1,12 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
 import { createToken } from "../utils/Jwt.js";
+import { getPeruTime, getUTCTime } from "../utils/Time.js";
 
 const prisma = new PrismaClient();
 
 export const login=async(nombre_usuario, contrasena_hash)=>{
 
-    //Validar si existe el usuario
     const usuario= await prisma.usuario.findUnique({
         where:{
             nombreUsuario: nombre_usuario
