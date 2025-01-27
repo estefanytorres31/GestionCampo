@@ -2,8 +2,9 @@ import "react-native-gesture-handler";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import LoginScreen from "./screens/views/Auth/Login";
-import ClientScreen from "./screens/views/client/Client";
-import EmbarcacionesScreen from "./screens/views/embarcacion/Embarcacion";
+import Clientes from "./screens/views/client/Client";
+import Exalmar from "./screens/views/embarcacion/Embarcacion";
+
 import { TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
@@ -14,8 +15,8 @@ export default function Navigation () {
         <NavigationContainer >
             <Stack.Navigator initialRouteName="Login"  screenOptions={{ headerShown: false }}>
                 <Stack.Screen name="Login" component={LoginScreen} />
-                <Stack.Screen name="Clientes" component={ClientScreen}  options={{ title: Clientes }} />
-                <Stack.Screen name="Exalmar" component={EmbarcacionesScreen}  options={{ title: Exalmar }}
+                <Stack.Screen name="Clientes" component={Clientes}  options={{ title: "Clientes" }} />
+                <Stack.Screen name="Exalmar" component={Exalmar}  options={{ title: "Exalmar" }}
              />
             </Stack.Navigator>
         </NavigationContainer>

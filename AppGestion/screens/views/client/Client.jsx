@@ -8,7 +8,7 @@ const ClientScreen = () =>{
     
     return(
         <LinearGradient
-              colors={['#E9E9E9']} 
+              colors={['#E9E9E9', '#143168']}
               style={styles.container}
               start={{x: 0.5, y: 0}} 
               end={{x: 0.5, y: 0}}
