@@ -31,10 +31,7 @@ export const login=async(nombre_usuario, contrasena_hash)=>{
 
     return {token,
         expiracion:expirationDate.toISOString() ,
-        usuario:{
-        id: usuario.id,
-        nombreUsuario: usuario.nombreUsuario,
-        nombreCompleto: usuario.nombreCompleto,
-        email: usuario.email
-    }}
+        userId:usuario.id,
+        
+    }
 }
