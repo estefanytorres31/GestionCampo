@@ -10,7 +10,10 @@ import authRouter from './routes/AuthRoute.js';
 const app = express();
 
 
-app.use(cors());
+app.use(cors({
+    origin: "http://localhost:5173", // Dominio del frontend
+    credentials: true, // Permitir cookies y otras credenciales
+  }));
 app.use(json());
 app.use(morgan('dev'));
 
