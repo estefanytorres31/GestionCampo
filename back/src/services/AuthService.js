@@ -23,6 +23,8 @@ export const login=async(nombre_usuario, contrasena_hash)=>{
     
     const token=jwt.sign({userId: usuario.id}, process.env.JWT_SECRET, { expiresIn: '1h'});
 
-    
+    return {token, usuario}
+
+
     
 }
