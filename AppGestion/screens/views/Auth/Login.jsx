@@ -43,7 +43,7 @@ const LoginScreen = () => {
         </View>
 
         {/* Login Button */}
-        <TouchableOpacity style={styles.button}>
+        <TouchableOpacity style={styles.button} >
             <Text style={styles.buttonText}>Iniciar sesión</Text>
         </TouchableOpacity>
       </View>
