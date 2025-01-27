@@ -1,0 +1,29 @@
+.button {
+    @apply px-4 py-3 rounded-xl h-11 shadow-md flex items-center justify-center active:scale-95 focus:outline-none transition duration-300 transform;
+    font-family: var(--text-sm-semibold-font-family);
+    font-size: var(--text-sm-semibold-font-size);
+    font-style: var(--text-sm-semibold-font-style);
+    font-weight: var(--text-sm-semibold-font-weight);
+    line-height: var(--text-sm-semibold-line-height);
+  }
+  
+  .button-green {
+    @apply bg-green-900 text-white hover:bg-green-800 active:bg-green-700;
+  }
+
+  .button-default {
+    @apply bg-[#0D1E4C] text-white rounded-xl h-11 shadow-md text-sm font-semibold flex items-center justify-center active:scale-95 focus:outline-none transition-transform duration-300;
+  }
+  
+  .button-hover {
+    @apply bg-gray-100 text-[#0D1E4C] hover:bg-gray-200 active:bg-gray-300 shadow-none;
+  }
+  
+  .button-report {
+    @apply bg-white text-green-900 border border-green-900 hover:border-green-800 active:border-green-700 hover:text-green-800 active:text-green-700;
+  }
+  
+  .button-icon, .button-filter {
+    @apply w-11 select-none;
+  }
+  
