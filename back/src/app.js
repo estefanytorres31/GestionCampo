@@ -6,6 +6,7 @@ import cors from 'cors';
 import rolRouter from './routes/RolRoute.js';
 import usuarioRouter from './routes/UsuarioRoute.js';
 import authRouter from './routes/AuthRoute.js';
+import sistemaRouter from './routes/SistemaRoute.js';
 
 const app = express();
 
@@ -21,5 +22,6 @@ app.use(morgan('dev'));
 app.use(rolRouter);
 app.use(usuarioRouter);
 app.use(authRouter);
+app.use(sistemaRouter);
 
 export default app;

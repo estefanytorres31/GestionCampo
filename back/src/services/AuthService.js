@@ -37,3 +37,7 @@ export const login=async(nombre_usuario, contrasena_hash)=>{
 
     }
 }
+
+export const logout=async(token)=>{
+    
+}

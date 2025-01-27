@@ -45,7 +45,7 @@ export const deleteUser=async (req, res) => {
     const {id} = req.params;
     try{
         await UsuarioService.deleteUser(id);
-        res.status(204).send();
+        res.status(204).send({message: 'Usuario eliminado'});
     }catch(err){
         res.status(500).json({message: err.message});
     }
