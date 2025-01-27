@@ -26,12 +26,14 @@ export const login=async(nombre_usuario, contrasena_hash)=>{
 
     }
     const token= createToken(payload);
-    const expiresInMilliseconds = 24 * 60 * 60 * 1000;
-    const expirationDate = new Date(Date.now() + expiresInMilliseconds);
+    const expiresInMilliseconds = 24 * 60 * 60 * 1000; // 24 horas en milisegundos
+    const expirationUTC = new Date(Date.now() + expiresInMilliseconds);
+    const expirationPeru = getUTCTime(expirationUTC.toISOString()); 
 
     return {token,
-        expiracion:expirationDate.toISOString() ,
+        expiracion:expirationPeru.toISOString(),
         userId:usuario.id,
-        
+        nombreUsuario: usuario.nombreUsuario
+
     }
 }

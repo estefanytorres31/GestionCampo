@@ -9,11 +9,12 @@ export const createUsuario = async (nombre_usuario, contrasena_hash, nombre_comp
     if (!roles_ids || roles_ids.length === 0) {
         throw new Error("Debe proporcionar al menos un rol para el usuario");
     }
-    const todayISO = new Date().toISOString();
-    const fecha_creacion = getUTCTime(todayISO);
+    
 
     const result = await prisma.$transaction(async (tx) => {
         const hashedPassword = await bcrypt.hash(contrasena_hash, 10);
+        const todayISO = new Date().toISOString();
+        const fecha_creacion = getUTCTime(todayISO);
         
         const newUser = await tx.usuario.create({
             data: {
@@ -21,6 +22,8 @@ export const createUsuario = async (nombre_usuario, contrasena_hash, nombre_comp
                 contrasenaHash: hashedPassword,
                 nombreCompleto: nombre_completo,
                 email: email,
+                creadoEn:fecha_creacion,
+                actualizadoEn:fecha_creacion,
                 roles: {
                     create: roles_ids.map(rolId => ({
                         rol: {
@@ -47,7 +50,8 @@ export const createUsuario = async (nombre_usuario, contrasena_hash, nombre_comp
 export const getUserByUsername=async(nombre_usuario)=>{
     const user = await prisma.usuario.findFirst({
         where:{
-            nombreUsuario: nombre_usuario
+            nombreUsuario: nombre_usuario,
+            estado: true
         }
     });
     return user;
@@ -65,14 +69,18 @@ export const getUserById=async(id)=>{
 }
 
 export const updateUser=async(id,nombre_usuario, nombre_completo, email)=>{
+    const todayISO = new Date().toISOString();
+    const fecha_creacion = getUTCTime(todayISO);
     const usuarioExistente = await prisma.usuario.update({
         where:{
-            id: parseInt(id)
+            id: parseInt(id),
+            estado: true
         },
         data:{
             nombreUsuario: nombre_usuario,
             nombreCompleto: nombre_completo,
-            email: email
+            email: email,
+            actualizadoEn: fecha_creacion
         }
     });
 
@@ -89,7 +97,8 @@ export const updateUser=async(id,nombre_usuario, nombre_completo, email)=>{
 export const deleteUser=async(id)=>{
     await prisma.user.delete({
         where:{
-            id: parseInt(id)
+            id: parseInt(id),
+            estado: true
         }
     });
 }
