@@ -30,7 +30,7 @@ export const getAllSistemas=async()=>{
 export const getSistemaById=async(id)=>{
     const sistema=await prisma.sistema.findUnique({
         where:{
-            id:id,
+            id:parseInt(id),
             estado:true,
         }
     });
@@ -66,7 +66,7 @@ export const updateSistema=async(id,nombre_sistema,descripcion)=>{
 export const deleteSistema=async(id)=>{
     await prisma.sistema.update({
         where:{
-            id:id,
+            id:parseInt(id),
             estado:true,
         },
         data:{
