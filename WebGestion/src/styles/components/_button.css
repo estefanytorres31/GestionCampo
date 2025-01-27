@@ -12,7 +12,7 @@
   }
 
   .button-default {
-    @apply bg-[#0D1E4C] text-white rounded-xl h-11 shadow-md text-sm font-semibold flex items-center justify-center active:scale-95 focus:outline-none transition-transform duration-300;
+    @apply bg-[#0D1E4C] text-white rounded-xl h-11 shadow-md text-sm font-semibold flex items-center justify-center active:scale-95 focus:outline-none transition-transform duration-300 hover:bg-blue-950 active:bg-[#0D1E4C]/90 ;
   }
   
   .button-hover {
@@ -20,7 +20,7 @@
   }
   
   .button-report {
-    @apply bg-white text-green-900 border border-green-900 hover:border-green-800 active:border-green-700 hover:text-green-800 active:text-green-700;
+    @apply bg-white text-[#0D1E4C] border border-[#0D1E4C] hover:border-blue-700 active:border-blue-700 hover:text-blue-800 active:text-blue-700;
   }
   
   .button-icon, .button-filter {

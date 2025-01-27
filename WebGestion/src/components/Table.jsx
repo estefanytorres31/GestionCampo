@@ -5,7 +5,7 @@ export const Table = ({ columns, data, render }) => {
     <>
       <table>
         <thead>
-          <tr>
+          <tr className="bg-gray-400 text-white rounded-t-lg">
             {columns?.map(({ name, uuid }) => (
               <th key={uuid} className={uuid}>
                 {name || uuid}
@@ -15,7 +15,7 @@ export const Table = ({ columns, data, render }) => {
         </thead>
         <tbody>
           {data.map((row) => (
-            <tr key={row.id}>
+            <tr key={row.id} className="border-b border-gray-200 hover:bg-gray-100 transition-colors duration-300">
               {columns.map(({ uuid }) => (
                 <td key={uuid} className={uuid}>
                   {render && render[uuid] ? render[uuid](row) : row[uuid]}

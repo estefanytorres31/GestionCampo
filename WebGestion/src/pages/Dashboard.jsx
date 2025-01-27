@@ -58,11 +58,12 @@ export const Dashboard = () => {
       btn: <Button width="w-min">detalles</Button>
     },
   ];
-
   return (
     <>
-      <h1 className="text-3xl font-bold mb-6 text-gray-800">General</h1>
       <main className="flex flex-col justify-start items-start h-full w-full overflow-x-auto">
+        {/* Div que simula el encabezado */}
+        <div className="w-full bg-[#83A6CE] leading-normal rounded-t-lg">
+        </div>
         <Table columns={columns} data={data} />
       </main>
     </>
