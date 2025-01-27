@@ -1,4 +1,4 @@
-import { createRol, obtenerTodosLosRoles, actualizarRol, eliminarRol, getRolById } from "../controllers/RolController";
+import { createRol, obtenerTodosLosRoles, actualizarRol, eliminarRol, getRolById } from "../controllers/RolController.js";
 import {Router} from "express";
 
 const rolRouter = Router();
