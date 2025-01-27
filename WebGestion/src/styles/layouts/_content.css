@@ -1,3 +1,3 @@
 .list-layout {
-    @apply h-full flex flex-col justify-start gap-4 overflow-auto bg-white rounded-2xl py-5 px-5 m-5;
+    @apply h-full flex flex-col justify-start gap-4 overflow-auto bg-white rounded-2xl ;
 }
