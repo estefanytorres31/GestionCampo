@@ -12,8 +12,8 @@ const app = express();
 
 
 app.use(cors({
-    origin: "http://localhost:5173", // Dominio del frontend
-    credentials: true, // Permitir cookies y otras credenciales
+    origin: "http://localhost:5173", 
+    credentials: true, 
   }));
 app.use(json());
 app.use(morgan('dev'));
