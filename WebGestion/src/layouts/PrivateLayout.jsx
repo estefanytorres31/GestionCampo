@@ -6,7 +6,7 @@ import Header from "./Header";
 import { VscFilePdf } from "react-icons/vsc";
 import { RiFileExcel2Fill } from "react-icons/ri";
 import { Input } from "@/components/Input";
-import { FaUser } from "react-icons/fa6";
+import { BsSearch } from "react-icons/bs";
 
 export const PrivateLayout = ({ children }) => {
   const { isAuth, logout } = useAuth();
@@ -35,7 +35,7 @@ export const PrivateLayout = ({ children }) => {
           <div className="flex gap-2 items-center justify-between w-full">
             <Input
               placeholder="Buscar registro"
-              iconLeft={<FaUser className="text-gray-400" />}
+              iconLeft={<BsSearch className="text-gray-400" />}
               className="border border-[#83A6CE] rounded-lg py-2 px-4 focus:outline-none focus:ring focus:ring-[#83A6CE]"
             />
             <div className="flex gap-2">
