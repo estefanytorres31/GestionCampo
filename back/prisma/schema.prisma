@@ -9,15 +9,53 @@ generator client {
   provider = "prisma-client-js"
 }
 
+model Permiso {
+  id          Int           @id @default(autoincrement())
+  nombre      String        @unique @db.VarChar(50)
+  descripcion String?       @db.VarChar(255)
+  creadoEn    DateTime      @default(now()) @map("creado_en")
+  actualizadoEn DateTime    @default(now()) @map("actualizado_en")
+  roles       RolPermiso[]
+
+  @@map("permisos")
+}
+
 model Role {
-  id            Int       @id @default(autoincrement())
-  nombreRol     String    @map("nombre_rol") @db.VarChar(50)
-  descripcion   String?   @db.VarChar(255)
-  creadoEn      DateTime  @default(now()) @map("creado_en")
-  actualizadoEn DateTime  @default(now()) @map("actualizado_en")
-  usuarios      Usuario[]
+  id            Int           @id @default(autoincrement())
+  nombreRol     String        @map("nombre_rol") @db.VarChar(50)
+  descripcion   String?       @db.VarChar(255)
+  creadoEn      DateTime      @default(now()) @map("creado_en")
+  actualizadoEn DateTime      @default(now()) @map("actualizado_en")
+  usuarios      UsuarioRol[]
+  permisos      RolPermiso[]
 
   @@map("roles")
+}
+
+// Tabla intermedia para la relación muchos a muchos entre Rol y Permiso
+model RolPermiso {
+  id        Int      @id @default(autoincrement())
+  rolId     Int      @map("rol_id")
+  permisoId Int      @map("permiso_id")
+  creadoEn  DateTime @default(now()) @map("creado_en")
+  rol       Role     @relation(fields: [rolId], references: [id])
+  permiso   Permiso  @relation(fields: [permisoId], references: [id])
+
+  @@unique([rolId, permisoId])
+  @@map("roles_permisos")
+}
+
+// Tabla intermedia para la relación muchos a muchos entre Usuario y Rol
+model UsuarioRol {
+  id        Int      @id @default(autoincrement())
+  usuarioId Int      @map("usuario_id")
+  rolId     Int      @map("rol_id")
+  creadoEn  DateTime @default(now()) @map("creado_en")
+  usuario   Usuario  @relation(fields: [usuarioId], references: [id])
+  rol       Role     @relation(fields: [rolId], references: [id])
+
+  @@unique([usuarioId, rolId])
+  @@map("usuario_roles")
 }
 
 model Usuario {
@@ -26,10 +64,9 @@ model Usuario {
   contrasenaHash String           @map("contrasena_hash") @db.VarChar(255)
   nombreCompleto String           @map("nombre_completo") @db.VarChar(100)
   email         String?           @db.VarChar(100)
-  rolId         Int              @map("rol_id")
   creadoEn      DateTime         @default(now()) @map("creado_en")
   actualizadoEn DateTime         @default(now()) @map("actualizado_en")
-  rol           Role             @relation(fields: [rolId], references: [id])
+  roles         UsuarioRol[]
   asistencias   Asistencia[]
   comentarios   ComentarioTarea[]
 
