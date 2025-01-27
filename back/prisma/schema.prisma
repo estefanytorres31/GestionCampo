@@ -13,6 +13,7 @@ model Permiso {
   id          Int           @id @default(autoincrement())
   nombre      String        @unique @db.VarChar(50)
   descripcion String?       @db.VarChar(255)
+  estado       Boolean       @default(true) @map("estado")
   creadoEn    DateTime      @default(now()) @map("creado_en")
   actualizadoEn DateTime    @default(now()) @map("actualizado_en")
   roles       RolPermiso[]
@@ -20,10 +21,11 @@ model Permiso {
   @@map("permisos")
 }
 
-model Role {
+model Roles {
   id            Int           @id @default(autoincrement())
   nombreRol     String        @map("nombre_rol") @db.VarChar(50)
   descripcion   String?       @db.VarChar(255)
+  estado        Boolean       @default(true)
   creadoEn      DateTime      @default(now()) @map("creado_en")
   actualizadoEn DateTime      @default(now()) @map("actualizado_en")
   usuarios      UsuarioRol[]
@@ -37,8 +39,9 @@ model RolPermiso {
   id        Int      @id @default(autoincrement())
   rolId     Int      @map("rol_id")
   permisoId Int      @map("permiso_id")
+  estado    Boolean           @default(true)
   creadoEn  DateTime @default(now()) @map("creado_en")
-  rol       Role     @relation(fields: [rolId], references: [id])
+  rol       Roles     @relation(fields: [rolId], references: [id])
   permiso   Permiso  @relation(fields: [permisoId], references: [id])
 
   @@unique([rolId, permisoId])
@@ -50,9 +53,10 @@ model UsuarioRol {
   id        Int      @id @default(autoincrement())
   usuarioId Int      @map("usuario_id")
   rolId     Int      @map("rol_id")
+  estado    Boolean  @default(true)
   creadoEn  DateTime @default(now()) @map("creado_en")
   usuario   Usuario  @relation(fields: [usuarioId], references: [id])
-  rol       Role     @relation(fields: [rolId], references: [id])
+  rol       Roles     @relation(fields: [rolId], references: [id])
 
   @@unique([usuarioId, rolId])
   @@map("usuario_roles")
@@ -64,6 +68,7 @@ model Usuario {
   contrasenaHash String           @map("contrasena_hash") @db.VarChar(255)
   nombreCompleto String           @map("nombre_completo") @db.VarChar(100)
   email         String?           @db.VarChar(100)
+  estado        Boolean           @default(true)
   creadoEn      DateTime         @default(now()) @map("creado_en")
   actualizadoEn DateTime         @default(now()) @map("actualizado_en")
   roles         UsuarioRol[]
@@ -79,6 +84,7 @@ model Embarcacion {
   nombre           String          @db.VarChar(100)
   datosQrCode      String         @map("datos_qr_code") @db.VarChar(255)
   ubicacion        String?        @db.VarChar(255)
+  estado           Boolean           @default(true)
   creadoEn         DateTime       @default(now()) @map("creado_en")
   actualizadoEn    DateTime       @default(now()) @map("actualizado_en")
   asistencias      Asistencia[]
@@ -95,7 +101,8 @@ model Asistencia {
   horaSalida           DateTime?              @map("hora_salida")
   gpsEntrada           String                 @map("gps_entrada") @db.VarChar(50)
   gpsSalida            String?                @map("gps_salida") @db.VarChar(50)
-  estado               EstadoAsistencia       @default(registrado)
+  estadoAsistencia               EstadoAsistencia       @default(registrado)
+  estado        Boolean           @default(true)
   creadoEn             DateTime               @default(now()) @map("creado_en")
   actualizadoEn        DateTime               @default(now()) @map("actualizado_en")
   usuario              Usuario                @relation(fields: [usuarioId], references: [id])
@@ -123,6 +130,7 @@ model EstadoSincronizacion {
 model TipoMantenimiento {
   id           Int            @id @default(autoincrement())
   nombreTipo   String         @map("nombre_tipo") @db.VarChar(100)
+  estado        Boolean           @default(true)
   descripcion  String?        @db.VarChar(255)
   mantenimientos Mantenimiento[]
 
@@ -134,10 +142,11 @@ model Mantenimiento {
   embarcacionId        Int                   @map("embarcacion_id")
   tipoMantenimientoId  Int                   @map("tipo_mantenimiento_id")
   fechaProgramada      DateTime              @map("fecha_programada") @db.Date
-  estado               EstadoMantenimiento    @default(Programado)
+  estadoMantenimiento  EstadoMantenimiento    @default(Programado)
   observaciones        String?               @db.Text
   llevarProximoAbordaje String?              @map("llevar_proximo_abordaje") @db.Text
   porcentajeAvance     Decimal?              @map("porcentaje_avance") @db.Decimal(5, 2)
+  estado               Boolean           @default(true)
   creadoEn             DateTime              @default(now()) @map("creado_en")
   actualizadoEn        DateTime              @default(now()) @map("actualizado_en")
   embarcacion          Embarcacion           @relation(fields: [embarcacionId], references: [id])
@@ -162,6 +171,7 @@ model Sistema {
   id                   Int                    @id @default(autoincrement())
   nombreSistema        String                @map("nombre_sistema") @db.VarChar(100)
   descripcion          String?               @db.VarChar(255)
+  estado               Boolean           @default(true)
   creadoEn             DateTime              @default(now()) @map("creado_en")
   actualizadoEn        DateTime              @default(now()) @map("actualizado_en")
   sistemasMantenimiento SistemaMantenimiento[]
