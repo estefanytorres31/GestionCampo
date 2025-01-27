@@ -10,7 +10,9 @@ export const createRol=async(nombre_rol)=>{
     const nuevoRol=await prisma.roles.create(
         {
             data:{
-                nombreRol:nombre_rol
+                nombreRol:nombre_rol,
+                creadoEn: fecha_creacion,
+                actualizadoEn:fecha_creacion,
             }
         }
     )
@@ -27,13 +29,18 @@ export const obtenerTodosLosRoles=async()=>{
 }
 
 export const actualizarRol=async(id,nombre_rol)=>{
+    const todayISO = new Date().toISOString();
+    const fecha_creacion = getUTCTime(todayISO);
     const rolExistente=await prisma.roles.update(
         {
             where:{
                 id:parseInt(id),
+                estado:true,
             },
             data:{
-                nombreRol:nombre_rol
+                nombreRol:nombre_rol,
+                actualizadoEn:fecha_creacion,
+                
             }
         }
     )
