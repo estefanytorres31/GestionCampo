@@ -5,7 +5,7 @@ export const Table = ({ columns, data, render }) => {
     <>
       <table>
         <thead>
-          <tr className="bg-gray-200 text-gray-600 rounded-t-lg">
+          <tr className="bg-gray-400 text-white rounded-t-lg">
             {columns?.map(({ name, uuid }) => (
               <th key={uuid} className={uuid}>
                 {name || uuid}
