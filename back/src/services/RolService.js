@@ -56,7 +56,8 @@ export const eliminarRol=async(id)=>{
     await prisma.roles.update(
         {
             where:{
-                id:parseInt(id)
+                id:parseInt(id),
+                estado:true,
             },
             data:{
                 estado:false

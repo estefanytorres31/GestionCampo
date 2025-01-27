@@ -50,7 +50,8 @@ export const createUsuario = async (nombre_usuario, contrasena_hash, nombre_comp
 export const getUserByUsername=async(nombre_usuario)=>{
     const user = await prisma.usuario.findFirst({
         where:{
-            nombreUsuario: nombre_usuario
+            nombreUsuario: nombre_usuario,
+            estado: true
         }
     });
     return user;
@@ -96,7 +97,8 @@ export const updateUser=async(id,nombre_usuario, nombre_completo, email)=>{
 export const deleteUser=async(id)=>{
     await prisma.user.delete({
         where:{
-            id: parseInt(id)
+            id: parseInt(id),
+            estado: true
         }
     });
 }
