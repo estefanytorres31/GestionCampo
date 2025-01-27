@@ -3,6 +3,8 @@ import { useAuth } from "@/context/AuthContext";
 import useTimer from "@/hooks/useTimer";
 import SideBar from "./Sidebar";
 import Header from "./Header";
+import { VscFilePdf } from "react-icons/vsc";
+import { RiFileExcel2Fill } from "react-icons/ri";
 
 export const PrivateLayout = ({ children }) => {
   const { isAuth, logout } = useAuth();
@@ -18,9 +20,20 @@ export const PrivateLayout = ({ children }) => {
         {/* header */}
         <Header title={"Gestión de Campo"} />
         {/* main */}
-        <main className="list-layout">
-        {children}
-        </main>
+        <div className="flex flex-row justify-between items-center">
+          <h1 className="text-3xl font-bold mb-6 text-gray-800">General</h1>
+          <div className="flex gap-2">
+            <Button color="report" width="w-min" className="flex gap-1">
+              <VscFilePdf size={20} className="min-w-max" />
+              PDF
+            </Button>
+            <Button color="report" width="w-min" className="flex gap-1">
+              <RiFileExcel2Fill size={20} className="min-w-max" />
+              Excel
+            </Button>
+          </div>
+        </div>
+        <main className="list-layout">{children}</main>
       </main>
     </div>
   );
