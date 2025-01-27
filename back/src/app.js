@@ -6,6 +6,11 @@ import cors from 'cors';
 import rolRouter from './routes/RolRoute.js';
 import usuarioRouter from './routes/UsuarioRoute.js';
 import authRouter from './routes/AuthRoute.js';
+import puertoRouter from './routes/PuertoRoute.js';
+import empresaRouter from './routes/EmpresaRoute.js';
+import empresaEmbarcacionRouter from './routes/EmpresaEmbarcacionRoute.js';
+import historialPuertoRouter from './routes/HistorialPuertoRoute.js';
+import embarcacionRouter from './routes/EmbarcacionRoute.js';
 
 const app = express();
 
@@ -21,5 +26,10 @@ app.use(morgan('dev'));
 app.use(rolRouter);
 app.use(usuarioRouter);
 app.use(authRouter);
+app.use(puertoRouter);
+app.use(empresaRouter);
+app.use(empresaEmbarcacionRouter);
+app.use(historialPuertoRouter);
+app.use(embarcacionRouter);
 
 export default app;
