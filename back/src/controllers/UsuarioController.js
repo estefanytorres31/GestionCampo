@@ -34,7 +34,7 @@ export const updateUser=async (req, res) => {
     const {id} = req.params;
     const {nombre_usuario, nombre_completo, email}=req.body;
     try{
-        const usuario = await UsuarioService.updateUser(id, nombre_usuario, contrasena_hash, nombre_completo, email);
+        const usuario = await UsuarioService.updateUser(id, nombre_usuario, nombre_completo, email);
         res.status(200).json(usuario);
     }catch(err){
         res.status(500).json({message: err.message});
