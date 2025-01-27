@@ -1,0 +1,6 @@
+@layer base {
+    .header-layout {
+        @apply w-full h-auto md:px-0 flex justify-between py-4 shadow-md md:shadow-none gap-3;
+      }
+  }
+  

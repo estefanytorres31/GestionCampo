@@ -105,7 +105,7 @@ const SideBar = () => {
     <aside>
       <div
         onClick={() => setIsOpen(false)}
-        className={`md:hidden fixed inset-0 max-h-screen z-[38] bg-black/50 ${
+        className={`md:hidden fixed inset-0 max-h-screen z-[50] bg-black/50 ${
           isOpen ? "block" : "hidden"
         } `}
       ></div>
@@ -133,7 +133,7 @@ const SideBar = () => {
                 <NavLink
                   to={to}
                   className={`link ${
-                    pathname.includes(to) ? "link-active border-r-8" : ""
+                    pathname.includes(to) ? "link-active border-r-8 border-teal-500" : ""
                   }`}
                 >
                   {icon}
