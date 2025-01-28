@@ -1,105 +1,195 @@
-import React from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
+import React from "react"
+import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView, Dimensions, BackHandler } from "react-native"
+import { Ionicons } from "@expo/vector-icons"
+import { LinearGradient } from "expo-linear-gradient"
+import { useFocusEffect } from '@react-navigation/native'
+import useAuth from '../../hooks/Auth/useAuth'
 
+const { height } = Dimensions.get('window')
 
-const ClientScreen = () =>{
+const ClientScreen = () => {
+    // Asegurémonos de que useAuth está retornando un objeto con handleLogout
+    const auth = useAuth();
+
     
-    return(
-        <LinearGradient
-              colors={['#E9E9E9', '#143168']}
-              style={styles.container}
-              start={{x: 0.5, y: 0}} 
-              end={{x: 0.5, y: 0}}
-            >
-        <View>
-            <Text style={styles.subtitle}>Selecciona un Cliente</Text>
+    useFocusEffect(
+        React.useCallback(() => {
+            const onBackPress = () => {
+                BackHandler.exitApp();
+                return true;
+            };
 
+            BackHandler.addEventListener('hardwareBackPress', onBackPress);
+
+            return () => {
+                BackHandler.removeEventListener('hardwareBackPress', onBackPress);
+            };
+        }, [])
+    );
+
+    const Logout = async () => {
+        try {
+            // Verificamos que auth y handleLogout existan
+            if (auth && auth.handleLogout) {
+                await auth.handleLogout();
+            } else {
+                console.error("handleLogout no está disponible");
+            }
+            navigation.reset({
+                index: 0,
+                routes: [{ name: 'Login' }],
+            });
+        } catch (e) {
+            console.error("Error al cerrar sesión:", e);
+        }
+    };
+
+    return (
+        <SafeAreaView style={styles.safeArea}>
+        <LinearGradient
+            colors={["#def8f6", "#e0e0e0"]}
+            style={styles.container}
+            start={{ x: 0.5, y: 0 }}
+            end={{ x: 0.5, y: 1 }}
+        >
+            <View style={styles.contentContainer}>
+            <View style={styles.headerContainer}>
+                <Text style={styles.subtitle}>Selecciona un cliente</Text>
+            </View>
 
             <View style={styles.buttonContainer}>
                 <TouchableOpacity style={[styles.button, styles.exalmar]}>
-                    <Text style={styles.buttonText}>Exalmar</Text>
+                <Ionicons name="boat" size={24} color="white" style={styles.icon} />
+                <Text style={styles.buttonText}>Exalmar</Text>
                 </TouchableOpacity>
+
                 <TouchableOpacity style={[styles.button, styles.austral]}>
-                    <Text style={styles.buttonText}>Austral</Text>
+                <Ionicons name="boat" size={24} color="white" style={styles.icon} />
+                <Text style={styles.buttonText}>Austral</Text>
                 </TouchableOpacity>
+
                 <TouchableOpacity style={[styles.button, styles.diamante]}>
-                    <Text style={styles.buttonText}>Diamante</Text>
+                <Ionicons name="boat" size={24} color="white" style={styles.icon} />
+                <Text style={styles.buttonText}>Diamante</Text>
                 </TouchableOpacity>
+
                 <TouchableOpacity style={[styles.button, styles.centinela]}>
-                    <Text style={styles.buttonText}>Centinela</Text>
+                <Ionicons name="boat" size={24} color="white" style={styles.icon} />
+                <Text style={styles.buttonText}>Centinela</Text>
                 </TouchableOpacity>
             </View>
-            <View>
-                <TouchableOpacity style={styles.logoutButton}>
-                    <Text style={styles.logoutText}>CERRAR SESIÓN</Text>
+
+            <View style={styles.footerContainer}>
+                <TouchableOpacity style={styles.logoutButton} onPress={Logout}>
+                <Ionicons name="log-out-outline" size={24} color="#EB1111" style={styles.logoutIcon} />
+                <Text style={styles.logoutText}>CERRAR SESIÓN</Text>
                 </TouchableOpacity>
             </View>
-        </View>
+            </View>
         </LinearGradient>
+        </SafeAreaView>
+    )
+}
 
-    );
-};
 const styles = StyleSheet.create({
-
+    safeArea: {
+        flex: 1,
+    },
     container: {
         flex: 1,
-        justifyContent: "flex-start",
-        alignItems: "center",
+    },
+    contentContainer: {
+        flex: 1,
         padding: 20,
-      },
+        justifyContent: 'space-between',
+    },
+    headerContainer: {
+        flex: 0.2,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
     subtitle: {
-        marginTop: 25,
-        fontSize: 25,
-        color: "#474444",
-        textAlign: "center",
-        
+        fontSize: 28,
+        fontWeight: '600',
+        color: '#444',
+        textAlign: 'center',
     },
     buttonContainer: {
-        marginTop: 45,
+        flex: 0.6,
+        justifyContent: 'center',
+        paddingHorizontal: 20,
     },
     button: {
-        marginTop: 25,
-        paddingHorizontal: 130,
-        paddingVertical: 25,
-        borderRadius: 8,
-        marginVertical: 5,
-        alignItems: "center",
-       
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: height * 0.025,
+        borderRadius: 12,
+        marginBottom: 16,
+        elevation: 4,
+        shadowColor: '#000',
+        shadowOffset: {
+        width: 0,
+        height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        transform: [{ scale: 1 }],
+    },
+    icon: {
+        marginRight: 12,
     },
     exalmar: {
-        backgroundColor: "#008987",
+        backgroundColor: '#00897B',
     },
     austral: {
-        backgroundColor: "#008932",
+        backgroundColor: '#2E7D32',
     },
     diamante: {
-        backgroundColor: "#AF8710",
+        backgroundColor: '#C0911F',
     },
     centinela: {
-        backgroundColor: "#004089",
+        backgroundColor: '#1565C0',
     },
     buttonText: {
-        color: "#fff",
-        fontSize: 25,
-      
+        color: '#fff',
+        fontSize: 18,
+        fontWeight: '600',
+        letterSpacing: 0.5,
+    },
+    footerContainer: {
+        flex: 0.2,
+        justifyContent: 'flex-end',
+        alignItems: 'center',
+        paddingBottom: 20,
     },
     logoutButton: {
-        marginTop: 55,
-        paddingVertical: 12,
-        marginLeft:89,
-        borderRadius: 20,
-        alignItems: "center",
-        width:180,
-        backgroundColor: "#d3d3d3",
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#fff',
+        padding: 16,
+        borderRadius: 30,
+        width: '80%',
+        maxWidth: 280,
+        elevation: 4,
+        shadowColor: 'rgb(26, 26, 26)',
+        shadowOffset: {
+        width: 0,
+        height: 2,
+        },
+        shadowOpacity: 0.2,
+        shadowRadius: 2,
+    },
+    logoutIcon: {
+        marginRight: 8,
     },
     logoutText: {
-        color: "#EB1111DE",
-        textAlign: "center",
-        fontWeight: "bold",
-        fontSize: 18,
+        color: '#EB1111',
+        fontSize: 16,
+        fontWeight: 'bold',
+        letterSpacing: 1,
     },
+})
 
-});
-export default ClientScreen;
+export default ClientScreen

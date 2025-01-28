@@ -16,6 +16,7 @@ const AuthProvider = ({ children }) => {
         setError(null);
         try {
             const { status, data } = await login(username, password);
+            console.log("Login response:", data);
             if (status === 200) {
                 const { userId, token } = data;
                 await AsyncStorage.setItem('token', token);
@@ -23,6 +24,7 @@ const AuthProvider = ({ children }) => {
                 console.log("Token and UserId stored:", token, userId);
                 setIsAuth(true);
                 const userData = await getUserById(userId);
+                console.log("UserData stored:", userData)
                 setUser(userData);
                 setRole(userData.rol);
                 return { status, data };
