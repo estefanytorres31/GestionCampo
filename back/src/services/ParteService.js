@@ -29,3 +29,29 @@ export const getParteById=async(id_parte)=>{
     });
     return parte;
 }
+
+export const updateParte=async(id_parte,nombre_parte)=>{
+    const updatedParte=await prisma.parte.update({
+        where:{
+            id_parte:parseInt(id_parte),
+            estado:true
+        },
+        data:{
+            nombre:nombre_parte
+        }
+    });
+    return updatedParte;
+}
+
+
+export const deleteParte=async(id_parte)=>{
+    await prisma.parte.update({
+        where:{
+            id_parte:parseInt(id_parte),
+            estado:true
+        },
+        data:{
+            estado:false
+        }
+    });
+}
