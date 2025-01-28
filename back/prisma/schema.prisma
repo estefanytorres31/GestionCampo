@@ -1,401 +1,369 @@
-// This is your Prisma schema file
-
-datasource db {
-  provider = "mysql"
-  url      = env("DATABASE_URL")
-}
-
 generator client {
   provider = "prisma-client-js"
 }
 
+datasource db {
+  provider = "mysql" // Cambia a "postgresql" u otro si usas otra base de datos
+  url      = env("DATABASE_URL")
+}
+
+/// Enums utilizados en el esquema
+enum Prioridad {
+  baja
+  media
+  alta
+}
+
+enum EstadoOrdenTrabajo {
+  pendiente
+  en_proceso
+  finalizado
+}
+
+enum TipoAsistencia {
+  entrada
+  salida
+}
+
+enum RolEnOrden {
+  Tecnico_Principal  @map("Técnico Principal")
+  Ayudante
+}
+
+/// Modelos de Prisma
+
 model Permiso {
-  id          Int           @id @default(autoincrement())
-  nombre      String        @unique @db.VarChar(50)
-  descripcion String?       @db.VarChar(255)
-  estado       Boolean       @default(true) @map("estado")
-  creadoEn    DateTime      @default(now()) @map("creado_en")
-  actualizadoEn DateTime    @default(now()) @map("actualizado_en")
-  roles       RolPermiso[]
+  id             Int              @id @default(autoincrement())
+  nombre         String           @unique
+  descripcion    String?
+  estado         Boolean          @default(true)
+  creado_en      DateTime         @default(now()) @map("creado_en")
+  actualizado_en DateTime         @updatedAt @map("actualizado_en")
+  roles_permisos RolesPermiso[]
 
   @@map("permisos")
 }
 
-model Roles {
-  id            Int           @id @default(autoincrement())
-  nombreRol     String        @map("nombre_rol") @db.VarChar(50)
-  descripcion   String?       @db.VarChar(255)
-  estado        Boolean       @default(true)
-  creadoEn      DateTime      @default(now()) @map("creado_en")
-  actualizadoEn DateTime      @default(now()) @map("actualizado_en")
-  usuarios      UsuarioRol[]
-  permisos      RolPermiso[]
+model Rol {
+  id             Int              @id @default(autoincrement())
+  nombre_rol     String           @unique @map("nombre_rol")
+  descripcion    String?
+  estado         Boolean          @default(true)
+  creado_en      DateTime         @default(now()) @map("creado_en")
+  actualizado_en DateTime         @updatedAt @map("actualizado_en")
+  roles_permisos RolesPermiso[]
+  usuario_roles  UsuarioRol[]
 
   @@map("roles")
 }
 
-// Tabla intermedia para la relación muchos a muchos entre Rol y Permiso
-model RolPermiso {
-  id        Int      @id @default(autoincrement())
-  rolId     Int      @map("rol_id")
-  permisoId Int      @map("permiso_id")
-  estado    Boolean           @default(true)
-  creadoEn  DateTime @default(now()) @map("creado_en")
-  rol       Roles     @relation(fields: [rolId], references: [id])
-  permiso   Permiso  @relation(fields: [permisoId], references: [id])
+model RolesPermiso {
+  id             Int      @id @default(autoincrement())
+  rol_id         Int      @map("rol_id")
+  permiso_id     Int      @map("permiso_id")
+  estado         Boolean  @default(true)
+  creado_en      DateTime @default(now()) @map("creado_en")
+  rol            Rol      @relation(fields: [rol_id], references: [id], onDelete: NoAction, onUpdate: Cascade)
+  permiso        Permiso  @relation(fields: [permiso_id], references: [id], onDelete: NoAction, onUpdate: Cascade)
 
-  @@unique([rolId, permisoId])
+  @@unique([rol_id, permiso_id], name: "roles_permisos_rol_id_permiso_id_key")
   @@map("roles_permisos")
 }
 
-// Tabla intermedia para la relación muchos a muchos entre Usuario y Rol
-model UsuarioRol {
-  id        Int      @id @default(autoincrement())
-  usuarioId Int      @map("usuario_id")
-  rolId     Int      @map("rol_id")
-  estado    Boolean  @default(true)
-  creadoEn  DateTime @default(now()) @map("creado_en")
-  usuario   Usuario  @relation(fields: [usuarioId], references: [id])
-  rol       Roles     @relation(fields: [rolId], references: [id])
-
-  @@unique([usuarioId, rolId])
-  @@map("usuario_roles")
-}
-
 model Usuario {
-  id             Int              @id @default(autoincrement())
-  nombreUsuario  String           @unique @map("nombre_usuario") @db.VarChar(50)
-  contrasenaHash String           @map("contrasena_hash") @db.VarChar(255)
-  nombreCompleto String           @map("nombre_completo") @db.VarChar(100)
-  email         String?           @db.VarChar(100)
-  estado        Boolean           @default(true)
-  creadoEn      DateTime         @default(now()) @map("creado_en")
-  actualizadoEn DateTime         @default(now()) @map("actualizado_en")
-  roles         UsuarioRol[]
-  asistencias   Asistencia[]
-  comentarios   ComentarioTarea[]
+  id                       Int                      @id @default(autoincrement())
+  nombre_usuario           String                   @unique @map("nombre_usuario")
+  contrasena_hash          String                   @map("contrasena_hash")
+  nombre_completo          String                   @map("nombre_completo")
+  email                    String?                  @unique
+  estado                   Boolean                  @default(true)
+  creado_en                DateTime                 @default(now()) @map("creado_en")
+  actualizado_en           DateTime                 @updatedAt @map("actualizado_en")
+  usuario_roles            UsuarioRol[]
+  orden_trabajo_jefe_asigna OrdenTrabajo[]          @relation("JefeAsigna")
+  orden_trabajo_usuario    OrdenTrabajoUsuario[]
+  tarea_realizada          TareaRealizada[]
+  asistencia               Asistencia[]
+  comentario_tarea         ComentarioTarea[]        @relation("UsuarioComentario") // Relación nombrada para evitar ambigüedades
 
   @@map("usuarios")
 }
 
-model Asistencia {
-  id                    Int                    @id @default(autoincrement())
-  usuarioId            Int                    @map("usuario_id")
-  embarcacionId        Int                    @map("embarcacion_id")
-  horaEntrada          DateTime               @map("hora_entrada")
-  horaSalida           DateTime?              @map("hora_salida")
-  gpsEntrada           String                 @map("gps_entrada") @db.VarChar(50)
-  gpsSalida            String?                @map("gps_salida") @db.VarChar(50)
-  estadoAsistencia               EstadoAsistencia       @default(registrado)
-  estado        Boolean           @default(true)
-  creadoEn             DateTime               @default(now()) @map("creado_en")
-  actualizadoEn        DateTime               @default(now()) @map("actualizado_en")
-  usuario              Usuario                @relation(fields: [usuarioId], references: [id])
-  embarcacion         Embarcacion            @relation(fields: [embarcacionId], references: [id])
-  estadoSincronizacion EstadoSincronizacion?
+model UsuarioRol {
+  id          Int      @id @default(autoincrement())
+  usuario_id  Int      @map("usuario_id")
+  rol_id      Int      @map("rol_id")
+  estado      Boolean  @default(true)
+  creado_en   DateTime @default(now()) @map("creado_en")
+  usuario     Usuario  @relation(fields: [usuario_id], references: [id], onDelete: NoAction, onUpdate: Cascade)
+  rol         Rol      @relation(fields: [rol_id], references: [id], onDelete: NoAction, onUpdate: Cascade)
 
-  @@map("asistencias")
-}
-
-enum EstadoAsistencia {
-  registrado
-  salido
-}
-
-model EstadoSincronizacion {
-  id                Int        @id @default(autoincrement())
-  asistenciaId      Int        @unique @map("asistencia_id")
-  estaSincronizado  Boolean    @default(false) @map("esta_sincronizado")
-  sincronizadoEn    DateTime?  @map("sincronizado_en")
-  asistencia        Asistencia @relation(fields: [asistenciaId], references: [id])
-
-  @@map("estados_sincronizacion")
-}
-
-model TipoMantenimiento {
-  id           Int            @id @default(autoincrement())
-  nombreTipo   String         @map("nombre_tipo") @db.VarChar(100)
-  estado        Boolean           @default(true)
-  descripcion  String?        @db.VarChar(255)
-  mantenimientos Mantenimiento[]
-
-  @@map("tipos_mantenimiento")
-}
-
-model Mantenimiento {
-  id                   Int                    @id @default(autoincrement())
-  embarcacionId        Int                   @map("embarcacion_id")
-  tipoMantenimientoId  Int                   @map("tipo_mantenimiento_id")
-  fechaProgramada      DateTime              @map("fecha_programada") @db.Date
-  estadoMantenimiento  EstadoMantenimiento    @default(Programado)
-  observaciones        String?               @db.Text
-  llevarProximoAbordaje String?              @map("llevar_proximo_abordaje") @db.Text
-  porcentajeAvance     Decimal?              @map("porcentaje_avance") @db.Decimal(5, 2)
-  estado               Boolean           @default(true)
-  creadoEn             DateTime              @default(now()) @map("creado_en")
-  actualizadoEn        DateTime              @default(now()) @map("actualizado_en")
-  embarcacion          Embarcacion           @relation(fields: [embarcacionId], references: [id])
-  tipoMantenimiento    TipoMantenimiento     @relation(fields: [tipoMantenimientoId], references: [id])
-  sistemasMantenimiento SistemaMantenimiento[]
-  materialesMantenimiento MaterialMantenimiento[]
-  mantenimientoPreventivo MantenimientoPreventivo?
-  mantenimientoCorrectivo MantenimientoCorrectivo?
-  proyecto              Proyecto?
-  desmontajeMontaje     DesmontajeMontaje?
-
-  @@map("mantenimientos")
-}
-
-enum EstadoMantenimiento {
-  Programado
-  En_Progreso @map("En Progreso")
-  Completado
-}
-
-model Sistema {
-  id                   Int                    @id @default(autoincrement())
-  nombreSistema        String                @map("nombre_sistema") @db.VarChar(100)
-  descripcion          String?               @db.VarChar(255)
-  estado               Boolean           @default(true)
-  creadoEn             DateTime              @default(now()) @map("creado_en")
-  actualizadoEn        DateTime              @default(now()) @map("actualizado_en")
-  sistemasMantenimiento SistemaMantenimiento[]
-  partes               Parte[]
-
-  @@map("sistemas")
-}
-
-model SistemaMantenimiento {
-  id                  Int           @id @default(autoincrement())
-  mantenimientoId     Int          @map("mantenimiento_id")
-  sistemaId           Int          @map("sistema_id")
-  nota                String?      @db.VarChar(255)
-  fallaEncontrada     String?      @map("falla_encontrada") @db.Text
-  porcentajeCompletado Decimal?     @map("porcentaje_completado") @db.Decimal(5, 2)
-  creadoEn            DateTime     @default(now()) @map("creado_en")
-  actualizadoEn       DateTime     @default(now()) @map("actualizado_en")
-  mantenimiento       Mantenimiento @relation(fields: [mantenimientoId], references: [id])
-  sistema             Sistema      @relation(fields: [sistemaId], references: [id])
-
-  @@map("sistemas_mantenimiento")
-}
-
-model Parte {
-  id           Int           @id @default(autoincrement())
-  sistemaId    Int          @map("sistema_id")
-  nombreParte  String       @map("nombre_parte") @db.VarChar(100)
-  descripcion  String?      @db.VarChar(255)
-  creadoEn     DateTime     @default(now()) @map("creado_en")
-  actualizadoEn DateTime     @default(now()) @map("actualizado_en")
-  sistema      Sistema      @relation(fields: [sistemaId], references: [id])
-  tareasPartes TareaParte[]
-
-  @@map("partes")
-}
-
-model TareaParte {
-  id                Int                 @id @default(autoincrement())
-  parteId           Int                @map("parte_id")
-  descripcionTarea  String             @map("descripcion_tarea") @db.VarChar(255)
-  esChecklist       Boolean            @default(false) @map("es_checklist")
-  estado            EstadoTarea        @default(Pendiente)
-  porcentajeAvance  Decimal?           @map("porcentaje_avance") @db.Decimal(5, 2)
-  creadoEn          DateTime           @default(now()) @map("creado_en")
-  actualizadoEn     DateTime           @default(now()) @map("actualizado_en")
-  parte             Parte              @relation(fields: [parteId], references: [id])
-  listasVerificacion ListaVerificacion[]
-  comentarios       ComentarioTarea[]
-  fotos            FotoTarea[]
-
-  @@map("tareas_partes")
-}
-
-enum EstadoTarea {
-  Pendiente
-  En_Progreso @map("En Progreso")
-  Completada
-}
-
-model ListaVerificacion {
-  id           Int        @id @default(autoincrement())
-  tareaParteId Int       @map("tarea_parte_id")
-  completada   Boolean    @default(false)
-  comentario   String?    @db.Text
-  urlFoto      String?    @map("url_foto") @db.VarChar(255)
-  creadoEn     DateTime   @default(now()) @map("creado_en")
-  actualizadoEn DateTime   @default(now()) @map("actualizado_en")
-  tareaParte   TareaParte @relation(fields: [tareaParteId], references: [id])
-
-  @@map("listas_verificacion")
-}
-
-model ComentarioTarea {
-  id           Int        @id @default(autoincrement())
-  tareaParteId Int       @map("tarea_parte_id")
-  usuarioId    Int       @map("usuario_id")
-  comentario   String    @db.Text
-  creadoEn     DateTime   @default(now()) @map("creado_en")
-  tareaParte   TareaParte @relation(fields: [tareaParteId], references: [id])
-  usuario      Usuario    @relation(fields: [usuarioId], references: [id])
-
-  @@map("comentarios_tarea")
-}
-
-model FotoTarea {
-  id           Int        @id @default(autoincrement())
-  tareaParteId Int       @map("tarea_parte_id")
-  urlFoto      String    @map("url_foto") @db.VarChar(255)
-  descripcion  String?   @db.VarChar(255)
-  creadoEn     DateTime   @default(now()) @map("creado_en")
-  tareaParte   TareaParte @relation(fields: [tareaParteId], references: [id])
-
-  @@map("fotos_tarea")
-}
-
-model Material {
-  id              Int                    @id @default(autoincrement())
-  nombreMaterial  String                @map("nombre_material") @db.VarChar(100)
-  descripcion     String?               @db.VarChar(255)
-  stock          Int                    @default(0)
-  creadoEn        DateTime              @default(now()) @map("creado_en")
-  actualizadoEn   DateTime              @default(now()) @map("actualizado_en")
-  materialesMantenimiento MaterialMantenimiento[]
-
-  @@map("materiales")
-}
-
-model MaterialMantenimiento {
-  id              Int           @id @default(autoincrement())
-  mantenimientoId Int          @map("mantenimiento_id")
-  materialId      Int          @map("material_id")
-  cantidad        Int          @default(1)
-  esProximo       Boolean      @default(false) @map("es_proximo")
-  creadoEn        DateTime     @default(now()) @map("creado_en")
-  actualizadoEn   DateTime     @default(now()) @map("actualizado_en")
-  mantenimiento   Mantenimiento @relation(fields: [mantenimientoId], references: [id])
-  material        Material     @relation(fields: [materialId], references: [id])
-
-  @@map("materiales_mantenimiento")
-}
-
-model MantenimientoPreventivo {
-  id              Int           @id @default(autoincrement())
-  mantenimientoId Int          @unique @map("mantenimiento_id")
-  creadoEn        DateTime     @default(now()) @map("creado_en")
-  actualizadoEn   DateTime     @default(now()) @map("actualizado_en")
-  mantenimiento   Mantenimiento @relation(fields: [mantenimientoId], references: [id])
-
-  @@map("mantenimiento_preventivo")
-}
-
-model MantenimientoCorrectivo {
-  id              Int           @id @default(autoincrement())
-  mantenimientoId Int          @unique @map("mantenimiento_id")
-  fallas         String?       @db.Text
-  causas         String?       @db.Text
-  solucion       String?       @db.Text
-  pendiente      String?       @db.Text
-  creadoEn        DateTime     @default(now()) @map("creado_en")
-  actualizadoEn   DateTime     @default(now()) @map("actualizado_en")
-  mantenimiento   Mantenimiento @relation(fields: [mantenimientoId], references: [id])
-
-  @@map("mantenimiento_correctivo")
-}
-
-model Proyecto {
-  id               Int           @id @default(autoincrement())
-  mantenimientoId  Int          @unique @map("mantenimiento_id")
-  porcentajeProceso Decimal?     @map("porcentaje_proceso") @db.Decimal(5, 2)
-  pendientes       String?       @db.Text
-  creadoEn         DateTime     @default(now()) @map("creado_en")
-  actualizadoEn    DateTime     @default(now()) @map("actualizado_en")
-  mantenimiento    Mantenimiento @relation(fields: [mantenimientoId], references: [id])
-
-  @@map("proyectos")
-}
-
-model DesmontajeMontaje {
-  id                    Int           @id @default(autoincrement())
-  mantenimientoId       Int          @unique @map("mantenimiento_id")
-  observaciones         String?       @db.Text
-  llevarProximoAbordaje String?       @map("llevar_proximo_abordaje") @db.Text
-  creadoEn              DateTime     @default(now()) @map("creado_en")
-  actualizadoEn         DateTime     @default(now()) @map("actualizado_en")
-  mantenimiento         Mantenimiento @relation(fields: [mantenimientoId], references: [id])
-
-  @@map("desmontaje_montaje")
-}
-
-model Puerto {
-  id             Int                 @id @default(autoincrement())
-  nombre         String              @unique @db.VarChar(100)
-  ubicacion      String?             @db.VarChar(255)
-  estado         Boolean             @default(true)
-  creadoEn       DateTime            @default(now()) @map("creado_en")
-  actualizadoEn  DateTime            @default(now()) @map("actualizado_en")
-  historialPuertos HistorialPuerto[] // Relación con la tabla intermedia
-
-  @@map("puertos")
+  @@unique([usuario_id, rol_id], name: "usuario_roles_usuario_id_rol_id_key")
+  @@map("usuario_roles")
 }
 
 model Empresa {
-  id             Int                 @id @default(autoincrement())
-  nombre         String              @unique @db.VarChar(100)
-  razonSocial    String?             @db.VarChar(255)
-  estado         Boolean             @default(true)
-  creadoEn       DateTime            @default(now()) @map("creado_en")
-  actualizadoEn  DateTime            @default(now()) @map("actualizado_en")
-  embarcaciones  EmpresaEmbarcacion[] // Relación con la tabla intermedia
+  id             Int           @id @default(autoincrement())
+  nombre         String        @unique
+  estado         Boolean       @default(true)
+  creado_en      DateTime      @default(now()) @map("creado_en")
+  actualizado_en DateTime      @updatedAt @map("actualizado_en")
+  embarcaciones  Embarcacion[]
 
   @@map("empresas")
 }
 
 model Embarcacion {
-  id                Int                   @id @default(autoincrement())
-  identificadorBarco String               @unique @map("identificador_barco") @db.VarChar(50)
-  nombre            String                @db.VarChar(100)
-  datosQrCode       String                @map("datos_qr_code") @db.VarChar(255)
-  ubicacion         String?               @db.VarChar(255)
-  estado            Boolean               @default(true)
-  creadoEn          DateTime              @default(now()) @map("creado_en")
-  actualizadoEn     DateTime              @default(now()) @map("actualizado_en")
-  historialPuertos  HistorialPuerto[]     // Relación con la tabla intermedia de puertos
-  empresas          EmpresaEmbarcacion[]  // Relación con la tabla intermedia de empresas
-  asistencias       Asistencia[]
-  mantenimientos    Mantenimiento[]
+  id_embarcacion       Int                @id @default(autoincrement()) @map("id_embarcacion")
+  empresa_id           Int                @map("empresa_id")
+  nombre               String             @map("nombre")
+  qr_code              String             @unique @map("qr_code")
+  estado               Boolean            @default(true) @map("estado")
+  creado_en            DateTime           @default(now()) @map("creado_en")
+  actualizado_en       DateTime           @updatedAt @map("actualizado_en")
+  empresa              Empresa            @relation(fields: [empresa_id], references: [id], onDelete: NoAction, onUpdate: Cascade)
+  historial_puertos    HistorialPuerto[]
+  embarcacion_sistemas EmbarcacionSistema[]
+  orden_trabajo        OrdenTrabajo[]
+  asistencia           Asistencia[]
 
-  @@map("embarcaciones")
+  @@map("embarcacion")
 }
 
-// Tabla intermedia para Embarcación y Puerto
+model Puerto {
+  id_puerto        Int                @id @default(autoincrement()) @map("id_puerto")
+  nombre           String             @unique @map("nombre")
+  ubicacion        String?            @map("ubicacion")
+  estado           Boolean            @default(true) @map("estado")
+  creado_en        DateTime           @default(now()) @map("creado_en")
+  actualizado_en   DateTime           @updatedAt @map("actualizado_en")
+  historial_puertos HistorialPuerto[]
+  orden_trabajo     OrdenTrabajo[]
+  asistencia        Asistencia[]      @relation("PuertoAsistencia")
+}
+
 model HistorialPuerto {
-  id             Int         @id @default(autoincrement())
-  embarcacionId  Int         @map("embarcacion_id")
-  puertoId       Int         @map("puerto_id")
-  fechaLlegada   DateTime    @map("fecha_llegada")
-  fechaSalida    DateTime?   @map("fecha_salida")
-  estado         Boolean     @default(true)
-  creadoEn       DateTime    @default(now()) @map("creado_en")
-  actualizadoEn  DateTime    @default(now()) @map("actualizado_en")
-  embarcacion    Embarcacion @relation(fields: [embarcacionId], references: [id])
-  puerto         Puerto      @relation(fields: [puertoId], references: [id])
+  id_historial    Int         @id @default(autoincrement()) @map("id_historial")
+  embarcacion_id  Int         @map("embarcacion_id")
+  puerto_id       Int         @map("puerto_id")
+  fecha_llegada   DateTime    @map("fecha_llegada")
+  fecha_salida    DateTime?   @map("fecha_salida")
+  estado          Boolean     @default(true) @map("estado")
+  creado_en       DateTime    @default(now()) @map("creado_en")
+  actualizado_en  DateTime    @updatedAt @map("actualizado_en")
+  embarcacion     Embarcacion @relation(fields: [embarcacion_id], references: [id_embarcacion], onDelete: NoAction, onUpdate: Cascade)
+  puerto          Puerto      @relation(fields: [puerto_id], references: [id_puerto], onDelete: NoAction, onUpdate: Cascade)
 
+  @@unique([embarcacion_id, puerto_id, fecha_llegada], name: "historial_puertos_unique")
   @@map("historial_puertos")
-  @@unique([embarcacionId, puertoId, fechaLlegada]) // Garantiza un único registro por embarcación, puerto y fecha de llegada
 }
 
-// Tabla intermedia para Embarcación y Empresa
-model EmpresaEmbarcacion {
-  id             Int         @id @default(autoincrement())
-  embarcacionId  Int         @map("embarcacion_id")
-  empresaId      Int         @map("empresa_id")
-  fechaAsignacion DateTime   @map("fecha_asignacion")
-  estado         Boolean     @default(true)
-  creadoEn       DateTime    @default(now()) @map("creado_en")
-  actualizadoEn  DateTime    @default(now()) @map("actualizado_en")
-  embarcacion    Embarcacion @relation(fields: [embarcacionId], references: [id])
-  empresa        Empresa     @relation(fields: [empresaId], references: [id])
+model Sistema {
+  id_sistema          Int                  @id @default(autoincrement()) @map("id_sistema")
+  nombre_sistema      String               @unique @map("nombre_sistema")
+  estado              Boolean              @default(true) @map("estado")
+  creado_en           DateTime             @default(now()) @map("creado_en")
+  actualizado_en      DateTime             @updatedAt @map("actualizado_en")
+  partes              Parte[]
+  embarcacion_sistemas EmbarcacionSistema[]
+  orden_trabajo_sistemas OrdenTrabajoSistema[]
 
-  @@map("empresa_embarcaciones")
-  @@unique([embarcacionId, empresaId]) // Garantiza un único registro por embarcación y empresa
+  @@map("sistema")
+}
+
+model Parte {
+  id_parte        Int       @id @default(autoincrement()) @map("id_parte")
+  id_sistema      Int       @map("id_sistema")
+  nombre_parte    String    @map("nombre_parte")
+  estado          Boolean   @default(true) @map("estado")
+  creado_en       DateTime  @default(now()) @map("creado_en")
+  actualizado_en  DateTime  @updatedAt @map("actualizado_en")
+  sistema         Sistema   @relation(fields: [id_sistema], references: [id_sistema], onDelete: NoAction, onUpdate: Cascade)
+  tareas          Tarea[]
+  orden_trabajo_parte OrdenTrabajoParte[]
+
+  @@unique([id_sistema, nombre_parte], name: "parte_unique")
+  @@map("parte")
+}
+
+model Tarea {
+  id_tarea          Int                  @id @default(autoincrement()) @map("id_tarea")
+  id_parte          Int                  @map("id_parte")
+  descripcion       String               @map("descripcion")
+  duracion_estimada Int?                 @map("duracion_estimada")
+  prioridad         Prioridad            @default(media) @map("prioridad")
+  estado            Boolean              @default(true) @map("estado")
+  creado_en         DateTime             @default(now()) @map("creado_en")
+  actualizado_en    DateTime             @updatedAt @map("actualizado_en")
+  parte             Parte                @relation(fields: [id_parte], references: [id_parte], onDelete: NoAction, onUpdate: Cascade)
+  orden_trabajo_tareas OrdenTrabajoTarea[]
+  tarea_realizada   TareaRealizada[]     // Relación inversa
+
+  @@map("tarea")
+}
+
+
+model EmbarcacionSistema {
+  id_embarcacion_sistema Int           @id @default(autoincrement()) @map("id_embarcacion_sistema")
+  id_embarcacion        Int           @map("id_embarcacion")
+  id_sistema            Int           @map("id_sistema")
+  estado_sistema        Boolean       @default(true) @map("estado_sistema")
+  creado_en             DateTime      @default(now()) @map("creado_en")
+  actualizado_en        DateTime      @updatedAt @map("actualizado_en")
+  embarcacion           Embarcacion   @relation(fields: [id_embarcacion], references: [id_embarcacion], onDelete: NoAction, onUpdate: Cascade)
+  sistema               Sistema       @relation(fields: [id_sistema], references: [id_sistema], onDelete: NoAction, onUpdate: Cascade)
+  orden_trabajo_sistemas OrdenTrabajoSistema[]
+
+  @@unique([id_embarcacion, id_sistema], name: "embarcacion_sistema_unique")
+  @@map("embarcacion_sistema")
+}
+
+model TipoTrabajo {
+  id_tipo_trabajo   Int           @id @default(autoincrement()) @map("id_tipo_trabajo")
+  nombre_trabajo    String        @unique @map("nombre_trabajo")
+  descripcion       String?       @map("descripcion")
+  estado            Boolean       @default(true) @map("estado")
+  creado_en         DateTime      @default(now()) @map("creado_en")
+  actualizado_en    DateTime      @updatedAt @map("actualizado_en")
+  orden_trabajo     OrdenTrabajo[]
+
+  @@map("tipo_trabajo")
+}
+
+model OrdenTrabajo {
+  id_orden_trabajo    Int                  @id @default(autoincrement()) @map("id_orden_trabajo")
+  id_tipo_trabajo     Int                  @map("id_tipo_trabajo")
+  id_embarcacion      Int                  @map("id_embarcacion")
+  id_puerto           Int                  @map("id_puerto")
+  id_jefe_asigna     Int                  @map("id_jefe_asigna")
+  fecha_asignacion    DateTime             @map("fecha_asignacion")
+  estado              EstadoOrdenTrabajo   @default(pendiente) @map("estado")
+  comentarios         String?              @map("comentarios")
+  creado_en           DateTime             @default(now()) @map("creado_en")
+  actualizado_en      DateTime             @updatedAt @map("actualizado_en")
+  tipo_trabajo        TipoTrabajo          @relation(fields: [id_tipo_trabajo], references: [id_tipo_trabajo], onDelete: NoAction, onUpdate: Cascade)
+  embarcacion         Embarcacion          @relation(fields: [id_embarcacion], references: [id_embarcacion], onDelete: NoAction, onUpdate: Cascade)
+  puerto              Puerto               @relation(fields: [id_puerto], references: [id_puerto], onDelete: NoAction, onUpdate: Cascade)
+  jefe_asigna         Usuario              @relation("JefeAsigna", fields: [id_jefe_asigna], references: [id], onDelete: NoAction, onUpdate: Cascade)
+  orden_trabajo_usuario OrdenTrabajoUsuario[]
+  orden_trabajo_sistemas OrdenTrabajoSistema[]
+  asistencia           Asistencia[]
+
+  @@map("orden_trabajo")
+}
+
+model OrdenTrabajoUsuario {
+  id_orden_trabajo_usuario Int           @id @default(autoincrement()) @map("id_orden_trabajo_usuario")
+  id_orden_trabajo        Int           @map("id_orden_trabajo")
+  id_usuario              Int           @map("id_usuario")
+  rol_en_orden            RolEnOrden?   @map("rol_en_orden")
+  observaciones           String?       @map("observaciones")
+  creado_en               DateTime      @default(now()) @map("creado_en")
+  orden_trabajo           OrdenTrabajo  @relation(fields: [id_orden_trabajo], references: [id_orden_trabajo], onDelete: NoAction, onUpdate: Cascade)
+  usuario                 Usuario       @relation(fields: [id_usuario], references: [id], onDelete: NoAction, onUpdate: Cascade)
+
+  @@unique([id_orden_trabajo, id_usuario], name: "orden_trabajo_usuario_unique")
+  @@map("orden_trabajo_usuario")
+}
+
+model OrdenTrabajoSistema {
+  id_orden_trabajo_sistema Int              @id @default(autoincrement()) @map("id_orden_trabajo_sistema")
+  id_orden_trabajo        Int              @map("id_orden_trabajo")
+  id_sistema              Int              @map("id_sistema")
+  id_embarcacion_sistema  Int              @map("id_embarcacion_sistema")
+  estado                  EstadoOrdenTrabajo @default(pendiente) @map("estado")
+  observaciones           String?          @map("observaciones")
+  creado_en               DateTime         @default(now()) @map("creado_en")
+  actualizado_en          DateTime         @updatedAt @map("actualizado_en")
+  orden_trabajo           OrdenTrabajo     @relation(fields: [id_orden_trabajo], references: [id_orden_trabajo], onDelete: NoAction, onUpdate: Cascade)
+  sistema                 Sistema          @relation(fields: [id_sistema], references: [id_sistema], onDelete: NoAction, onUpdate: Cascade)
+  embarcacion_sistema     EmbarcacionSistema @relation(fields: [id_embarcacion_sistema], references: [id_embarcacion_sistema], onDelete: NoAction, onUpdate: Cascade)
+  orden_trabajo_parte     OrdenTrabajoParte[]
+  orden_trabajo_tareas    OrdenTrabajoTarea[] @relation("SistemaToTareas") // Relación nombrada
+
+  @@unique([id_orden_trabajo, id_sistema], name: "orden_trabajo_sistema_unique")
+  @@map("orden_trabajo_sistema")
+}
+
+
+
+model OrdenTrabajoParte {
+  id_orden_trabajo_parte Int                @id @default(autoincrement()) @map("id_orden_trabajo_parte")
+  id_orden_trabajo_sistema Int             @map("id_orden_trabajo_sistema")
+  id_parte               Int                @map("id_parte")
+  estado                 EstadoOrdenTrabajo @default(pendiente) @map("estado")
+  creado_en              DateTime           @default(now()) @map("creado_en")
+  actualizado_en         DateTime           @updatedAt @map("actualizado_en")
+  orden_trabajo_sistema  OrdenTrabajoSistema @relation(fields: [id_orden_trabajo_sistema], references: [id_orden_trabajo_sistema], onDelete: NoAction, onUpdate: Cascade)
+  parte                   Parte              @relation(fields: [id_parte], references: [id_parte], onDelete: NoAction, onUpdate: Cascade)
+  orden_trabajo_tareas    OrdenTrabajoTarea[]
+
+  @@unique([id_orden_trabajo_sistema, id_parte], name: "orden_trabajo_parte_unique")
+  @@map("orden_trabajo_parte")
+}
+
+model OrdenTrabajoTarea {
+  id_orden_trabajo_tarea Int              @id @default(autoincrement()) @map("id_orden_trabajo_tarea")
+  id_orden_trabajo_parte Int              @map("id_orden_trabajo_parte")
+  id_tarea              Int              @map("id_tarea")
+  id_sistema            Int?             @map("id_sistema") // Relación opcional con sistema
+  estado                EstadoOrdenTrabajo @default(pendiente) @map("estado")
+  creado_en             DateTime         @default(now()) @map("creado_en")
+  actualizado_en        DateTime         @updatedAt @map("actualizado_en")
+  orden_trabajo_parte   OrdenTrabajoParte @relation(fields: [id_orden_trabajo_parte], references: [id_orden_trabajo_parte], onDelete: NoAction, onUpdate: Cascade)
+  tarea                 Tarea            @relation(fields: [id_tarea], references: [id_tarea], onDelete: NoAction, onUpdate: Cascade)
+  tarea_realizada       TareaRealizada[]
+  orden_trabajo_sistema OrdenTrabajoSistema? @relation("SistemaToTareas", fields: [id_sistema], references: [id_orden_trabajo_sistema]) // Relación nombrada y opcional
+
+  @@unique([id_orden_trabajo_parte, id_tarea], name: "orden_trabajo_tarea_unique")
+  @@map("orden_trabajo_tarea")
+}
+
+
+model TareaRealizada {
+  id_tarea_realizada    Int              @id @default(autoincrement()) @map("id_tarea_realizada")
+  id_orden_trabajo_tarea Int            @map("id_orden_trabajo_tarea")
+  id_usuario            Int              @map("id_usuario")
+  id_tarea              Int              @map("id_tarea")
+  fecha_hora            DateTime         @map("fecha_hora")
+  comentarios           String?          @map("comentarios")
+  creado_en             DateTime         @default(now()) @map("creado_en")
+  orden_trabajo_tarea   OrdenTrabajoTarea @relation(fields: [id_orden_trabajo_tarea], references: [id_orden_trabajo_tarea], onDelete: NoAction, onUpdate: Cascade)
+  usuario               Usuario           @relation(fields: [id_usuario], references: [id], onDelete: NoAction, onUpdate: Cascade)
+  tarea                 Tarea             @relation(fields: [id_tarea], references: [id_tarea], onDelete: NoAction, onUpdate: Cascade)
+  comentario_tarea      ComentarioTarea[] @relation("ComentarioToTareaRealizada") // Relación nombrada
+
+  @@map("tarea_realizada")
+}
+
+
+model Asistencia {
+  id_asistencia        Int              @id @default(autoincrement()) @map("id_asistencia")
+  id_usuario           Int              @map("id_usuario")
+  id_embarcacion       Int              @map("id_embarcacion")
+  id_orden_trabajo     Int?             @map("id_orden_trabajo")
+  id_puerto            Int?             @map("id_puerto")
+  fecha_hora           DateTime         @map("fecha_hora")
+  latitud              Decimal?         @db.Decimal(10, 6) @map("latitud")
+  longitud             Decimal?         @db.Decimal(10, 6) @map("longitud")
+  tipo                 TipoAsistencia   @map("tipo")
+  creado_en            DateTime         @default(now()) @map("creado_en")
+  usuario              Usuario          @relation(fields: [id_usuario], references: [id], onDelete: NoAction, onUpdate: Cascade)
+  embarcacion          Embarcacion      @relation(fields: [id_embarcacion], references: [id_embarcacion], onDelete: NoAction, onUpdate: Cascade)
+  orden_trabajo        OrdenTrabajo?    @relation(fields: [id_orden_trabajo], references: [id_orden_trabajo], onDelete: SetNull, onUpdate: Cascade)
+  puerto               Puerto?          @relation("PuertoAsistencia", fields: [id_puerto], references: [id_puerto], onDelete: SetNull, onUpdate: Cascade)
+
+  @@map("asistencia")
+}
+
+model ComentarioTarea {
+  id_comentario_tarea Int             @id @default(autoincrement()) @map("id_comentario_tarea")
+  id_tarea_realizada  Int             @map("id_tarea_realizada")
+  id_usuario          Int             @map("id_usuario")
+  comentario          String          @map("comentario")
+  creado_en           DateTime        @default(now()) @map("creado_en")
+  tarea_realizada     TareaRealizada  @relation("ComentarioToTareaRealizada", fields: [id_tarea_realizada], references: [id_tarea_realizada], onDelete: Cascade, onUpdate: Cascade)
+  usuario             Usuario         @relation("UsuarioComentario", fields: [id_usuario], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@map("comentario_tarea")
 }
