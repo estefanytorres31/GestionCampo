@@ -1,14 +1,13 @@
 import * as EmbarcacionService from "../services/EmbarcacionService.js";
 
 export const createEmbarcacion = async (req, res) => {
-  const { identificadorBarco, nombre, datosQrCode, ubicacion, puertoId, empresaId } = req.body;
+  const { identificadorBarco, nombre, datosQrCode, ubicacion, empresaId } = req.body;
   try {
     const embarcacion = await EmbarcacionService.createEmbarcacion(
       identificadorBarco,
       nombre,
       datosQrCode,
       ubicacion,
-      puertoId,
       empresaId
     );
     res.status(201).json(embarcacion);
@@ -38,13 +37,13 @@ export const getEmbarcacionById = async (req, res) => {
 
 export const updateEmbarcacion = async (req, res) => {
   const { id } = req.params;
-  const { nombre, ubicacion, puertoId, empresaId } = req.body;
+  const { nombre, datosQrCode, ubicacion, empresaId } = req.body;
   try {
     const embarcacion = await EmbarcacionService.updateEmbarcacion(
       id,
       nombre,
+      datosQrCode,
       ubicacion,
-      puertoId,
       empresaId
     );
     res.status(200).json(embarcacion);
