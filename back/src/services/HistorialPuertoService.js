@@ -1,117 +1,135 @@
-import { getPeruTime, getUTCTime } from "../utils/Time.js";
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-export const createHistorialPuerto = async (embarcacionId, puertoId, fechaLlegada, fechaSalida) => {
-  const todayISO = new Date().toISOString();
-  const fecha_creacion = getUTCTime(todayISO);
-  // Verificar si la embarcación y el puerto existen y están activos
-  const embarcacion = await prisma.embarcacion.findUnique({
-    where: { id: parseInt(embarcacionId) },
-  });
+// Registrar llegada de una embarcación
+export const registrarLlegada = async (embarcacion_id, puerto_id, fecha_llegada) => {
+    // Validar que embarcacion_id y puerto_id sean números
+    if (isNaN(embarcacion_id) || isNaN(puerto_id)) {
+        throw new Error("El ID de la embarcación y el puerto deben ser números válidos.");
+    }
 
-  if (!embarcacion || !embarcacion.estado) {
-    throw new Error("La embarcación no existe o está inactiva.");
-  }
-
-  const puerto = await prisma.puerto.findUnique({
-    where: { id: parseInt(puertoId) },
-  });
-
-  if (!puerto || !puerto.estado) {
-    throw new Error("El puerto no existe o está inactivo.");
-  }
-
-  // Crear el historial de puerto
-  const historial = await prisma.historialPuerto.create({
-    data: {
-      embarcacionId: parseInt(embarcacionId),
-      puertoId: parseInt(puertoId),
-      fechaLlegada: new Date(fechaLlegada),
-      fechaSalida: fechaSalida ? new Date(fechaSalida) : null,
-      creadoEn:fecha_creacion,
-      actualizadoEn:fecha_creacion
-    },
-  });
-
-  return historial;
-};
-
-export const getHistorialByEmbarcacion = async (embarcacionId) => {
-  const historial = await prisma.historialPuerto.findMany({
-    where: { embarcacionId: parseInt(embarcacionId) },
-    orderBy: { fechaLlegada: "desc" },
-    include: {
-      puerto: true,
-    },
-  });
-
-  return historial;
-};
-
-export const getHistorialById = async (id) => {
-  const historial = await prisma.historialPuerto.findUnique({
-    where: { id: parseInt(id) },
-    include: {
-      embarcacion: true,
-      puerto: true,
-    },
-  });
-
-  if (!historial) {
-    throw new Error("El historial de puerto no existe.");
-  }
-
-  return historial;
-};
-
-export const updateHistorialPuerto = async (id, fechaSalida) => {
-  const todayISO = new Date().toISOString();
-  const fecha_creacion = getUTCTime(todayISO);
-  const historialExistente = await prisma.historialPuerto.findUnique({
-    where: { id: parseInt(id) },
-  });
-
-  if (!historialExistente) {
-    throw new Error("El historial de puerto no existe.");
-  }
-
-  const historialActualizado = await prisma.historialPuerto.update({
-    where: { id: parseInt(id) },
-    data: {
-      fechaSalida: fechaSalida ? new Date(fechaSalida) : null,
-      actualizadoEn: fecha_creacion
-    },
-  });
-
-  return historialActualizado;
-};
-
-export const deleteHistorialPuerto = async (id) => {
-  const historialExistente = await prisma.historialPuerto.findUnique({
-    where: { id: parseInt(id) },
-  });
-
-  if (!historialExistente) {
-    throw new Error("El historial de puerto no existe.");
-  }
-
-  // Realizar un soft delete (desactivar el historial)
-  await prisma.historialPuerto.update({
-    where: { id: parseInt(id) },
-    data: { estado: false },
-  });
-};
-
-export const getHistorialCompleto = async (embarcacionId) => {
-    const historial = await prisma.historialPuerto.findMany({
-      where: { embarcacionId: parseInt(embarcacionId) },
-      orderBy: { fechaLlegada: "desc" },
-      include: {
-        puerto: true,
-      },
+    // Validar que la embarcación existe
+    const embarcacionExiste = await prisma.embarcacion.findUnique({
+        where: { id_embarcacion: parseInt(embarcacion_id, 10) },
     });
-  
+    if (!embarcacionExiste) {
+        throw new Error("La embarcación no existe.");
+    }
+
+    // Validar que el puerto existe
+    const puertoExiste = await prisma.puerto.findUnique({
+        where: { id_puerto: parseInt(puerto_id, 10) },
+    });
+    if (!puertoExiste) {
+        throw new Error("El puerto no existe.");
+    }
+
+    // Validar si la embarcación ya está en un puerto sin registrar salida
+    const llegadaPendiente = await prisma.historialPuerto.findFirst({
+        where: {
+            embarcacion_id: parseInt(embarcacion_id, 10),
+            fecha_salida: null,
+            estado: true,
+        },
+    });
+
+    if (llegadaPendiente) {
+        throw new Error("La embarcación no puede registrar una nueva llegada sin haber registrado una salida previa.");
+    }
+
+    // Registrar la llegada
+    const nuevoRegistro = await prisma.historialPuerto.create({
+        data: {
+            embarcacion_id: parseInt(embarcacion_id, 10),
+            puerto_id: parseInt(puerto_id, 10),
+            fecha_llegada: new Date(fecha_llegada),
+        },
+    });
+
+    return nuevoRegistro;
+};
+
+// Registrar salida de una embarcación
+export const registrarSalida = async (embarcacion_id, fecha_salida) => {
+    if (isNaN(embarcacion_id)) {
+        throw new Error("El ID de la embarcación debe ser un número válido.");
+    }
+
+    // Buscar el último registro de llegada sin salida
+    const registroPendiente = await prisma.historialPuerto.findFirst({
+        where: {
+            embarcacion_id: parseInt(embarcacion_id, 10),
+            fecha_salida: null,
+            estado: true,
+        },
+        orderBy: {
+            fecha_llegada: "desc",
+        },
+    });
+
+    if (!registroPendiente) {
+        throw new Error("No se encontró un registro de llegada pendiente para esta embarcación.");
+    }
+
+    // Registrar la salida
+    const registroActualizado = await prisma.historialPuerto.update({
+        where: {
+            id_historial: registroPendiente.id_historial,
+        },
+        data: {
+            fecha_salida: new Date(fecha_salida),
+        },
+    });
+
+    return registroActualizado;
+};
+
+// Consultar puerto actual de una embarcación
+export const obtenerPuertoActual = async (embarcacion_id) => {
+    if (isNaN(embarcacion_id)) {
+        throw new Error("El ID de la embarcación debe ser un número válido.");
+    }
+
+    const puertoActual = await prisma.historialPuerto.findFirst({
+        where: {
+            embarcacion_id: parseInt(embarcacion_id, 10),
+            fecha_salida: null,
+            estado: true,
+        },
+        include: {
+            puerto: true,
+        },
+    });
+
+    if (!puertoActual) {
+        throw new Error("La embarcación no se encuentra actualmente en ningún puerto.");
+    }
+
+    return puertoActual.puerto;
+};
+
+// Consultar historial de puertos de una embarcación
+export const obtenerHistorialPuertos = async (embarcacion_id, limit = 10) => {
+    if (isNaN(embarcacion_id)) {
+        throw new Error("El ID de la embarcación debe ser un número válido.");
+    }
+
+    const historial = await prisma.historialPuerto.findMany({
+        where: { 
+            embarcacion_id: parseInt(embarcacion_id, 10), 
+            estado: true 
+        },
+        orderBy: { fecha_llegada: "desc" },
+        take: limit,
+        include: {
+            puerto: true,
+        },
+    });
+
+    if (historial.length === 0) {
+        throw new Error("No se encontró historial de puertos para esta embarcación.");
+    }
+
     return historial;
-  };
+};

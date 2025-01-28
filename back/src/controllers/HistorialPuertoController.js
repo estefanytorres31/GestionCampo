@@ -1,69 +1,50 @@
-// controllers/HistorialPuertoController.js
-
 import * as HistorialPuertoService from "../services/HistorialPuertoService.js";
 
-export const createHistorialPuerto = async (req, res) => {
-  const { embarcacionId, puertoId, fechaLlegada, fechaSalida } = req.body;
-  try {
-    const historial = await HistorialPuertoService.createHistorialPuerto(
-      embarcacionId,
-      puertoId,
-      fechaLlegada,
-      fechaSalida
-    );
-    res.status(201).json(historial);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-};
+// Registrar llegada de una embarcación
+export const registrarLlegada = async (req, res) => {
+    const { embarcacion_id, puerto_id, fecha_llegada } = req.body;
 
-export const getHistorialByEmbarcacion = async (req, res) => {
-  const { embarcacionId } = req.params;
-  try {
-    const historial = await HistorialPuertoService.getHistorialByEmbarcacion(embarcacionId);
-    res.status(200).json(historial);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-};
-
-export const getHistorialById = async (req, res) => {
-  const { id } = req.params;
-  try {
-    const historial = await HistorialPuertoService.getHistorialById(id);
-    res.status(200).json(historial);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-};
-
-export const updateHistorialPuerto = async (req, res) => {
-  const { id } = req.params;
-  const { fechaSalida } = req.body;
-  try {
-    const historial = await HistorialPuertoService.updateHistorialPuerto(id, fechaSalida);
-    res.status(200).json(historial);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-};
-
-export const deleteHistorialPuerto = async (req, res) => {
-  const { id } = req.params;
-  try {
-    await HistorialPuertoService.deleteHistorialPuerto(id);
-    res.status(204).send();
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-};
-
-export const getHistorialCompleto = async (req, res) => {
-    const { embarcacionId } = req.params;
     try {
-      const historial = await HistorialPuertoService.getHistorialCompleto(embarcacionId);
-      res.status(200).json(historial);
-    } catch (err) {
-      res.status(500).json({ message: err.message });
+        const registro = await HistorialPuertoService.registrarLlegada(embarcacion_id, puerto_id, fecha_llegada);
+        res.status(201).json({ message: "Llegada registrada exitosamente.", data: registro });
+    } catch (error) {
+        res.status(400).json({ message: error.message });
     }
-  };
+};
+
+// Registrar salida de una embarcación
+export const registrarSalida = async (req, res) => {
+    const { embarcacion_id, fecha_salida } = req.body;
+
+    try {
+        const registro = await HistorialPuertoService.registrarSalida(embarcacion_id, fecha_salida);
+        res.status(200).json({ message: "Salida registrada exitosamente.", data: registro });
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+};
+
+// Consultar puerto actual de una embarcación
+export const obtenerPuertoActual = async (req, res) => {
+    const { embarcacion_id } = req.params;
+
+    try {
+        const puerto = await HistorialPuertoService.obtenerPuertoActual(embarcacion_id);
+        res.status(200).json({ message: "Puerto actual obtenido exitosamente.", data: puerto });
+    } catch (error) {
+        res.status(404).json({ message: error.message });
+    }
+};
+
+// Consultar historial de puertos de una embarcación
+export const obtenerHistorialPuertos = async (req, res) => {
+    const { embarcacion_id } = req.params;
+    const { limit } = req.query;
+
+    try {
+        const historial = await HistorialPuertoService.obtenerHistorialPuertos(embarcacion_id, parseInt(limit, 10) || 10);
+        res.status(200).json({ message: "Historial obtenido exitosamente.", data: historial });
+    } catch (error) {
+        res.status(404).json({ message: error.message });
+    }
+};
