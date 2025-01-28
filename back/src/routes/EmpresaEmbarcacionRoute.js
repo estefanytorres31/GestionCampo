@@ -9,14 +9,14 @@ import {
   const empresaEmbarcacionRouter = Router();
   
   // Asignar una empresa a una embarcación
-  empresaEmbarcacionRouter.post("/api/empresa-embarcaciones", assignEmpresaToEmbarcacion);
+  empresaEmbarcacionRouter.post("/", assignEmpresaToEmbarcacion);
   
   // Obtener todas las embarcaciones asignadas a una empresa específica
-  empresaEmbarcacionRouter.get("/api/empresa-embarcaciones/:empresaId", getEmbarcacionesByEmpresa);
+  empresaEmbarcacionRouter.get("/:empresaId", getEmbarcacionesByEmpresa);
   
   // Desasignar una empresa de una embarcación
-  empresaEmbarcacionRouter.delete("/api/empresa-embarcaciones/:empresaId/:embarcacionId", unassignEmpresaFromEmbarcacion);
-  empresaEmbarcacionRouter.put("/api/empresa-embarcaciones/:empresaId/:embarcacionId", updateFechaAsignacion);
+  empresaEmbarcacionRouter.delete("/:empresaId/:embarcacionId", unassignEmpresaFromEmbarcacion);
+  empresaEmbarcacionRouter.put("/:empresaId/:embarcacionId", updateFechaAsignacion);
   
   export default empresaEmbarcacionRouter;
   

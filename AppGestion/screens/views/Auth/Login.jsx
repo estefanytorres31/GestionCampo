@@ -1,31 +1,105 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, ActivityIndicator } from "react-native";
+import { 
+  View, 
+  Text, 
+  TextInput, 
+  TouchableOpacity, 
+  Image, 
+  StyleSheet, 
+  ActivityIndicator,
+  Alert 
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import PSC from "../image/PSC.png";
+import useAuth from '../../hooks/Auth/useAuth';
 import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation } from "@react-navigation/native";
-import PSC from "../image/PSC.png";
 
 const LoginScreen = () => {
   const navigation = useNavigation();
-  const [credentials, setCredentials] = useState({ username: "", password: "" });
+  const { loginAccess } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
+  const [credentials, setCredentials] = useState({
+    username: "",
+    password: ""
+  });
+
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  // Alertas
+  const [alertConfig, setAlertConfig] = useState({
+    type: '',
+    title: '',
+    message: ''
+  });
+  const [alertVisible, setAlertVisible] = useState(false);
 
-  const handleLogin = () => {
-    const { username, password } = credentials;
-
-    if (!username || !password) {
-      alert("Por favor, completa todos los campos.");
-      return;
+ /* const validateInputs = () => {
+    if (!credentials.username.trim() || !credentials.password.trim()) {
+      setAlertConfig({
+        type: 'INFO',
+        title: 'Campos incompletos',
+        message: 'Por favor, complete todos los campos'
+      });
+      setAlertVisible(true);
+      return false;
     }
+    return true;
+  };*/
 
-    setIsLoading(true);
-
-    setTimeout(() => {
+  const handleLogin = async () => {
+    const { username, password } = credentials;
+  if (!username || !password) {
+    setAlertConfig({
+      type: 'INFO',
+      title: 'Campos vacíos',
+      message: 'Por favor, completa todos los campos.',
+    });
+    setAlertVisible(true);
+    //shakeAnimation();
+    return;
+  }
+    try {
+      setIsLoading(true);
+      const result = await loginAccess(username, password);
+      if (result.status === 200 && result.data?.token) {
+          navigation.navigate('Clientes');
+      } else {
+        setAlertConfig({
+          type: 'ERROR',
+          title: 'Inicio de sesión fallido',
+          message: 'Usuario o contraseña incorrectos.',
+        });
+        setAlertVisible(true);
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      setAlertConfig({
+        type: 'ERROR',
+        title: 'Error de conexión',
+        message: 'No se pudo conectar al servidor. Por favor, intenta más tarde.'
+      });
+      setAlertVisible(true);
+    } finally {
       setIsLoading(false);
-      navigation.navigate("Clientes"); // Cambia "Home" por la vista a la que deseas navegar
-    }, 2000); // Simula un retraso en la autenticación
+    }
   };
+
+  const showAlert = () => {
+    if (alertVisible) {
+      Alert.alert(
+        alertConfig.title,
+        alertConfig.message,
+        [{ text: "OK", onPress: () => setAlertVisible(false) }]
+      );
+    }
+  };
+
+  React.useEffect(() => {
+    if (alertVisible) {
+      showAlert();
+    }
+  }, [alertVisible]);
 
   return (
     <LinearGradient
@@ -35,42 +109,56 @@ const LoginScreen = () => {
       end={{ x: 0.5, y: 1 }}
     >
       <View style={styles.modal}>
-        {/* Logo */}
         <Image source={PSC} style={styles.logo} />
 
-        {/* Input Container */}
         <View style={styles.inputContainer}>
-          {/* Username Input */}
-          <View style={styles.inputBox}>
+          <View style={[styles.inputBox, error && styles.inputError]}>
             <Ionicons name="person-outline" size={24} color="#143168" style={styles.icon} />
             <TextInput
               placeholder="Username"
               style={styles.input}
               placeholderTextColor="#143168"
-              value={credentials.username}
-              onChangeText={(text) => setCredentials({ ...credentials, username: text })}
+              //value={credentials.username}
+              onChangeText={(text) => {
+                setError("");
+                setCredentials({ ...credentials, username: text });
+              }}
+              autoCapitalize="none"
+              editable={!isLoading}
             />
           </View>
 
-          {/* Password Input */}
-          <View style={styles.inputBox}>
+          <View style={[styles.inputBox, error && styles.inputError]}>
             <Ionicons name="lock-closed-outline" size={24} color="#143168" style={styles.icon} />
             <TextInput
               placeholder="Password"
               secureTextEntry={!showPassword}
               style={styles.input}
               placeholderTextColor="#143168"
-              value={credentials.password}
-              onChangeText={(text) => setCredentials({ ...credentials, password: text })}
+              //value={credentials.password}
+              onChangeText={(text) => {
+                setError("");
+                setCredentials({ ...credentials, password: text });
+              }}
+              editable={!isLoading}
             />
-            <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-              <Ionicons name={showPassword ? "eye-off-outline" : "eye-outline"} size={24} color="#143168" />
+            <TouchableOpacity onPress={() => setShowPassword(!showPassword)} disabled={isLoading}>
+              <Ionicons 
+                name={showPassword ? "eye-off-outline" : "eye-outline"} 
+                size={24} 
+                color="#143168" 
+              />
             </TouchableOpacity>
           </View>
+
+          {error ? <Text style={styles.errorText}>{error}</Text> : null}
         </View>
 
-        {/* Login Button */}
-        <TouchableOpacity style={styles.button} onPress={handleLogin} disabled={isLoading}>
+        <TouchableOpacity 
+          style={[styles.button, isLoading && styles.buttonDisabled]} 
+          onPress={handleLogin} 
+          disabled={isLoading}
+        >
           {isLoading ? (
             <ActivityIndicator size="small" color="#fff" />
           ) : (
@@ -110,7 +198,7 @@ const styles = StyleSheet.create({
   inputContainer: {
     marginBottom: 20,
   },
- inputBox: {
+  inputBox: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#fff",
@@ -126,6 +214,9 @@ const styles = StyleSheet.create({
     elevation: 5,
     marginBottom: 15,
     width: "100%",
+  },
+  inputError: {
+    borderColor: '#ff0000',
   },
   icon: {
     marginRight: 10,
@@ -146,6 +237,16 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     fontWeight: "bold",
+  },
+  buttonDisabled: {
+    backgroundColor: '#888',
+  },
+  errorText: {
+    color: '#ff0000',
+    fontSize: 14,
+    marginTop: -10,
+    marginBottom: 10,
+    textAlign: 'center',
   },
 });
 

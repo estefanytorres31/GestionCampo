@@ -6,30 +6,34 @@ import cors from 'cors';
 import rolRouter from './routes/RolRoute.js';
 import usuarioRouter from './routes/UsuarioRoute.js';
 import authRouter from './routes/AuthRoute.js';
+import sistemaRouter from './routes/SistemaRoute.js';
 import puertoRouter from './routes/PuertoRoute.js';
 import empresaRouter from './routes/EmpresaRoute.js';
 import empresaEmbarcacionRouter from './routes/EmpresaEmbarcacionRoute.js';
 import historialPuertoRouter from './routes/HistorialPuertoRoute.js';
 import embarcacionRouter from './routes/EmbarcacionRoute.js';
+import permisoRouter from './routes/PermisoRoute.js';
 
 const app = express();
 
 
 app.use(cors({
-    origin: "http://localhost:5173", // Dominio del frontend
-    credentials: true, // Permitir cookies y otras credenciales
+    origin: "http://localhost:5173", 
+    credentials: true, 
   }));
 app.use(json());
 app.use(morgan('dev'));
 
 // Routes
-app.use(rolRouter);
-app.use(usuarioRouter);
-app.use(authRouter);
-app.use(puertoRouter);
-app.use(empresaRouter);
-app.use(empresaEmbarcacionRouter);
-app.use(historialPuertoRouter);
-app.use(embarcacionRouter);
+app.use('/api/rol', rolRouter);
+app.use('/api/usuario', usuarioRouter);
+app.use('/api/auth', authRouter);
+app.use('/api/sistema', sistemaRouter);
+app.use('/api/puerto', puertoRouter);
+app.use('/api/empresa', empresaRouter);
+app.use('/api/empresa-embarcacion', empresaEmbarcacionRouter);
+app.use('/api/historial-puerto', historialPuertoRouter);
+app.use('/api/embarcacion', embarcacionRouter);
+app.use('/api/permiso', permisoRouter);
 
 export default app;

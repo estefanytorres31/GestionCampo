@@ -14,28 +14,51 @@ const AuthProvider = ({ children }) => {
     const loginAccess = async (username, password) => {
         setLoading(true);
         setError(null);
+        
         try {
+            // First attempt login
             const { status, data } = await login(username, password);
-            if (status === 200) {
-                const { userId, token } = data;
-                await AsyncStorage.setItem('token', token);
-                await AsyncStorage.setItem("userId", userId.toString());
-                console.log("Token and UserId stored:", token, userId);
-                setIsAuth(true);
+            
+            if (status !== 200 || !data?.token) {
+                throw new Error('Invalid credentials');
+            }
+
+            const { userId, token } = data;
+
+            // Store auth data
+            await AsyncStorage.setItem('token', token);
+            await AsyncStorage.setItem("userId", userId.toString());
+            
+            try {
+                // Attempt to get user data
                 const userData = await getUserById(userId);
                 setUser(userData);
-                setRole(userData.rol);
-                return { status, data };
+                //setRole(userData.rol);
+            } catch (userError) {
+                // If we can't get user data, we'll still consider them logged in
+                // but with minimal user data
+                console.warn('Could not fetch full user data:', userError);
+                setUser({
+                    id: userId,
+                    username: data.nombreUsuario
+                });
             }
-            setIsAuth(false);
-            setUser(null);
-            setRole(null);
+
+            // Set authenticated regardless of user data fetch
+            setIsAuth(true);
             return { status, data };
-        } catch (err) {
-            setError("Error al iniciar sesión");
+
+        } catch (error) {
             setIsAuth(false);
             setUser(null);
             setRole(null);
+            
+            if (error.message === 'Invalid credentials') {
+                setError('Usuario o contraseña incorrectos');
+                return { status: 401, data: null };
+            }
+            
+            setError('Error al iniciar sesión');
             return { status: 500, data: null };
         } finally {
             setLoading(false);

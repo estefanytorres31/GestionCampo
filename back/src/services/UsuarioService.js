@@ -57,16 +57,21 @@ export const getUserByUsername=async(nombre_usuario)=>{
     return user;
 }
 
-export const getUserById=async(id)=>{
+export const getUserById = async (id) => {
+    const userId = parseInt(id, 10);
+    if (isNaN(userId)) {
+        throw new Error("El ID proporcionado no es válido");
+    }
+    
     const user = await prisma.usuario.findFirst({
-        where:{
-            id:  parseInt(id),
+        where: {
+            id: userId,
             estado: true
         }
     });
+    
     return user;
-
-}
+};
 
 export const updateUser=async(id,nombre_usuario, nombre_completo, email)=>{
     const todayISO = new Date().toISOString();

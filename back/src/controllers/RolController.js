@@ -35,7 +35,7 @@ export const eliminarRol = async (req, res) => {
     const {id} = req.params;
     try {
         await RolService.eliminarRol(id);
-        res.status(204).end();
+        res.status(204).json({message:'Rol eliminado'});
     } catch (error) {
         res.status(404).json({message: error.message});
     }

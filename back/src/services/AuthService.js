@@ -5,11 +5,12 @@ import { getPeruTime, getUTCTime } from "../utils/Time.js";
 
 const prisma = new PrismaClient();
 
-export const login=async(nombre_usuario, contrasena_hash)=>{
+export const login=async(nombreUsuario, contrasena_hash)=>{
 
     const usuario= await prisma.usuario.findUnique({
         where:{
-            nombreUsuario: nombre_usuario
+        
+            nombreUsuario
         }
     });
     if(!usuario){
@@ -26,14 +27,18 @@ export const login=async(nombre_usuario, contrasena_hash)=>{
 
     }
     const token= createToken(payload);
-    const expiresInMilliseconds = 24 * 60 * 60 * 1000; // 24 horas en milisegundos
+    const expiresInMilliseconds = 24 * 60 * 60 * 1000;
     const expirationUTC = new Date(Date.now() + expiresInMilliseconds);
     const expirationPeru = getUTCTime(expirationUTC.toISOString()); 
 
-    return {token,
+    return { token,
         expiracion:expirationPeru.toISOString(),
         userId:usuario.id,
         nombreUsuario: usuario.nombreUsuario
 
     }
+}
+
+export const logout=async(token)=>{
+    
 }

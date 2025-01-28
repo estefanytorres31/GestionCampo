@@ -13,20 +13,20 @@ import {
   const historialPuertoRouter = Router();
   
   // Crear un nuevo historial de puerto
-  historialPuertoRouter.post("/api/historial-puertos", createHistorialPuerto);
+  historialPuertoRouter.post("/", createHistorialPuerto);
   
   // Obtener todos los historiales de una embarcación específica
-  historialPuertoRouter.get("/api/historial-puertos/embarcacion/:embarcacionId", getHistorialByEmbarcacion);
+  historialPuertoRouter.get("/embarcacion/:embarcacionId", getHistorialByEmbarcacion);
   
   // Obtener un historial de puerto por ID
-  historialPuertoRouter.get("/api/historial-puertos/:id", getHistorialById);
+  historialPuertoRouter.get("/:id", getHistorialById);
   
   // Actualizar un historial de puerto (e.g., agregar fecha de salida)
-  historialPuertoRouter.put("/api/historial-puertos/:id", updateHistorialPuerto);
+  historialPuertoRouter.put("/:id", updateHistorialPuerto);
   
   // Eliminar (desactivar) un historial de puerto
-  historialPuertoRouter.delete("/api/historial-puertos/:id", deleteHistorialPuerto);
-  historialPuertoRouter.get("/api/historial-puertos/completo/:embarcacionId", getHistorialCompleto);
+  historialPuertoRouter.delete("/:id", deleteHistorialPuerto);
+  historialPuertoRouter.get("/completo/:embarcacionId", getHistorialCompleto);
   
   export default historialPuertoRouter;
   

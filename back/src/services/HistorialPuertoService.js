@@ -1,10 +1,11 @@
-// services/HistorialPuertoService.js
-
+import { getPeruTime, getUTCTime } from "../utils/Time.js";
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
 export const createHistorialPuerto = async (embarcacionId, puertoId, fechaLlegada, fechaSalida) => {
+  const todayISO = new Date().toISOString();
+  const fecha_creacion = getUTCTime(todayISO);
   // Verificar si la embarcación y el puerto existen y están activos
   const embarcacion = await prisma.embarcacion.findUnique({
     where: { id: parseInt(embarcacionId) },
@@ -29,6 +30,8 @@ export const createHistorialPuerto = async (embarcacionId, puertoId, fechaLlegad
       puertoId: parseInt(puertoId),
       fechaLlegada: new Date(fechaLlegada),
       fechaSalida: fechaSalida ? new Date(fechaSalida) : null,
+      creadoEn:fecha_creacion,
+      actualizadoEn:fecha_creacion
     },
   });
 
@@ -64,6 +67,8 @@ export const getHistorialById = async (id) => {
 };
 
 export const updateHistorialPuerto = async (id, fechaSalida) => {
+  const todayISO = new Date().toISOString();
+  const fecha_creacion = getUTCTime(todayISO);
   const historialExistente = await prisma.historialPuerto.findUnique({
     where: { id: parseInt(id) },
   });
@@ -76,7 +81,7 @@ export const updateHistorialPuerto = async (id, fechaSalida) => {
     where: { id: parseInt(id) },
     data: {
       fechaSalida: fechaSalida ? new Date(fechaSalida) : null,
-      actualizadoEn: new Date(),
+      actualizadoEn: fecha_creacion
     },
   });
 
