@@ -34,14 +34,12 @@ export const getEmbarcacionById = async (req, res) => {
 
 export const updateEmbarcacion = async (req, res) => {
   const { id } = req.params;
-  const { nombre, datosQrCode, ubicacion, empresaId } = req.body;
+  const { nombre, empresa_id } = req.body;
   try {
     const embarcacion = await EmbarcacionService.updateEmbarcacion(
       id,
       nombre,
-      datosQrCode,
-      ubicacion,
-      empresaId
+      empresa_id
     );
     res.status(200).json(embarcacion);
   } catch (err) {
