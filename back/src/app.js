@@ -20,6 +20,7 @@ import tipoTrabajoRouter from './routes/TipoTrabajoRouter.js';
 import ordenTrabajoUsuarioRouter from './routes/OrdenTrabajoUsuarioRouter.js';
 import ordenTrabajoSistemaRouter from './routes/OrdenTrabajoSistemaRouter.js';
 import parteRouter from './routes/ParteRoute.js';
+import asistenciaRouter from './routes/AsistenciaRoute.js';
 
 const app = express();
 
@@ -51,5 +52,6 @@ app.use("/api/ordenestrabajo", ordenTrabajoRouter);
 app.use("/api/ordenestrabajousuario", ordenTrabajoUsuarioRouter);
 app.use("/api/ordenestrabajosistema", ordenTrabajoSistemaRouter);
 app.use("/api/parte", parteRouter);
+app.use("/api/asistencia", asistenciaRouter);
 
 export default app;
