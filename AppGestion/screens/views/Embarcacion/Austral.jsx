@@ -5,13 +5,14 @@ import {
     TouchableOpacity, 
     StyleSheet, 
     Animated,
-    Dimensions 
+    Dimensions,
+    ScrollView
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 const { width } = Dimensions.get('window');
 
-const Exalmar = ({ route, navigation }) => {
+const Austral = ({ route, navigation }) => {
     const { clase } = route.params || {};
     const fadeAnim = React.useRef(new Animated.Value(0)).current;
     const scaleAnim = React.useRef(new Animated.Value(0.9)).current;
@@ -33,11 +34,14 @@ const Exalmar = ({ route, navigation }) => {
     }, []);
 
     const categories = [
-        { icon: "anchor", text: "Don Alfredo", color: "#00897B", hasSubcategories: true },
-        { icon: "ship-wheel", text: "Caribe", color: "#00897B", hasSubcategories: false },
-        { icon: "anchor", text: "Ancash 2", color: "#00897B", hasSubcategories: false },
-        { icon: "ship-wheel", text: "Carmencita", color: "#00897B", hasSubcategories: false },
-        { icon: "anchor", text: "Creta", color: "#00897B", hasSubcategories: false },
+        { icon: "ferry", text: "Estela De Oro II", color: "#2E7D32", hasSubcategories: true },
+        { icon: "sail-boat", text: "Kiana", color: "#2E7D32", hasSubcategories: false },
+        { icon: "ship-wheel", text: "Marina", color: "#2E7D32", hasSubcategories: false },
+        { icon: "anchor", text: "Piti", color: "#2E7D32", hasSubcategories: false },
+        { icon: "ferry", text: "Resbalosa II", color: "#2E7D32", hasSubcategories: false },
+        { icon: "sail-boat", text: "Simon", color: "#2E7D32", hasSubcategories: false },
+        { icon: "anchor", text: "Estela De Plata II", color: "#2E7D32", hasSubcategories: true },
+        { icon: "lighthouse", text: "Vea", color: "#2E7D32", hasSubcategories: false },
     ];
 
     const handleCategoryPress = (text, hasSubcategories) => {
@@ -64,39 +68,50 @@ const Exalmar = ({ route, navigation }) => {
     };
 
     return (
-        <Animated.View style={[styles.container, { opacity: fadeAnim, transform: [{ scale: scaleAnim }] }]}>
+        <Animated.View 
+            style={[styles.container, { 
+                opacity: fadeAnim, 
+                transform: [{ scale: scaleAnim }] 
+            }]}
+        >
             <View style={styles.header}>
                 <MaterialCommunityIcons name="anchor" size={40} color="#1a237e" style={styles.headerIcon} />
                 <Text style={styles.headerTitle}>Embarcaciones</Text>
                 <Text style={styles.headerSubtitle}>Seleccione para más detalles</Text>
             </View>
 
-            <View style={styles.buttonsContainer}>
-                {categories.map(({ icon, text, color, hasSubcategories }, index) => (
-                    <TouchableOpacity
-                        key={index}
-                        style={[styles.button, { backgroundColor: color }]}
-                        onPress={() => handleCategoryPress(text, hasSubcategories)}
-                        activeOpacity={0.7}
-                    >
-                        <View style={styles.buttonContent}>
-                            <View style={styles.iconContainer}>
-                                <MaterialCommunityIcons name={icon} size={32} color="#fff" />
+            <ScrollView 
+                style={styles.scrollView}
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={styles.scrollContent}
+            >
+                <View style={styles.buttonsContainer}>
+                    {categories.map(({ icon, text, color, hasSubcategories }, index) => (
+                        <TouchableOpacity
+                            key={index}
+                            style={[styles.button, { backgroundColor: color }]}
+                            onPress={() => handleCategoryPress(text, hasSubcategories)}
+                            activeOpacity={0.7}
+                        >
+                            <View style={styles.buttonContent}>
+                                <View style={styles.iconContainer}>
+                                    <MaterialCommunityIcons name={icon} size={32} color="#fff" />
+                                </View>
+                                <View style={styles.textContainer}>
+                                    <Text style={styles.buttonText}>{text}</Text>
+                                    {hasSubcategories && (
+                                        <MaterialCommunityIcons 
+                                            name="chevron-right" 
+                                            size={24} 
+                                            color="#ffffff80" 
+                                        />
+                                    )}
+                                </View>
                             </View>
-                            <View style={styles.textContainer}>
-                                <Text style={styles.buttonText}>{text}</Text>
-                                {hasSubcategories && (
-                                    <MaterialCommunityIcons 
-                                        name="chevron-right" 
-                                        size={24} 
-                                        color="#ffffff80" 
-                                    />
-                                )}
-                            </View>
-                        </View>
-                    </TouchableOpacity>
-                ))}
-            </View>
+                        </TouchableOpacity>
+                    ))}
+                </View>
+            </ScrollView>
         </Animated.View>
     );
 };
@@ -108,7 +123,7 @@ const styles = StyleSheet.create({
     },
     header: {
         alignItems: "center",
-        marginVertical: 30,
+        marginVertical: 20,
         paddingHorizontal: 20,
     },
     headerIcon: {
@@ -124,6 +139,12 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: "#5c6bc0",
         marginTop: 5,
+    },
+    scrollView: {
+        flex: 1,
+    },
+    scrollContent: {
+        paddingBottom: 20,
     },
     buttonsContainer: {
         paddingHorizontal: 16,
@@ -168,4 +189,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default Exalmar;
+export default Austral;
