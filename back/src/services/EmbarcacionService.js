@@ -140,7 +140,7 @@ export const getEmbarcacionById = async (id) => {
  * @param {number} [empresaId] - Nuevo ID de la empresa propietaria.
  * @returns {Promise<Object>} - La embarcación actualizada.
  */
-export const updateEmbarcacion = async (id, nombre, ubicacion, puertoId, empresaId) => {
+export const updateEmbarcacion = async (id, nombre, empresaId) => {
   const todayISO = new Date().toISOString();
   const fecha_actualizacion = getUTCTime(todayISO);
 
@@ -151,13 +151,6 @@ export const updateEmbarcacion = async (id, nombre, ubicacion, puertoId, empresa
 
   if (!embarcacionExistente) {
     throw new Error("La embarcación no existe.");
-  }
-
-  if (puertoId) {
-    const puerto = await prisma.puerto.findUnique({ where: { id: puertoId } });
-    if (!puerto || !puerto.estado) {
-      throw new Error("El puerto no existe o está inactivo.");
-    }
   }
 
   let empresaActual = embarcacionExistente.empresa;
@@ -225,7 +218,6 @@ export const updateEmbarcacion = async (id, nombre, ubicacion, puertoId, empresa
       where: { id_embarcacion: parseInt(id) },
       data: {
         nombre: nombre || embarcacionExistente.nombre,
-        ubicacion: ubicacion || embarcacionExistente.ubicacion,
         empresa_id: empresaId || embarcacionExistente.empresa_id,
         qr_code: qr_code_url,
         actualizado_en: fecha_actualizacion,
