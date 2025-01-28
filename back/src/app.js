@@ -1,6 +1,7 @@
 import express, { json } from 'express';
 import morgan from 'morgan';
 import cors from 'cors';
+import fileUpload from 'express-fileupload';
 
 //Rutas
 import rolRouter from './routes/RolRoute.js';
@@ -23,6 +24,9 @@ app.use(cors({
   }));
 app.use(json());
 app.use(morgan('dev'));
+app.use(fileUpload({
+  useTempFiles: true,
+}));
 
 // Routes
 app.use('/api/rol', rolRouter);

@@ -1,14 +1,11 @@
 import * as EmbarcacionService from "../services/EmbarcacionService.js";
 
 export const createEmbarcacion = async (req, res) => {
-  const { identificadorBarco, nombre, datosQrCode, ubicacion, empresaId } = req.body;
+  const {nombre, empresa_id } = req.body;
   try {
     const embarcacion = await EmbarcacionService.createEmbarcacion(
-      identificadorBarco,
       nombre,
-      datosQrCode,
-      ubicacion,
-      empresaId
+      empresa_id
     );
     res.status(201).json(embarcacion);
   } catch (err) {
