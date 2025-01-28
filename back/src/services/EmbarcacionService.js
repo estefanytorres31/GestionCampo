@@ -48,14 +48,13 @@ export const createEmbarcacion = async (nombre, empresa_id) => {
       margin: 1
     });
 
-    // Crear imagen con QR y texto usando Sharp
     const finalImagePath = path.join(tempDir, `${nombre}_qr_final.png`);
     await sharp(qrPath)
-    .resize(400, 400) // Aseguramos que el QR tenga un tamaño adecuado
+    .resize(400, 400) 
     .extend({
       top: 0,
-      bottom: 120, // Espacio adicional debajo de la imagen para el texto
-      background: { r: 255, g: 255, b: 255 } // Fondo blanco
+      bottom: 120,
+      background: { r: 255, g: 255, b: 255 }
     })
     .composite([{
       input: Buffer.from(`
@@ -68,7 +67,7 @@ export const createEmbarcacion = async (nombre, empresa_id) => {
           </text>
         </svg>
       `),
-      top: 400, // Colocamos el texto debajo de la imagen QR
+      top: 400, 
       left: 0
     }])
     .toFile(finalImagePath);
@@ -108,7 +107,6 @@ export const getAllEmbarcaciones = async () => {
     include: {
       empresa: true,
     },
-    orderBy: { nombre: "asc" },
   });
   return embarcaciones;
 };
@@ -122,7 +120,6 @@ export const getEmbarcacionById = async (id) => {
   const embarcacion = await prisma.embarcacion.findUnique({
     where: { id_embarcacion: parseInt(id) },
     include: {
-      puerto: true,
       empresa: true,
     },
   });
