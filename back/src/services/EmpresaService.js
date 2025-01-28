@@ -1,10 +1,11 @@
-// services/EmpresaService.js
-
 import { PrismaClient } from "@prisma/client";
+import { getPeruTime, getUTCTime } from "../utils/Time.js";
 
 const prisma = new PrismaClient();
 
 export const createEmpresa = async (nombre, razonSocial) => {
+      const todayISO = new Date().toISOString();
+      const fecha_creacion = getUTCTime(todayISO);
   // Verificar si ya existe una empresa con el mismo nombre
   const empresaExistente = await prisma.empresa.findUnique({
     where: { nombre },
@@ -18,7 +19,8 @@ export const createEmpresa = async (nombre, razonSocial) => {
   const empresa = await prisma.empresa.create({
     data: {
       nombre,
-      razonSocial,
+      creadoEn:fecha_creacion,
+      actualizadoEn:fecha_creacion
     },
   });
 
@@ -28,7 +30,6 @@ export const createEmpresa = async (nombre, razonSocial) => {
 export const getAllEmpresas = async () => {
   const empresas = await prisma.empresa.findMany({
     where: { estado: true },
-    orderBy: { nombre: "asc" },
     include: {
       embarcaciones: {
         include: {
@@ -60,6 +61,8 @@ export const getEmpresaById = async (id) => {
 };
 
 export const updateEmpresa = async (id, nombre, razonSocial) => {
+      const todayISO = new Date().toISOString();
+      const fecha_creacion = getUTCTime(todayISO);
   // Verificar si la empresa existe
   const empresaExistente = await prisma.empresa.findUnique({
     where: { id: parseInt(id) },
@@ -74,8 +77,7 @@ export const updateEmpresa = async (id, nombre, razonSocial) => {
     where: { id: parseInt(id) },
     data: {
       nombre,
-      razonSocial,
-      actualizadoEn: new Date(),
+      actualizadoEn:fecha_creacion,
     },
   });
 

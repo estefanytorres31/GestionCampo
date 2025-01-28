@@ -1,8 +1,11 @@
 import { PrismaClient } from "@prisma/client";
+import { getPeruTime, getUTCTime } from "../utils/Time.js";
 
 const prisma = new PrismaClient();
 
 export const createPuerto = async (nombre, ubicacion) => {
+  const todayISO = new Date().toISOString();
+  const fecha_creacion = getUTCTime(todayISO);
   const puertoExistente = await prisma.puerto.findUnique({
     where: { nombre },
   });
@@ -15,6 +18,8 @@ export const createPuerto = async (nombre, ubicacion) => {
     data: {
       nombre,
       ubicacion,
+      creadoEn:fecha_creacion,
+      actualizadoEn:fecha_creacion
     },
   });
 
@@ -42,6 +47,8 @@ export const getPuertoById = async (id) => {
 };
 
 export const updatePuerto = async (id, nombre, ubicacion) => {
+  const todayISO = new Date().toISOString();
+  const fecha_creacion = getUTCTime(todayISO);
   const puertoExistente = await prisma.puerto.findUnique({
     where: { id: parseInt(id) },
   });
@@ -55,7 +62,7 @@ export const updatePuerto = async (id, nombre, ubicacion) => {
     data: {
       nombre,
       ubicacion,
-      actualizadoEn: new Date(),
+      actualizadoEn: fecha_creacion
     },
   });
 

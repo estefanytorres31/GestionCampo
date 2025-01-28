@@ -1,5 +1,4 @@
-// services/EmbarcacionService.js
-
+import { getPeruTime, getUTCTime } from "../utils/Time.js";
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
@@ -15,6 +14,8 @@ const prisma = new PrismaClient();
  * @returns {Promise<Object>} - La embarcación creada.
  */
 export const createEmbarcacion = async (identificadorBarco, nombre, datosQrCode, ubicacion, puertoId, empresaId) => {
+  const todayISO = new Date().toISOString();
+  const fecha_creacion = getUTCTime(todayISO);
   // Verificar si ya existe una embarcación con el mismo identificador
   const embarcacionExistente = await prisma.embarcacion.findUnique({
     where: { identificadorBarco },
@@ -26,7 +27,7 @@ export const createEmbarcacion = async (identificadorBarco, nombre, datosQrCode,
 
   // Verificar si el puerto existe y está activo
   const puerto = await prisma.puerto.findUnique({
-    where: { id: puertoId },
+    where: { id: parseInt(puertoId) },
   });
 
   if (!puerto || !puerto.estado) {
@@ -35,7 +36,7 @@ export const createEmbarcacion = async (identificadorBarco, nombre, datosQrCode,
 
   // Verificar si la empresa existe y está activa
   const empresa = await prisma.empresa.findUnique({
-    where: { id: empresaId },
+    where: { id: parseInt(empresaId) },
   });
 
   if (!empresa || !empresa.estado) {
@@ -51,6 +52,8 @@ export const createEmbarcacion = async (identificadorBarco, nombre, datosQrCode,
       ubicacion,
       puertoId,
       empresaId,
+      creadoEn:fecha_creacion,
+      actualizadoEn:fecha_creacion
     },
   });
 
@@ -104,6 +107,8 @@ export const getEmbarcacionById = async (id) => {
  * @returns {Promise<Object>} - La embarcación actualizada.
  */
 export const updateEmbarcacion = async (id, nombre, ubicacion, puertoId, empresaId) => {
+  const todayISO = new Date().toISOString();
+  const fecha_creacion = getUTCTime(todayISO);
   // Verificar si la embarcación existe
   const embarcacionExistente = await prisma.embarcacion.findUnique({
     where: { id: parseInt(id) },
@@ -137,7 +142,7 @@ export const updateEmbarcacion = async (id, nombre, ubicacion, puertoId, empresa
       ubicacion: ubicacion || embarcacionExistente.ubicacion,
       puertoId: puertoId || embarcacionExistente.puertoId,
       empresaId: empresaId || embarcacionExistente.empresaId,
-      actualizadoEn: new Date(),
+      actualizadoEn: fecha_creacion,
     },
   });
 
