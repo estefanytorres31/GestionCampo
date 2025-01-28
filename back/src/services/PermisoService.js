@@ -5,6 +5,8 @@ const prisma = new PrismaClient();
 
 // Crear un nuevo permiso
 export const createPermiso = async (nombre, descripcion) => {
+    const todayISO = new Date().toISOString();
+    const fecha_creacion = getUTCTime(todayISO);
     if (!nombre) {
         throw new Error("El nombre del permiso es obligatorio.");
     }
@@ -23,6 +25,8 @@ export const createPermiso = async (nombre, descripcion) => {
         data: {
             nombre,
             descripcion,
+            creado_en:fecha_creacion,
+            actualizado_en:fecha_creacion
         },
     });
 
@@ -62,7 +66,9 @@ export const getPermisoById = async (id) => {
 };
 
 // Actualizar un permiso
-export const updatePermiso = async (id, nombre, descripcion, estado) => {
+export const updatePermiso = async (id, nombre, descripcion) => {
+    const todayISO = new Date().toISOString();
+    const fecha_creacion = getUTCTime(todayISO);
     const permisoId = parseInt(id, 10);
 
     if (isNaN(permisoId)) {
@@ -94,7 +100,7 @@ export const updatePermiso = async (id, nombre, descripcion, estado) => {
         data: {
             nombre: nombre || permisoExistente.nombre,
             descripcion: descripcion !== undefined ? descripcion : permisoExistente.descripcion,
-            estado: estado !== undefined ? estado : permisoExistente.estado,
+            actualizado_en:fecha_creacion
         },
     });
 
@@ -103,6 +109,8 @@ export const updatePermiso = async (id, nombre, descripcion, estado) => {
 
 // Eliminar (desactivar) un permiso
 export const deletePermiso = async (id) => {
+    const todayISO = new Date().toISOString();
+    const fecha_creacion = getUTCTime(todayISO);
     const permisoId = parseInt(id, 10);
 
     if (isNaN(permisoId)) {
@@ -121,7 +129,7 @@ export const deletePermiso = async (id) => {
     // Desactivar el permiso
     const permisoDesactivado = await prisma.permiso.update({
         where: { id: permisoId },
-        data: { estado: false },
+        data: { estado: false, actualizado_en:fecha_creacion },
     });
 
     return permisoDesactivado;

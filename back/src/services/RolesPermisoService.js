@@ -5,6 +5,8 @@ const prisma = new PrismaClient();
 
 // Asignar un permiso a un rol
 export const assignPermisoToRol = async (rol_id, permiso_id) => {
+    const todayISO = new Date().toISOString();
+    const fecha_creacion = getUTCTime(todayISO);
     if (isNaN(rol_id) || isNaN(permiso_id)) {
         throw new Error("El ID del rol y del permiso deben ser números válidos.");
     }
@@ -57,6 +59,7 @@ export const assignPermisoToRol = async (rol_id, permiso_id) => {
         data: {
             rol_id: parseInt(rol_id, 10),
             permiso_id: parseInt(permiso_id, 10),
+            creado_en:fecha_creacion
         },
     });
 

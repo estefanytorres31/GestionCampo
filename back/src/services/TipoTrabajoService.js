@@ -5,6 +5,8 @@ const prisma = new PrismaClient();
 
 // Crear o reactivar un TipoTrabajo
 export const createTipoTrabajo = async (nombre_trabajo, descripcion) => {
+    const todayISO = new Date().toISOString();
+    const fecha_creacion = getUTCTime(todayISO);
     if (!nombre_trabajo) {
         throw new Error("El nombre del tipo de trabajo es obligatorio.");
     }
@@ -24,7 +26,7 @@ export const createTipoTrabajo = async (nombre_trabajo, descripcion) => {
                 data: {
                     estado: true,
                     descripcion: descripcion || tipoTrabajoExistente.descripcion,
-                    actualizado_en: new Date(),
+                    actualizado_en: fecha_creacion
                 },
             });
             return tipoTrabajoReactivado;
@@ -36,6 +38,7 @@ export const createTipoTrabajo = async (nombre_trabajo, descripcion) => {
         data: {
             nombre_trabajo,
             descripcion,
+            creado_en:fecha_creacion
         },
     });
 
@@ -75,7 +78,9 @@ export const getTipoTrabajoById = async (id) => {
 };
 
 // Actualizar un TipoTrabajo
-export const updateTipoTrabajo = async (id, nombre_trabajo, descripcion, estado) => {
+export const updateTipoTrabajo = async (id, nombre_trabajo, descripcion) => {
+    const todayISO = new Date().toISOString();
+    const fecha_creacion = getUTCTime(todayISO);
     const tipoTrabajoId = parseInt(id, 10);
 
     if (isNaN(tipoTrabajoId)) {
@@ -107,8 +112,7 @@ export const updateTipoTrabajo = async (id, nombre_trabajo, descripcion, estado)
         data: {
             nombre_trabajo: nombre_trabajo || tipoTrabajoExistente.nombre_trabajo,
             descripcion: descripcion !== undefined ? descripcion : tipoTrabajoExistente.descripcion,
-            estado: estado !== undefined ? estado : tipoTrabajoExistente.estado,
-            actualizado_en: new Date(),
+            actualizado_en: fecha_creacion
         },
     });
 
@@ -117,6 +121,8 @@ export const updateTipoTrabajo = async (id, nombre_trabajo, descripcion, estado)
 
 // Eliminar (desactivar) un TipoTrabajo
 export const deleteTipoTrabajo = async (id) => {
+    const todayISO = new Date().toISOString();
+    const fecha_creacion = getUTCTime(todayISO);
     const tipoTrabajoId = parseInt(id, 10);
 
     if (isNaN(tipoTrabajoId)) {
@@ -135,7 +141,7 @@ export const deleteTipoTrabajo = async (id) => {
     // Desactivar el TipoTrabajo
     const tipoTrabajoDesactivado = await prisma.tipoTrabajo.update({
         where: { id_tipo_trabajo: tipoTrabajoId },
-        data: { estado: false },
+        data: { estado: false, actualizado_en:fecha_creacion },
     });
 
     return tipoTrabajoDesactivado;

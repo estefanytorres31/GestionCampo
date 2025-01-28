@@ -4,9 +4,13 @@ import { getPeruTime, getUTCTime } from "../utils/Time.js";
 const prisma = new PrismaClient();
 
 export const createParte=async(nombre_parte)=>{
+    const todayISO = new Date().toISOString();
+    const fecha_creacion = getUTCTime(todayISO);
     const newParte=await prisma.parte.create({
         data:{
-            nombre:nombre_parte
+            nombre:nombre_parte,
+            creado_en:fecha_creacion,
+            actualizado_en:fecha_creacion
         }
     });
     return newParte;
@@ -32,13 +36,16 @@ export const getParteById=async(id_parte)=>{
 }
 
 export const updateParte=async(id_parte,nombre_parte)=>{
+    const todayISO = new Date().toISOString();
+    const fecha_creacion = getUTCTime(todayISO);
     const updatedParte=await prisma.parte.update({
         where:{
             id_parte:parseInt(id_parte),
             estado:true
         },
         data:{
-            nombre:nombre_parte
+            nombre:nombre_parte,
+            actualizado_en:fecha_creacion
         }
     });
     return updatedParte;
@@ -46,13 +53,16 @@ export const updateParte=async(id_parte,nombre_parte)=>{
 
 
 export const deleteParte=async(id_parte)=>{
+    const todayISO = new Date().toISOString();
+    const fecha_creacion = getUTCTime(todayISO);
     await prisma.parte.update({
         where:{
             id_parte:parseInt(id_parte),
             estado:true
         },
         data:{
-            estado:false
+            estado:false,
+            actualizado_en:fecha_creacion
         }
     });
 }

@@ -44,10 +44,10 @@ export const getTipoTrabajoById = async (req, res) => {
 // Actualizar un TipoTrabajo
 export const updateTipoTrabajo = async (req, res) => {
     const { id } = req.params;
-    const { nombre_trabajo, descripcion, estado } = req.body;
+    const { nombre_trabajo, descripcion } = req.body;
 
     try {
-        const tipoTrabajo = await TipoTrabajoService.updateTipoTrabajo(id, nombre_trabajo, descripcion, estado);
+        const tipoTrabajo = await TipoTrabajoService.updateTipoTrabajo(id, nombre_trabajo, descripcion);
         res.status(200).json({ message: "Tipo de trabajo actualizado exitosamente.", data: tipoTrabajo });
     } catch (error) {
         res.status(400).json({ message: error.message });
