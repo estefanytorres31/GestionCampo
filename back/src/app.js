@@ -15,6 +15,8 @@ import embarcacionRouter from './routes/EmbarcacionRoute.js';
 import permisoRouter from './routes/PermisoRoute.js';
 import rolesPermisoRouter from './routes/RolesPermisoRouter.js';
 import embarcacionSistemaRouter from './routes/EmbarcacionSistemaRouter.js';
+import ordenTrabajoRouter from './routes/OrdenTrabajoRouter.js';
+import tipoTrabajoRouter from './routes/TipoTrabajoRouter.js';
 
 const app = express();
 
@@ -39,5 +41,7 @@ app.use('/api/embarcacion', embarcacionRouter);
 app.use('/api/permiso', permisoRouter);
 app.use('/api/rolespermisos', rolesPermisoRouter);
 app.use("/api/embarcacionsistemas", embarcacionSistemaRouter);
+app.use("/api/tipotrabajo", tipoTrabajoRouter);
+app.use("/api/ordenestrabajo", ordenTrabajoRouter);
 
 export default app;
