@@ -4,15 +4,14 @@ import { getPeruTime, getUTCTime } from "../utils/Time.js";
 const prisma = new PrismaClient();
 
 
-export const createSistema=async(nombre_sistema,descripcion,)=>{
+export const createSistema=async(nombre_sistema)=>{
     const todayISO = new Date().toISOString();
     const fecha_creacion = getUTCTime(todayISO);
     const nuevoSistema=await prisma.sistema.create({
         data:{
-            nombreSistema:nombre_sistema,
-            descripcion:descripcion,
-            creadoEn:fecha_creacion,
-            actualizadoEn:fecha_creacion,
+            nombre_sistema:nombre_sistema,
+            creado_en:fecha_creacion,
+            actualizado_en:fecha_creacion,
         }
     });
     return nuevoSistema;

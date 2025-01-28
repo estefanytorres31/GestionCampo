@@ -1,9 +1,9 @@
 import * as SistemaService from "../services/SistemaService.js";
 
 export const createSistema=async(req, res)=>{
-    const {nombre_sistema, descripcion} = req.body;
+    const {nombre_sistema} = req.body;
     try{
-        const sistema = await SistemaService.createSistema(nombre_sistema, descripcion);
+        const sistema = await SistemaService.createSistema(nombre_sistema);
         res.status(201).json(sistema);
     }catch(e){
         res.status(500).json({error: e.message});
