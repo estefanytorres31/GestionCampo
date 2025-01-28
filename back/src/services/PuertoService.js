@@ -3,107 +3,162 @@ import { getUTCTime } from "../utils/Time.js";
 
 const prisma = new PrismaClient();
 
-// Crear un nuevo puerto
+/**
+ * Crear un nuevo puerto.
+ * @param {string} nombre - Nombre del puerto.
+ * @param {string} [ubicacion] - Ubicación del puerto.
+ * @returns {Promise<Object>} - Objeto del puerto creado.
+ * @throws {Error} - Si ocurre un error durante la creación.
+ */
 export const createPuerto = async (nombre, ubicacion) => {
     try {
         const todayISO = new Date().toISOString();
         const fecha_creacion = getUTCTime(todayISO);
 
+        // Verificar si el nombre ya existe
+        const puertoExistente = await prisma.puerto.findUnique({
+            where: { nombre },
+        });
+
+        if (puertoExistente) {
+            const error = new Error("El nombre del puerto ya está en uso.");
+            error.code = "DUPLICATE_NOMBRE";
+            throw error;
+        }
+
         const nuevoPuerto = await prisma.puerto.create({
             data: {
-                nombre: nombre,
-                ubicacion: ubicacion,
+                nombre,
+                ubicacion,
                 creado_en: fecha_creacion,
                 actualizado_en: fecha_creacion,
             },
         });
 
-        return { status: 201, message: "Puerto creado exitosamente", data: nuevoPuerto };
+        return nuevoPuerto;
     } catch (error) {
-        return { status: 500, message: "Error al crear el puerto", error: error.message };
+        throw error;
     }
 };
 
-// Obtener todos los puertos
+/**
+ * Obtener todos los puertos activos.
+ * @returns {Promise<Array>} - Lista de puertos.
+ * @throws {Error} - Si ocurre un error durante la consulta.
+ */
 export const getAllPuertos = async () => {
     try {
         const puertos = await prisma.puerto.findMany({
-            where: {
-                estado: true, // Solo devuelve los puertos activos
-            },
-            orderBy: {
-                creado_en: "desc", // Orden descendente por fecha de creación
-            },
+            where: { estado: true },
+            orderBy: { creado_en: "desc" },
         });
 
-        return { status: 200, message: "Puertos obtenidos exitosamente", data: puertos };
+        return puertos;
     } catch (error) {
-        return { status: 500, message: "Error al obtener los puertos", error: error.message };
+        throw error;
     }
 };
 
-// Obtener un puerto por su ID
+/**
+ * Obtener un puerto por su ID.
+ * @param {number} id - ID del puerto.
+ * @returns {Promise<Object>} - Objeto del puerto.
+ * @throws {Error} - Si el puerto no se encuentra o está inactivo.
+ */
 export const getPuertoById = async (id) => {
     try {
         const puerto = await prisma.puerto.findUnique({
-            where: {
-                id_puerto: parseInt(id),
-            },
+            where: { id_puerto: id },
         });
 
-        if (!puerto || puerto.estado !== true) {
-            return { status: 404, message: "Puerto no encontrado o inactivo" };
+        if (!puerto || !puerto.estado) {
+            const error = new Error("Puerto no encontrado o inactivo.");
+            error.code = "NOT_FOUND";
+            throw error;
         }
 
-        return { status: 200, message: "Puerto obtenido exitosamente", data: puerto };
+        return puerto;
     } catch (error) {
-        return { status: 500, message: "Error al obtener el puerto", error: error.message };
+        throw error;
     }
 };
 
-// Actualizar un puerto
+/**
+ * Actualizar un puerto existente.
+ * @param {number} id - ID del puerto.
+ * @param {string} nombre - Nuevo nombre del puerto.
+ * @param {string} [ubicacion] - Nueva ubicación del puerto.
+ * @returns {Promise<Object>} - Objeto del puerto actualizado.
+ * @throws {Error} - Si el puerto no se encuentra o el nombre ya está en uso.
+ */
 export const updatePuerto = async (id, nombre, ubicacion) => {
     try {
+        // Verificar si el puerto existe
+        const puertoExistente = await prisma.puerto.findUnique({
+            where: { id_puerto: id },
+        });
+
+        if (!puertoExistente || !puertoExistente.estado) {
+            const error = new Error("Puerto no encontrado o inactivo.");
+            error.code = "NOT_FOUND";
+            throw error;
+        }
+
+        // Verificar si el nuevo nombre está en uso por otro puerto
+        const puertoNombre = await prisma.puerto.findUnique({
+            where: { nombre },
+        });
+
+        if (puertoNombre && puertoNombre.id_puerto !== id) {
+            const error = new Error("El nombre del puerto ya está en uso.");
+            error.code = "DUPLICATE_NOMBRE";
+            throw error;
+        }
+
         const todayISO = new Date().toISOString();
         const fecha_actualizacion = getUTCTime(todayISO);
 
         const puertoActualizado = await prisma.puerto.update({
-            where: {
-                id_puerto: parseInt(id),
-            },
+            where: { id_puerto: id },
             data: {
-                nombre: nombre,
-                ubicacion: ubicacion,
+                nombre,
+                ubicacion,
                 actualizado_en: fecha_actualizacion,
             },
         });
 
-        return { status: 200, message: "Puerto actualizado exitosamente", data: puertoActualizado };
+        return puertoActualizado;
     } catch (error) {
-        if (error.code === "P2025") {
-            return { status: 404, message: "Puerto no encontrado para actualizar" };
-        }
-        return { status: 500, message: "Error al actualizar el puerto", error: error.message };
+        throw error;
     }
 };
 
-// Eliminar (desactivar) un puerto
+/**
+ * Desactivar (eliminar) un puerto.
+ * @param {number} id - ID del puerto.
+ * @returns {Promise<Object>} - Objeto del puerto desactivado.
+ * @throws {Error} - Si el puerto no se encuentra.
+ */
 export const deletePuerto = async (id) => {
     try {
-        const puertoDesactivado = await prisma.puerto.update({
-            where: {
-                id_puerto: parseInt(id),
-            },
-            data: {
-                estado: false, // Cambia el estado a inactivo
-            },
+        // Verificar si el puerto existe
+        const puertoExistente = await prisma.puerto.findUnique({
+            where: { id_puerto: id },
         });
 
-        return { status: 200, message: "Puerto desactivado exitosamente", data: puertoDesactivado };
-    } catch (error) {
-        if (error.code === "P2025") {
-            return { status: 404, message: "Puerto no encontrado para desactivar" };
+        if (!puertoExistente || !puertoExistente.estado) {
+            const error = new Error("Puerto no encontrado o ya está desactivado.");
+            error.code = "NOT_FOUND";
+            throw error;
         }
-        return { status: 500, message: "Error al desactivar el puerto", error: error.message };
+
+        const puertoDesactivado = await prisma.puerto.update({
+            where: { id_puerto: id },
+            data: { estado: false },
+        });
+
+        return puertoDesactivado;
+    } catch (error) {
+        throw error;
     }
 };

@@ -9,10 +9,11 @@ import { Router } from "express";
 
 const puertoRouter = Router();
 
-puertoRouter.post("/", createPuerto);
-puertoRouter.get("/", getAllPuertos);
-puertoRouter.get("/:id", getPuertoById);
-puertoRouter.put("/:id", updatePuerto);
-puertoRouter.delete("/:id", deletePuerto);
+// Rutas de la API de puertos
+puertoRouter.post("/", createPuerto); // Crear puerto
+puertoRouter.get("/", getAllPuertos); // Obtener todos los puertos
+puertoRouter.get("/:id", getPuertoById); // Obtener puerto por ID
+puertoRouter.put("/:id", updatePuerto); // Actualizar puerto
+puertoRouter.delete("/:id", deletePuerto); // Desactivar puerto
 
 export default puertoRouter;
