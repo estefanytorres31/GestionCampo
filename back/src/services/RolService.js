@@ -67,7 +67,7 @@ export const eliminarRol=async(id)=>{
 }
 
 export const getRolById=async(id)=>{
-    const rol=await prisma.rol.findOne({
+    const rol=await prisma.rol.findUnique({
         where:{
             id:parseInt(id),
             estado:true
