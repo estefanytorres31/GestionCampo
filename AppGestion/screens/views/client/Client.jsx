@@ -4,10 +4,13 @@ import { Ionicons } from "@expo/vector-icons"
 import { LinearGradient } from "expo-linear-gradient"
 import { useFocusEffect } from '@react-navigation/native'
 import useAuth from '../../hooks/Auth/useAuth'
+import AsyncStorage from "@react-native-async-storage/async-storage"
 
 const { height } = Dimensions.get('window')
 
 const ClientScreen = () => {
+    console.log(AsyncStorage.getItem('userId'))
+   
     // Asegurémonos de que useAuth está retornando un objeto con handleLogout
     const auth = useAuth();
 

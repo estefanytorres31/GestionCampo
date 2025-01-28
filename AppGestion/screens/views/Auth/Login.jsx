@@ -34,7 +34,7 @@ const LoginScreen = () => {
   });
   const [alertVisible, setAlertVisible] = useState(false);
 
-  const validateInputs = () => {
+ /* const validateInputs = () => {
     if (!credentials.username.trim() || !credentials.password.trim()) {
       setAlertConfig({
         type: 'INFO',
@@ -45,25 +45,30 @@ const LoginScreen = () => {
       return false;
     }
     return true;
-  };
+  };*/
 
   const handleLogin = async () => {
-    if (!validateInputs()) return;
-
+    const { username, password } = credentials;
+  if (!username || !password) {
+    setAlertConfig({
+      type: 'INFO',
+      title: 'Campos vacíos',
+      message: 'Por favor, completa todos los campos.',
+    });
+    setAlertVisible(true);
+    //shakeAnimation();
+    return;
+  }
     try {
       setIsLoading(true);
-      setError("");
-      
-      const result = await loginAccess(credentials.username, credentials.password);
-      console.log(credentials.username, credentials.password);
-      
-      if (result?.status === 200) {
+      const result = await loginAccess(username, password);
+      if (result.status === 200 && result.data?.token) {
+          navigation.navigate('Clientes');
       } else {
-        const errorMessage = result?.data?.message || 'Usuario o contraseña incorrectos.';
         setAlertConfig({
           type: 'ERROR',
-          title: 'Error al iniciar sesión',
-          message: errorMessage
+          title: 'Inicio de sesión fallido',
+          message: 'Usuario o contraseña incorrectos.',
         });
         setAlertVisible(true);
       }
@@ -113,7 +118,7 @@ const LoginScreen = () => {
               placeholder="Username"
               style={styles.input}
               placeholderTextColor="#143168"
-              value={credentials.username}
+              //value={credentials.username}
               onChangeText={(text) => {
                 setError("");
                 setCredentials({ ...credentials, username: text });
@@ -130,7 +135,7 @@ const LoginScreen = () => {
               secureTextEntry={!showPassword}
               style={styles.input}
               placeholderTextColor="#143168"
-              value={credentials.password}
+              //value={credentials.password}
               onChangeText={(text) => {
                 setError("");
                 setCredentials({ ...credentials, password: text });
