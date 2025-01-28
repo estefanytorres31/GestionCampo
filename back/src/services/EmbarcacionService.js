@@ -1,7 +1,7 @@
 import { getPeruTime, getUTCTime } from "../utils/Time.js";
 import { PrismaClient } from "@prisma/client";
 import QRCode from "qrcode";
-import fs from 'fs-extra';  // Importa fs-extra en lugar de fs
+import fs from 'fs-extra'; 
 import path from "path";
 import sharp from "sharp";
 import { uploadQR } from "../utils/Cloudinary.js";
