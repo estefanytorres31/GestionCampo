@@ -1,6 +1,6 @@
 import {
     getParteById,
-    getPartes,
+    getAllPartes,
     createParte,
     deleteParte,
     updateParte
@@ -9,7 +9,7 @@ import { Router } from "express";
 
 const parteRouter = Router();
 
-parteRouter.get('/', getPartes);
+parteRouter.get('/', getAllPartes);
 parteRouter.get('/:id', getParteById);
 parteRouter.post('/', createParte);
 parteRouter.delete('/:id', deleteParte);
