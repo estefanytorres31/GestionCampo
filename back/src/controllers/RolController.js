@@ -6,11 +6,19 @@ export const createRol = async (req, res) => {
 
     try {
         const rol = await RolService.createRol(nombre_rol, descripcion);
-        res.status(201).json({ message: "Rol creado exitosamente.", data: rol });
+        // Determinar si se creó un nuevo rol o se reactivó uno existente
+        const mensaje = rol.estado ? 
+            (rol.creado_en === rol.actualizado_en ? 
+                "Rol creado exitosamente." : 
+                "Rol reactivado exitosamente.") 
+            : "Rol creado exitosamente.";
+
+        res.status(201).json({ message: mensaje, data: rol });
     } catch (error) {
         res.status(400).json({ message: error.message });
     }
 };
+
 
 // Obtener todos los roles
 export const getAllRoles = async (req, res) => {

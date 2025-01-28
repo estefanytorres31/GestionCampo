@@ -1,61 +1,67 @@
 import * as SistemaService from "../services/SistemaService.js";
 
-export const createSistema=async(req, res)=>{
-    const {nombre_sistema, descripcion} = req.body;
-    try{
+// Crear o reactivar un sistema
+export const createSistema = async (req, res) => {
+    const { nombre_sistema, descripcion } = req.body;
+
+    try {
         const sistema = await SistemaService.createSistema(nombre_sistema, descripcion);
-        res.status(201).json(sistema);
-    }catch(e){
-        res.status(500).json({error: e.message});
+        // Determinar si se creó un nuevo sistema o se reactivó uno existente
+        const mensaje = sistema.estado ?
+            (sistema.creado_en.getTime() === sistema.actualizado_en.getTime() ?
+                "Sistema creado exitosamente." :
+                "Sistema reactivado exitosamente.") :
+            "Sistema creado exitosamente.";
+
+        res.status(201).json({ message: mensaje, data: sistema });
+    } catch (error) {
+        res.status(400).json({ message: error.message });
     }
+};
 
-}
-
-export const getSistemas=async(req, res)=>{
-    try{
+// Obtener todos los sistemas
+export const getAllSistemas = async (req, res) => {
+    try {
         const sistemas = await SistemaService.getAllSistemas();
-        res.json(sistemas);
-    }catch(e){
-        res.status(500).json({error: e.message});
+        res.status(200).json({ message: "Sistemas obtenidos exitosamente.", data: sistemas });
+    } catch (error) {
+        res.status(404).json({ message: error.message });
     }
-}
+};
 
-export const getSistemaById=async(req,res)=>{
-    const {id} = req.params;
-    try{
+// Obtener un sistema por su ID
+export const getSistemaById = async (req, res) => {
+    const { id } = req.params;
+
+    try {
         const sistema = await SistemaService.getSistemaById(id);
-        if(!sistema){
-            return res.status(404).json({error: "Sistema no encontrado"});
-        }
-        res.json(sistema);
-    }catch(e){
-        res.status(500).json({error: e.message});
+        res.status(200).json({ message: "Sistema obtenido exitosamente.", data: sistema });
+    } catch (error) {
+        res.status(404).json({ message: error.message });
     }
-}
+};
 
-export const updateSistema=async(req,res)=>{
-    const {id} = req.params;
-    const {nombre_sistema, descripcion} = req.body;
-    try{
-        const updatedSistema = await SistemaService.updateSistema(id, nombre_sistema, descripcion);
-        if(!updatedSistema){
-            return res.status(404).json({error: "Sistema no encontrado"});
-        }
-        res.json(updatedSistema);
-    }catch(e){
-        res.status(500).json({error: e.message});
-    }
-}
+// Actualizar un sistema
+export const updateSistema = async (req, res) => {
+    const { id } = req.params;
+    const { nombre_sistema, descripcion, estado } = req.body;
 
-export const deleteSistema=async(req,res)=>{
-    const {id} = req.params;
-    try{
-        const deletedSistema = await SistemaService.deleteSistema(id);
-        if(!deletedSistema){
-            return res.status(404).json({error: "Sistema no encontrado"});
-        }
-        res.json({message:'Sistema eliminado'});
-    }catch(e){
-        res.status(500).json({error: e.message});
+    try {
+        const sistema = await SistemaService.updateSistema(id, nombre_sistema, descripcion, estado);
+        res.status(200).json({ message: "Sistema actualizado exitosamente.", data: sistema });
+    } catch (error) {
+        res.status(400).json({ message: error.message });
     }
-}
+};
+
+// Eliminar (desactivar) un sistema
+export const deleteSistema = async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const sistema = await SistemaService.deleteSistema(id);
+        res.status(200).json({ message: "Sistema desactivado exitosamente.", data: sistema });
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+};

@@ -166,10 +166,10 @@ model HistorialPuerto {
   @@map("historial_puertos")
 }
 
-
 model Sistema {
   id_sistema          Int                  @id @default(autoincrement()) @map("id_sistema")
   nombre_sistema      String               @unique @map("nombre_sistema")
+  descripcion         String?
   estado              Boolean              @default(true) @map("estado")
   creado_en           DateTime             @default(now()) @map("creado_en")
   actualizado_en      DateTime             @updatedAt @map("actualizado_en")
@@ -178,6 +178,7 @@ model Sistema {
   orden_trabajo_sistemas OrdenTrabajoSistema[]
 
   @@map("sistema")
+  @@index([estado], name: "idx_sistema_estado")
 }
 
 model Parte {
@@ -211,7 +212,6 @@ model Tarea {
   @@map("tarea")
 }
 
-
 model EmbarcacionSistema {
   id_embarcacion_sistema Int           @id @default(autoincrement()) @map("id_embarcacion_sistema")
   id_embarcacion        Int           @map("id_embarcacion")
@@ -225,6 +225,9 @@ model EmbarcacionSistema {
 
   @@unique([id_embarcacion, id_sistema], name: "embarcacion_sistema_unique")
   @@map("embarcacion_sistema")
+  @@index([id_embarcacion], name: "idx_embarcacion_sistema_embarcacion_id")
+  @@index([id_sistema], name: "idx_embarcacion_sistema_sistema_id")
+  @@index([estado_sistema], name: "idx_embarcacion_sistema_estado_sistema")
 }
 
 model TipoTrabajo {

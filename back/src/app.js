@@ -13,6 +13,8 @@ import empresaEmbarcacionRouter from './routes/EmpresaEmbarcacionRoute.js';
 import historialPuertoRouter from './routes/HistorialPuertoRoute.js';
 import embarcacionRouter from './routes/EmbarcacionRoute.js';
 import permisoRouter from './routes/PermisoRoute.js';
+import rolesPermisoRouter from './routes/RolesPermisoRouter.js';
+import embarcacionSistemaRouter from './routes/EmbarcacionSistemaRouter.js';
 
 const app = express();
 
@@ -35,5 +37,7 @@ app.use('/api/empresa-embarcacion', empresaEmbarcacionRouter);
 app.use('/api/historialpuerto', historialPuertoRouter);
 app.use('/api/embarcacion', embarcacionRouter);
 app.use('/api/permiso', permisoRouter);
+app.use('/api/rolespermisos', rolesPermisoRouter);
+app.use("/api/embarcacionsistemas", embarcacionSistemaRouter);
 
 export default app;

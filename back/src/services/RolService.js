@@ -9,14 +9,32 @@ export const createRol = async (nombre_rol, descripcion) => {
         throw new Error("El nombre del rol es obligatorio.");
     }
 
+    // Buscar si el rol ya existe
     const rolExistente = await prisma.rol.findUnique({
         where: { nombre_rol },
     });
 
     if (rolExistente) {
-        throw new Error(`El rol con el nombre "${nombre_rol}" ya existe.`);
+        if (rolExistente.estado) {
+            throw new Error(`El rol con el nombre "${nombre_rol}" ya existe y está activo.`);
+        } else {
+            // Reactivar el rol existente
+            const fecha_actualizacion = getUTCTime(new Date().toISOString());
+
+            const rolReactivado = await prisma.rol.update({
+                where: { id: rolExistente.id },
+                data: {
+                    estado: true,
+                    descripcion: descripcion || rolExistente.descripcion,
+                    actualizado_en: fecha_actualizacion,
+                },
+            });
+
+            return rolReactivado;
+        }
     }
 
+    // Crear un nuevo rol si no existe
     const todayISO = new Date().toISOString();
     const fecha_creacion = getUTCTime(todayISO);
 
