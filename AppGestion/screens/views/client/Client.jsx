@@ -1,12 +1,17 @@
 import React from "react"
-import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView, Dimensions } from "react-native"
+import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView, Dimensions, BackHandler } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 import { LinearGradient } from "expo-linear-gradient"
+import { useFocusEffect } from '@react-navigation/native'
+import useAuth from '../../hooks/Auth/useAuth'
 
 const { height } = Dimensions.get('window')
 
 const ClientScreen = () => {
-    const { handleLogout } = useAuth();
+    // Asegurémonos de que useAuth está retornando un objeto con handleLogout
+    const auth = useAuth();
+
+    
     useFocusEffect(
         React.useCallback(() => {
             const onBackPress = () => {
@@ -21,14 +26,23 @@ const ClientScreen = () => {
             };
         }, [])
     );
-    const Logout = () => {
-        try{
-            handleLogout();
-        }catch(e){
-            console.error("Error al cerrar sesión", e);
+
+    const Logout = async () => {
+        try {
+            // Verificamos que auth y handleLogout existan
+            if (auth && auth.handleLogout) {
+                await auth.handleLogout();
+            } else {
+                console.error("handleLogout no está disponible");
+            }
+            navigation.reset({
+                index: 0,
+                routes: [{ name: 'Login' }],
+            });
+        } catch (e) {
+            console.error("Error al cerrar sesión:", e);
         }
     };
-    
 
     return (
         <SafeAreaView style={styles.safeArea}>

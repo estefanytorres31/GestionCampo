@@ -1,5 +1,4 @@
-import apiClient from "../API/AxiosConfig";
-
+import apiClient from "../API/apiClient";
 export const getUserById=async(id)=>{
     try{
         const response=await apiClient.get(`/usuario/${id}`)
