@@ -1,52 +1,61 @@
-import * as PermisoService from "../services/PermisosService.js";
+// src/controllers/PermisoController.js
+import * as PermisoService from "../services/PermisoService.js";
 
+// Crear un nuevo permiso
 export const createPermiso = async (req, res) => {
-  const { nombre, descripcion, estado } = req.body;
-  try {
-    const nuevoPermiso = await PermisoService.createPermiso({ nombre, descripcion, estado });
-    res.status(201).json(nuevoPermiso);
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
+    const { nombre, descripcion } = req.body;
+
+    try {
+        const permiso = await PermisoService.createPermiso(nombre, descripcion);
+        res.status(201).json({ message: "Permiso creado exitosamente.", data: permiso });
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
 };
 
-export const obtenerTodosLosPermisos = async (req, res) => {
-  try {
-    const permisos = await PermisoService.obtenerTodosLosPermisos();
-    res.json(permisos);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
+// Obtener todos los permisos
+export const getAllPermisos = async (req, res) => {
+    try {
+        const permisos = await PermisoService.getAllPermisos();
+        res.status(200).json({ message: "Permisos obtenidos exitosamente.", data: permisos });
+    } catch (error) {
+        res.status(404).json({ message: error.message });
+    }
 };
 
-export const actualizarPermiso = async (req, res) => {
-  const { id } = req.params;
-  const { nombre, descripcion, estado } = req.body;
-  try {
-    const permisoActualizado = await PermisoService.actualizarPermiso(id, { nombre, descripcion, estado });
-    res.json(permisoActualizado);
-  } catch (error) {
-    res.status(404).json({ message: error.message });
-  }
-};
-
-export const eliminarPermiso = async (req, res) => {
-  const { id } = req.params;
-  try {
-    await PermisoService.eliminarPermiso(id);
-    res.status(204).end();
-  } catch (error) {
-    res.status(404).json({ message: error.message });
-  }
-};
-
+// Obtener un permiso por su ID
 export const getPermisoById = async (req, res) => {
-  const { id } = req.params;
-  try {
-    const permiso = await PermisoService.getPermisoById(id);
-    if (!permiso) return res.status(404).json({ message: "Permiso no encontrado" });
-    res.json(permiso);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
+    const { id } = req.params;
+
+    try {
+        const permiso = await PermisoService.getPermisoById(id);
+        res.status(200).json({ message: "Permiso obtenido exitosamente.", data: permiso });
+    } catch (error) {
+        res.status(404).json({ message: error.message });
+    }
+};
+
+// Actualizar un permiso
+export const updatePermiso = async (req, res) => {
+    const { id } = req.params;
+    const { nombre, descripcion, estado } = req.body;
+
+    try {
+        const permiso = await PermisoService.updatePermiso(id, nombre, descripcion, estado);
+        res.status(200).json({ message: "Permiso actualizado exitosamente.", data: permiso });
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+};
+
+// Eliminar (desactivar) un permiso
+export const deletePermiso = async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const permiso = await PermisoService.deletePermiso(id);
+        res.status(200).json({ message: "Permiso desactivado exitosamente.", data: permiso });
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
 };

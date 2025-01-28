@@ -1,18 +1,19 @@
-import{
-    getSistemas,
-    getSistemaById,
+import {
     createSistema,
+    getAllSistemas,
+    getSistemaById,
+    updateSistema,
     deleteSistema,
-    updateSistema
-} from "../controllers/SistemaController.js"
-import {Router} from "express"
+} from "../controllers/SistemaController.js";
+import { Router } from "express";
 
-const sistemaRouter = Router()
+const sistemaRouter = Router();
 
-sistemaRouter.get('/', getSistemas)
-sistemaRouter.get('/:id', getSistemaById)
-sistemaRouter.post('/', createSistema)
-sistemaRouter.delete('/:id', deleteSistema)
-sistemaRouter.put('/:id', updateSistema)
+// Definir las rutas
+sistemaRouter.post("/", createSistema);
+sistemaRouter.get("/", getAllSistemas);
+sistemaRouter.get("/:id", getSistemaById);
+sistemaRouter.put("/:id", updateSistema);
+sistemaRouter.delete("/:id", deleteSistema);
 
-export default sistemaRouter
+export default sistemaRouter;
