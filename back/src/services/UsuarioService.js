@@ -120,7 +120,15 @@ export const updateUser = async (id, nombre_usuario, nombre_completo, email) => 
         },
     });
 
-    return updatedUser;
+    const usuario={
+        id:updatedUser.id,
+        nombre_usuario:updatedUser.nombre_usuario,
+        nombre_completo:updatedUser.nombre_completo,
+        email:updatedUser.email,
+        creado_en:updatedUser.creado_en,
+        actualizado_en: updatedUser.actualizado_en,
+    }
+    return usuario;
 };
 
 // Eliminar (desactivar) un usuario

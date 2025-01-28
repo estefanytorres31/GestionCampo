@@ -174,7 +174,6 @@ model Sistema {
   estado              Boolean              @default(true) @map("estado")
   creado_en           DateTime             @default(now()) @map("creado_en")
   actualizado_en      DateTime             @updatedAt @map("actualizado_en")
-  partes              Parte[]
   embarcacion_sistemas EmbarcacionSistema[]
   orden_trabajo_sistemas OrdenTrabajoSistema[]
 
@@ -184,33 +183,13 @@ model Sistema {
 
 model Parte {
   id_parte        Int       @id @default(autoincrement()) @map("id_parte")
-  id_sistema      Int       @map("id_sistema")
   nombre_parte    String    @map("nombre_parte")
   estado          Boolean   @default(true) @map("estado")
   creado_en       DateTime  @default(now()) @map("creado_en")
   actualizado_en  DateTime  @updatedAt @map("actualizado_en")
-  sistema         Sistema   @relation(fields: [id_sistema], references: [id_sistema], onDelete: NoAction, onUpdate: Cascade)
-  tareas          Tarea[]
   orden_trabajo_parte OrdenTrabajoParte[]
 
-  @@unique([id_sistema, nombre_parte], name: "parte_unique")
   @@map("parte")
-}
-
-model Tarea {
-  id_tarea          Int                  @id @default(autoincrement()) @map("id_tarea")
-  id_parte          Int                  @map("id_parte")
-  descripcion       String               @map("descripcion")
-  duracion_estimada Int?                 @map("duracion_estimada")
-  prioridad         Prioridad            @default(media) @map("prioridad")
-  estado            Boolean              @default(true) @map("estado")
-  creado_en         DateTime             @default(now()) @map("creado_en")
-  actualizado_en    DateTime             @updatedAt @map("actualizado_en")
-  parte             Parte                @relation(fields: [id_parte], references: [id_parte], onDelete: NoAction, onUpdate: Cascade)
-  orden_trabajo_tareas OrdenTrabajoTarea[]
-  tarea_realizada   TareaRealizada[]     // Relación inversa
-
-  @@map("tarea")
 }
 
 model EmbarcacionSistema {
@@ -302,7 +281,6 @@ model OrdenTrabajoSistema {
   sistema                 Sistema              @relation(fields: [id_sistema], references: [id_sistema], onDelete: NoAction, onUpdate: Cascade)
   embarcacion_sistema     EmbarcacionSistema  @relation(fields: [id_embarcacion_sistema], references: [id_embarcacion_sistema], onDelete: NoAction, onUpdate: Cascade)
   orden_trabajo_parte     OrdenTrabajoParte[]
-  orden_trabajo_tareas    OrdenTrabajoTarea[] @relation("SistemaToTareas") // Relación nombrada
 
   @@unique([id_orden_trabajo, id_sistema], name: "orden_trabajo_sistema_unique")
   @@map("orden_trabajo_sistema")
@@ -326,41 +304,22 @@ model OrdenTrabajoParte {
   actualizado_en         DateTime           @updatedAt @map("actualizado_en")
   orden_trabajo_sistema  OrdenTrabajoSistema @relation(fields: [id_orden_trabajo_sistema], references: [id_orden_trabajo_sistema], onDelete: NoAction, onUpdate: Cascade)
   parte                   Parte              @relation(fields: [id_parte], references: [id_parte], onDelete: NoAction, onUpdate: Cascade)
-  orden_trabajo_tareas    OrdenTrabajoTarea[]
+  
 
   @@unique([id_orden_trabajo_sistema, id_parte], name: "orden_trabajo_parte_unique")
   @@map("orden_trabajo_parte")
 }
 
-model OrdenTrabajoTarea {
-  id_orden_trabajo_tarea Int              @id @default(autoincrement()) @map("id_orden_trabajo_tarea")
-  id_orden_trabajo_parte Int              @map("id_orden_trabajo_parte")
-  id_tarea              Int              @map("id_tarea")
-  id_sistema            Int?             @map("id_sistema") // Relación opcional con sistema
-  estado                EstadoOrdenTrabajo @default(pendiente) @map("estado")
-  creado_en             DateTime         @default(now()) @map("creado_en")
-  actualizado_en        DateTime         @updatedAt @map("actualizado_en")
-  orden_trabajo_parte   OrdenTrabajoParte @relation(fields: [id_orden_trabajo_parte], references: [id_orden_trabajo_parte], onDelete: NoAction, onUpdate: Cascade)
-  tarea                 Tarea            @relation(fields: [id_tarea], references: [id_tarea], onDelete: NoAction, onUpdate: Cascade)
-  tarea_realizada       TareaRealizada[]
-  orden_trabajo_sistema OrdenTrabajoSistema? @relation("SistemaToTareas", fields: [id_sistema], references: [id_orden_trabajo_sistema]) // Relación nombrada y opcional
-
-  @@unique([id_orden_trabajo_parte, id_tarea], name: "orden_trabajo_tarea_unique")
-  @@map("orden_trabajo_tarea")
-}
 
 
 model TareaRealizada {
   id_tarea_realizada    Int              @id @default(autoincrement()) @map("id_tarea_realizada")
-  id_orden_trabajo_tarea Int            @map("id_orden_trabajo_tarea")
   id_usuario            Int              @map("id_usuario")
   id_tarea              Int              @map("id_tarea")
   fecha_hora            DateTime         @map("fecha_hora")
   comentarios           String?          @map("comentarios")
   creado_en             DateTime         @default(now()) @map("creado_en")
-  orden_trabajo_tarea   OrdenTrabajoTarea @relation(fields: [id_orden_trabajo_tarea], references: [id_orden_trabajo_tarea], onDelete: NoAction, onUpdate: Cascade)
   usuario               Usuario           @relation(fields: [id_usuario], references: [id], onDelete: NoAction, onUpdate: Cascade)
-  tarea                 Tarea             @relation(fields: [id_tarea], references: [id_tarea], onDelete: NoAction, onUpdate: Cascade)
   comentario_tarea      ComentarioTarea[] @relation("ComentarioToTareaRealizada") // Relación nombrada
 
   @@map("tarea_realizada")
