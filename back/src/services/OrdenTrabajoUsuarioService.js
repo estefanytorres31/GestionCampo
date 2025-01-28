@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 // import { sendNotification } from "../utils/Notification.js"; // Implementa esta función según tus necesidades
+import { getPeruTime, getUTCTime } from "../utils/Time.js";
 
 const prisma = new PrismaClient();
 
@@ -13,6 +14,8 @@ const prisma = new PrismaClient();
  * @returns {Promise<Object>} Asignación creada o actualizada
  */
 export const assignUserToOrdenTrabajo = async ({ id_orden_trabajo, id_usuario, rol_en_orden, observaciones }) => {
+    const todayISO = new Date().toISOString();
+    const fecha_creacion = getUTCTime(todayISO);
     if (isNaN(id_orden_trabajo) || isNaN(id_usuario)) {
         throw new Error("Los IDs de la orden de trabajo y del usuario deben ser válidos.");
     }
@@ -52,7 +55,7 @@ export const assignUserToOrdenTrabajo = async ({ id_orden_trabajo, id_usuario, r
             data: {
                 rol_en_orden: rol_en_orden || asignacionExistente.rol_en_orden,
                 observaciones: observaciones || asignacionExistente.observaciones,
-                actualizado_en: new Date(),
+                actualizado_en:fecha_creacion
             },
         });
 
@@ -69,6 +72,8 @@ export const assignUserToOrdenTrabajo = async ({ id_orden_trabajo, id_usuario, r
             id_usuario,
             rol_en_orden,
             observaciones,
+            creado_en:fecha_creacion,
+            actualizado_en: fecha_creacion,
         },
     });
 
@@ -149,6 +154,8 @@ export const getAsignacionById = async (id_orden_trabajo_usuario) => {
  * @returns {Promise<Object>} Asignación actualizada
  */
 export const updateAsignacion = async (id_orden_trabajo_usuario, { rol_en_orden, observaciones }) => {
+    const todayISO = new Date().toISOString();
+    const fecha_creacion = getUTCTime(todayISO);
     if (isNaN(id_orden_trabajo_usuario)) {
         throw new Error("El ID de la asignación debe ser válido.");
     }
@@ -168,7 +175,7 @@ export const updateAsignacion = async (id_orden_trabajo_usuario, { rol_en_orden,
         data: {
             rol_en_orden: rol_en_orden || asignacionExistente.rol_en_orden,
             observaciones: observaciones || asignacionExistente.observaciones,
-            actualizado_en: new Date(),
+            actualizado_en: fecha_creacion
         },
     });
 

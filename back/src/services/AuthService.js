@@ -9,21 +9,20 @@ export const login=async(nombreUsuario, contrasena_hash)=>{
 
     const usuario= await prisma.usuario.findUnique({
         where:{
-        
-            nombreUsuario
+            nombre_usuario:nombreUsuario,
         }
     });
     if(!usuario){
         throw new Error ("Usuario no encontrado")
     }
-    const valido=bcrypt.compareSync(contrasena_hash, usuario.contrasenaHash);
+    const valido=bcrypt.compareSync(contrasena_hash, usuario.contrasena_hash);
     if(!valido){
         throw new Error("Contraseña incorrecta")
     }
 
     const payload = {
         userId: usuario.id,
-        nombreUsuario: usuario.nombreUsuario
+        nombreUsuario: usuario.nombre_usuario
 
     }
     const token= createToken(payload);
@@ -34,7 +33,7 @@ export const login=async(nombreUsuario, contrasena_hash)=>{
     return { token,
         expiracion:expirationPeru.toISOString(),
         userId:usuario.id,
-        nombreUsuario: usuario.nombreUsuario
+        nombreUsuario: usuario.nombre_usuario
 
     }
 }

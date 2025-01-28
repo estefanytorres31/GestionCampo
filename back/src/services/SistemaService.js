@@ -25,7 +25,7 @@ export const createSistema = async (nombre_sistema, descripcion) => {
                 where: { id_sistema: sistemaExistente.id_sistema },
                 data: {
                     estado: true,
-                    descripcion: descripcion || sistemaExistente.descripcion,
+                    nombre_sistema:nombre_sistema,
                     actualizado_en: fecha_actualizacion,
                 },
             });

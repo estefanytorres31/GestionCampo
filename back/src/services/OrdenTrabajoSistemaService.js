@@ -1,4 +1,4 @@
-
+import { getPeruTime, getUTCTime } from "../utils/Time.js";
 import { PrismaClient } from "@prisma/client";
 // import { sendNotification } from "../utils/Notification.js"; // Implementa esta función según tus necesidades
 
@@ -14,6 +14,8 @@ const prisma = new PrismaClient();
  * @returns {Promise<Object>} Asignación creada o actualizada
  */
 export const assignSistemaToOrdenTrabajo = async ({ id_orden_trabajo, id_sistema, id_embarcacion_sistema, observaciones }) => {
+    const todayISO = new Date().toISOString();
+    const fecha_creacion = getUTCTime(todayISO);
     if (isNaN(id_orden_trabajo) || isNaN(id_sistema) || isNaN(id_embarcacion_sistema)) {
         throw new Error("Los IDs de la orden de trabajo, sistema y embarcación_sistema deben ser válidos.");
     }
@@ -62,7 +64,7 @@ export const assignSistemaToOrdenTrabajo = async ({ id_orden_trabajo, id_sistema
             data: {
                 estado: "pendiente", // Resetear estado o mantener el existente
                 observaciones: observaciones || asignacionExistente.observaciones,
-                actualizado_en: new Date(),
+                actualizado_en: fecha_creacion
             },
         });
 
@@ -80,6 +82,8 @@ export const assignSistemaToOrdenTrabajo = async ({ id_orden_trabajo, id_sistema
             id_embarcacion_sistema,
             estado: "pendiente",
             observaciones,
+            creado_en:fecha_creacion,
+            actualizado_en: fecha_creacion,
         },
     });
 
@@ -98,6 +102,8 @@ export const assignSistemaToOrdenTrabajo = async ({ id_orden_trabajo, id_sistema
  * @returns {Promise<Object>} Asignación modificada
  */
 export const modificarAsignacionSistema = async (id_orden_trabajo_sistema, { estado, observaciones }) => {
+    const todayISO = new Date().toISOString();
+    const fecha_creacion = getUTCTime(todayISO);
     if (isNaN(id_orden_trabajo_sistema)) {
         throw new Error("El ID de la asignación debe ser válido.");
     }
@@ -123,7 +129,7 @@ export const modificarAsignacionSistema = async (id_orden_trabajo_sistema, { est
         data: {
             estado: estado || asignacionExistente.estado,
             observaciones: observaciones || asignacionExistente.observaciones,
-            actualizado_en: new Date(),
+            actualizado_en: fecha_creacion
         },
     });
 
@@ -139,6 +145,8 @@ export const modificarAsignacionSistema = async (id_orden_trabajo_sistema, { est
  * @returns {Promise<Object>} Asignación desactivada
  */
 export const deactivateSistemaFromOrdenTrabajo = async (id_orden_trabajo_sistema) => {
+    const todayISO = new Date().toISOString();
+    const fecha_creacion = getUTCTime(todayISO);
     if (isNaN(id_orden_trabajo_sistema)) {
         throw new Error("El ID de la asignación debe ser válido.");
     }
@@ -159,7 +167,7 @@ export const deactivateSistemaFromOrdenTrabajo = async (id_orden_trabajo_sistema
     // Desactivar la asignación
     const asignacionDesactivada = await prisma.ordenTrabajoSistema.update({
         where: { id_orden_trabajo_sistema },
-        data: { estado: "cancelado", actualizado_en: new Date() },
+        data: { estado: "cancelado", actualizado_en: fecha_creacion },
     });
 
     // Enviar notificación al encargado
@@ -277,6 +285,8 @@ export const generarReporteOrdenesTrabajoConSistemas = async (filtros) => {
  * @returns {Promise<Object>} Orden de Trabajo finalizada
  */
 export const finalizarOrdenTrabajo = async (id_orden_trabajo) => {
+    const todayISO = new Date().toISOString();
+    const fecha_creacion = getUTCTime(todayISO);
     if (isNaN(id_orden_trabajo)) {
         throw new Error("El ID de la orden de trabajo debe ser válido.");
     }
@@ -307,7 +317,7 @@ export const finalizarOrdenTrabajo = async (id_orden_trabajo) => {
         const actualizarSistemas = sistemasAsignados.map(asignacion =>
             tx.ordenTrabajoSistema.update({
                 where: { id_orden_trabajo_sistema: asignacion.id_orden_trabajo_sistema },
-                data: { estado: "completado", actualizado_en: new Date() },
+                data: { estado: "completado", actualizado_en: fecha_creacion},
             })
         );
 
@@ -322,7 +332,7 @@ export const finalizarOrdenTrabajo = async (id_orden_trabajo) => {
         const actualizarUsuarios = usuariosAsignados.map(asignacion =>
             tx.ordenTrabajoUsuario.update({
                 where: { id_orden_trabajo_usuario: asignacion.id_orden_trabajo_usuario },
-                data: { observaciones: "Orden de trabajo completada.", actualizado_en: new Date() },
+                data: { observaciones: "Orden de trabajo completada.", actualizado_en: fecha_creacion },
             })
         );
 

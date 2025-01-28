@@ -24,14 +24,14 @@ export const createUsuario = async (nombre_usuario, contrasena_hash, nombre_comp
     const newUser = await prisma.$transaction(async (tx) => {
         return tx.usuario.create({
             data: {
-                nombre_usuario,
+                nombre_usuario: nombre_usuario,
                 contrasena_hash: hashedPassword,
-                nombre_completo,
-                email,
-                creado_en: fecha_creacion,
-                actualizado_en: fecha_creacion,
+                nombre_completo: nombre_completo,
+                email: email,
+                creado_en:fecha_creacion,
+                actualizado_en:fecha_creacion,
                 usuario_roles: {
-                    create: roles_ids.map((rolId) => ({
+                    create: roles_ids.map(rolId => ({
                         rol: {
                             connect: { id: rolId },
                         },
@@ -51,38 +51,21 @@ export const createUsuario = async (nombre_usuario, contrasena_hash, nombre_comp
     return newUser;
 };
 
-// Obtener todos los usuarios
-export const getAllUsers = async () => {
-    const users = await prisma.usuario.findMany({
-        where: { estado: true },
-        include: {
-            usuario_roles: {
-                include: {
-                    rol: true,
-                },
-            },
-        },
-    });
-
-    if (users.length === 0) {
-        throw new Error("No hay usuarios disponibles.");
-    }
-
-    return users;
-};
-
-// Obtener un usuario por su nombre de usuario
-export const getUserByUsername = async (nombre_usuario) => {
+export const getUserByUsername=async(nombre_usuario)=>{
     const user = await prisma.usuario.findFirst({
-        where: { nombre_usuario, estado: true },
+        where:{
+            nombre_usuario: nombre_usuario,
+            estado: true
+        }
     });
 
-    if (!user) {
-        throw new Error(`El usuario con el nombre "${nombre_usuario}" no existe o está inactivo.`);
+    if (user.length === 0) {
+        throw new Error("No hay usuarios disponibles.");
     }
 
     return user;
 };
+
 
 // Obtener un usuario por su ID
 export const getUserById = async (id) => {
@@ -137,7 +120,15 @@ export const updateUser = async (id, nombre_usuario, nombre_completo, email) => 
         },
     });
 
-    return updatedUser;
+    const usuario={
+        id:updatedUser.id,
+        nombre_usuario:updatedUser.nombre_usuario,
+        nombre_completo:updatedUser.nombre_completo,
+        email:updatedUser.email,
+        creado_en:updatedUser.creado_en,
+        actualizado_en: updatedUser.actualizado_en,
+    }
+    return usuario;
 };
 
 // Eliminar (desactivar) un usuario

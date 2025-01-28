@@ -4,6 +4,7 @@ import {
     getEmbarcacionById,
     updateEmbarcacion,
     deleteEmbarcacion,
+    getEmbarcacionesByEmpresa
   } from "../controllers/EmbarcacionController.js";
   import { Router } from "express";
   
@@ -14,6 +15,7 @@ import {
   embarcacionRouter.get("/:id", getEmbarcacionById);
   embarcacionRouter.put("/:id", updateEmbarcacion);
   embarcacionRouter.delete("/:id", deleteEmbarcacion);
+  embarcacionRouter.get("/empresa/:empresa_id", getEmbarcacionesByEmpresa);
   
   export default embarcacionRouter;
   
