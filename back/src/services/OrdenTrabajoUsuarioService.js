@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-import { sendNotification } from "../utils/Notification.js"; // Implementa esta función según tus necesidades
+// import { sendNotification } from "../utils/Notification.js"; // Implementa esta función según tus necesidades
 
 const prisma = new PrismaClient();
 
@@ -57,7 +57,7 @@ export const assignUserToOrdenTrabajo = async ({ id_orden_trabajo, id_usuario, r
         });
 
         // Enviar notificación al usuario
-        await sendNotification(id_usuario, `Tu asignación a la orden de trabajo ID ${id_orden_trabajo} ha sido actualizada.`);
+        // await sendNotification(id_usuario, `Tu asignación a la orden de trabajo ID ${id_orden_trabajo} ha sido actualizada.`);
 
         return asignacionActualizada;
     }
@@ -73,7 +73,7 @@ export const assignUserToOrdenTrabajo = async ({ id_orden_trabajo, id_usuario, r
     });
 
     // Enviar notificación al usuario
-    await sendNotification(id_usuario, `Has sido asignado a la orden de trabajo ID ${id_orden_trabajo} como ${rol_en_orden}.`);
+    // await sendNotification(id_usuario, `Has sido asignado a la orden de trabajo ID ${id_orden_trabajo} como ${rol_en_orden}.`);
 
     return nuevaAsignacion;
 };
@@ -84,25 +84,33 @@ export const assignUserToOrdenTrabajo = async ({ id_orden_trabajo, id_usuario, r
  * @returns {Promise<Array>} Lista de asignaciones
  */
 export const getUsuariosByOrdenTrabajo = async (id_orden_trabajo) => {
-    if (isNaN(id_orden_trabajo)) {
-        throw new Error("El ID de la orden de trabajo debe ser válido.");
+    // Convertir a entero
+    const idOrdenTrabajo = parseInt(id_orden_trabajo, 10);
+
+    if (isNaN(idOrdenTrabajo)) {
+        throw { status: 400, message: "El ID de la orden de trabajo debe ser un número válido." };
     }
 
     // Verificar que la Orden de Trabajo exista
     const ordenTrabajo = await prisma.ordenTrabajo.findUnique({
-        where: { id_orden_trabajo },
+        where: { id_orden_trabajo: idOrdenTrabajo },
     });
 
     if (!ordenTrabajo) {
-        throw new Error(`La orden de trabajo con ID ${id_orden_trabajo} no existe.`);
+        throw { status: 404, message: `La orden de trabajo con ID ${idOrdenTrabajo} no existe.` };
     }
 
+    // Obtener Usuarios Asignados
     const usuariosAsignados = await prisma.ordenTrabajoUsuario.findMany({
-        where: { id_orden_trabajo },
+        where: { id_orden_trabajo: idOrdenTrabajo },
         include: {
             usuario: true,
         },
     });
+
+    if (usuariosAsignados.length === 0) {
+        return []; // Retornar una lista vacía si no hay asignaciones
+    }
 
     return usuariosAsignados;
 };
@@ -165,7 +173,7 @@ export const updateAsignacion = async (id_orden_trabajo_usuario, { rol_en_orden,
     });
 
     // Enviar notificación al usuario
-    await sendNotification(asignacionActualizada.id_usuario, `Tu asignación en la orden de trabajo ID ${asignacionActualizada.id_orden_trabajo} ha sido actualizada.`);
+    // await sendNotification(asignacionActualizada.id_usuario, `Tu asignación en la orden de trabajo ID ${asignacionActualizada.id_orden_trabajo} ha sido actualizada.`);
 
     return asignacionActualizada;
 };
@@ -195,7 +203,7 @@ export const removeAsignacion = async (id_orden_trabajo_usuario) => {
     });
 
     // Enviar notificación al usuario
-    await sendNotification(asignacionEliminada.id_usuario, `Tu asignación en la orden de trabajo ID ${asignacionEliminada.id_orden_trabajo} ha sido eliminada.`);
+    // await sendNotification(asignacionEliminada.id_usuario, `Tu asignación en la orden de trabajo ID ${asignacionEliminada.id_orden_trabajo} ha sido eliminada.`);
 
     return asignacionEliminada;
 };
@@ -253,7 +261,7 @@ export const reasignarOrdenTrabajo = async (id_orden_trabajo, nuevos_usuarios) =
 
         // Enviar notificaciones a los nuevos usuarios
         for (const usuario of nuevos_usuarios) {
-            await sendNotification(usuario.id_usuario, `Has sido asignado a la orden de trabajo ID ${id_orden_trabajo} como ${usuario.rol_en_orden}.`);
+            // await sendNotification(usuario.id_usuario, `Has sido asignado a la orden de trabajo ID ${id_orden_trabajo} como ${usuario.rol_en_orden}.`);
         }
 
         return nuevasAsignaciones;
