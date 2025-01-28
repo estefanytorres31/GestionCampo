@@ -9,10 +9,10 @@ import {Router} from "express"
 
 const sistemaRouter = Router()
 
-sistemaRouter.get('/api/sistema', getSistemas)
-sistemaRouter.get('/api/sistema/:id', getSistemaById)
-sistemaRouter.post('/api/sistema', createSistema)
-sistemaRouter.delete('/api/sistema/:id', deleteSistema)
-sistemaRouter.put('/api/sistema/:id', updateSistema)
+sistemaRouter.get('/', getSistemas)
+sistemaRouter.get('/:id', getSistemaById)
+sistemaRouter.post('/', createSistema)
+sistemaRouter.delete('/:id', deleteSistema)
+sistemaRouter.put('/:id', updateSistema)
 
 export default sistemaRouter

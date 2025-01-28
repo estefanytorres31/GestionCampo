@@ -3,10 +3,10 @@ import {Router} from "express";
 
 const rolRouter = Router();
 
-rolRouter.get('/api/rol', obtenerTodosLosRoles)
-rolRouter.post('/api/rol', createRol)
-rolRouter.put('/api/rol/:id', actualizarRol)
-rolRouter.delete('/api/rol/:id', eliminarRol)
-rolRouter.get('/api/rol/:id', getRolById)
+rolRouter.get('/', obtenerTodosLosRoles)
+rolRouter.post('/', createRol)
+rolRouter.put('/:id', actualizarRol)
+rolRouter.delete('/:id', eliminarRol)
+rolRouter.get('/:id', getRolById)
 
 export default rolRouter;

@@ -12,6 +12,7 @@ import empresaRouter from './routes/EmpresaRoute.js';
 import empresaEmbarcacionRouter from './routes/EmpresaEmbarcacionRoute.js';
 import historialPuertoRouter from './routes/HistorialPuertoRoute.js';
 import embarcacionRouter from './routes/EmbarcacionRoute.js';
+import permisoRouter from './routes/PermisoRoute.js';
 
 const app = express();
 
@@ -24,14 +25,15 @@ app.use(json());
 app.use(morgan('dev'));
 
 // Routes
-app.use(rolRouter);
-app.use(usuarioRouter);
-app.use(authRouter);
-app.use(sistemaRouter);
-app.use(puertoRouter);
-app.use(empresaRouter);
-app.use(empresaEmbarcacionRouter);
-app.use(historialPuertoRouter);
-app.use(embarcacionRouter);
+app.use('/api/rol', rolRouter);
+app.use('/api/usuario', usuarioRouter);
+app.use('/api/auth', authRouter);
+app.use('/api/sistema', sistemaRouter);
+app.use('/api/puerto', puertoRouter);
+app.use('/api/empresa', empresaRouter);
+app.use('/api/empresa-embarcacion', empresaEmbarcacionRouter);
+app.use('/api/historial-puerto', historialPuertoRouter);
+app.use('/api/embarcacion', embarcacionRouter);
+app.use('/api/permiso', permisoRouter);
 
 export default app;

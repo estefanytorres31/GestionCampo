@@ -11,11 +11,11 @@ import {verificarAuth } from "../middleware/verificarAuth.js"
 
 const usuarioRouter = Router();
 
-usuarioRouter.get('/api/usuario', verificarAuth, getAllUsers);
-usuarioRouter.get('/api/usuario/nombre/:nombre_usuario', getUserByUsername);
-usuarioRouter.post('/api/usuario', createUsuario);
-usuarioRouter.get('/api/usuario/:id', getUserById);
-usuarioRouter.put('/api/usuario/:id', updateUser);
-usuarioRouter.delete('/api/usuario/:id', deleteUser);
+usuarioRouter.get('/', verificarAuth, getAllUsers);
+usuarioRouter.get('/nombre/:nombre_usuario', getUserByUsername);
+usuarioRouter.post('/', createUsuario);
+usuarioRouter.get('/:id', getUserById);
+usuarioRouter.put('/:id', updateUser);
+usuarioRouter.delete('/:id', deleteUser);
 
 export default usuarioRouter;

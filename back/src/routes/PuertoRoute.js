@@ -9,11 +9,11 @@ import {
   
   const puertoRouter = Router();
   
-  puertoRouter.post("/api/puertos", createPuerto);
-  puertoRouter.get("/api/puertos", getAllPuertos);
-  puertoRouter.get("/api/puertos/:id", getPuertoById);
-  puertoRouter.put("/api/puertos/:id", updatePuerto);
-  puertoRouter.delete("/api/puertos/:id", deletePuerto);
+  puertoRouter.post("/", createPuerto);
+  puertoRouter.get("/", getAllPuertos);
+  puertoRouter.get("/:id", getPuertoById);
+  puertoRouter.put("/:id", updatePuerto);
+  puertoRouter.delete("/:id", deletePuerto);
   
   export default puertoRouter;
   

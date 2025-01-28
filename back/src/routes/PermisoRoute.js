@@ -9,11 +9,11 @@ import {
   
   const permisoRouter = Router();
   
-  permisoRouter.get("/api/permisos", obtenerTodosLosPermisos);
-  permisoRouter.post("/api/permisos", createPermiso);
-  permisoRouter.put("/api/permisos/:id", actualizarPermiso);
-  permisoRouter.delete("/api/permisos/:id", eliminarPermiso);
-  permisoRouter.get("/api/permisos/:id", getPermisoById);
+  permisoRouter.get("/", obtenerTodosLosPermisos);
+  permisoRouter.post("/", createPermiso);
+  permisoRouter.put("/:id", actualizarPermiso);
+  permisoRouter.delete("/:id", eliminarPermiso);
+  permisoRouter.get("/:id", getPermisoById);
   
   export default permisoRouter;
   

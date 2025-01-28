@@ -1,4 +1,4 @@
-import * as PermisoService from "../services/PermisoService.js";
+import * as PermisoService from "../services/PermisosService.js";
 
 export const createPermiso = async (req, res) => {
   const { nombre, descripcion, estado } = req.body;
