@@ -31,10 +31,9 @@ enum RolEnOrden {
 }
 
 /// Modelos de Prisma
-
 model Permiso {
   id             Int              @id @default(autoincrement())
-  nombre         String           @unique
+  nombre         String           @unique @map("nombre")
   descripcion    String?
   estado         Boolean          @default(true)
   creado_en      DateTime         @default(now()) @map("creado_en")
@@ -42,6 +41,7 @@ model Permiso {
   roles_permisos RolesPermiso[]
 
   @@map("permisos")
+  @@index([estado], name: "idx_permiso_estado")
 }
 
 model Rol {
@@ -55,6 +55,7 @@ model Rol {
   usuario_roles  UsuarioRol[]
 
   @@map("roles")
+  @@index([estado], name: "idx_rol_estado")
 }
 
 model RolesPermiso {
@@ -68,6 +69,9 @@ model RolesPermiso {
 
   @@unique([rol_id, permiso_id], name: "roles_permisos_rol_id_permiso_id_key")
   @@map("roles_permisos")
+  @@index([rol_id], name: "idx_roles_permisos_rol_id")
+  @@index([permiso_id], name: "idx_roles_permisos_permiso_id")
+  @@index([estado], name: "idx_roles_permisos_estado")
 }
 
 model Usuario {
@@ -155,8 +159,13 @@ model HistorialPuerto {
   puerto          Puerto      @relation(fields: [puerto_id], references: [id_puerto], onDelete: NoAction, onUpdate: Cascade)
 
   @@unique([embarcacion_id, puerto_id, fecha_llegada], name: "historial_puertos_unique")
+  @@index([embarcacion_id], name: "idx_embarcacion")
+  @@index([puerto_id], name: "idx_puerto")
+  @@index([fecha_salida], name: "idx_fecha_salida")
+  
   @@map("historial_puertos")
 }
+
 
 model Sistema {
   id_sistema          Int                  @id @default(autoincrement()) @map("id_sistema")

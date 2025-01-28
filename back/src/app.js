@@ -32,7 +32,7 @@ app.use('/api/sistema', sistemaRouter);
 app.use('/api/puerto', puertoRouter);
 app.use('/api/empresa', empresaRouter);
 app.use('/api/empresa-embarcacion', empresaEmbarcacionRouter);
-app.use('/api/historial-puerto', historialPuertoRouter);
+app.use('/api/historialpuerto', historialPuertoRouter);
 app.use('/api/embarcacion', embarcacionRouter);
 app.use('/api/permiso', permisoRouter);
 

@@ -1,118 +1,165 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
-import { getPeruTime, getUTCTime } from "../utils/Time.js";
+import { getUTCTime } from "../utils/Time.js";
 
 const prisma = new PrismaClient();
 
-
+// Crear un nuevo usuario
 export const createUsuario = async (nombre_usuario, contrasena_hash, nombre_completo, email, roles_ids) => {
     if (!roles_ids || roles_ids.length === 0) {
-        throw new Error("Debe proporcionar al menos un rol para el usuario");
+        throw new Error("Debe proporcionar al menos un rol para el usuario.");
     }
-    
 
-    const result = await prisma.$transaction(async (tx) => {
-        const hashedPassword = await bcrypt.hash(contrasena_hash, 10);
-        const todayISO = new Date().toISOString();
-        const fecha_creacion = getUTCTime(todayISO);
-        
-        const newUser = await tx.usuario.create({
+    const usuarioExistente = await prisma.usuario.findUnique({
+        where: { nombre_usuario },
+    });
+
+    if (usuarioExistente) {
+        throw new Error(`El usuario con el nombre "${nombre_usuario}" ya existe.`);
+    }
+
+    const hashedPassword = await bcrypt.hash(contrasena_hash, 10);
+    const fecha_creacion = getUTCTime(new Date().toISOString());
+
+    const newUser = await prisma.$transaction(async (tx) => {
+        return tx.usuario.create({
             data: {
-                nombreUsuario: nombre_usuario,
-                contrasenaHash: hashedPassword,
-                nombreCompleto: nombre_completo,
-                email: email,
-                creadoEn:fecha_creacion,
-                actualizadoEn:fecha_creacion,
-                roles: {
-                    create: roles_ids.map(rolId => ({
+                nombre_usuario,
+                contrasena_hash: hashedPassword,
+                nombre_completo,
+                email,
+                creado_en: fecha_creacion,
+                actualizado_en: fecha_creacion,
+                usuario_roles: {
+                    create: roles_ids.map((rolId) => ({
                         rol: {
-                            connect: { id: rolId }
-                        }
-                    }))
-                }
+                            connect: { id: rolId },
+                        },
+                    })),
+                },
             },
             include: {
-                roles: {
+                usuario_roles: {
                     include: {
-                        rol: true
-                    }
-                }
-            }
+                        rol: true,
+                    },
+                },
+            },
         });
-
-        return newUser;
     });
 
-    return result;
+    return newUser;
 };
 
-export const getUserByUsername=async(nombre_usuario)=>{
-    const user = await prisma.usuario.findFirst({
-        where:{
-            nombreUsuario: nombre_usuario,
-            estado: true
-        }
+// Obtener todos los usuarios
+export const getAllUsers = async () => {
+    const users = await prisma.usuario.findMany({
+        where: { estado: true },
+        include: {
+            usuario_roles: {
+                include: {
+                    rol: true,
+                },
+            },
+        },
     });
-    return user;
-}
 
+    if (users.length === 0) {
+        throw new Error("No hay usuarios disponibles.");
+    }
+
+    return users;
+};
+
+// Obtener un usuario por su nombre de usuario
+export const getUserByUsername = async (nombre_usuario) => {
+    const user = await prisma.usuario.findFirst({
+        where: { nombre_usuario, estado: true },
+    });
+
+    if (!user) {
+        throw new Error(`El usuario con el nombre "${nombre_usuario}" no existe o está inactivo.`);
+    }
+
+    return user;
+};
+
+// Obtener un usuario por su ID
 export const getUserById = async (id) => {
     const userId = parseInt(id, 10);
     if (isNaN(userId)) {
-        throw new Error("El ID proporcionado no es válido");
+        throw new Error("El ID proporcionado no es válido.");
     }
-    
+
     const user = await prisma.usuario.findFirst({
-        where: {
-            id: userId,
-            estado: true
-        }
+        where: { id: userId, estado: true },
+        include: {
+            usuario_roles: {
+                include: {
+                    rol: true,
+                },
+            },
+        },
     });
-    
+
+    if (!user) {
+        throw new Error(`El usuario con ID ${id} no existe o está inactivo.`);
+    }
+
     return user;
 };
 
-export const updateUser=async(id,nombre_usuario, nombre_completo, email)=>{
-    const todayISO = new Date().toISOString();
-    const fecha_creacion = getUTCTime(todayISO);
-    const usuarioExistente = await prisma.usuario.update({
-        where:{
-            id: parseInt(id),
-            estado: true
-        },
-        data:{
-            nombreUsuario: nombre_usuario,
-            nombreCompleto: nombre_completo,
-            email: email,
-            actualizadoEn: fecha_creacion
-        }
-    });
+// Actualizar un usuario
+export const updateUser = async (id, nombre_usuario, nombre_completo, email) => {
+    const userId = parseInt(id, 10);
 
-    const usuarioActualizado={
-        id: usuarioExistente.id,
-        nombre_usuario: usuarioExistente.nombreUsuario,
-        nombre_completo: usuarioExistente.nombreCompleto,
-        email: usuarioExistente.email
+    if (isNaN(userId)) {
+        throw new Error("El ID proporcionado no es válido.");
     }
 
-    return usuarioActualizado;
-}
-
-export const deleteUser=async(id)=>{
-    await prisma.user.delete({
-        where:{
-            id: parseInt(id),
-            estado: true
-        }
+    const user = await prisma.usuario.findUnique({
+        where: { id: userId },
     });
-}
 
-export const getAllUsers = async()=>{
-    const users = await prisma.usuario.findMany({
-        where:{
-            estado: true
-        }
+    if (!user || !user.estado) {
+        throw new Error(`El usuario con ID ${id} no existe o está inactivo.`);
+    }
+
+    const fecha_actualizacion = getUTCTime(new Date().toISOString());
+
+    const updatedUser = await prisma.usuario.update({
+        where: { id: userId },
+        data: {
+            nombre_usuario,
+            nombre_completo,
+            email,
+            actualizado_en: fecha_actualizacion,
+        },
     });
-    return users;
-}
+
+    return updatedUser;
+};
+
+// Eliminar (desactivar) un usuario
+export const deleteUser = async (id) => {
+    const userId = parseInt(id, 10);
+
+    if (isNaN(userId)) {
+        throw new Error("El ID proporcionado no es válido.");
+    }
+
+    const user = await prisma.usuario.findUnique({
+        where: { id: userId },
+    });
+
+    if (!user || !user.estado) {
+        throw new Error(`El usuario con ID ${id} no existe o ya está inactivo.`);
+    }
+
+    const deletedUser = await prisma.usuario.update({
+        where: { id: userId },
+        data: { estado: false },
+    });
+
+    return deletedUser;
+};

@@ -1,54 +1,60 @@
 import * as RolService from "../services/RolService.js";
 
+// Crear un nuevo rol
 export const createRol = async (req, res) => {
-    const {nombre_rol} = req.body;
+    const { nombre_rol, descripcion } = req.body;
+
     try {
-        const nuevoRol = await RolService.createRol(nombre_rol);
-        res.status(201).json(nuevoRol);
+        const rol = await RolService.createRol(nombre_rol, descripcion);
+        res.status(201).json({ message: "Rol creado exitosamente.", data: rol });
     } catch (error) {
-        res.status(400).json({message: error.message});
+        res.status(400).json({ message: error.message });
     }
-}
+};
 
-
-export const obtenerTodosLosRoles = async (req, res) => {
+// Obtener todos los roles
+export const getAllRoles = async (req, res) => {
     try {
-        const roles = await RolService.obtenerTodosLosRoles();
-        res.json(roles);
+        const roles = await RolService.getAllRoles();
+        res.status(200).json({ message: "Roles obtenidos exitosamente.", data: roles });
     } catch (error) {
-        res.status(500).json({message: error.message});
+        res.status(404).json({ message: error.message });
     }
-}
+};
 
-export const actualizarRol = async (req, res) => {
-    const {id} = req.params;
-    const {nombre_rol} = req.body;
-    try {
-        const rolActualizado = await RolService.actualizarRol(id, nombre_rol);
-        res.json(rolActualizado);
-    } catch (error) {
-        res.status(404).json({message: error.message});
-    }
-}
-
-export const eliminarRol = async (req, res) => {
-    const {id} = req.params;
-    try {
-        await RolService.eliminarRol(id);
-        res.status(204).json({message:'Rol eliminado'});
-    } catch (error) {
-        res.status(404).json({message: error.message});
-    }
-}
-
-
+// Obtener un rol por su ID
 export const getRolById = async (req, res) => {
-    const {id} = req.params;
+    const { id } = req.params;
+
     try {
         const rol = await RolService.getRolById(id);
-        if (!rol) return res.status(404).json({message: "Rol no encontrado"});
-        res.json(rol);
+        res.status(200).json({ message: "Rol obtenido exitosamente.", data: rol });
     } catch (error) {
-        res.status(500).json({message: error.message});
+        res.status(404).json({ message: error.message });
     }
-}
+};
+
+// Actualizar un rol
+export const updateRol = async (req, res) => {
+    const { id } = req.params;
+    const { nombre_rol, descripcion } = req.body;
+
+    try {
+        const rol = await RolService.updateRol(id, nombre_rol, descripcion);
+        res.status(200).json({ message: "Rol actualizado exitosamente.", data: rol });
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+};
+
+// Eliminar (desactivar) un rol
+export const deleteRol = async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const rol = await RolService.deleteRol(id);
+        res.status(200).json({ message: "Rol desactivado exitosamente.", data: rol });
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+};
