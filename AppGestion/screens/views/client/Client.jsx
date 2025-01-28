@@ -8,9 +8,9 @@ import AsyncStorage from "@react-native-async-storage/async-storage"
 
 const { height } = Dimensions.get('window')
 
-const ClientScreen = () => {
+const ClientScreen = ({ navigation }) => {
     console.log(AsyncStorage.getItem('userId'))
-   
+
     // Asegurémonos de que useAuth está retornando un objeto con handleLogout
     const auth = useAuth();
 
@@ -61,10 +61,14 @@ const ClientScreen = () => {
             </View>
 
             <View style={styles.buttonContainer}>
-                <TouchableOpacity style={[styles.button, styles.exalmar]}>
+            <TouchableOpacity
+                style={[styles.button, styles.exalmar]}
+                onPress={() => navigation.navigate('Exalmar', { clase: 'algún valor' })}
+            >
                 <Ionicons name="boat" size={24} color="white" style={styles.icon} />
                 <Text style={styles.buttonText}>Exalmar</Text>
-                </TouchableOpacity>
+            </TouchableOpacity>
+
 
                 <TouchableOpacity style={[styles.button, styles.austral]}>
                 <Ionicons name="boat" size={24} color="white" style={styles.icon} />

@@ -3,7 +3,8 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import LoginScreen from "./screens/views/Auth/Login";
 import Clientes from "./screens/views/client/Client";
-import Exalmar from "./screens/views/embarcacion/Embarcacion";
+import Exalmar from "./screens/views/Embarcacion/Exalmar";
+import SubcategoryScreen from "./screens/components/Subcategoria";
 
 import { TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
@@ -16,8 +17,8 @@ export default function Navigation () {
             <Stack.Navigator initialRouteName="Login" >
                 <Stack.Screen name="Login" component={LoginScreen}  options={{ headerShown: false }} />
                 <Stack.Screen name="Clientes" component={Clientes}  options={{ title: "Clientes" , headerShown:false}} />
-                <Stack.Screen name="Exalmar" component={Exalmar}  options={{ title: "Exalmar" }}
-             />
+                <Stack.Screen name="Exalmar" component={Exalmar}  options={{ title: "Exalmar" }}/>
+                <Stack.Screen name='SubcategoryScreen' component={SubcategoryScreen}/>
             </Stack.Navigator>
         </NavigationContainer>
     );
