@@ -16,8 +16,9 @@ enum Prioridad {
 
 enum EstadoOrdenTrabajo {
   pendiente
-  en_proceso
-  finalizado
+  en_progreso
+  completado
+  cancelado
 }
 
 enum TipoAsistencia {
@@ -231,37 +232,43 @@ model EmbarcacionSistema {
 }
 
 model TipoTrabajo {
-  id_tipo_trabajo   Int           @id @default(autoincrement()) @map("id_tipo_trabajo")
-  nombre_trabajo    String        @unique @map("nombre_trabajo")
-  descripcion       String?       @map("descripcion")
-  estado            Boolean       @default(true) @map("estado")
-  creado_en         DateTime      @default(now()) @map("creado_en")
-  actualizado_en    DateTime      @updatedAt @map("actualizado_en")
-  orden_trabajo     OrdenTrabajo[]
+  id_tipo_trabajo Int            @id @default(autoincrement()) @map("id_tipo_trabajo")
+  nombre_trabajo  String         @unique @map("nombre_trabajo")
+  descripcion     String?        @map("descripcion")
+  estado          Boolean        @default(true) @map("estado")
+  creado_en       DateTime       @default(now()) @map("creado_en")
+  actualizado_en  DateTime       @updatedAt @map("actualizado_en")
+  orden_trabajo   OrdenTrabajo[]
 
   @@map("tipo_trabajo")
+  @@index([estado], name: "idx_tipo_trabajo_estado")
 }
 
 model OrdenTrabajo {
-  id_orden_trabajo    Int                  @id @default(autoincrement()) @map("id_orden_trabajo")
-  id_tipo_trabajo     Int                  @map("id_tipo_trabajo")
-  id_embarcacion      Int                  @map("id_embarcacion")
-  id_puerto           Int                  @map("id_puerto")
-  id_jefe_asigna     Int                  @map("id_jefe_asigna")
-  fecha_asignacion    DateTime             @map("fecha_asignacion")
-  estado              EstadoOrdenTrabajo   @default(pendiente) @map("estado")
-  comentarios         String?              @map("comentarios")
-  creado_en           DateTime             @default(now()) @map("creado_en")
-  actualizado_en      DateTime             @updatedAt @map("actualizado_en")
-  tipo_trabajo        TipoTrabajo          @relation(fields: [id_tipo_trabajo], references: [id_tipo_trabajo], onDelete: NoAction, onUpdate: Cascade)
-  embarcacion         Embarcacion          @relation(fields: [id_embarcacion], references: [id_embarcacion], onDelete: NoAction, onUpdate: Cascade)
-  puerto              Puerto               @relation(fields: [id_puerto], references: [id_puerto], onDelete: NoAction, onUpdate: Cascade)
-  jefe_asigna         Usuario              @relation("JefeAsigna", fields: [id_jefe_asigna], references: [id], onDelete: NoAction, onUpdate: Cascade)
+  id_orden_trabajo      Int                  @id @default(autoincrement()) @map("id_orden_trabajo")
+  id_tipo_trabajo       Int                  @map("id_tipo_trabajo")
+  id_embarcacion        Int                  @map("id_embarcacion")
+  id_puerto             Int                  @map("id_puerto")
+  id_jefe_asigna       Int                  @map("id_jefe_asigna")
+  fecha_asignacion      DateTime             @map("fecha_asignacion")
+  estado                EstadoOrdenTrabajo   @default(pendiente) @map("estado")
+  comentarios           String?              @map("comentarios")
+  creado_en             DateTime             @default(now()) @map("creado_en")
+  actualizado_en        DateTime             @updatedAt @map("actualizado_en")
+  tipo_trabajo          TipoTrabajo          @relation(fields: [id_tipo_trabajo], references: [id_tipo_trabajo], onDelete: NoAction, onUpdate: Cascade)
+  embarcacion           Embarcacion          @relation(fields: [id_embarcacion], references: [id_embarcacion], onDelete: NoAction, onUpdate: Cascade)
+  puerto                Puerto               @relation(fields: [id_puerto], references: [id_puerto], onDelete: NoAction, onUpdate: Cascade)
+  jefe_asigna           Usuario              @relation("JefeAsigna", fields: [id_jefe_asigna], references: [id], onDelete: NoAction, onUpdate: Cascade)
   orden_trabajo_usuario OrdenTrabajoUsuario[]
   orden_trabajo_sistemas OrdenTrabajoSistema[]
-  asistencia           Asistencia[]
+  asistencia             Asistencia[]
 
   @@map("orden_trabajo")
+  @@index([id_tipo_trabajo], name: "idx_orden_trabajo_tipo_trabajo_id")
+  @@index([id_embarcacion], name: "idx_orden_trabajo_embarcacion_id")
+  @@index([id_puerto], name: "idx_orden_trabajo_puerto_id")
+  @@index([id_jefe_asigna], name: "idx_orden_trabajo_jefe_asigna_id")
+  @@index([estado], name: "idx_orden_trabajo_estado")
 }
 
 model OrdenTrabajoUsuario {
