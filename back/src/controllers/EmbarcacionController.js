@@ -58,3 +58,13 @@ export const deleteEmbarcacion = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
+export const getEmbarcacionesByEmpresa = async (req, res) => {
+  const { empresaId } = req.params;
+  try {
+    const embarcaciones = await EmbarcacionService.getEmbarcacionByEmpresa(empresaId);
+    res.status(200).json(embarcaciones);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+}

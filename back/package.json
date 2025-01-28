@@ -6,7 +6,8 @@
   "scripts": {
     "build": "babel src -d dist",
     "dev": "nodemon index.js",
-    "start": "node dist"
+    "start": "node dist",
+    "seed": "node prisma/seedEmbarcaciones.js"
   },
   "keywords": [],
   "author": "",

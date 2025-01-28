@@ -205,3 +205,17 @@ export const deleteEmbarcacion = async (id) => {
     data: { estado: false },
   });
 };
+
+
+export const getEmbarcacionByEmpresa=async(empresa_id)=>{
+  const embarcaciones=await prisma.embarcacion.findMany({
+    where:{
+      empresa_id:parseInt(empresa_id),
+      estado:true
+    },
+    include:{
+      empresa:true
+    }
+  })
+  return embarcaciones;
+}
