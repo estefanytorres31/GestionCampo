@@ -9,32 +9,31 @@ export const login=async(nombreUsuario, contrasena_hash)=>{
 
     const usuario= await prisma.usuario.findUnique({
         where:{
-        
-            nombreUsuario
+            nombre_usuario:nombreUsuario,
         }
     });
     if(!usuario){
         throw new Error ("Usuario no encontrado")
     }
-    const valido=bcrypt.compareSync(contrasena_hash, usuario.contrasenaHash);
+    const valido=bcrypt.compareSync(contrasena_hash, usuario.contrasena_hash);
     if(!valido){
         throw new Error("Contraseña incorrecta")
     }
 
     const payload = {
         userId: usuario.id,
-        nombreUsuario: usuario.nombreUsuario
+        nombreUsuario: usuario.nombre_usuario
 
     }
     const token= createToken(payload);
-    const expiresInMilliseconds = 24 * 60 * 60 * 1000; // 24 horas en milisegundos
+    const expiresInMilliseconds = 24 * 60 * 60 * 1000;
     const expirationUTC = new Date(Date.now() + expiresInMilliseconds);
     const expirationPeru = getUTCTime(expirationUTC.toISOString()); 
 
     return { token,
         expiracion:expirationPeru.toISOString(),
         userId:usuario.id,
-        nombreUsuario: usuario.nombreUsuario
+        nombreUsuario: usuario.nombre_usuario
 
     }
 }

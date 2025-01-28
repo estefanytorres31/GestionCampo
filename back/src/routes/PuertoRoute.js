@@ -1,19 +1,19 @@
 import {
-    createPuerto,
-    getAllPuertos,
-    getPuertoById,
-    updatePuerto,
-    deletePuerto,
-  } from "../controllers/PuertoController.js";
-  import { Router } from "express";
-  
-  const puertoRouter = Router();
-  
-  puertoRouter.post("/api/puertos", createPuerto);
-  puertoRouter.get("/api/puertos", getAllPuertos);
-  puertoRouter.get("/api/puertos/:id", getPuertoById);
-  puertoRouter.put("/api/puertos/:id", updatePuerto);
-  puertoRouter.delete("/api/puertos/:id", deletePuerto);
-  
-  export default puertoRouter;
-  
+  createPuerto,
+  getAllPuertos,
+  getPuertoById,
+  updatePuerto,
+  deletePuerto,
+} from "../controllers/PuertoController.js";
+import { Router } from "express";
+
+const puertoRouter = Router();
+
+// Rutas de la API de puertos
+puertoRouter.post("/", createPuerto); // Crear puerto
+puertoRouter.get("/", getAllPuertos); // Obtener todos los puertos
+puertoRouter.get("/:id", getPuertoById); // Obtener puerto por ID
+puertoRouter.put("/:id", updatePuerto); // Actualizar puerto
+puertoRouter.delete("/:id", deletePuerto); // Desactivar puerto
+
+export default puertoRouter;

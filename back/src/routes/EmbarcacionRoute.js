@@ -4,16 +4,18 @@ import {
     getEmbarcacionById,
     updateEmbarcacion,
     deleteEmbarcacion,
+    getEmbarcacionesByEmpresa
   } from "../controllers/EmbarcacionController.js";
   import { Router } from "express";
   
   const embarcacionRouter = Router();
   
-  embarcacionRouter.post("/api/embarcaciones", createEmbarcacion);
-  embarcacionRouter.get("/api/embarcaciones", getAllEmbarcaciones);
-  embarcacionRouter.get("/api/embarcaciones/:id", getEmbarcacionById);
-  embarcacionRouter.put("/api/embarcaciones/:id", updateEmbarcacion);
-  embarcacionRouter.delete("/api/embarcaciones/:id", deleteEmbarcacion);
+  embarcacionRouter.post("/", createEmbarcacion);
+  embarcacionRouter.get("/", getAllEmbarcaciones);
+  embarcacionRouter.get("/:id", getEmbarcacionById);
+  embarcacionRouter.put("/:id", updateEmbarcacion);
+  embarcacionRouter.delete("/:id", deleteEmbarcacion);
+  embarcacionRouter.get("/empresa/:empresa_id", getEmbarcacionesByEmpresa);
   
   export default embarcacionRouter;
   

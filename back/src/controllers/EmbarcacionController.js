@@ -1,15 +1,11 @@
 import * as EmbarcacionService from "../services/EmbarcacionService.js";
 
 export const createEmbarcacion = async (req, res) => {
-  const { identificadorBarco, nombre, datosQrCode, ubicacion, puertoId, empresaId } = req.body;
+  const {nombre, empresa_id } = req.body;
   try {
     const embarcacion = await EmbarcacionService.createEmbarcacion(
-      identificadorBarco,
       nombre,
-      datosQrCode,
-      ubicacion,
-      puertoId,
-      empresaId
+      empresa_id
     );
     res.status(201).json(embarcacion);
   } catch (err) {
@@ -38,13 +34,13 @@ export const getEmbarcacionById = async (req, res) => {
 
 export const updateEmbarcacion = async (req, res) => {
   const { id } = req.params;
-  const { nombre, ubicacion, puertoId, empresaId } = req.body;
+  const { nombre, datosQrCode, ubicacion, empresaId } = req.body;
   try {
     const embarcacion = await EmbarcacionService.updateEmbarcacion(
       id,
       nombre,
+      datosQrCode,
       ubicacion,
-      puertoId,
       empresaId
     );
     res.status(200).json(embarcacion);
@@ -62,3 +58,13 @@ export const deleteEmbarcacion = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
+export const getEmbarcacionesByEmpresa = async (req, res) => {
+  const { empresa_id } = req.params;
+  try {
+    const embarcaciones = await EmbarcacionService.getEmbarcacionByEmpresa(empresa_id);
+    res.status(200).json(embarcaciones);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+}

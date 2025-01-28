@@ -9,7 +9,6 @@ export const createUsuario = async (nombre_usuario, contrasena_hash, nombre_comp
     if (!roles_ids || roles_ids.length === 0) {
         throw new Error("Debe proporcionar al menos un rol para el usuario");
     }
-    
 
     const result = await prisma.$transaction(async (tx) => {
         const hashedPassword = await bcrypt.hash(contrasena_hash, 10);
@@ -18,13 +17,13 @@ export const createUsuario = async (nombre_usuario, contrasena_hash, nombre_comp
         
         const newUser = await tx.usuario.create({
             data: {
-                nombreUsuario: nombre_usuario,
-                contrasenaHash: hashedPassword,
-                nombreCompleto: nombre_completo,
+                nombre_usuario: nombre_usuario,
+                contrasena_hash: hashedPassword,
+                nombre_completo: nombre_completo,
                 email: email,
-                creadoEn:fecha_creacion,
-                actualizadoEn:fecha_creacion,
-                roles: {
+                creado_en:fecha_creacion,
+                actualizado_en:fecha_creacion,
+                usuario_roles: {
                     create: roles_ids.map(rolId => ({
                         rol: {
                             connect: { id: rolId }
@@ -33,7 +32,7 @@ export const createUsuario = async (nombre_usuario, contrasena_hash, nombre_comp
                 }
             },
             include: {
-                roles: {
+                usuario_roles: {
                     include: {
                         rol: true
                     }
@@ -50,7 +49,7 @@ export const createUsuario = async (nombre_usuario, contrasena_hash, nombre_comp
 export const getUserByUsername=async(nombre_usuario)=>{
     const user = await prisma.usuario.findFirst({
         where:{
-            nombreUsuario: nombre_usuario,
+            nombre_usuario: nombre_usuario,
             estado: true
         }
     });
@@ -82,17 +81,17 @@ export const updateUser=async(id,nombre_usuario, nombre_completo, email)=>{
             estado: true
         },
         data:{
-            nombreUsuario: nombre_usuario,
-            nombreCompleto: nombre_completo,
+            nombre_usuario: nombre_usuario,
+            nombre_completo: nombre_completo,
             email: email,
-            actualizadoEn: fecha_creacion
+            actualizado_en: fecha_creacion
         }
     });
 
     const usuarioActualizado={
         id: usuarioExistente.id,
-        nombre_usuario: usuarioExistente.nombreUsuario,
-        nombre_completo: usuarioExistente.nombreCompleto,
+        nombre_usuario: usuarioExistente.nombre_usuario,
+        nombre_completo: usuarioExistente.nombre_completo,
         email: usuarioExistente.email
     }
 

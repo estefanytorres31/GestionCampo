@@ -1,100 +1,112 @@
-// services/EmpresaService.js
-
 import { PrismaClient } from "@prisma/client";
+import { getUTCTime } from "../utils/Time.js";
 
 const prisma = new PrismaClient();
 
-export const createEmpresa = async (nombre, razonSocial) => {
-  // Verificar si ya existe una empresa con el mismo nombre
-  const empresaExistente = await prisma.empresa.findUnique({
-    where: { nombre },
-  });
+// Crear una nueva empresa
+export const createEmpresa = async (nombre) => {
+    try {
+        const todayISO = new Date().toISOString();
+        const fecha_creacion = getUTCTime(todayISO);
 
-  if (empresaExistente) {
-    throw new Error("Ya existe una empresa con ese nombre.");
-  }
+        const nuevaEmpresa = await prisma.empresa.create({
+            data: {
+                nombre: nombre,
+                creado_en: fecha_creacion,
+                actualizado_en: fecha_creacion,
+            },
+        });
 
-  // Crear una nueva empresa
-  const empresa = await prisma.empresa.create({
-    data: {
-      nombre,
-      razonSocial,
-    },
-  });
-
-  return empresa;
+        return { status: 201, message: "Empresa creada exitosamente", data: nuevaEmpresa };
+    } catch (error) {
+        if (error.code === "P2002") {
+            return { status: 400, message: "El nombre de la empresa ya existe", error: error.message };
+        }
+        return { status: 500, message: "Error al crear la empresa", error: error.message };
+    }
 };
 
+// Obtener todas las empresas
 export const getAllEmpresas = async () => {
-  const empresas = await prisma.empresa.findMany({
-    where: { estado: true },
-    orderBy: { nombre: "asc" },
-    include: {
-      embarcaciones: {
-        include: {
-          embarcacion: true,
-        },
-      },
-    },
-  });
-  return empresas;
+    try {
+        const empresas = await prisma.empresa.findMany({
+            where: {
+                estado: true, // Solo devuelve las empresas activas
+            },
+            orderBy: {
+                creado_en: "desc", // Orden descendente por fecha de creación
+            },
+        });
+
+        return { status: 200, message: "Empresas obtenidas exitosamente", data: empresas };
+    } catch (error) {
+        return { status: 500, message: "Error al obtener las empresas", error: error.message };
+    }
 };
 
+// Obtener una empresa por su ID
 export const getEmpresaById = async (id) => {
-  const empresa = await prisma.empresa.findUnique({
-    where: { id: parseInt(id) },
-    include: {
-      embarcaciones: {
-        include: {
-          embarcacion: true,
-        },
-      },
-    },
-  });
+    try {
+        const empresa = await prisma.empresa.findUnique({
+            where: {
+                id: parseInt(id),
+            },
+        });
 
-  if (!empresa) {
-    throw new Error("La empresa no existe.");
-  }
+        if (!empresa || empresa.estado !== true) {
+            return { status: 404, message: "Empresa no encontrada o inactiva" };
+        }
 
-  return empresa;
+        return { status: 200, message: "Empresa obtenida exitosamente", data: empresa };
+    } catch (error) {
+        return { status: 500, message: "Error al obtener la empresa", error: error.message };
+    }
 };
 
-export const updateEmpresa = async (id, nombre, razonSocial) => {
-  // Verificar si la empresa existe
-  const empresaExistente = await prisma.empresa.findUnique({
-    where: { id: parseInt(id) },
-  });
+// Actualizar una empresa
+export const updateEmpresa = async (id, nombre) => {
+    try {
+        const todayISO = new Date().toISOString();
+        const fecha_actualizacion = getUTCTime(todayISO);
 
-  if (!empresaExistente) {
-    throw new Error("La empresa no existe.");
-  }
+        const empresaActualizada = await prisma.empresa.update({
+            where: {
+                id: parseInt(id),
+            },
+            data: {
+                nombre: nombre,
+                actualizado_en: fecha_actualizacion,
+            },
+        });
 
-  // Actualizar la empresa
-  const empresaActualizada = await prisma.empresa.update({
-    where: { id: parseInt(id) },
-    data: {
-      nombre,
-      razonSocial,
-      actualizadoEn: new Date(),
-    },
-  });
-
-  return empresaActualizada;
+        return { status: 200, message: "Empresa actualizada exitosamente", data: empresaActualizada };
+    } catch (error) {
+        if (error.code === "P2025") {
+            return { status: 404, message: "Empresa no encontrada para actualizar" };
+        } else if (error.code === "P2002") {
+            return { status: 400, message: "El nombre de la empresa ya está en uso", error: error.message };
+        }
+        return { status: 500, message: "Error al actualizar la empresa", error: error.message };
+    }
 };
 
+// Eliminar (desactivar) una empresa
 export const deleteEmpresa = async (id) => {
-  // Verificar si la empresa existe
-  const empresaExistente = await prisma.empresa.findUnique({
-    where: { id: parseInt(id) },
-  });
+    try {
+        const empresaDesactivada = await prisma.empresa.update({
+            where: {
+                id: parseInt(id),
+            },
+            data: {
+                estado: false, // Cambia el estado a inactivo
+            },
+        });
 
-  if (!empresaExistente) {
-    throw new Error("La empresa no existe.");
-  }
-
-  // Realizar un soft delete (desactivar la empresa)
-  await prisma.empresa.update({
-    where: { id: parseInt(id) },
-    data: { estado: false },
-  });
+        return { status: 200, message: "Empresa desactivada exitosamente", data: empresaDesactivada };
+    } catch (error) {
+        if (error.code === "P2025") {
+            return { status: 404, message: "Empresa no encontrada para desactivar" };
+        }
+        return { status: 500, message: "Error al desactivar la empresa", error: error.message };
+    }
 };

@@ -1,8 +1,11 @@
 import { PrismaClient } from "@prisma/client";
+import { getPeruTime, getUTCTime } from "../utils/Time.js";
 
 const prisma = new PrismaClient();
 
 export const assignEmpresaToEmbarcacion = async (empresaId, embarcacionId, fechaAsignacion) => {
+  const todayISO = new Date().toISOString();
+  const fecha_creacion = getUTCTime(todayISO);
   // Verificar si la empresa y la embarcación existen y están activas
   const empresa = await prisma.empresa.findUnique({
     where: { id: parseInt(empresaId) },
@@ -25,7 +28,9 @@ export const assignEmpresaToEmbarcacion = async (empresaId, embarcacionId, fecha
     data: {
       empresaId: parseInt(empresaId),
       embarcacionId: parseInt(embarcacionId),
-      fechaAsignacion: new Date(fechaAsignacion),
+      fechaAsignacion:fecha_creacion,
+      creadoEn:fecha_creacion,
+      actualizadoEn:fecha_creacion
     },
   });
 
@@ -69,8 +74,11 @@ export const unassignEmpresaFromEmbarcacion = async (empresaId, embarcacionId) =
 };
 
 export const updateFechaAsignacion = async (empresaId, embarcacionId, nuevaFechaAsignacion) => {
+  const todayISO = new Date().toISOString();
+  const fecha_creacion = getUTCTime(todayISO);
     const asignacionExistente = await prisma.empresaEmbarcacion.findUnique({
       where: {
+        actualizadoEn:fecha_creacion,
         empresaId_embarcacionId: {
           empresaId: parseInt(empresaId),
           embarcacionId: parseInt(embarcacionId),
