@@ -5,9 +5,9 @@ import { getUTCTime } from "../utils/Time.js";
 const prisma = new PrismaClient();
 
 // Crear un nuevo usuario
-export const createUsuario = async (nombre_usuario, contrasena_hash, nombre_completo, email, roles_ids) => {
-    if (!roles_ids || roles_ids.length === 0) {
-        throw new Error("Debe proporcionar al menos un rol para el usuario.");
+export const createUsuario = async (nombre_usuario, contrasena_hash, nombre_completo, email) => {
+    if (!nombre_usuario || !contrasena_hash || !nombre_completo || !email) {
+        throw new Error("Todos los campos son obligatorios: nombre_usuario, contraseña, nombre_completo, email.");
     }
 
     const usuarioExistente = await prisma.usuario.findUnique({
@@ -21,34 +21,79 @@ export const createUsuario = async (nombre_usuario, contrasena_hash, nombre_comp
     const hashedPassword = await bcrypt.hash(contrasena_hash, 10);
     const fecha_creacion = getUTCTime(new Date().toISOString());
 
-    const newUser = await prisma.$transaction(async (tx) => {
-        return tx.usuario.create({
-            data: {
-                nombre_usuario: nombre_usuario,
-                contrasena_hash: hashedPassword,
-                nombre_completo: nombre_completo,
-                email: email,
-                creado_en:fecha_creacion,
-                actualizado_en:fecha_creacion,
-                usuario_roles: {
-                    create: roles_ids.map(rolId => ({
-                        rol: {
-                            connect: { id: rolId },
-                        },
-                    })),
-                },
-            },
-            include: {
-                usuario_roles: {
-                    include: {
-                        rol: true,
-                    },
-                },
-            },
-        });
+    const newUser = await prisma.usuario.create({
+        data: {
+            nombre_usuario,
+            contrasena_hash: hashedPassword,
+            nombre_completo,
+            email,
+            creado_en: fecha_creacion,
+            actualizado_en: fecha_creacion,
+        },
     });
 
     return newUser;
+};
+
+// 🔹 Obtener todos los usuarios con sus roles
+export const getAllUsers = async () => {
+    const usuarios = await prisma.usuario.findMany({
+        where: { estado: true },
+        include: {
+            usuario_roles: {
+                include: { rol: true },
+            },
+        },
+        orderBy: { creado_en: "desc" },
+    });
+
+    if (usuarios.length === 0) {
+        throw new Error("No hay usuarios disponibles.");
+    }
+
+    return usuarios;
+};
+
+export const getFilteredUsers = async (filters) => {
+    const { nombre_usuario, email, estado, rol_id } = filters;
+
+    // Construcción dinámica de filtros
+    const whereClause = {
+        estado: estado !== undefined ? estado === "true" : true, // Filtra por estado (true por defecto)
+    };
+
+    if (nombre_usuario) {
+        whereClause.nombre_usuario = { contains: nombre_usuario };
+    }
+
+    if (email) {
+        whereClause.email = { contains: email };
+    }
+
+    // Filtrado por rol_id (si está presente)
+    if (rol_id) {
+        whereClause.usuario_roles = {
+            some: { rol_id: parseInt(rol_id, 10) },
+        };
+    }
+
+    const usuarios = await prisma.usuario.findMany({
+        where: whereClause,
+        include: {
+            usuario_roles: {
+                include: {
+                    rol: true,
+                },
+            },
+        },
+        orderBy: { creado_en: "desc" },
+    });
+
+    if (usuarios.length === 0) {
+        throw new Error("No se encontraron usuarios con los filtros proporcionados.");
+    }
+
+    return usuarios;
 };
 
 export const getUserByUsername=async(nombre_usuario)=>{
@@ -78,9 +123,7 @@ export const getUserById = async (id) => {
         where: { id: userId, estado: true },
         include: {
             usuario_roles: {
-                include: {
-                    rol: true,
-                },
+                include: { rol: true },
             },
         },
     });

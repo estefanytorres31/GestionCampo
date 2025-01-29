@@ -3,7 +3,8 @@ import {
     assignRolToUsuario,
     removeRolFromUsuario,
     getRolesByUsuario,
-    getUsuariosByRol
+    getUsuariosByRol,
+    assignMultipleRolesToUsuario
 } from "../controllers/UsuarioRolController.js";
 
 const usuarioRolRouter = Router();
@@ -13,6 +14,9 @@ usuarioRolRouter.post("/assign", assignRolToUsuario);
 
 // 📌 Remover un rol de un usuario (desactivar)
 usuarioRolRouter.put("/remove", removeRolFromUsuario);
+
+// 📌 Asignar múltiples roles a un usuario
+usuarioRolRouter.post("/assign-multiple-roles", assignMultipleRolesToUsuario);
 
 // 📌 Obtener todos los roles de un usuario
 usuarioRolRouter.get("/usuario/:usuario_id", getRolesByUsuario);

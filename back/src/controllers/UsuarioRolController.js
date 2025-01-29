@@ -12,6 +12,18 @@ export const assignRolToUsuario = async (req, res) => {
     }
 };
 
+// 🔹 Asignar múltiples roles a un usuario
+export const assignMultipleRolesToUsuario = async (req, res) => {
+    const { usuario_id, roles_ids } = req.body;
+
+    try {
+        const resultado = await UsuarioRolService.assignMultipleRolesToUsuario(usuario_id, roles_ids);
+        res.status(201).json({ message: "Roles asignados exitosamente.", data: resultado });
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+};
+
 // 🔹 Remover un rol de un usuario
 export const removeRolFromUsuario = async (req, res) => {
     const { usuario_id, rol_id } = req.body;

@@ -2,26 +2,28 @@ import * as UsuarioService from "../services/UsuarioService.js";
 
 // Crear un nuevo usuario
 export const createUsuario = async (req, res) => {
-    const { nombre_usuario, contrasena_hash, nombre_completo, email, roles_ids } = req.body;
+    const { nombre_usuario, contrasena_hash, nombre_completo, email } = req.body;
 
     try {
-        const usuario = await UsuarioService.createUsuario(
-            nombre_usuario,
-            contrasena_hash,
-            nombre_completo,
-            email,
-            roles_ids
-        );
+        const usuario = await UsuarioService.createUsuario(nombre_usuario, contrasena_hash, nombre_completo, email);
         res.status(201).json({ message: "Usuario creado exitosamente.", data: usuario });
     } catch (error) {
         res.status(400).json({ message: error.message });
     }
 };
 
-// Obtener todos los usuarios
 export const getAllUsers = async (req, res) => {
     try {
         const usuarios = await UsuarioService.getAllUsers();
+        res.status(200).json({ message: "Usuarios obtenidos exitosamente.", data: usuarios });
+    } catch (error) {
+        res.status(404).json({ message: error.message });
+    }
+};
+
+export const getFilteredUsers = async (req, res) => {
+    try {
+        const usuarios = await UsuarioService.getFilteredUsers(req.query);
         res.status(200).json({ message: "Usuarios obtenidos exitosamente.", data: usuarios });
     } catch (error) {
         res.status(404).json({ message: error.message });

@@ -63,6 +63,67 @@ export const assignRolToUsuario = async (usuario_id, rol_id) => {
     });
 };
 
+// 🔹 Asignar múltiples roles a un usuario
+export const assignMultipleRolesToUsuario = async (usuario_id, roles_ids) => {
+    if (!usuario_id || !Array.isArray(roles_ids) || roles_ids.length === 0) {
+        throw new Error("Debe proporcionar un usuario válido y al menos un rol.");
+    }
+
+    // Verificar si el usuario existe y está activo
+    const usuario = await prisma.usuario.findUnique({ where: { id: usuario_id } });
+
+    if (!usuario || !usuario.estado) {
+        throw new Error(`El usuario con ID ${usuario_id} no existe o está inactivo.`);
+    }
+
+    // Verificar si los roles existen y están activos
+    const rolesValidos = await prisma.rol.findMany({
+        where: { id: { in: roles_ids }, estado: true },
+    });
+
+    if (rolesValidos.length !== roles_ids.length) {
+        throw new Error("Algunos roles no existen o están inactivos.");
+    }
+
+    // Crear o actualizar los roles en una transacción
+    const fecha_actualizacion = getUTCTime(new Date());
+    const resultados = await prisma.$transaction(async (tx) => {
+        const operaciones = roles_ids.map(async (rol_id) => {
+            const relacionExistente = await tx.usuarioRol.findUnique({
+                where: {
+                    usuario_roles_usuario_id_rol_id_key: {
+                        usuario_id,
+                        rol_id,
+                    },
+                },
+            });
+
+            if (relacionExistente) {
+                if (!relacionExistente.estado) {
+                    return tx.usuarioRol.update({
+                        where: { id: relacionExistente.id },
+                        data: { estado: true, actualizado_en: fecha_actualizacion },
+                    });
+                }
+                return null; // Si ya está activo, no hacer nada
+            }
+
+            return tx.usuarioRol.create({
+                data: {
+                    usuario_id,
+                    rol_id,
+                    creado_en: fecha_actualizacion,
+                    actualizado_en: fecha_actualizacion,
+                },
+            });
+        });
+
+        return Promise.all(operaciones);
+    });
+
+    return { usuario_id, roles_asignados: roles_ids };
+};
+
 // 🔹 Remover un rol de un usuario (desactivarlo)
 export const removeRolFromUsuario = async (usuario_id, rol_id) => {
     if (isNaN(usuario_id) || isNaN(rol_id)) {
