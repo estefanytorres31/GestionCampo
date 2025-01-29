@@ -49,7 +49,6 @@ export const createTipoTrabajo = async (nombre_trabajo, descripcion) => {
 export const getAllTipoTrabajos = async () => {
     const tipoTrabajos = await prisma.tipoTrabajo.findMany({
         where: { estado: true },
-        orderBy: { creado_en: "desc" },
     });
 
     if (tipoTrabajos.length === 0) {

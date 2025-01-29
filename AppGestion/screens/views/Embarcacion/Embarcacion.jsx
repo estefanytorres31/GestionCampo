@@ -56,7 +56,7 @@ const EmbarcacionesScreen = ({ route, navigation }) => {
             }),
         ]).start();
 
-        navigation.navigate("DetalleEmbarcacion", { embarcacion });
+        navigation.navigate("Trabajo", { embarcacion });
     };
 
     const renderContent = () => {
