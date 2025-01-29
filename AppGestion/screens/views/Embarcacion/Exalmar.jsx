@@ -34,10 +34,10 @@ const Exalmar = ({ route, navigation }) => {
 
     const categories = [
         { icon: "anchor", text: "Don Alfredo", color: "#00897B", hasSubcategories: true },
-        { icon: "ship-wheel", text: "Caribe", color: "#00897B", hasSubcategories: false },
-        { icon: "anchor", text: "Ancash 2", color: "#00897B", hasSubcategories: false },
-        { icon: "ship-wheel", text: "Carmencita", color: "#00897B", hasSubcategories: false },
-        { icon: "anchor", text: "Creta", color: "#00897B", hasSubcategories: false },
+        { icon: "ship-wheel", text: "Caribe", color: "#00897B", hasSubcategories: true },
+        { icon: "anchor", text: "Ancash 2", color: "#00897B", hasSubcategories: true },
+        { icon: "ship-wheel", text: "Carmencita", color: "#00897B", hasSubcategories: true },
+        { icon: "anchor", text: "Creta", color: "#00897B", hasSubcategories: true },
     ];
 
     const handleCategoryPress = (text, hasSubcategories) => {

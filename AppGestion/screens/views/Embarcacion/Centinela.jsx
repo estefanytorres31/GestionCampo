@@ -35,11 +35,11 @@ const Austral = ({ route, navigation }) => {
 
     const categories = [
         { icon: "anchor", text: "Blandi", color: "#1565C0", hasSubcategories: true },
-        { icon: "ship-wheel", text: "Susan VI", color: "#1565C0", hasSubcategories: false },
-        { icon: "anchor", text: "Maria I", color: "#1565C0", hasSubcategories: false },
-        { icon: "ship-wheel", text: "Corintia", color: "#1565C0", hasSubcategories: false },
-        { icon: "anchor", text: "Mary", color: "#1565C0", hasSubcategories: false },
-        { icon: "ship-wheel", text: "Santa Adela II", color: "#1565C0", hasSubcategories: false },
+        { icon: "ship-wheel", text: "Susan VI", color: "#1565C0", hasSubcategories: true },
+        { icon: "anchor", text: "Maria I", color: "#1565C0", hasSubcategories: true },
+        { icon: "ship-wheel", text: "Corintia", color: "#1565C0", hasSubcategories: true },
+        { icon: "anchor", text: "Mary", color: "#1565C0", hasSubcategories: true },
+        { icon: "ship-wheel", text: "Santa Adela II", color: "#1565C0", hasSubcategories: true },
         { icon: "anchor", text: "Polar I", color: "#1565C0", hasSubcategories: true },
 
     ];

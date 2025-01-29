@@ -3,6 +3,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import LoginScreen from "./screens/views/Auth/Login";
 import Clientes from "./screens/views/client/Client";
+import Tasa from "./screens/views/Embarcacion/Tasa";
 import Exalmar from "./screens/views/Embarcacion/Exalmar";
 import Austral from "./screens/views/Embarcacion/Austral";
 import Diamante from "./screens/views/Embarcacion/Diamante";
@@ -20,6 +21,7 @@ export default function Navigation () {
             <Stack.Navigator initialRouteName="Login" >
                 <Stack.Screen name="Login" component={LoginScreen}  options={{ headerShown: false }} />
                 <Stack.Screen name="Clientes" component={Clientes}  options={{ title: "Clientes" , headerShown:false}} />
+                <Stack.Screen name="Tasa" component={Tasa}  options={{ title: "Tasa" }} />
                 <Stack.Screen name="Exalmar" component={Exalmar}  options={{ title: "Exalmar" }}/>
                 <Stack.Screen name="Austral" component={Austral}  options={{ title: "Austral" }}/>
                 <Stack.Screen name="Diamante" component={Diamante}  options={{ title: "Diamante" }}/>

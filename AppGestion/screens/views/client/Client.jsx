@@ -107,10 +107,12 @@ const ClientScreen = ({ navigation }) => {
 
                     <View style={styles.buttonContainer}>
                         {[
+                            { name: 'Tasa', style: styles.tasa, icon: 'boat-outline' },
                             { name: 'Exalmar', style: styles.exalmar, icon: 'boat-outline' },
                             { name: 'Austral', style: styles.austral, icon: 'boat-outline' },
                             { name: 'Diamante', style: styles.diamante, icon: 'boat-outline' },
                             { name: 'Centinela', style: styles.centinela, icon: 'boat-outline' }
+                            
                         ].map((client, index) => (
                             <TouchableOpacity
                                 key={index}
@@ -209,6 +211,9 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgba(255, 255, 255, 0.2)',
         justifyContent: 'center',
         alignItems: 'center',
+    },
+    tasa: {
+        backgroundColor: '#7fa23d',
     },
     exalmar: {
         backgroundColor: '#00897B',

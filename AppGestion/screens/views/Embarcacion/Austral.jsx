@@ -34,14 +34,14 @@ const Austral = ({ route, navigation }) => {
     }, []);
 
     const categories = [
-        { icon: "ferry", text: "Estela De Oro II", color: "#2E7D32", hasSubcategories: true },
-        { icon: "sail-boat", text: "Kiana", color: "#2E7D32", hasSubcategories: false },
-        { icon: "ship-wheel", text: "Marina", color: "#2E7D32", hasSubcategories: false },
-        { icon: "anchor", text: "Piti", color: "#2E7D32", hasSubcategories: false },
-        { icon: "ferry", text: "Resbalosa II", color: "#2E7D32", hasSubcategories: false },
-        { icon: "sail-boat", text: "Simon", color: "#2E7D32", hasSubcategories: false },
+        { icon: "anchor", text: "Estela De Oro II", color: "#2E7D32", hasSubcategories: true },
+        { icon: "ship-wheel", text: "Kiana", color: "#2E7D32", hasSubcategories: true },
+        { icon: "anchor", text: "Marina", color: "#2E7D32", hasSubcategories: true },
+        { icon: "ship-wheel", text: "Piti", color: "#2E7D32", hasSubcategories: true },
+        { icon: "anchor", text: "Resbalosa II", color: "#2E7D32", hasSubcategories: true },
+        { icon: "ship-wheel", text: "Simon", color: "#2E7D32", hasSubcategories: true },
         { icon: "anchor", text: "Estela De Plata II", color: "#2E7D32", hasSubcategories: true },
-        { icon: "lighthouse", text: "Vea", color: "#2E7D32", hasSubcategories: false },
+        { icon: "ship-wheel", text: "Vea", color: "#2E7D32", hasSubcategories: true },
     ];
 
     const handleCategoryPress = (text, hasSubcategories) => {

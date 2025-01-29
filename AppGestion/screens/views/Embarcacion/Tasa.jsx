@@ -12,7 +12,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 const { width } = Dimensions.get('window');
 
-const Austral = ({ route, navigation }) => {
+const tasa = ({ route, navigation }) => {
     const { clase } = route.params || {};
     const fadeAnim = React.useRef(new Animated.Value(0)).current;
     const scaleAnim = React.useRef(new Animated.Value(0.9)).current;
@@ -34,20 +34,50 @@ const Austral = ({ route, navigation }) => {
     }, []);
 
     const categories = [
-        { icon: "anchor", text: "Patricia", color: "#C0911F", hasSubcategories: true },
-        { icon: "ship-wheel", text: "Corina", color: "#C0911F", hasSubcategories: true },
-        { icon: "anchor", text: "Gabriela V", color: "#C0911F", hasSubcategories: true },
-        { icon: "ship-wheel", text: "Alessandro", color: "#C0911F", hasSubcategories: true },
-        { icon: "anchor", text: "Natalia", color: "#C0911F", hasSubcategories: true },
-        { icon: "ship-wheel", text: "Stefano", color: "#C0911F", hasSubcategories: true },
-        { icon: "anchor", text: "Fabiola", color: "#C0911F", hasSubcategories: true },
-        { icon: "ship-wheel", text: "Daniella", color: "#C0911F", hasSubcategories: true },
-        { icon: "anchor", text: "Graciela", color: "#C0911F", hasSubcategories: true },
-        { icon: "ship-wheel", text: "Sebastian", color: "#C0911F", hasSubcategories: true },
-        { icon: "anchor", text: "Alexandra", color: "#C0911F", hasSubcategories: true },
-        { icon: "ship-wheel", text: "Polar VII", color: "#C0911F", hasSubcategories: true },
-        { icon: "anchor", text: "Pola IV", color: "#C0911F", hasSubcategories: true },
-
+        { icon: "anchor", text: "Tasa 17", color: "#7fa23d", hasSubcategories: true },
+        { icon: "ship-wheel", text: "Tasa 21", color: "#7fa23d", hasSubcategories: true },
+        { icon: "anchor", text: "Tasa 22", color: "#7fa23d", hasSubcategories: true },
+        { icon: "ship-wheel", text: "Tasa 23", color: "#7fa23d", hasSubcategories: true },
+        { icon: "anchor", text: "Tasa 31", color: "#7fa23d", hasSubcategories: true },
+        { icon: "ship-wheel", text: "Tasa 32", color: "#7fa23d", hasSubcategories: true },
+        { icon: "anchor", text: "Tasa 34", color: "#7fa23d", hasSubcategories: true },
+        { icon: "ship-wheel", text: "Tasa 36", color: "#7fa23d", hasSubcategories: true },
+        { icon: "anchor", text: "Tasa 37", color: "#7fa23d", hasSubcategories: true },
+        { icon: "ship-wheel", text: "Tasa 38", color: "#7fa23d", hasSubcategories: true },
+        { icon: "anchor", text: "Tasa 41", color: "#7fa23d", hasSubcategories: true },
+        { icon: "ship-wheel", text: "Tasa 42", color: "#7fa23d", hasSubcategories: true },
+        { icon: "anchor", text: "Tasa 43", color: "#7fa23d", hasSubcategories: true },
+        { icon: "ship-wheel", text: "Tasa 44", color: "#7fa23d", hasSubcategories: true },
+        { icon: "anchor", text: "Tasa 51", color: "#7fa23d", hasSubcategories: true },
+        { icon: "ship-wheel", text: "Tasa 52", color: "#7fa23d", hasSubcategories: true },
+        { icon: "anchor", text: "Tasa 53", color: "#7fa23d", hasSubcategories: true },
+        { icon: "ship-wheel", text: "Tasa 54", color: "#7fa23d", hasSubcategories: true },
+        { icon: "anchor", text: "Tasa 55", color: "#7fa23d", hasSubcategories: true },
+        { icon: "ship-wheel", text: "Tasa 56", color: "#7fa23d", hasSubcategories: true },
+        { icon: "anchor", text: "Tasa 57", color: "#7fa23d", hasSubcategories: true },
+        { icon: "ship-wheel", text: "Tasa 58", color: "#7fa23d", hasSubcategories: true },
+        { icon: "anchor", text: "Tasa 59", color: "#7fa23d", hasSubcategories: true },
+        { icon: "ship-wheel", text: "Tasa 61", color: "#7fa23d", hasSubcategories: true },
+        { icon: "anchor", text: "Tasa 71", color: "#7fa23d", hasSubcategories: true },
+        { icon: "ship-wheel", text: "Tasa 111", color: "#7fa23d", hasSubcategories: true },
+        { icon: "anchor", text: "Tasa 210", color: "#7fa23d", hasSubcategories: true },
+        { icon: "ship-wheel", text: "Tasa 218", color: "#7fa23d", hasSubcategories: true },
+        { icon: "anchor", text: "Tasa 310", color: "#7fa23d", hasSubcategories: true },
+        { icon: "ship-wheel", text: "Tasa 314", color: "#7fa23d", hasSubcategories: true },
+        { icon: "anchor", text: "Tasa 315", color: "#7fa23d", hasSubcategories: true },
+        { icon: "ship-wheel", text: "Tasa 411", color: "#7fa23d", hasSubcategories: true },
+        { icon: "anchor", text: "Tasa 412", color: "#7fa23d", hasSubcategories: true },
+        { icon: "ship-wheel", text: "Tasa 413", color: "#7fa23d", hasSubcategories: true },
+        { icon: "anchor", text: "Tasa 414", color: "#7fa23d", hasSubcategories: true },
+        { icon: "ship-wheel", text: "Tasa 416", color: "#7fa23d", hasSubcategories: true },
+        { icon: "anchor", text: "Tasa 417", color: "#7fa23d", hasSubcategories: true },
+        { icon: "ship-wheel", text: "Tasa 418", color: "#7fa23d", hasSubcategories: true },
+        { icon: "anchor", text: "Tasa 419", color: "#7fa23d", hasSubcategories: true },
+        { icon: "ship-wheel", text: "Tasa 420", color: "#7fa23d", hasSubcategories: true },
+        { icon: "anchor", text: "Tasa 424", color: "#7fa23d", hasSubcategories: true },
+        { icon: "ship-wheel", text: "Tasa 425", color: "#7fa23d", hasSubcategories: true },
+        { icon: "anchor", text: "Tasa 426", color: "#7fa23d", hasSubcategories: true },
+        { icon: "ship-wheel", text: "Tasa 427", color: "#7fa23d", hasSubcategories: true },
     ];
 
     const handleCategoryPress = (text, hasSubcategories) => {
@@ -195,4 +225,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default Austral;
+export default tasa;
