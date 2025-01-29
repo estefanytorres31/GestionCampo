@@ -1,199 +1,199 @@
 import { PrismaClient } from "@prisma/client";
-import { getPeruTime, getUTCTime } from "../utils/Time.js";
+import { getUTCTime } from "../utils/Time.js";
 
 const prisma = new PrismaClient();
 
-// Asignar un Trabajo a una Embarcación
-export const asignarTrabajoAEmbarcacion = async ({
-    id_tipo_trabajo,
-    id_embarcacion,
-    id_puerto,
-    id_jefe_asigna,
-    comentarios,
-}) => {
-    // Validaciones básicas
-    if (isNaN(id_tipo_trabajo) || isNaN(id_embarcacion) || isNaN(id_puerto) || isNaN(id_jefe_asigna)) {
-        throw new Error("Todos los IDs proporcionados deben ser números válidos.");
+/**
+ * Crear o Reactivar una relación TipoTrabajoEmbarcacionSistemaParte
+ * @param {number} id_tipo_trabajo - ID del tipo de trabajo
+ * @param {number} id_embarcacion_sistema_parte - ID de la relación embarcación-sistema-parte
+ * @returns {Promise<Object>} - La relación creada o reactivada
+ */
+export const createOrReactivateTipoTrabajoESP = async (id_tipo_trabajo, id_embarcacion_sistema_parte) => {
+    if (!id_tipo_trabajo || !id_embarcacion_sistema_parte) {
+        throw { status: 400, message: "El ID del tipo de trabajo y de la relación embarcación-sistema-parte son obligatorios." };
     }
 
-    // Verificar que el TipoTrabajo exista y esté activo
-    const tipoTrabajo = await prisma.tipoTrabajo.findUnique({
-        where: { id_tipo_trabajo },
+    const fechaActual = getUTCTime(new Date().toISOString());
+
+    // Verificar si la relación ya existe
+    const relacionExistente = await prisma.tipoTrabajoEmbarcacionSistemaParte.findUnique({
+        where: { unq_tt_esp: { id_tipo_trabajo, id_embarcacion_sistema_parte } }
     });
 
-    if (!tipoTrabajo || !tipoTrabajo.estado) {
-        throw new Error(`El tipo de trabajo con ID ${id_tipo_trabajo} no existe o está inactivo.`);
-    }
-    const todayISO = new Date().toISOString();
-    const fecha_creacion = getUTCTime(todayISO);
-
-    // Verificar que la Embarcacion exista y esté activa
-    const embarcacion = await prisma.embarcacion.findUnique({
-        where: { id_embarcacion },
-    });
-
-    if (!embarcacion || !embarcacion.estado) {
-        throw new Error(`La embarcación con ID ${id_embarcacion} no existe o está inactiva.`);
-    }
-
-    // Verificar que el Puerto exista y esté activo
-    const puerto = await prisma.puerto.findUnique({
-        where: { id_puerto },
-    });
-
-    if (!puerto || !puerto.estado) {
-        throw new Error(`El puerto con ID ${id_puerto} no existe o está inactivo.`);
+    if (relacionExistente) {
+        if (relacionExistente.estado) {
+            throw { status: 400, message: "Esta relación ya está activa." };
+        } else {
+            // Reactivar la relación si estaba desactivada
+            return await prisma.tipoTrabajoEmbarcacionSistemaParte.update({
+                where: { id_tipo_trabajo_embarcacion_sistema_parte: relacionExistente.id_tipo_trabajo_embarcacion_sistema_parte },
+                data: {
+                    estado: true,
+                    actualizado_en: fechaActual,
+                }
+            });
+        }
     }
 
-    // Verificar que el Usuario (Jefe que asigna) exista y tenga el rol adecuado
-    const jefe = await prisma.usuario.findUnique({
-        where: { id: id_jefe_asigna },
-    });
-
-    if (!jefe || !jefe.estado) {
-        throw new Error(`El usuario con ID ${id_jefe_asigna} no existe o está inactivo.`);
-    }
-
-    // Crear la Orden de Trabajo
-    const ordenTrabajo = await prisma.ordenTrabajo.create({
+    // Crear nueva relación
+    const nuevaRelacion = await prisma.tipoTrabajoEmbarcacionSistemaParte.create({
         data: {
             id_tipo_trabajo,
-            id_embarcacion,
-            id_puerto,
-            id_jefe_asigna,
-            fecha_asignacion: fecha_creacion,
-            estado: "pendiente",
-            comentarios,
-            creado_en:fecha_creacion,
-            actualizado_en:fecha_creacion
+            id_embarcacion_sistema_parte,
+            estado: true,
+            creado_en: fechaActual,
+            actualizado_en: fechaActual,
+        }
+    });
 
+    return nuevaRelacion;
+};
+
+/**
+ * Obtener todas las relaciones activas de TipoTrabajoEmbarcacionSistemaParte
+ * @returns {Promise<Array>} - Lista de relaciones activas
+ */
+export const getAllTipoTrabajoESP = async () => {
+    const relaciones = await prisma.tipoTrabajoEmbarcacionSistemaParte.findMany({
+        where: { estado: true },
+        include: {
+            tipo_trabajo: true,
+            embarcacion_sistema_parte: {
+                include: {
+                    embarcacion_sistema: {
+                        include: {
+                            embarcacion: true,
+                            sistema: true,
+                        }
+                    },
+                    parte: true,
+                }
+            }
         },
+        orderBy: { creado_en: "desc" },
     });
 
-    return ordenTrabajo;
-};
-
-// Gestionar el Estado de la Orden de Trabajo
-export const gestionarEstadoOrdenTrabajo = async (id_orden_trabajo, nuevo_estado) => {
-    const todayISO = new Date().toISOString();
-    const fecha_creacion = getUTCTime(todayISO);
-    const validEstados = ["pendiente", "en_progreso", "completado", "cancelado"];
-    if (!validEstados.includes(nuevo_estado)) {
-        throw new Error(`El estado "${nuevo_estado}" no es válido. Estados permitidos: ${validEstados.join(", ")}.`);
+    if (relaciones.length === 0) {
+        throw { status: 404, message: "No hay relaciones disponibles." };
     }
 
-    // Verificar que la Orden de Trabajo exista
-    const ordenTrabajo = await prisma.ordenTrabajo.findUnique({
-        where: { id_orden_trabajo },
-    });
-
-    if (!ordenTrabajo) {
-        throw new Error(`La orden de trabajo con ID ${id_orden_trabajo} no existe.`);
-    }
-
-    // Actualizar el estado
-    const ordenTrabajoActualizada = await prisma.ordenTrabajo.update({
-        where: { id_orden_trabajo },
-        data: { estado: nuevo_estado, actualizado_en: fecha_creacion},
-    });
-
-    return ordenTrabajoActualizada;
+    return relaciones;
 };
 
-// Actualizar el Estado de la Orden de Trabajo
-export const actualizarEstadoOrdenTrabajo = async (id_orden_trabajo, nuevo_estado) => {
-    // Este método puede reutilizarse con gestionarEstadoOrdenTrabajo
-    return await gestionarEstadoOrdenTrabajo(id_orden_trabajo, nuevo_estado);
-};
-
-// Asignar múltiples Ordenes de Trabajo a una Embarcación (Transacción)
-export const asignarMultipleOrdenesTrabajoAEmbarcacion = async (ordenes) => {
-    const todayISO = new Date().toISOString();
-    const fecha_creacion = getUTCTime(todayISO);
-    /*
-        'ordenes' es un array de objetos que contienen:
-        - id_tipo_trabajo
-        - id_embarcacion
-        - id_puerto
-        - id_jefe_asigna
-        - comentarios
-    */
-
-    if (!Array.isArray(ordenes) || ordenes.length === 0) {
-        throw new Error("Debe proporcionar una lista válida de órdenes de trabajo.");
+/**
+ * Obtener una relación por su ID
+ * @param {number} id - ID de la relación
+ * @returns {Promise<Object>} - La relación encontrada
+ */
+export const getTipoTrabajoESPById = async (id) => {
+    if (!id) {
+        throw { status: 400, message: "El ID de la relación es obligatorio." };
     }
 
-    // Iniciar una transacción
-    const resultados = await prisma.$transaction(async (tx) => {
-        const operaciones = ordenes.map(async (orden) => {
-            const {
-                id_tipo_trabajo,
-                id_embarcacion,
-                id_puerto,
-                id_jefe_asigna,
-                comentarios,
-            } = orden;
-
-            // Validaciones similares a asignarTrabajoAEmbarcacion
-            if (
-                isNaN(id_tipo_trabajo) ||
-                isNaN(id_embarcacion) ||
-                isNaN(id_puerto) ||
-                isNaN(id_jefe_asigna)
-            ) {
-                throw new Error("Todos los IDs proporcionados deben ser números válidos.");
+    const relacion = await prisma.tipoTrabajoEmbarcacionSistemaParte.findUnique({
+        where: { id_tipo_trabajo_embarcacion_sistema_parte: parseInt(id, 10) },
+        include: {
+            tipo_trabajo: true,
+            embarcacion_sistema_parte: {
+                include: {
+                    embarcacion_sistema: {
+                        include: {
+                            embarcacion: true,
+                            sistema: true,
+                        }
+                    },
+                    parte: true,
+                }
             }
-
-            const tipoTrabajo = await tx.tipoTrabajo.findUnique({
-                where: { id_tipo_trabajo },
-            });
-
-            if (!tipoTrabajo || !tipoTrabajo.estado) {
-                throw new Error(`El tipo de trabajo con ID ${id_tipo_trabajo} no existe o está inactivo.`);
-            }
-
-            const embarcacion = await tx.embarcacion.findUnique({
-                where: { id_embarcacion },
-            });
-
-            if (!embarcacion || !embarcacion.estado) {
-                throw new Error(`La embarcación con ID ${id_embarcacion} no existe o está inactiva.`);
-            }
-
-            const puerto = await tx.puerto.findUnique({
-                where: { id_puerto },
-            });
-
-            if (!puerto || !puerto.estado) {
-                throw new Error(`El puerto con ID ${id_puerto} no existe o está inactivo.`);
-            }
-
-            const jefe = await tx.usuario.findUnique({
-                where: { id: id_jefe_asigna },
-            });
-
-            if (!jefe || !jefe.estado) {
-                throw new Error(`El usuario con ID ${id_jefe_asigna} no existe o está inactivo.`);
-            }
-
-            // Crear la Orden de Trabajo
-            return await tx.ordenTrabajo.create({
-                data: {
-                    id_tipo_trabajo,
-                    id_embarcacion,
-                    id_puerto,
-                    id_jefe_asigna,
-                    fecha_asignacion: new Date(),
-                    estado: "pendiente",
-                    comentarios,
-                    creado_en:fecha_creacion,
-                    actualizado_en: fecha_creacion,
-                },
-            });
-        });
-
-        return Promise.all(operaciones);
+        }
     });
 
-    return resultados;
+    if (!relacion || !relacion.estado) {
+        throw { status: 404, message: `La relación con ID ${id} no existe o está inactiva.` };
+    }
+
+    return relacion;
+};
+
+/**
+ * Actualizar una relación TipoTrabajoEmbarcacionSistemaParte
+ * @param {number} id - ID de la relación
+ * @param {Object} data - Datos a actualizar
+ * @returns {Promise<Object>} - La relación actualizada
+ */
+export const updateTipoTrabajoESP = async (id, data) => {
+    if (!id) {
+        throw { status: 400, message: "El ID de la relación es obligatorio." };
+    }
+
+    const fechaActual = getUTCTime(new Date().toISOString());
+
+    // Opcional: Validar los campos a actualizar
+    // Por ejemplo, si se intenta cambiar el id_tipo_trabajo o id_embarcacion_sistema_parte,
+    // deberías verificar que las nuevas relaciones existan y estén activas.
+
+    return await prisma.tipoTrabajoEmbarcacionSistemaParte.update({
+        where: { id_tipo_trabajo_embarcacion_sistema_parte: parseInt(id, 10) },
+        data: {
+            ...data,
+            actualizado_en: fechaActual,
+        },
+        include: {
+            tipo_trabajo: true,
+            embarcacion_sistema_parte: {
+                include: {
+                    embarcacion_sistema: {
+                        include: {
+                            embarcacion: true,
+                            sistema: true,
+                        }
+                    },
+                    parte: true,
+                }
+            }
+        }
+    });
+};
+
+/**
+ * Desactivar una relación TipoTrabajoEmbarcacionSistemaParte (Soft Delete)
+ * @param {number} id - ID de la relación
+ * @returns {Promise<Object>} - La relación desactivada
+ */
+export const desactivarTipoTrabajoESP = async (id) => {
+    if (!id) {
+        throw { status: 400, message: "El ID de la relación es obligatorio." };
+    }
+
+    const relacion = await prisma.tipoTrabajoEmbarcacionSistemaParte.findUnique({
+        where: { id_tipo_trabajo_embarcacion_sistema_parte: parseInt(id, 10) }
+    });
+
+    if (!relacion || !relacion.estado) {
+        throw { status: 404, message: "La relación ya está desactivada o no existe." };
+    }
+
+    const fechaActual = getUTCTime(new Date().toISOString());
+
+    const relacionDesactivada = await prisma.tipoTrabajoEmbarcacionSistemaParte.update({
+        where: { id_tipo_trabajo_embarcacion_sistema_parte: parseInt(id, 10) },
+        data: { estado: false, actualizado_en: fechaActual },
+        include: {
+            tipo_trabajo: true,
+            embarcacion_sistema_parte: {
+                include: {
+                    embarcacion_sistema: {
+                        include: {
+                            embarcacion: true,
+                            sistema: true,
+                        }
+                    },
+                    parte: true,
+                }
+            }
+        }
+    });
+
+    return relacionDesactivada;
 };
