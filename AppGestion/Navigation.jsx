@@ -9,7 +9,7 @@ import Austral from "./screens/views/Embarcacion/Austral";
 import Diamante from "./screens/views/Embarcacion/Diamante";
 import Centinela from "./screens/views/Embarcacion/Centinela";
 import SubcategoryScreen from "./screens/components/Subcategoria";
-
+import trabajo from "./screens/views/Tipo/Trabajo";
 import { TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
@@ -26,6 +26,7 @@ export default function Navigation () {
                 <Stack.Screen name="Austral" component={Austral}  options={{ title: "Austral" }}/>
                 <Stack.Screen name="Diamante" component={Diamante}  options={{ title: "Diamante" }}/>
                 <Stack.Screen name="Centinela" component={Centinela}  options={{ title: "Centinela" }}/>
+                <Stack.Screen name="Trabajo" component={trabajo}  options={{ title: "Trabajo" }}/>
                 <Stack.Screen name='SubcategoryScreen' component={SubcategoryScreen}/>
             </Stack.Navigator>
         </NavigationContainer>

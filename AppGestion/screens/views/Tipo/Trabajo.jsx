@@ -17,7 +17,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage"
 
 const { height, width } = Dimensions.get('window')
 
-const ClientScreen = ({ navigation }) => {
+const trabajo = ({ navigation }) => {
     const auth = useAuth();
     const fadeAnim = React.useRef(new Animated.Value(0)).current;
     const scaleAnim = React.useRef(new Animated.Value(0.95)).current;
@@ -101,17 +101,15 @@ const ClientScreen = ({ navigation }) => {
                     ]}
                 >
                     <View style={styles.headerContainer}>
-                        <Text style={styles.welcomeText}>¡Bienvenido!</Text>
-                        <Text style={styles.subtitle}>Selecciona un cliente</Text>
+                        <Text style={styles.subtitle}>Selecciona un tipo de trabajo</Text>
                     </View>
 
                     <View style={styles.buttonContainer}>
                         {[
-                            { name: 'Tasa', style: styles.tasa, icon: 'boat-outline' },
-                            { name: 'Exalmar', style: styles.exalmar, icon: 'boat-outline' },
-                            { name: 'Austral', style: styles.austral, icon: 'boat-outline' },
-                            { name: 'Diamante', style: styles.diamante, icon: 'boat-outline' },
-                            { name: 'Centinela', style: styles.centinela, icon: 'boat-outline' }
+                            { name: 'Mantto Preventivo', style: styles.preventivo, icon: 'boat-outline' },
+                            { name: 'Mantto Correctivo', style: styles.correctivo, icon: 'boat-outline' },
+                            { name: 'Proyecto', style: styles.proyecto, icon: 'boat-outline' },
+                            { name: 'Desmontaje / Montaje', style: styles.desmontaje, icon: 'boat-outline' },
                             
                         ].map((client, index) => (
                             <TouchableOpacity
@@ -129,17 +127,6 @@ const ClientScreen = ({ navigation }) => {
                                 </View>
                             </TouchableOpacity>
                         ))}
-                    </View>
-
-                    <View style={styles.footerContainer}>
-                        <TouchableOpacity 
-                            style={styles.logoutButton} 
-                            onPress={Logout}
-                            activeOpacity={0.9}
-                        >
-                            <Ionicons name="log-out-outline" size={24} color="#EB1111" style={styles.logoutIcon} />
-                            <Text style={styles.logoutText}>CERRAR SESIÓN</Text>
-                        </TouchableOpacity>
                     </View>
                 </Animated.View>
             </LinearGradient>
@@ -164,15 +151,6 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         marginTop: 20,
-    },
-    welcomeText: {
-        fontSize: 32,
-        fontWeight: '800',
-        color: '#2d3436',
-        marginBottom: 8,
-        textShadowColor: 'rgba(0, 0, 0, 0.1)',
-        textShadowOffset: { width: 1, height: 1 },
-        textShadowRadius: 2,
     },
     subtitle: {
         fontSize: 24,
@@ -212,20 +190,17 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
     },
-    tasa: {
+    preventivo: {
         backgroundColor: '#7fa23d',
     },
-    exalmar: {
+    correctivo: {
         backgroundColor: '#00897B',
     },
-    austral: {
+    proyecto: {
         backgroundColor: '#2E7D32',
     },
-    diamante: {
+    desmontaje: {
         backgroundColor: '#C0911F',
-    },
-    centinela: {
-        backgroundColor: '#1565C0',
     },
     buttonText: {
         color: '#fff',
@@ -235,39 +210,6 @@ const styles = StyleSheet.create({
         flex: 1,
         marginLeft: 15,
     },
-    footerContainer: {
-        flex: 0.2,
-        justifyContent: 'flex-end',
-        alignItems: 'center',
-        paddingBottom: 20,
-    },
-    logoutButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: '#fff',
-        padding: 16,
-        borderRadius: 30,
-        width: '80%',
-        maxWidth: 280,
-        elevation: 6,
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 3,
-        },
-        shadowOpacity: 0.27,
-        shadowRadius: 4.65,
-    },
-    logoutIcon: {
-        marginRight: 8,
-    },
-    logoutText: {
-        color: '#EB1111',
-        fontSize: 16,
-        fontWeight: 'bold',
-        letterSpacing: 1,
-    },
 });
 
-export default ClientScreen;
+export default trabajo;
