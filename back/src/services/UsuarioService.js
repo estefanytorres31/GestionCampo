@@ -215,16 +215,3 @@ export const deleteUser = async (id) => {
     return deletedUser;
 };
 
-export const getAllUsers=async()=>{
-    const users = await prisma.usuario.findMany({
-        where: { estado: true },
-        include: {
-            usuario_roles: {
-                include: {
-                    rol: true,
-                },
-            },
-        },
-    });
-    return users;
-}
