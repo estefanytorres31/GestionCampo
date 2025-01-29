@@ -23,6 +23,7 @@ import parteRouter from './routes/ParteRoute.js';
 import { getPartesBySistema } from './controllers/SistemaParteController.js';
 import sistemaParteRouter from './routes/SistemaParteRoute.js';
 import embarcacionSistemaParteRouter from './routes/EmbarcacionSistemaParteRouter.js';
+import usuarioRolRouter from './routes/UsuarioRolRouter.js';
 
 const app = express();
 
@@ -40,6 +41,7 @@ app.use(fileUpload({
 // Routes
 app.use('/api/rol', rolRouter);
 app.use('/api/usuario', usuarioRouter);
+app.use('/api/usuariorol', usuarioRolRouter);
 app.use('/api/auth', authRouter);
 app.use('/api/sistema', sistemaRouter);
 app.use('/api/puerto', puertoRouter);

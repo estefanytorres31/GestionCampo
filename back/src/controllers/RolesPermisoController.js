@@ -1,4 +1,3 @@
-// src/controllers/RolesPermisoController.js
 import * as RolesPermisoService from "../services/RolesPermisoService.js";
 
 // Asignar un permiso a un rol
@@ -31,6 +30,11 @@ export const getPermisosByRol = async (req, res) => {
 
     try {
         const permisos = await RolesPermisoService.getPermisosByRol(rol_id);
+
+        if (permisos.length === 0) {
+            return res.status(404).json({ message: "No hay permisos asignados a este rol.", data: [] });
+        }
+
         res.status(200).json({ message: "Permisos obtenidos exitosamente.", data: permisos });
     } catch (error) {
         res.status(404).json({ message: error.message });
@@ -43,7 +47,27 @@ export const getRolesByPermiso = async (req, res) => {
 
     try {
         const roles = await RolesPermisoService.getRolesByPermiso(permiso_id);
+
+        if (roles.length === 0) {
+            return res.status(404).json({ message: "No hay roles asignados a este permiso.", data: [] });
+        }
+
         res.status(200).json({ message: "Roles obtenidos exitosamente.", data: roles });
+    } catch (error) {
+        res.status(404).json({ message: error.message });
+    }
+};
+
+// Obtener todas las relaciones entre roles y permisos activas
+export const getAllRolesPermisos = async (req, res) => {
+    try {
+        const rolesPermisos = await RolesPermisoService.getAllRolesPermisos();
+
+        if (rolesPermisos.length === 0) {
+            return res.status(404).json({ message: "No hay relaciones activas entre roles y permisos.", data: [] });
+        }
+
+        res.status(200).json({ message: "Relaciones entre roles y permisos obtenidas exitosamente.", data: rolesPermisos });
     } catch (error) {
         res.status(404).json({ message: error.message });
     }

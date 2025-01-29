@@ -6,14 +6,7 @@ export const createTipoTrabajo = async (req, res) => {
 
     try {
         const tipoTrabajo = await TipoTrabajoService.createTipoTrabajo(nombre_trabajo, descripcion);
-        // Determinar si se creó un nuevo TipoTrabajo o se reactivó uno existente
-        const mensaje = tipoTrabajo.estado
-            ? (tipoTrabajo.creado_en.getTime() === tipoTrabajo.actualizado_en.getTime()
-                ? "Tipo de trabajo creado exitosamente."
-                : "Tipo de trabajo reactivado exitosamente.")
-            : "Tipo de trabajo creado exitosamente.";
-
-        res.status(201).json({ message: mensaje, data: tipoTrabajo });
+        res.status(201).json({ message: "Tipo de trabajo creado o reactivado exitosamente.", data: tipoTrabajo });
     } catch (error) {
         res.status(400).json({ message: error.message });
     }
@@ -47,12 +40,17 @@ export const updateTipoTrabajo = async (req, res) => {
     const { nombre_trabajo, descripcion, estado } = req.body;
 
     try {
+        if (!nombre_trabajo && descripcion === undefined && estado === undefined) {
+            return res.status(400).json({ message: "Debe proporcionar al menos un campo válido para actualizar." });
+        }
+
         const tipoTrabajo = await TipoTrabajoService.updateTipoTrabajo(id, nombre_trabajo, descripcion, estado);
         res.status(200).json({ message: "Tipo de trabajo actualizado exitosamente.", data: tipoTrabajo });
     } catch (error) {
         res.status(400).json({ message: error.message });
     }
 };
+
 
 // Eliminar (desactivar) un TipoTrabajo
 export const deleteTipoTrabajo = async (req, res) => {

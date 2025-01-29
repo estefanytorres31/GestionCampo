@@ -65,6 +65,7 @@ model RolesPermiso {
   permiso_id     Int      @map("permiso_id")
   estado         Boolean  @default(true)
   creado_en      DateTime @default(now()) @map("creado_en")
+  actualizado_en DateTime @updatedAt @map("actualizado_en") // ← Agregamos esto
   rol            Rol      @relation(fields: [rol_id], references: [id], onDelete: NoAction, onUpdate: Cascade)
   permiso        Permiso  @relation(fields: [permiso_id], references: [id], onDelete: NoAction, onUpdate: Cascade)
 
@@ -100,11 +101,15 @@ model UsuarioRol {
   rol_id      Int      @map("rol_id")
   estado      Boolean  @default(true)
   creado_en   DateTime @default(now()) @map("creado_en")
+  actualizado_en DateTime @updatedAt @map("actualizado_en")  // NUEVO CAMPO
   usuario     Usuario  @relation(fields: [usuario_id], references: [id], onDelete: NoAction, onUpdate: Cascade)
   rol         Rol      @relation(fields: [rol_id], references: [id], onDelete: NoAction, onUpdate: Cascade)
 
   @@unique([usuario_id, rol_id], name: "usuario_roles_usuario_id_rol_id_key")
   @@map("usuario_roles")
+  @@index([usuario_id], name: "idx_usuario_roles_usuario_id")  // Índice para optimizar búsqueda por usuario
+  @@index([rol_id], name: "idx_usuario_roles_rol_id")  // Índice para optimizar búsqueda por rol
+  @@index([estado], name: "idx_usuario_roles_estado")  // Índice para filtrar por estado activo
 }
 
 model Empresa {
@@ -347,8 +352,6 @@ model OrdenTrabajoParte {
   @@unique([id_orden_trabajo_sistema, id_parte], name: "orden_trabajo_parte_unique")
   @@map("orden_trabajo_parte")
 }
-
-
 
 model TareaRealizada {
   id_tarea_realizada    Int              @id @default(autoincrement()) @map("id_tarea_realizada")

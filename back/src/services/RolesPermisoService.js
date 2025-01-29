@@ -1,4 +1,4 @@
-import { getPeruTime, getUTCTime } from "../utils/Time.js";
+import { getUTCTime } from "../utils/Time.js";
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
@@ -10,19 +10,13 @@ export const assignPermisoToRol = async (rol_id, permiso_id) => {
     }
 
     // Verificar si el rol existe y está activo
-    const rol = await prisma.rol.findUnique({
-        where: { id: parseInt(rol_id, 10) },
-    });
-
+    const rol = await prisma.rol.findUnique({ where: { id: parseInt(rol_id, 10) } });
     if (!rol || !rol.estado) {
         throw new Error(`El rol con ID ${rol_id} no existe o está inactivo.`);
     }
 
     // Verificar si el permiso existe y está activo
-    const permiso = await prisma.permiso.findUnique({
-        where: { id: parseInt(permiso_id, 10) },
-    });
-
+    const permiso = await prisma.permiso.findUnique({ where: { id: parseInt(permiso_id, 10) } });
     if (!permiso || !permiso.estado) {
         throw new Error(`El permiso con ID ${permiso_id} no existe o está inactivo.`);
     }
@@ -37,33 +31,33 @@ export const assignPermisoToRol = async (rol_id, permiso_id) => {
         },
     });
 
-    if (relacionExistente && relacionExistente.estado) {
-        throw new Error("La relación entre el rol y el permiso ya existe y está activa.");
+    if (relacionExistente) {
+        if (relacionExistente.estado) {
+            throw new Error("El permiso ya está asignado a este rol.");
+        } else {
+            // Reactivar la relación existente
+            return await prisma.rolesPermiso.update({
+                where: { id: relacionExistente.id },
+                data: {
+                    estado: true,
+                    actualizado_en: getUTCTime(new Date()),
+                },
+            });
+        }
     }
 
-    if (relacionExistente && !relacionExistente.estado) {
-        // Reactivar la relación existente
-        const relacionReactivada = await prisma.rolesPermiso.update({
-            where: {
-                id: relacionExistente.id,
-            },
-            data: { estado: true },
-        });
-        return relacionReactivada;
-    }
-
-    // Crear la relación
-    const nuevaRelacion = await prisma.rolesPermiso.create({
+    // Crear la nueva relación con fecha UTC
+    return await prisma.rolesPermiso.create({
         data: {
             rol_id: parseInt(rol_id, 10),
             permiso_id: parseInt(permiso_id, 10),
+            creado_en: getUTCTime(new Date()),
+            actualizado_en: getUTCTime(new Date()),
         },
     });
-
-    return nuevaRelacion;
 };
 
-// Quitar un permiso de un rol
+// Quitar un permiso de un rol (desactivarlo)
 export const removePermisoFromRol = async (rol_id, permiso_id) => {
     if (isNaN(rol_id) || isNaN(permiso_id)) {
         throw new Error("El ID del rol y del permiso deben ser números válidos.");
@@ -80,41 +74,34 @@ export const removePermisoFromRol = async (rol_id, permiso_id) => {
     });
 
     if (!relacion || !relacion.estado) {
-        throw new Error("La relación entre el rol y el permiso no existe o ya está inactiva.");
+        throw new Error("El permiso no está asignado a este rol o ya está inactivo.");
     }
 
-    // Desactivar la relación
-    const relacionDesactivada = await prisma.rolesPermiso.update({
+    // Desactivar la relación y actualizar la fecha
+    return await prisma.rolesPermiso.update({
         where: { id: relacion.id },
-        data: { estado: false },
+        data: {
+            estado: false,
+            actualizado_en: getUTCTime(new Date()),
+        },
     });
-
-    return relacionDesactivada;
 };
 
-// Obtener todos los permisos asignados a un rol
+// Obtener todos los permisos activos asignados a un rol
 export const getPermisosByRol = async (rol_id) => {
     if (isNaN(rol_id)) {
         throw new Error("El ID del rol debe ser un número válido.");
     }
 
-    // Verificar si el rol existe y está activo
-    const rol = await prisma.rol.findUnique({
-        where: { id: parseInt(rol_id, 10) },
-    });
-
+    // Verificar que el rol exista y esté activo
+    const rol = await prisma.rol.findUnique({ where: { id: parseInt(rol_id, 10) } });
     if (!rol || !rol.estado) {
         throw new Error(`El rol con ID ${rol_id} no existe o está inactivo.`);
     }
 
     const permisos = await prisma.rolesPermiso.findMany({
-        where: {
-            rol_id: parseInt(rol_id, 10),
-            estado: true,
-        },
-        include: {
-            permiso: true,
-        },
+        where: { rol_id: parseInt(rol_id, 10), estado: true },
+        include: { permiso: true },
     });
 
     return permisos.map(rp => rp.permiso);
@@ -126,24 +113,31 @@ export const getRolesByPermiso = async (permiso_id) => {
         throw new Error("El ID del permiso debe ser un número válido.");
     }
 
-    // Verificar si el permiso existe y está activo
-    const permiso = await prisma.permiso.findUnique({
-        where: { id: parseInt(permiso_id, 10) },
-    });
-
+    // Verificar que el permiso exista y esté activo
+    const permiso = await prisma.permiso.findUnique({ where: { id: parseInt(permiso_id, 10) } });
     if (!permiso || !permiso.estado) {
         throw new Error(`El permiso con ID ${permiso_id} no existe o está inactivo.`);
     }
 
     const roles = await prisma.rolesPermiso.findMany({
-        where: {
-            permiso_id: parseInt(permiso_id, 10),
-            estado: true,
-        },
-        include: {
-            rol: true,
-        },
+        where: { permiso_id: parseInt(permiso_id, 10), estado: true },
+        include: { rol: true },
     });
 
     return roles.map(rp => rp.rol);
+};
+
+// Obtener todos los permisos asignados a roles activos
+export const getAllRolesPermisos = async () => {
+    const rolesPermisos = await prisma.rolesPermiso.findMany({
+        where: { estado: true },
+        include: { rol: true, permiso: true },
+        orderBy: { creado_en: "desc" },
+    });
+
+    if (rolesPermisos.length === 0) {
+        throw new Error("No hay relaciones activas entre roles y permisos.");
+    }
+
+    return rolesPermisos;
 };
