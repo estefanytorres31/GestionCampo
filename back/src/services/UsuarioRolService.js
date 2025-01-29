@@ -46,7 +46,7 @@ export const assignRolToUsuario = async (usuario_id, rol_id) => {
                 where: { id: relacionExistente.id },
                 data: {
                     estado: true,
-                    actualizado_en: getUTCTime(new Date()),
+                    actualizado_en: getUTCTime(new Date().toISOString())
                 },
             });
         }
@@ -57,8 +57,8 @@ export const assignRolToUsuario = async (usuario_id, rol_id) => {
         data: {
             usuario_id: parseInt(usuario_id, 10),
             rol_id: parseInt(rol_id, 10),
-            creado_en: getUTCTime(new Date()),
-            actualizado_en: getUTCTime(new Date()),
+            creado_en: getUTCTime(new Date().toISOString()),
+            actualizado_en: getUTCTime(new Date().toISOString())
         },
     });
 };
@@ -86,7 +86,7 @@ export const assignMultipleRolesToUsuario = async (usuario_id, roles_ids) => {
     }
 
     // Crear o actualizar los roles en una transacción
-    const fecha_actualizacion = getUTCTime(new Date());
+    const fecha_actualizacion = getUTCTime(new Date().toISOString())
     const resultados = await prisma.$transaction(async (tx) => {
         const operaciones = roles_ids.map(async (rol_id) => {
             const relacionExistente = await tx.usuarioRol.findUnique({
