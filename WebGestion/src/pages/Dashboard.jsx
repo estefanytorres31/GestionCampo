@@ -65,6 +65,7 @@ export const Dashboard = () => {
         <div className="w-full bg-[#83A6CE] leading-normal rounded-t-lg">
         </div>
         <Table columns={columns} data={data} />
+        
       </main>
     </>
   );
