@@ -14,10 +14,26 @@ export const createUsuario = async (nombre_usuario, contrasena_hash, nombre_comp
         where: { nombre_usuario },
     });
 
+    const fecha_actualizacion = getUTCTime(new Date().toISOString());
+
     if (usuarioExistente) {
-        throw new Error(`El usuario con el nombre "${nombre_usuario}" ya existe.`);
+        if (usuarioExistente.estado) {
+            throw new Error(`El usuario con el nombre "${nombre_usuario}" ya existe y está activo.`);
+        }
+
+        // Reactivar el usuario desactivado
+        const usuarioReactivado = await prisma.usuario.update({
+            where: { id: usuarioExistente.id },
+            data: {
+                estado: true,
+                actualizado_en: fecha_actualizacion,
+            },
+        });
+
+        return usuarioReactivado;
     }
 
+    // Si el usuario no existe, lo creamos desde cero
     const hashedPassword = await bcrypt.hash(contrasena_hash, 10);
     const fecha_creacion = getUTCTime(new Date().toISOString());
 
@@ -27,6 +43,7 @@ export const createUsuario = async (nombre_usuario, contrasena_hash, nombre_comp
             contrasena_hash: hashedPassword,
             nombre_completo,
             email,
+            estado: true, // Se asegura de que el usuario se cree activo
             creado_en: fecha_creacion,
             actualizado_en: fecha_creacion,
         },

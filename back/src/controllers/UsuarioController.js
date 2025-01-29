@@ -6,7 +6,15 @@ export const createUsuario = async (req, res) => {
 
     try {
         const usuario = await UsuarioService.createUsuario(nombre_usuario, contrasena_hash, nombre_completo, email);
-        res.status(201).json({ message: "Usuario creado exitosamente.", data: usuario });
+
+        // Determinar si se creó un nuevo usuario o se reactivó uno existente
+        const mensaje = usuario.estado 
+            ? (usuario.creado_en.getTime() === usuario.actualizado_en.getTime()
+                ? "Usuario creado exitosamente."
+                : "Usuario reactivado exitosamente.")
+            : "Usuario creado exitosamente.";
+
+        res.status(201).json({ message: mensaje, data: usuario });
     } catch (error) {
         res.status(400).json({ message: error.message });
     }
