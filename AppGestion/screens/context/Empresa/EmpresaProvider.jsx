@@ -12,10 +12,12 @@ const EmpresaProvider = ({ children }) => {
         if(isAuth){
             const getEmpresas = async () => {
                 try {
+
                     const response = await getAllEmpresas();
                     console.log('Respuesta de getAllEmpresas:', response);
                     
-                    if (response && response.length > 0) {
+                    if (response) {
+
                         setEmpresas(response);
                     } else {
                         console.log('No se encontraron empresas.');
@@ -27,7 +29,7 @@ const EmpresaProvider = ({ children }) => {
             
         getEmpresas();
     }
-    }, []);
+    }, [isAuth]);
 
     return (
         <EmpresaContext.Provider value={{ empresas, setEmpresas }}>

@@ -17,10 +17,15 @@ import useAuth from '../../hooks/Auth/useAuth';
 const { height, width } = Dimensions.get('window');
 
 const ClientScreen = ({ navigation }) => {
-    const { empresas } = useEmpresa(); // Obtener las empresas desde el contexto
-    const auth = useAuth();
+    const { empresas } = useEmpresa();
+    const {logout} = useAuth();
     const fadeAnim = React.useRef(new Animated.Value(0)).current;
     const scaleAnim = React.useRef(new Animated.Value(0.95)).current;
+
+    const handleLogout=()=>{
+        logout();
+        navigation.navigate('Login');
+    }
     
     useEffect(() => {
         Animated.parallel([
@@ -105,7 +110,7 @@ const ClientScreen = ({ navigation }) => {
                     <View style={styles.footerContainer}>
                         <TouchableOpacity 
                             style={styles.logoutButton} 
-                            onPress={auth.handleLogout}
+                            onPress={handleLogout}
                             activeOpacity={0.9}
                         >
                             <Ionicons name="log-out-outline" size={24} color="#EB1111" style={styles.logoutIcon} />
