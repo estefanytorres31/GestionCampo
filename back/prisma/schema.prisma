@@ -188,14 +188,14 @@ model Sistema {
 }
 
 model Parte {
-  id_parte                 Int                     @id @default(autoincrement()) @map("id_parte")
-  nombre_parte             String                  @map("nombre_parte")
-  estado                   Boolean                 @default(true) @map("estado")
-  creado_en                DateTime                @default(now()) @map("creado_en")
-  actualizado_en           DateTime                @updatedAt @map("actualizado_en")
-  sistema_partes           SistemaParte[]          // Relación inversa con SistemaParte
-  orden_trabajo_parte      OrdenTrabajoParte[]
-  embarcacion_sistema_partes EmbarcacionSistemaParte[]
+  id_parte                       Int                     @id @default(autoincrement()) @map("id_parte")
+  nombre_parte                   String                  @map("nombre_parte") @unique
+  estado                         Boolean                 @default(true) @map("estado")
+  creado_en                      DateTime                @default(now()) @map("creado_en")
+  actualizado_en                 DateTime                @updatedAt @map("actualizado_en")
+  sistema_partes                 SistemaParte[]          // Relación inversa con SistemaParte
+  orden_trabajo_parte            OrdenTrabajoParte[]
+  embarcacion_sistema_partes     EmbarcacionSistemaParte[]
 
   @@map("parte")
 }
