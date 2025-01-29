@@ -4,64 +4,84 @@ import { getUTCTime } from "../utils/Time.js";
 const prisma = new PrismaClient();
 
 // Register entry attendance
-export const registrarEntrada = async (
-  id_usuario,
-  id_embarcacion,
-  id_orden_trabajo,
-  id_puerto,
-  latitud,
-  longitud
-) => {
+export const registrarEntrada = async (id_usuario, id_embarcacion, id_orden_trabajo, id_puerto, latitud, longitud) => {
   const todayISO = new Date().toISOString();
   const fecha_creacion = getUTCTime(todayISO);
 
-    const newAsistencia = await prisma.asistencia.create({
-      data: {
-        id_usuario,
-        id_embarcacion,
-        id_orden_trabajo,
-        id_puerto,
-        fecha_hora: fecha_creacion,
-        latitud: latitud ? parseFloat(latitud) : null,
-        longitud: longitud ? parseFloat(longitud) : null,
-        tipo: "entrada",
-        estado: true,
-        creado_en: fecha_creacion
-      }
-    });
-    return newAsistencia;
+  // Verificar si ya hay una entrada sin salida
+  const asistenciaExistente = await prisma.asistencia.findFirst({
+    where: {
+      id_usuario,
+      id_embarcacion,
+      tipo: "entrada",
+      estado: true
+    },
+    orderBy: {
+      fecha_hora: "desc"
+    }
+  });
 
+  if (asistenciaExistente) {
+    throw new Error("Ya tienes una entrada registrada. Marca tu salida antes de ingresar nuevamente.");
+  }
+
+  // Registrar nueva entrada
+  return await prisma.asistencia.create({
+    data: {
+      id_usuario,
+      id_embarcacion,
+      id_orden_trabajo,
+      id_puerto,
+      fecha_hora: fecha_creacion,
+      latitud: latitud ? parseFloat(latitud) : null,
+      longitud: longitud ? parseFloat(longitud) : null,
+      tipo: "entrada",
+      estado: true,
+      creado_en: fecha_creacion
+    }
+  });
 };
+
 
 // Register exit attendance
-export const registrarSalida = async (
-  id_usuario,
-  id_embarcacion,
-  id_orden_trabajo,
-  id_puerto,
-  latitud,
-  longitud
-) => {
+export const registrarSalida = async (id_usuario, id_embarcacion, id_orden_trabajo, id_puerto, latitud, longitud) => {
   const todayISO = new Date().toISOString();
   const fecha_creacion = getUTCTime(todayISO);
 
-    const newAsistencia = await prisma.asistencia.create({
-      data: {
-        id_usuario,
-        id_embarcacion,
-        id_orden_trabajo,
-        id_puerto,
-        fecha_hora: fecha_creacion,
-        latitud: latitud ? parseFloat(latitud) : null,
-        longitud: longitud ? parseFloat(longitud) : null,
-        tipo: "salida",
-        estado: true,
-        creado_en: fecha_creacion
-      }
-    });
-    return newAsistencia;
+  // Verificar si hay una entrada activa
+  const asistenciaEntrada = await prisma.asistencia.findFirst({
+    where: {
+      id_usuario,
+      id_embarcacion,
+      tipo: "entrada",
+      estado: true
+    },
+    orderBy: {
+      fecha_hora: "desc"
+    }
+  });
 
+  if (!asistenciaEntrada) {
+    throw new Error("No puedes marcar salida sin haber registrado una entrada.");
+  }
+
+  // Registrar salida
+  return await prisma.asistencia.create({
+    data: {
+      id_usuario,
+      id_embarcacion,
+      id_orden_trabajo,
+      id_puerto,
+      fecha_hora: fecha_creacion,
+      latitud: latitud ? parseFloat(latitud) : null,
+      longitud: longitud ? parseFloat(longitud) : null,
+      tipo: "salida",
+      estado: true,
+      creado_en: fecha_creacion
+    }
+  });
 };
+
 
 // Get all attendances
 export const getAllAsistencias = async () => {
