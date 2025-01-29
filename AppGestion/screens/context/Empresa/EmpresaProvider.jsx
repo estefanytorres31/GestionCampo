@@ -18,7 +18,7 @@ const EmpresaProvider = ({ children }) => {
                     
                     if (response) {
 
-                        setEmpresas(response);
+                        setEmpresas(response.data);
                     } else {
                         console.log('No se encontraron empresas.');
                     }
