@@ -16,7 +16,7 @@ export const createEmpresa = async (req, res) => {
 export const getAllEmpresas = async (req, res) => {
     try {
         const empresas = await EmpresaService.getAllEmpresas();
-        res.status(200).json( empresas );
+        res.status(200).json({ message: "Empresas obtenidas exitosamente.", data: empresas });
     } catch (error) {
         res.status(404).json({ message: error.message });
     }
