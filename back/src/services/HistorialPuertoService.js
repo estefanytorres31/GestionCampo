@@ -1,9 +1,12 @@
 import { PrismaClient } from "@prisma/client";
+import { getPeruTime, getUTCTime } from "../utils/Time.js";
 
 const prisma = new PrismaClient();
 
 // Registrar llegada de una embarcación
 export const registrarLlegada = async (embarcacion_id, puerto_id, fecha_llegada) => {
+    const todayISO = new Date().toISOString();
+    const fecha_creacion = getUTCTime(todayISO);
     // Validar que embarcacion_id y puerto_id sean números
     if (isNaN(embarcacion_id) || isNaN(puerto_id)) {
         throw new Error("El ID de la embarcación y el puerto deben ser números válidos.");
@@ -44,6 +47,8 @@ export const registrarLlegada = async (embarcacion_id, puerto_id, fecha_llegada)
             embarcacion_id: parseInt(embarcacion_id, 10),
             puerto_id: parseInt(puerto_id, 10),
             fecha_llegada: new Date(fecha_llegada),
+            creado_en:fecha_creacion,
+            actualizado_en:fecha_creacion
         },
     });
 
@@ -52,6 +57,8 @@ export const registrarLlegada = async (embarcacion_id, puerto_id, fecha_llegada)
 
 // Registrar salida de una embarcación
 export const registrarSalida = async (embarcacion_id, fecha_salida) => {
+    const todayISO = new Date().toISOString();
+    const fecha_creacion = getUTCTime(todayISO);
     if (isNaN(embarcacion_id)) {
         throw new Error("El ID de la embarcación debe ser un número válido.");
     }
@@ -79,6 +86,8 @@ export const registrarSalida = async (embarcacion_id, fecha_salida) => {
         },
         data: {
             fecha_salida: new Date(fecha_salida),
+            actualizado_en: fecha_creacion,
+
         },
     });
 

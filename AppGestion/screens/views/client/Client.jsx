@@ -1,4 +1,4 @@
-import React, { useEffect } from "react"
+import React, { useEffect, useContext } from "react"; 
 import { 
     View, 
     Text, 
@@ -6,21 +6,29 @@ import {
     StyleSheet, 
     SafeAreaView, 
     Dimensions,
-    BackHandler,
     Animated 
-} from "react-native"
-import { Ionicons } from "@expo/vector-icons"
-import { LinearGradient } from "expo-linear-gradient"
-import { useFocusEffect } from '@react-navigation/native'
-import useAuth from '../../hooks/Auth/useAuth'
-import AsyncStorage from "@react-native-async-storage/async-storage"
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
+import { useFocusEffect } from '@react-navigation/native';
+import useEmpresa from "../../hooks/Empresa/useEmpresa";
+import useAuth from '../../hooks/Auth/useAuth';
 
-const { height, width } = Dimensions.get('window')
+const { height, width } = Dimensions.get('window');
+
+// Colores que se asignarán dinámicamente a los botones
+const coloresBotones = ['#00897B', '#2E7D32','#1565C0', '#C0911F','#7fa23d'];
 
 const ClientScreen = ({ navigation }) => {
-    const auth = useAuth();
+    const { empresas } = useEmpresa();
+    const { logout } = useAuth();
     const fadeAnim = React.useRef(new Animated.Value(0)).current;
     const scaleAnim = React.useRef(new Animated.Value(0.95)).current;
+
+    const handleLogout = () => {
+        logout();
+        navigation.navigate('Login');
+    };
     
     useEffect(() => {
         Animated.parallel([
@@ -38,7 +46,7 @@ const ClientScreen = ({ navigation }) => {
         ]).start();
     }, []);
 
-    const handleButtonPress = (screen) => {
+    const handleButtonPress = (empresa, index) => {
         Animated.sequence([
             Animated.spring(scaleAnim, {
                 toValue: 0.97,
@@ -54,33 +62,12 @@ const ClientScreen = ({ navigation }) => {
             }),
         ]).start();
 
-        navigation.navigate(screen, { clase: 'algún valor' });
-    };
+        const empresaConColor = {
+            ...empresa,
+            color: coloresBotones[index % coloresBotones.length]
+        };
 
-    useFocusEffect(
-        React.useCallback(() => {
-            const onBackPress = () => {
-                BackHandler.exitApp();
-                return true;
-            };
-
-            BackHandler.addEventListener('hardwareBackPress', onBackPress);
-            return () => BackHandler.removeEventListener('hardwareBackPress', onBackPress);
-        }, [])
-    );
-
-    const Logout = async () => {
-        try {
-            if (auth && auth.handleLogout) {
-                await auth.handleLogout();
-            }
-            navigation.reset({
-                index: 0,
-                routes: [{ name: 'Login' }],
-            });
-        } catch (e) {
-            console.error("Error al cerrar sesión:", e);
-        }
+        navigation.navigate('Embarcaciones', { empresa: empresaConColor });
     };
 
     return (
@@ -92,13 +79,7 @@ const ClientScreen = ({ navigation }) => {
                 end={{ x: 0.5, y: 1 }}
             >
                 <Animated.View 
-                    style={[
-                        styles.contentContainer,
-                        {
-                            opacity: fadeAnim,
-                            transform: [{ scale: scaleAnim }]
-                        }
-                    ]}
+                    style={[styles.contentContainer, { opacity: fadeAnim, transform: [{ scale: scaleAnim }] }]}
                 >
                     <View style={styles.headerContainer}>
                         <Text style={styles.welcomeText}>¡Bienvenido!</Text>
@@ -106,35 +87,32 @@ const ClientScreen = ({ navigation }) => {
                     </View>
 
                     <View style={styles.buttonContainer}>
-                        {[
-                            { name: 'Tasa', style: styles.tasa, icon: 'boat-outline' },
-                            { name: 'Exalmar', style: styles.exalmar, icon: 'boat-outline' },
-                            { name: 'Austral', style: styles.austral, icon: 'boat-outline' },
-                            { name: 'Diamante', style: styles.diamante, icon: 'boat-outline' },
-                            { name: 'Centinela', style: styles.centinela, icon: 'boat-outline' }
-                            
-                        ].map((client, index) => (
-                            <TouchableOpacity
-                                key={index}
-                                style={[styles.button, client.style]}
-                                onPress={() => handleButtonPress(client.name)}
-                                activeOpacity={0.8}
-                            >
-                                <View style={styles.buttonContent}>
-                                    <View style={styles.iconContainer}>
-                                        <Ionicons name={client.icon} size={28} color="white" />
+                        {empresas.length > 0 ? (
+                            empresas.map((empresa, index) => (
+                                <TouchableOpacity
+                                    key={empresa.id || index}
+                                    style={[styles.button, { backgroundColor: coloresBotones[index % coloresBotones.length] }]} // Asignación dinámica de color
+                                    onPress={() => handleButtonPress(empresa, index)}
+                                    activeOpacity={0.8}
+                                >
+                                    <View style={styles.buttonContent}>
+                                        <View style={styles.iconContainer}>
+                                            <Ionicons name="boat-outline" size={28} color="white" />
+                                        </View>
+                                        <Text style={styles.buttonText}>{empresa.nombre}</Text>
+                                        <Ionicons name="chevron-forward" size={24} color="rgba(255,255,255,0.8)" />
                                     </View>
-                                    <Text style={styles.buttonText}>{client.name}</Text>
-                                    <Ionicons name="chevron-forward" size={24} color="rgba(255,255,255,0.8)" />
-                                </View>
-                            </TouchableOpacity>
-                        ))}
+                                </TouchableOpacity>
+                            ))
+                        ) : (
+                            <Text style={styles.loadingText}>Cargando empresas...</Text>
+                        )}
                     </View>
 
                     <View style={styles.footerContainer}>
                         <TouchableOpacity 
                             style={styles.logoutButton} 
-                            onPress={Logout}
+                            onPress={handleLogout}
                             activeOpacity={0.9}
                         >
                             <Ionicons name="log-out-outline" size={24} color="#EB1111" style={styles.logoutIcon} />
@@ -144,8 +122,8 @@ const ClientScreen = ({ navigation }) => {
                 </Animated.View>
             </LinearGradient>
         </SafeAreaView>
-    )
-}
+    );
+};
 
 const styles = StyleSheet.create({
     safeArea: {
@@ -170,9 +148,6 @@ const styles = StyleSheet.create({
         fontWeight: '800',
         color: '#2d3436',
         marginBottom: 8,
-        textShadowColor: 'rgba(0, 0, 0, 0.1)',
-        textShadowOffset: { width: 1, height: 1 },
-        textShadowRadius: 2,
     },
     subtitle: {
         fontSize: 24,
@@ -212,28 +187,18 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
     },
-    tasa: {
-        backgroundColor: '#7fa23d',
-    },
-    exalmar: {
-        backgroundColor: '#00897B',
-    },
-    austral: {
-        backgroundColor: '#2E7D32',
-    },
-    diamante: {
-        backgroundColor: '#C0911F',
-    },
-    centinela: {
-        backgroundColor: '#1565C0',
-    },
     buttonText: {
         color: '#fff',
         fontSize: 20,
         fontWeight: '700',
-        letterSpacing: 0.5,
         flex: 1,
         marginLeft: 15,
+    },
+    loadingText: {
+        textAlign: "center",
+        fontSize: 18,
+        fontWeight: "bold",
+        color: "#636e72",
     },
     footerContainer: {
         flex: 0.2,
@@ -242,31 +207,19 @@ const styles = StyleSheet.create({
         paddingBottom: 20,
     },
     logoutButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: '#fff',
-        padding: 16,
-        borderRadius: 30,
-        width: '80%',
-        maxWidth: 280,
-        elevation: 6,
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 3,
-        },
-        shadowOpacity: 0.27,
-        shadowRadius: 4.65,
+        flexDirection: "row",
+        alignItems: "center",
+        backgroundColor: "transparent",
+        paddingVertical: 10,
+        paddingHorizontal: 20,
     },
     logoutIcon: {
-        marginRight: 8,
+        marginRight: 10,
     },
     logoutText: {
-        color: '#EB1111',
-        fontSize: 16,
-        fontWeight: 'bold',
-        letterSpacing: 1,
+        fontSize: 18,
+        fontWeight: "600",
+        color: "#EB1111",
     },
 });
 

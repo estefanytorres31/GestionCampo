@@ -38,10 +38,10 @@ export const getPermisoById = async (req, res) => {
 // Actualizar un permiso
 export const updatePermiso = async (req, res) => {
     const { id } = req.params;
-    const { nombre, descripcion, estado } = req.body;
+    const { nombre, descripcion } = req.body;
 
     try {
-        const permiso = await PermisoService.updatePermiso(id, nombre, descripcion, estado);
+        const permiso = await PermisoService.updatePermiso(id, nombre, descripcion);
         res.status(200).json({ message: "Permiso actualizado exitosamente.", data: permiso });
     } catch (error) {
         res.status(400).json({ message: error.message });

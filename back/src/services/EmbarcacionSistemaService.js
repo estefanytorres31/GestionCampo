@@ -1,9 +1,12 @@
 import { PrismaClient } from "@prisma/client";
+import { getPeruTime, getUTCTime } from "../utils/Time.js";
 
 const prisma = new PrismaClient();
 
 // Asignar un sistema a una embarcación
 export const assignSistemaToEmbarcacion = async (id_embarcacion, id_sistema) => {
+    const todayISO = new Date().toISOString();
+    const fecha_creacion = getUTCTime(todayISO);
     if (isNaN(id_embarcacion) || isNaN(id_sistema)) {
         throw new Error("El ID de la embarcación y del sistema deben ser números válidos.");
     }
@@ -45,7 +48,7 @@ export const assignSistemaToEmbarcacion = async (id_embarcacion, id_sistema) => 
                 where: { id_embarcacion_sistema: relacionExistente.id_embarcacion_sistema },
                 data: {
                     estado_sistema: true,
-                    actualizado_en: new Date(),
+                    actualizado_en: fecha_creacion
                 },
             });
             return relacionReactivada;
@@ -58,6 +61,8 @@ export const assignSistemaToEmbarcacion = async (id_embarcacion, id_sistema) => 
             id_embarcacion: parseInt(id_embarcacion, 10),
             id_sistema: parseInt(id_sistema, 10),
             estado_sistema: true,
+            actualizado_en: fecha_creacion,
+            creacion_en: fecha_creacion,
         },
     });
 
@@ -66,6 +71,8 @@ export const assignSistemaToEmbarcacion = async (id_embarcacion, id_sistema) => 
 
 // Asignar múltiples sistemas a una embarcación
 export const assignMultipleSistemasToEmbarcacion = async (id_embarcacion, sistemas_ids) => {
+    const todayISO = new Date().toISOString();
+    const fecha_creacion = getUTCTime(todayISO);
     if (isNaN(id_embarcacion)) {
         throw new Error("El ID de la embarcación debe ser un número válido.");
     }
@@ -123,7 +130,7 @@ export const assignMultipleSistemasToEmbarcacion = async (id_embarcacion, sistem
                         where: { id_embarcacion_sistema: relacionExistente.id_embarcacion_sistema },
                         data: {
                             estado_sistema: true,
-                            actualizado_en: new Date(),
+                            actualizado_en: fecha_creacion
                         },
                     });
                 }
@@ -135,6 +142,8 @@ export const assignMultipleSistemasToEmbarcacion = async (id_embarcacion, sistem
                     id_embarcacion: parseInt(id_embarcacion, 10),
                     id_sistema: parseInt(id_sistema, 10),
                     estado_sistema: true,
+                    actualizado_en: fecha_creacion,
+                    creacion_en: fecha_creacion,
                 },
             });
         });
@@ -147,6 +156,8 @@ export const assignMultipleSistemasToEmbarcacion = async (id_embarcacion, sistem
 
 // Desactivar un sistema de una embarcación
 export const deactivateSistemaFromEmbarcacion = async (id_embarcacion, id_sistema) => {
+    const todayISO = new Date().toISOString();
+    const fecha_creacion = getUTCTime(todayISO);
     if (isNaN(id_embarcacion) || isNaN(id_sistema)) {
         throw new Error("El ID de la embarcación y del sistema deben ser números válidos.");
     }
@@ -168,7 +179,7 @@ export const deactivateSistemaFromEmbarcacion = async (id_embarcacion, id_sistem
     // Desactivar la relación
     const relacionDesactivada = await prisma.embarcacionSistema.update({
         where: { id_embarcacion_sistema: relacion.id_embarcacion_sistema },
-        data: { estado_sistema: false },
+        data: { estado_sistema: false, actualizado_en:fecha_creacion },
     });
 
     return relacionDesactivada;
@@ -176,6 +187,8 @@ export const deactivateSistemaFromEmbarcacion = async (id_embarcacion, id_sistem
 
 // Reactivar un sistema previamente desactivado de una embarcación
 export const reactivateSistemaFromEmbarcacion = async (id_embarcacion, id_sistema) => {
+    const todayISO = new Date().toISOString();
+    const fecha_creacion = getUTCTime(todayISO);
     if (isNaN(id_embarcacion) || isNaN(id_sistema)) {
         throw new Error("El ID de la embarcación y del sistema deben ser números válidos.");
     }
@@ -201,7 +214,7 @@ export const reactivateSistemaFromEmbarcacion = async (id_embarcacion, id_sistem
     // Reactivar la relación
     const relacionReactivada = await prisma.embarcacionSistema.update({
         where: { id_embarcacion_sistema: relacion.id_embarcacion_sistema },
-        data: { estado_sistema: true },
+        data: { estado_sistema: true, actualizado_en:fecha_creacion },
     });
 
     return relacionReactivada;

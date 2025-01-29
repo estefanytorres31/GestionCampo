@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+import { getPeruTime, getUTCTime } from "../utils/Time.js";
 
 const prisma = new PrismaClient();
 
@@ -23,6 +24,8 @@ export const asignarTrabajoAEmbarcacion = async ({
     if (!tipoTrabajo || !tipoTrabajo.estado) {
         throw new Error(`El tipo de trabajo con ID ${id_tipo_trabajo} no existe o está inactivo.`);
     }
+    const todayISO = new Date().toISOString();
+    const fecha_creacion = getUTCTime(todayISO);
 
     // Verificar que la Embarcacion exista y esté activa
     const embarcacion = await prisma.embarcacion.findUnique({
@@ -58,9 +61,12 @@ export const asignarTrabajoAEmbarcacion = async ({
             id_embarcacion,
             id_puerto,
             id_jefe_asigna,
-            fecha_asignacion: new Date(),
+            fecha_asignacion: fecha_creacion,
             estado: "pendiente",
             comentarios,
+            creado_en:fecha_creacion,
+            actualizado_en:fecha_creacion
+
         },
     });
 
@@ -69,6 +75,8 @@ export const asignarTrabajoAEmbarcacion = async ({
 
 // Gestionar el Estado de la Orden de Trabajo
 export const gestionarEstadoOrdenTrabajo = async (id_orden_trabajo, nuevo_estado) => {
+    const todayISO = new Date().toISOString();
+    const fecha_creacion = getUTCTime(todayISO);
     const validEstados = ["pendiente", "en_progreso", "completado", "cancelado"];
     if (!validEstados.includes(nuevo_estado)) {
         throw new Error(`El estado "${nuevo_estado}" no es válido. Estados permitidos: ${validEstados.join(", ")}.`);
@@ -86,7 +94,7 @@ export const gestionarEstadoOrdenTrabajo = async (id_orden_trabajo, nuevo_estado
     // Actualizar el estado
     const ordenTrabajoActualizada = await prisma.ordenTrabajo.update({
         where: { id_orden_trabajo },
-        data: { estado: nuevo_estado, actualizado_en: new Date() },
+        data: { estado: nuevo_estado, actualizado_en: fecha_creacion},
     });
 
     return ordenTrabajoActualizada;
@@ -100,6 +108,8 @@ export const actualizarEstadoOrdenTrabajo = async (id_orden_trabajo, nuevo_estad
 
 // Asignar múltiples Ordenes de Trabajo a una Embarcación (Transacción)
 export const asignarMultipleOrdenesTrabajoAEmbarcacion = async (ordenes) => {
+    const todayISO = new Date().toISOString();
+    const fecha_creacion = getUTCTime(todayISO);
     /*
         'ordenes' es un array de objetos que contienen:
         - id_tipo_trabajo
@@ -176,6 +186,8 @@ export const asignarMultipleOrdenesTrabajoAEmbarcacion = async (ordenes) => {
                     fecha_asignacion: new Date(),
                     estado: "pendiente",
                     comentarios,
+                    creado_en:fecha_creacion,
+                    actualizado_en: fecha_creacion,
                 },
             });
         });

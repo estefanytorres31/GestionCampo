@@ -67,28 +67,18 @@ const AuthProvider = ({ children }) => {
     
     
     const logout = async () => {    
-        try{
-            const token = await AsyncStorage.getItem('token');
-            if (token!==null){
-                const response = await logout();
-                if(response.status === 200){
-                    await AsyncStorage.clear();
-                    setIsAuth(false);
-                    setUser(null);
-                    setRole(null);
-                    return true;
-                }else{
-                    setIsAuth(false);
-                    setUser(null);
-                    setRole(null);
-                    return false;
-                }
-            }
-        }catch(err){
+        try {
+            await AsyncStorage.clear();
+            setIsAuth(false);
+            setUser(null);
+            setRole(null);
+            return true;
+        } catch (err) {
             console.error(err);
             return false;
         }
-    }
+    };
+    
     
     return (
         <AuthContext.Provider value={{
