@@ -1,54 +1,76 @@
 import * as ParteService from "../services/ParteService.js";
 
-export const createParte=async(req, res)=>{
-    try {
-        const { nombre_parte } = req.body;
-        const parte = await ParteService.createParte(nombre_parte);
-        res.status(201).json(parte);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-}
+/**
+ * Crear o reactivar una parte.
+ */
+export const createParte = async (req, res) => {
+    const { nombre_parte } = req.body;
 
-export const getPartes=async(req, res)=>{
+    try {
+        const parte = await ParteService.createParte(nombre_parte);
+
+        // Determinar si se creó una nueva parte o se reactivó una existente
+        const mensaje = parte.creado_en.getTime() === parte.actualizado_en.getTime()
+            ? "Parte creada exitosamente."
+            : "Parte reactivada exitosamente.";
+
+        res.status(201).json({ message: mensaje, data: parte });
+    } catch (error) {
+        res.status(error.status || 500).json({ message: error.message });
+    }
+};
+
+/**
+ * Obtener todas las partes activas.
+ */
+export const getAllPartes = async (req, res) => {
     try {
         const partes = await ParteService.getAllPartes();
-        res.json(partes);
+        res.status(200).json({ message: "Partes obtenidas exitosamente.", data: partes });
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        res.status(error.status || 500).json({ message: error.message });
     }
-}
+};
 
-export const getParteById=async(req, res)=>{
+/**
+ * Obtener una parte por su ID.
+ */
+export const getParteById = async (req, res) => {
+    const { id } = req.params;
+
     try {
-        const { id } = req.params;
         const parte = await ParteService.getParteById(id);
-        if (!parte) return res.status(404).json({ message: 'Parte not found' });
-        res.json(parte);
+        res.status(200).json({ message: "Parte obtenida exitosamente.", data: parte });
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        res.status(error.status || 500).json({ message: error.message });
     }
-}
+};
 
-export const updateParte=async(req, res)=>{
-    try {
-        const { id } = req.params;
-        const { nombre_parte } = req.body;
-        const updatedParte = await ParteService.updateParte(id, nombre_parte);
-        if (!updatedParte) return res.status(404).json({ message: 'Parte not found' });
-        res.json(updatedParte);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-}
+/**
+ * Actualizar una parte existente.
+ */
+export const updateParte = async (req, res) => {
+    const { id_parte } = req.params;
+    const { nombre_parte } = req.body;
 
-export const deleteParte=async(req, res)=>{
     try {
-        const { id } = req.params;
-        const deletedParte = await ParteService.deleteParte(id);
-        if (!deletedParte) return res.status(404).json({ message: 'Parte not found' });
-        res.json({message:'Parte eliminado'});
+        const parteActualizada = await ParteService.updateParte(id_parte, nombre_parte);
+        res.status(200).json({ message: "Parte actualizada exitosamente.", data: parteActualizada });
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        res.status(error.status || 500).json({ message: error.message });
     }
-}
+};
+
+/**
+ * Desactivar una parte.
+ */
+export const deleteParte = async (req, res) => {
+    const { id_parte } = req.params;
+
+    try {
+        const parteDesactivada = await ParteService.deleteParte(id_parte);
+        res.status(200).json({ message: "Parte desactivada exitosamente.", data: parteDesactivada });
+    } catch (error) {
+        res.status(error.status || 500).json({ message: error.message });
+    }
+};

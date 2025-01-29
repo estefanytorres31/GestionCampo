@@ -1,17 +1,19 @@
 import {
     createUsuario,
     getUserByUsername,
-    getAllUsers,
     getUserById,
     deleteUser,
-    updateUser
+    updateUser,
+    getFilteredUsers,
+    getAllUsers
 } from "../controllers/UsuarioController.js";
 import { Router } from "express";
 import {verificarAuth } from "../middleware/verificarAuth.js"
 
 const usuarioRouter = Router();
 
-usuarioRouter.get('/', verificarAuth, getAllUsers);
+usuarioRouter.get('/', verificarAuth, getFilteredUsers);
+usuarioRouter.get('/all', verificarAuth, getAllUsers);
 usuarioRouter.get('/nombre/:nombre_usuario', getUserByUsername);
 usuarioRouter.post('/', createUsuario);
 usuarioRouter.get('/:id', getUserById);

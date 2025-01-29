@@ -181,9 +181,9 @@ export const deactivateSistemaFromOrdenTrabajo = async (id_orden_trabajo_sistema
  * @param {number} id_orden_trabajo
  * @returns {Promise<Array>} Lista de asignaciones
  */
-export const getOrdenTrabajoById = async (id) => {
+export const getSistemasByOrdenTrabajo = async (id_orden_trabajo) => {
     // Convertir el ID a un entero
-    const idOrdenTrabajo = parseInt(id, 10);
+    const idOrdenTrabajo = parseInt(id_orden_trabajo, 10);
 
     // Validar si el ID es un número válido
     if (isNaN(idOrdenTrabajo)) {

@@ -62,7 +62,7 @@ export const assignSistemaToEmbarcacion = async (id_embarcacion, id_sistema) => 
             id_sistema: parseInt(id_sistema, 10),
             estado_sistema: true,
             actualizado_en: fecha_creacion,
-            creacion_en: fecha_creacion,
+            creado_en: fecha_creacion,
         },
     });
 
