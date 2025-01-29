@@ -1,4 +1,4 @@
-import React, { useEffect, useContext } from "react";
+import React, { useEffect, useContext } from "react"; 
 import { 
     View, 
     Text, 
@@ -16,16 +16,19 @@ import useAuth from '../../hooks/Auth/useAuth';
 
 const { height, width } = Dimensions.get('window');
 
+// Colores que se asignarán dinámicamente a los botones
+const coloresBotones = ['#00897B', '#2E7D32','#1565C0', '#C0911F','#7fa23d'];
+
 const ClientScreen = ({ navigation }) => {
     const { empresas } = useEmpresa();
-    const {logout} = useAuth();
+    const { logout } = useAuth();
     const fadeAnim = React.useRef(new Animated.Value(0)).current;
     const scaleAnim = React.useRef(new Animated.Value(0.95)).current;
 
-    const handleLogout=()=>{
+    const handleLogout = () => {
         logout();
         navigation.navigate('Login');
-    }
+    };
     
     useEffect(() => {
         Animated.parallel([
@@ -43,7 +46,7 @@ const ClientScreen = ({ navigation }) => {
         ]).start();
     }, []);
 
-    const handleButtonPress = (empresa) => {
+    const handleButtonPress = (empresa, index) => {
         Animated.sequence([
             Animated.spring(scaleAnim, {
                 toValue: 0.97,
@@ -59,7 +62,12 @@ const ClientScreen = ({ navigation }) => {
             }),
         ]).start();
 
-        navigation.navigate('DetallesEmpresa', { empresa });
+        const empresaConColor = {
+            ...empresa,
+            color: coloresBotones[index % coloresBotones.length]
+        };
+
+        navigation.navigate('Embarcaciones', { empresa: empresaConColor });
     };
 
     return (
@@ -71,13 +79,7 @@ const ClientScreen = ({ navigation }) => {
                 end={{ x: 0.5, y: 1 }}
             >
                 <Animated.View 
-                    style={[
-                        styles.contentContainer,
-                        {
-                            opacity: fadeAnim,
-                            transform: [{ scale: scaleAnim }]
-                        }
-                    ]}
+                    style={[styles.contentContainer, { opacity: fadeAnim, transform: [{ scale: scaleAnim }] }]}
                 >
                     <View style={styles.headerContainer}>
                         <Text style={styles.welcomeText}>¡Bienvenido!</Text>
@@ -89,13 +91,13 @@ const ClientScreen = ({ navigation }) => {
                             empresas.map((empresa, index) => (
                                 <TouchableOpacity
                                     key={empresa.id || index}
-                                    style={[styles.button, styles.dynamicButton]}
-                                    onPress={() => handleButtonPress(empresa)}
+                                    style={[styles.button, { backgroundColor: coloresBotones[index % coloresBotones.length] }]} // Asignación dinámica de color
+                                    onPress={() => handleButtonPress(empresa, index)}
                                     activeOpacity={0.8}
                                 >
                                     <View style={styles.buttonContent}>
                                         <View style={styles.iconContainer}>
-                                            <Ionicons name="business-outline" size={28} color="white" />
+                                            <Ionicons name="boat-outline" size={28} color="white" />
                                         </View>
                                         <Text style={styles.buttonText}>{empresa.nombre}</Text>
                                         <Ionicons name="chevron-forward" size={24} color="rgba(255,255,255,0.8)" />
@@ -121,7 +123,7 @@ const ClientScreen = ({ navigation }) => {
             </LinearGradient>
         </SafeAreaView>
     );
-}
+};
 
 const styles = StyleSheet.create({
     safeArea: {
@@ -169,9 +171,6 @@ const styles = StyleSheet.create({
         },
         shadowOpacity: 0.3,
         shadowRadius: 4.65,
-    },
-    dynamicButton: {
-        backgroundColor: '#00897B', // Puedes hacer esto dinámico si cada empresa tiene un color
     },
     buttonContent: {
         flexDirection: 'row',
