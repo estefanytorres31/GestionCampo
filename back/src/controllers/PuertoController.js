@@ -1,18 +1,27 @@
 import * as PuertoService from "../services/PuertoService.js";
 
-// Crear un nuevo puerto
+/**
+ * Crear o reactivar un puerto
+ */
 export const createPuerto = async (req, res) => {
     const { nombre, ubicacion } = req.body;
 
     try {
         const puerto = await PuertoService.createPuerto(nombre, ubicacion);
-        res.status(201).json({ message: "Puerto creado exitosamente.", data: puerto });
+        // Determinar si se creó o se reactivó
+        const mensaje = puerto.creado_en === puerto.actualizado_en 
+            ? "Puerto creado exitosamente." 
+            : "Puerto reactivado exitosamente.";
+
+        res.status(201).json({ message: mensaje, data: puerto });
     } catch (error) {
         res.status(400).json({ message: error.message });
     }
 };
 
-// Obtener todos los puertos
+/**
+ * Obtener todos los puertos activos
+ */
 export const getAllPuertos = async (req, res) => {
     try {
         const puertos = await PuertoService.getAllPuertos();
@@ -22,7 +31,9 @@ export const getAllPuertos = async (req, res) => {
     }
 };
 
-// Obtener un puerto por su ID
+/**
+ * Obtener un puerto por su ID
+ */
 export const getPuertoById = async (req, res) => {
     const { id } = req.params;
 
@@ -34,7 +45,9 @@ export const getPuertoById = async (req, res) => {
     }
 };
 
-// Actualizar un puerto
+/**
+ * Actualizar un puerto
+ */
 export const updatePuerto = async (req, res) => {
     const { id } = req.params;
     const { nombre, ubicacion } = req.body;
@@ -47,7 +60,9 @@ export const updatePuerto = async (req, res) => {
     }
 };
 
-// Eliminar (desactivar) un puerto
+/**
+ * Desactivar un puerto
+ */
 export const deletePuerto = async (req, res) => {
     const { id } = req.params;
 

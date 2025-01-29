@@ -1,18 +1,28 @@
 import * as EmpresaService from "../services/EmpresaService.js";
 
-// Crear una nueva empresa
+/**
+ * Crear o reactivar una empresa.
+ */
 export const createEmpresa = async (req, res) => {
     const { nombre } = req.body;
 
     try {
         const empresa = await EmpresaService.createEmpresa(nombre);
-        res.status(201).json({ message: "Empresa creada exitosamente.", data: empresa });
+
+        // Determinar si se creó o se reactivó
+        const mensaje = empresa.creado_en.getTime() === empresa.actualizado_en.getTime()
+            ? "Empresa creada exitosamente."
+            : "Empresa reactivada exitosamente.";
+
+        res.status(201).json({ message: mensaje, data: empresa });
     } catch (error) {
         res.status(400).json({ message: error.message });
     }
 };
 
-// Obtener todas las empresas
+/**
+ * Obtener todas las empresas activas.
+ */
 export const getAllEmpresas = async (req, res) => {
     try {
         const empresas = await EmpresaService.getAllEmpresas();
@@ -22,7 +32,9 @@ export const getAllEmpresas = async (req, res) => {
     }
 };
 
-// Obtener una empresa por su ID
+/**
+ * Obtener una empresa por su ID.
+ */
 export const getEmpresaById = async (req, res) => {
     const { id } = req.params;
 
@@ -34,7 +46,9 @@ export const getEmpresaById = async (req, res) => {
     }
 };
 
-// Actualizar una empresa
+/**
+ * Actualizar una empresa existente.
+ */
 export const updateEmpresa = async (req, res) => {
     const { id } = req.params;
     const { nombre } = req.body;
@@ -47,7 +61,9 @@ export const updateEmpresa = async (req, res) => {
     }
 };
 
-// Eliminar (desactivar) una empresa
+/**
+ * Desactivar una empresa.
+ */
 export const deleteEmpresa = async (req, res) => {
     const { id } = req.params;
 

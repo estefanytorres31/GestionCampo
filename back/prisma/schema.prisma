@@ -65,6 +65,7 @@ model RolesPermiso {
   permiso_id     Int      @map("permiso_id")
   estado         Boolean  @default(true)
   creado_en      DateTime @default(now()) @map("creado_en")
+  actualizado_en DateTime @updatedAt @map("actualizado_en") // ← Agregamos esto
   rol            Rol      @relation(fields: [rol_id], references: [id], onDelete: NoAction, onUpdate: Cascade)
   permiso        Permiso  @relation(fields: [permiso_id], references: [id], onDelete: NoAction, onUpdate: Cascade)
 
@@ -100,11 +101,15 @@ model UsuarioRol {
   rol_id      Int      @map("rol_id")
   estado      Boolean  @default(true)
   creado_en   DateTime @default(now()) @map("creado_en")
+  actualizado_en DateTime @updatedAt @map("actualizado_en")  // NUEVO CAMPO
   usuario     Usuario  @relation(fields: [usuario_id], references: [id], onDelete: NoAction, onUpdate: Cascade)
   rol         Rol      @relation(fields: [rol_id], references: [id], onDelete: NoAction, onUpdate: Cascade)
 
   @@unique([usuario_id, rol_id], name: "usuario_roles_usuario_id_rol_id_key")
   @@map("usuario_roles")
+  @@index([usuario_id], name: "idx_usuario_roles_usuario_id")  // Índice para optimizar búsqueda por usuario
+  @@index([rol_id], name: "idx_usuario_roles_rol_id")  // Índice para optimizar búsqueda por rol
+  @@index([estado], name: "idx_usuario_roles_estado")  // Índice para filtrar por estado activo
 }
 
 model Empresa {
@@ -129,7 +134,8 @@ model Embarcacion {
   empresa              Empresa            @relation(fields: [empresa_id], references: [id], onDelete: NoAction, onUpdate: Cascade)
   historial_puertos    HistorialPuerto[]
   embarcacion_sistemas EmbarcacionSistema[]
-  orden_trabajo        OrdenTrabajo[]
+  // Se elimina la relación inversa con OrdenTrabajo, 
+  // pues la hemos quitado para evitar redundancia 
   asistencia           Asistencia[]
 
   @@map("embarcacion")
@@ -176,6 +182,7 @@ model Sistema {
   estado              Boolean              @default(true) @map("estado")
   creado_en           DateTime             @default(now()) @map("creado_en")
   actualizado_en      DateTime             @updatedAt @map("actualizado_en")
+  sistema_partes      SistemaParte[]       // Relación inversa con SistemaParte
   embarcacion_sistemas EmbarcacionSistema[]
   orden_trabajo_sistemas OrdenTrabajoSistema[]
 
@@ -184,25 +191,46 @@ model Sistema {
 }
 
 model Parte {
-  id_parte        Int       @id @default(autoincrement()) @map("id_parte")
-  nombre_parte    String    @map("nombre_parte")
-  estado          Boolean   @default(true) @map("estado")
-  creado_en       DateTime  @default(now()) @map("creado_en")
-  actualizado_en  DateTime  @updatedAt @map("actualizado_en")
-  orden_trabajo_parte OrdenTrabajoParte[]
+  id_parte                       Int                     @id @default(autoincrement()) @map("id_parte")
+  nombre_parte                   String                  @map("nombre_parte") @unique
+  estado                         Boolean                 @default(true) @map("estado")
+  creado_en                      DateTime                @default(now()) @map("creado_en")
+  actualizado_en                 DateTime                @updatedAt @map("actualizado_en")
+  sistema_partes                 SistemaParte[]          // Relación inversa con SistemaParte
+  orden_trabajo_parte            OrdenTrabajoParte[]
+  embarcacion_sistema_partes     EmbarcacionSistemaParte[]
 
   @@map("parte")
 }
 
+model SistemaParte {
+  id_sistema_parte Int      @id @default(autoincrement()) @map("id_sistema_parte")
+  id_sistema       Int      @map("id_sistema")
+  id_parte         Int      @map("id_parte")
+  estado           Boolean  @default(true) @map("estado") // Nuevo campo
+  creado_en        DateTime @default(now()) @map("creado_en")
+  actualizado_en   DateTime @updatedAt @map("actualizado_en")
+  
+  sistema          Sistema  @relation(fields: [id_sistema], references: [id_sistema], onDelete: Cascade, onUpdate: Cascade)
+  parte            Parte    @relation(fields: [id_parte], references: [id_parte], onDelete: Cascade, onUpdate: Cascade)
+
+  @@unique([id_sistema, id_parte], name: "sistema_parte_unique")
+  @@map("sistema_parte")
+  @@index([id_sistema], name: "idx_sistema_parte_sistema_id")
+  @@index([id_parte], name: "idx_sistema_parte_parte_id")
+  @@index([estado], name: "idx_sistema_parte_estado")
+}
+
 model EmbarcacionSistema {
-  id_embarcacion_sistema Int           @id @default(autoincrement()) @map("id_embarcacion_sistema")
-  id_embarcacion        Int           @map("id_embarcacion")
-  id_sistema            Int           @map("id_sistema")
-  estado_sistema        Boolean       @default(true) @map("estado_sistema")
-  creado_en             DateTime      @default(now()) @map("creado_en")
-  actualizado_en        DateTime      @updatedAt @map("actualizado_en")
-  embarcacion           Embarcacion   @relation(fields: [id_embarcacion], references: [id_embarcacion], onDelete: NoAction, onUpdate: Cascade)
-  sistema               Sistema       @relation(fields: [id_sistema], references: [id_sistema], onDelete: NoAction, onUpdate: Cascade)
+  id_embarcacion_sistema Int              @id @default(autoincrement()) @map("id_embarcacion_sistema")
+  id_embarcacion        Int              @map("id_embarcacion")
+  id_sistema            Int              @map("id_sistema")
+  estado_sistema        Boolean          @default(true) @map("estado_sistema")
+  creado_en             DateTime         @default(now()) @map("creado_en")
+  actualizado_en        DateTime         @updatedAt @map("actualizado_en")
+  embarcacion           Embarcacion      @relation(fields: [id_embarcacion], references: [id_embarcacion], onDelete: NoAction, onUpdate: Cascade)
+  sistema               Sistema          @relation(fields: [id_sistema], references: [id_sistema], onDelete: NoAction, onUpdate: Cascade)
+  embarcacion_sistema_partes EmbarcacionSistemaParte[] // Relación inversa con EmbarcacionSistemaParte
   orden_trabajo_sistemas OrdenTrabajoSistema[]
 
   @@unique([id_embarcacion, id_sistema], name: "embarcacion_sistema_unique")
@@ -210,6 +238,26 @@ model EmbarcacionSistema {
   @@index([id_embarcacion], name: "idx_embarcacion_sistema_embarcacion_id")
   @@index([id_sistema], name: "idx_embarcacion_sistema_sistema_id")
   @@index([estado_sistema], name: "idx_embarcacion_sistema_estado_sistema")
+}
+
+
+model EmbarcacionSistemaParte {
+  id_embarcacion_sistema_parte Int  @id @default(autoincrement()) @map("id_embarcacion_sistema_parte")
+  id_embarcacion_sistema       Int  @map("id_embarcacion_sistema")
+  id_parte                      Int  @map("id_parte")
+  estado                        Boolean @default(true) @map("estado")
+  creado_en                     DateTime @default(now()) @map("creado_en")
+  actualizado_en                DateTime @updatedAt @map("actualizado_en")
+
+  embarcacion_sistema           EmbarcacionSistema @relation(fields: [id_embarcacion_sistema], references: [id_embarcacion_sistema], onDelete: Cascade, onUpdate: Cascade)
+  parte                         Parte              @relation(fields: [id_parte], references: [id_parte], onDelete: Cascade, onUpdate: Cascade)
+
+  tipo_trabajo_emb_sist_par     TipoTrabajoEmbarcacionSistemaParte[] @relation("ESPtoTTESP") // Back relation
+
+  @@unique([id_embarcacion_sistema, id_parte], name: "emb_sis_par_unique")
+  @@map("embarcacion_sistema_parte")
+  @@index([id_embarcacion_sistema], name: "idx_esp_es")
+  @@index([id_parte], name: "idx_esp_par")
 }
 
 model TipoTrabajo {
@@ -220,36 +268,36 @@ model TipoTrabajo {
   creado_en       DateTime       @default(now()) @map("creado_en")
   actualizado_en  DateTime       @updatedAt @map("actualizado_en")
   orden_trabajo   OrdenTrabajo[]
+  tipo_trabajo_emb_sist_par  TipoTrabajoEmbarcacionSistemaParte[] @relation("TTESPtoTT") // Back relation para el nuevo modelo
 
   @@map("tipo_trabajo")
-  @@index([estado], name: "idx_tipo_trabajo_estado")
+  @@index([estado], name: "idx_tipotrab_estado")
 }
 
 model OrdenTrabajo {
-  id_orden_trabajo      Int                  @id @default(autoincrement()) @map("id_orden_trabajo")
-  id_tipo_trabajo       Int                  @map("id_tipo_trabajo")
-  id_embarcacion        Int                  @map("id_embarcacion")
-  id_puerto             Int                  @map("id_puerto")
-  id_jefe_asigna       Int                  @map("id_jefe_asigna")
-  fecha_asignacion      DateTime             @map("fecha_asignacion")
-  estado                EstadoOrdenTrabajo   @default(pendiente) @map("estado")
-  comentarios           String?              @map("comentarios")
-  creado_en             DateTime             @default(now()) @map("creado_en")
-  actualizado_en        DateTime             @updatedAt @map("actualizado_en")
-  tipo_trabajo          TipoTrabajo          @relation(fields: [id_tipo_trabajo], references: [id_tipo_trabajo], onDelete: NoAction, onUpdate: Cascade)
-  embarcacion           Embarcacion          @relation(fields: [id_embarcacion], references: [id_embarcacion], onDelete: NoAction, onUpdate: Cascade)
-  puerto                Puerto               @relation(fields: [id_puerto], references: [id_puerto], onDelete: NoAction, onUpdate: Cascade)
-  jefe_asigna           Usuario              @relation("JefeAsigna", fields: [id_jefe_asigna], references: [id], onDelete: NoAction, onUpdate: Cascade)
-  orden_trabajo_usuario OrdenTrabajoUsuario[]
+  id_orden_trabajo  Int                 @id @default(autoincrement()) @map("id_orden_trabajo")
+  id_tipo_trabajo   Int                 @map("id_tipo_trabajo")
+  id_puerto         Int                 @map("id_puerto")
+  id_jefe_asigna    Int                 @map("id_jefe_asigna")
+  fecha_asignacion  DateTime            @map("fecha_asignacion")
+  estado            EstadoOrdenTrabajo  @default(pendiente) @map("estado")
+  comentarios       String?             @map("comentarios")
+  creado_en         DateTime            @default(now()) @map("creado_en")
+  actualizado_en    DateTime            @updatedAt @map("actualizado_en")
+
+  tipo_trabajo      TipoTrabajo         @relation(fields: [id_tipo_trabajo], references: [id_tipo_trabajo], onDelete: NoAction, onUpdate: Cascade)
+  puerto            Puerto              @relation(fields: [id_puerto], references: [id_puerto], onDelete: NoAction, onUpdate: Cascade)
+  jefe_asigna       Usuario             @relation("JefeAsigna", fields: [id_jefe_asigna], references: [id], onDelete: NoAction, onUpdate: Cascade)
+
+  orden_trabajo_usuario  OrdenTrabajoUsuario[]
   orden_trabajo_sistemas OrdenTrabajoSistema[]
   asistencia             Asistencia[]
 
   @@map("orden_trabajo")
-  @@index([id_tipo_trabajo], name: "idx_orden_trabajo_tipo_trabajo_id")
-  @@index([id_embarcacion], name: "idx_orden_trabajo_embarcacion_id")
-  @@index([id_puerto], name: "idx_orden_trabajo_puerto_id")
-  @@index([id_jefe_asigna], name: "idx_orden_trabajo_jefe_asigna_id")
-  @@index([estado], name: "idx_orden_trabajo_estado")
+  @@index([id_tipo_trabajo], name: "idx_ot_tt")
+  @@index([id_puerto], name: "idx_ot_pto")
+  @@index([id_jefe_asigna], name: "idx_ot_jefe")
+  @@index([estado], name: "idx_ot_est")
 }
 model OrdenTrabajoUsuario {
   id_orden_trabajo_usuario Int         @id @default(autoincrement()) @map("id_orden_trabajo_usuario")
@@ -271,31 +319,32 @@ model OrdenTrabajoUsuario {
 }
 
 model OrdenTrabajoSistema {
-  id_orden_trabajo_sistema Int                  @id @default(autoincrement()) @map("id_orden_trabajo_sistema")
-  id_orden_trabajo        Int                  @map("id_orden_trabajo")
-  id_sistema              Int                  @map("id_sistema")
-  id_embarcacion_sistema  Int                  @map("id_embarcacion_sistema")
-  estado                  EstadoOrdenTrabajo   @default(pendiente) @map("estado")
-  observaciones           String?              @map("observaciones")
-  creado_en               DateTime             @default(now()) @map("creado_en")
-  actualizado_en          DateTime             @updatedAt @map("actualizado_en")
-  orden_trabajo           OrdenTrabajo         @relation(fields: [id_orden_trabajo], references: [id_orden_trabajo], onDelete: NoAction, onUpdate: Cascade)
-  sistema                 Sistema              @relation(fields: [id_sistema], references: [id_sistema], onDelete: NoAction, onUpdate: Cascade)
-  embarcacion_sistema     EmbarcacionSistema  @relation(fields: [id_embarcacion_sistema], references: [id_embarcacion_sistema], onDelete: NoAction, onUpdate: Cascade)
+  id_orden_trabajo_sistema Int  @id @default(autoincrement()) @map("id_orden_trabajo_sistema")
+  id_orden_trabajo        Int  @map("id_orden_trabajo")
+  id_sistema              Int  @map("id_sistema")
+  id_embarcacion_sistema  Int  @map("id_embarcacion_sistema")
+  estado                  EstadoOrdenTrabajo @default(pendiente) @map("estado")
+  observaciones           String? @map("observaciones")
+  creado_en               DateTime @default(now()) @map("creado_en")
+  actualizado_en          DateTime @updatedAt @map("actualizado_en")
+  id_tipo_trabajo_embarcacion_sistema_parte Int @map("id_tipo_trabajo_embarcacion_sistema_parte")
+
+  orden_trabajo           OrdenTrabajo   @relation(fields: [id_orden_trabajo], references: [id_orden_trabajo], onDelete: NoAction, onUpdate: Cascade)
+  sistema                 Sistema        @relation(fields: [id_sistema], references: [id_sistema], onDelete: NoAction, onUpdate: Cascade)
+  embarcacion_sistema     EmbarcacionSistema @relation(fields: [id_embarcacion_sistema], references: [id_embarcacion_sistema], onDelete: NoAction, onUpdate: Cascade)
+
+  /// Relación a "TipoTrabajoEmbarcacionSistemaParte"
+  tipo_trabajo_embarcacion_sistema_parte TipoTrabajoEmbarcacionSistemaParte @relation("TTESPtoOTSIS", fields: [id_tipo_trabajo_embarcacion_sistema_parte], references: [id_tipo_trabajo_embarcacion_sistema_parte], onDelete: NoAction, onUpdate: Cascade)
+
   orden_trabajo_parte     OrdenTrabajoParte[]
 
-  @@unique([id_orden_trabajo, id_sistema], name: "orden_trabajo_sistema_unique")
+  @@unique([id_orden_trabajo, id_sistema, id_tipo_trabajo_embarcacion_sistema_parte], name: "orden_trabajo_sistema_unique")
   @@map("orden_trabajo_sistema")
-  
-  // Índices adicionales
-  @@index([id_orden_trabajo], name: "idx_orden_trabajo_sistema_orden_trabajo")
-  @@index([id_sistema], name: "idx_orden_trabajo_sistema_sistema")
-  @@index([id_embarcacion_sistema], name: "idx_orden_trabajo_sistema_embarcacion_sistema")
-  @@index([estado], name: "idx_orden_trabajo_sistema_estado")
+  @@index([id_orden_trabajo], name: "idx_otsis_ot")
+  @@index([id_sistema], name: "idx_otsis_sis")
+  @@index([id_embarcacion_sistema], name: "idx_otsis_es")
+  @@index([estado], name: "idx_otsis_est")
 }
-
-
-
 
 model OrdenTrabajoParte {
   id_orden_trabajo_parte Int                @id @default(autoincrement()) @map("id_orden_trabajo_parte")
@@ -312,7 +361,30 @@ model OrdenTrabajoParte {
   @@map("orden_trabajo_parte")
 }
 
+model TipoTrabajoEmbarcacionSistemaParte {
+  id_tipo_trabajo_embarcacion_sistema_parte Int  @id @default(autoincrement()) @map("id_tt_esp")
 
+  id_tipo_trabajo                           Int  @map("id_tipo_trabajo")
+  id_embarcacion_sistema_parte             Int  @map("id_esp") // acortamos nombres de columnas e índices
+
+  estado                                    Boolean @default(true) @map("estado")
+  creado_en                                 DateTime @default(now()) @map("creado_en")
+  actualizado_en                            DateTime @updatedAt @map("actualizado_en")
+
+  /// Relación a "TipoTrabajo" con la back-rel
+  tipo_trabajo              TipoTrabajo @relation("TTESPtoTT", fields: [id_tipo_trabajo], references: [id_tipo_trabajo], onDelete: Cascade, onUpdate: Cascade)
+
+  /// Relación a "EmbarcacionSistemaParte" con la back-rel
+  embarcacion_sistema_parte EmbarcacionSistemaParte @relation("ESPtoTTESP", fields: [id_embarcacion_sistema_parte], references: [id_embarcacion_sistema_parte], onDelete: Cascade, onUpdate: Cascade)
+
+  /// Back-rel a "OrdenTrabajoSistema"
+  orden_trabajo_sistemas OrdenTrabajoSistema[] @relation("TTESPtoOTSIS")
+
+  @@unique([id_tipo_trabajo, id_embarcacion_sistema_parte], name: "unq_tt_esp")
+  @@map("tipo_trabajo_esp") // nombre acortado para la tabla
+  @@index([id_tipo_trabajo], name: "idx_tt_esp_tt")
+  @@index([id_embarcacion_sistema_parte], name: "idx_tt_esp_esp")
+}
 
 model TareaRealizada {
   id_tarea_realizada    Int              @id @default(autoincrement()) @map("id_tarea_realizada")

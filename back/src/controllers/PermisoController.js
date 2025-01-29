@@ -7,7 +7,15 @@ export const createPermiso = async (req, res) => {
 
     try {
         const permiso = await PermisoService.createPermiso(nombre, descripcion);
-        res.status(201).json({ message: "Permiso creado exitosamente.", data: permiso });
+
+        // Determinar si se creó un nuevo permiso o se reactivó uno existente
+        const mensaje = permiso.estado 
+            ? (permiso.creado_en.getTime() === permiso.actualizado_en.getTime()
+                ? "Permiso creado exitosamente."
+                : "Permiso reactivado exitosamente.")
+            : "Permiso creado exitosamente.";
+
+        res.status(201).json({ message: mensaje, data: permiso });
     } catch (error) {
         res.status(400).json({ message: error.message });
     }

@@ -1,4 +1,4 @@
-import { getPeruTime, getUTCTime } from "../utils/Time.js";
+import { getUTCTime } from "../utils/Time.js";
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
@@ -11,22 +11,31 @@ export const createPermiso = async (nombre, descripcion) => {
         throw new Error("El nombre del permiso es obligatorio.");
     }
 
-    // Verificar si el permiso ya existe
+    // Verificar si el permiso ya existe (incluyendo los inactivos)
     const permisoExistente = await prisma.permiso.findUnique({
         where: { nombre },
     });
 
     if (permisoExistente) {
-        throw new Error(`El permiso con el nombre "${nombre}" ya existe.`);
+        if (!permisoExistente.estado) {
+            // Si el permiso existe pero está inactivo, lo reactivamos
+            return await prisma.permiso.update({
+                where: { id: permisoExistente.id },
+                data: {
+                    estado: true,
+                    actualizado_en: getUTCTime(new Date()),
+                },
+            });
+        }
+        throw new Error(`El permiso con el nombre "${nombre}" ya existe y está activo.`);
     }
 
-    // Crear el permiso
     const nuevoPermiso = await prisma.permiso.create({
         data: {
             nombre,
             descripcion,
-            creado_en:fecha_creacion,
-            actualizado_en:fecha_creacion
+            creado_en: fecha_creacion,
+            actualizado_en: fecha_creacion,
         },
     });
 
@@ -84,7 +93,7 @@ export const updatePermiso = async (id, nombre, descripcion) => {
         throw new Error(`El permiso con ID ${id} no existe o está inactivo.`);
     }
 
-    // Verificar si el nuevo nombre ya está en uso
+    // Verificar si el nuevo nombre ya está en uso (excluyendo el permiso actual)
     if (nombre && nombre !== permisoExistente.nombre) {
         const nombreEnUso = await prisma.permiso.findUnique({
             where: { nombre },
@@ -94,7 +103,8 @@ export const updatePermiso = async (id, nombre, descripcion) => {
         }
     }
 
-    // Actualizar el permiso
+    // Actualizar el permiso con fecha actualizada
+    const fecha_actualizacion = getUTCTime(new Date());
     const permisoActualizado = await prisma.permiso.update({
         where: { id: permisoId },
         data: {
@@ -126,7 +136,7 @@ export const deletePermiso = async (id) => {
         throw new Error(`El permiso con ID ${id} no existe o ya está inactivo.`);
     }
 
-    // Desactivar el permiso
+    // Desactivar el permiso y actualizar la fecha
     const permisoDesactivado = await prisma.permiso.update({
         where: { id: permisoId },
         data: { estado: false, actualizado_en:fecha_creacion },
