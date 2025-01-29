@@ -1,4 +1,3 @@
-// controllers/TipoTrabajoEmbarcacionSistemaParteController.js
 import * as TipoTrabajoESPService from "../services/TipoTrabajoEmbarcacionSistemaParteService.js";
 
 /**

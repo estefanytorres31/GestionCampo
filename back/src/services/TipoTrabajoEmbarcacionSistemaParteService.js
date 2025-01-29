@@ -16,9 +16,14 @@ export const createOrReactivateTipoTrabajoESP = async (id_tipo_trabajo, id_embar
 
     const fechaActual = getUTCTime(new Date().toISOString());
 
-    // Verificar si la relación ya existe
+    // Verificar si la relación ya existe utilizando el índice único
     const relacionExistente = await prisma.tipoTrabajoEmbarcacionSistemaParte.findUnique({
-        where: { unq_tt_esp: { id_tipo_trabajo, id_embarcacion_sistema_parte } }
+        where: {
+            unq_tt_esp: {
+                id_tipo_trabajo,
+                id_embarcacion_sistema_parte,
+            },
+        },
     });
 
     if (relacionExistente) {
@@ -31,7 +36,7 @@ export const createOrReactivateTipoTrabajoESP = async (id_tipo_trabajo, id_embar
                 data: {
                     estado: true,
                     actualizado_en: fechaActual,
-                }
+                },
             });
         }
     }
@@ -44,7 +49,7 @@ export const createOrReactivateTipoTrabajoESP = async (id_tipo_trabajo, id_embar
             estado: true,
             creado_en: fechaActual,
             actualizado_en: fechaActual,
-        }
+        },
     });
 
     return nuevaRelacion;
@@ -65,11 +70,11 @@ export const getAllTipoTrabajoESP = async () => {
                         include: {
                             embarcacion: true,
                             sistema: true,
-                        }
+                        },
                     },
                     parte: true,
-                }
-            }
+                },
+            },
         },
         orderBy: { creado_en: "desc" },
     });
@@ -101,12 +106,12 @@ export const getTipoTrabajoESPById = async (id) => {
                         include: {
                             embarcacion: true,
                             sistema: true,
-                        }
+                        },
                     },
                     parte: true,
-                }
-            }
-        }
+                },
+            },
+        },
     });
 
     if (!relacion || !relacion.estado) {
@@ -147,12 +152,12 @@ export const updateTipoTrabajoESP = async (id, data) => {
                         include: {
                             embarcacion: true,
                             sistema: true,
-                        }
+                        },
                     },
                     parte: true,
-                }
-            }
-        }
+                },
+            },
+        },
     });
 };
 
@@ -167,7 +172,7 @@ export const desactivarTipoTrabajoESP = async (id) => {
     }
 
     const relacion = await prisma.tipoTrabajoEmbarcacionSistemaParte.findUnique({
-        where: { id_tipo_trabajo_embarcacion_sistema_parte: parseInt(id, 10) }
+        where: { id_tipo_trabajo_embarcacion_sistema_parte: parseInt(id, 10) },
     });
 
     if (!relacion || !relacion.estado) {
@@ -187,12 +192,12 @@ export const desactivarTipoTrabajoESP = async (id) => {
                         include: {
                             embarcacion: true,
                             sistema: true,
-                        }
+                        },
                     },
                     parte: true,
-                }
-            }
-        }
+                },
+            },
+        },
     });
 
     return relacionDesactivada;
