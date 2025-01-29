@@ -6,8 +6,6 @@ export const getUserById = async (id) => {
     try {
         const response = await apiClient.get(`/usuario/${id}`);
         
-        
-        // Check if response.data is null or undefined
         if (!response.data) {
             console.warn(`No user data found for ID: ${id}`);
             throw new Error('User not found');
