@@ -13,7 +13,33 @@ export const assignParteToEmbarcacionSistema = async (id_embarcacion_sistema, id
 
     const fechaActual = getUTCTime(new Date().toISOString());
 
-    const embarcacionSistemaParte = await prisma.embarcacionSistemaParte.create({
+    // Verificar si la asociación ya existe
+    const asociacionExistente = await prisma.embarcacionSistemaParte.findUnique({
+        where: {
+            embarcacion_sistema_parte_unique: {
+                id_embarcacion_sistema,
+                id_parte
+            }
+        }
+    });
+
+    if (asociacionExistente) {
+        if (asociacionExistente.estado) {
+            throw { status: 400, message: "Esta parte ya está asignada a este sistema en la embarcación." };
+        } else {
+            // Reactivar la relación si estaba desactivada
+            return await prisma.embarcacionSistemaParte.update({
+                where: { id_embarcacion_sistema_parte: asociacionExistente.id_embarcacion_sistema_parte },
+                data: {
+                    estado: true,
+                    actualizado_en: fechaActual
+                }
+            });
+        }
+    }
+
+    // Crear nueva asociación
+    return await prisma.embarcacionSistemaParte.create({
         data: {
             id_embarcacion_sistema,
             id_parte,
@@ -22,8 +48,6 @@ export const assignParteToEmbarcacionSistema = async (id_embarcacion_sistema, id
             actualizado_en: fechaActual,
         },
     });
-
-    return embarcacionSistemaParte;
 };
 
 /**
@@ -35,12 +59,12 @@ export const getPartesByEmbarcacionSistema = async (id_embarcacion_sistema) => {
     }
 
     const partes = await prisma.embarcacionSistemaParte.findMany({
-        where: { id_embarcacion_sistema },
+        where: { id_embarcacion_sistema, estado: true },
         include: { parte: true },
     });
 
     if (!partes.length) {
-        throw { status: 404, message: `No se encontraron partes para la relación embarcación-sistema con ID ${id_embarcacion_sistema}.` };
+        throw { status: 404, message: `No se encontraron partes activas para la embarcación-sistema con ID ${id_embarcacion_sistema}.` };
     }
 
     return partes;
@@ -56,28 +80,37 @@ export const updateEmbarcacionSistemaParte = async (id_embarcacion_sistema_parte
 
     const fechaActual = getUTCTime(new Date().toISOString());
 
-    const embarcacionSistemaParte = await prisma.embarcacionSistemaParte.update({
+    return await prisma.embarcacionSistemaParte.update({
         where: { id_embarcacion_sistema_parte },
         data: {
             ...data,
             actualizado_en: fechaActual,
         },
     });
-
-    return embarcacionSistemaParte;
 };
 
 /**
- * Eliminar una Asociación entre Embarcación, Sistema y Parte
+ * "Eliminar" una Asociación entre Embarcación, Sistema y Parte (Desactivar)
  */
 export const deleteEmbarcacionSistemaParte = async (id_embarcacion_sistema_parte) => {
     if (!id_embarcacion_sistema_parte) {
         throw { status: 400, message: "El ID de la asociación es obligatorio." };
     }
 
-    const embarcacionSistemaParte = await prisma.embarcacionSistemaParte.delete({
-        where: { id_embarcacion_sistema_parte },
+    const fechaActual = getUTCTime(new Date().toISOString());
+
+    // Buscar la relación
+    const asociacion = await prisma.embarcacionSistemaParte.findUnique({
+        where: { id_embarcacion_sistema_parte }
     });
 
-    return embarcacionSistemaParte;
+    if (!asociacion || !asociacion.estado) {
+        throw { status: 404, message: "La asociación ya está desactivada o no existe." };
+    }
+
+    // Desactivar la relación en lugar de eliminarla
+    return await prisma.embarcacionSistemaParte.update({
+        where: { id_embarcacion_sistema_parte },
+        data: { estado: false, actualizado_en: fechaActual },
+    });
 };

@@ -204,6 +204,7 @@ model SistemaParte {
   id_sistema_parte Int      @id @default(autoincrement()) @map("id_sistema_parte")
   id_sistema       Int      @map("id_sistema")
   id_parte         Int      @map("id_parte")
+  estado           Boolean  @default(true) @map("estado") // Nuevo campo
   creado_en        DateTime @default(now()) @map("creado_en")
   actualizado_en   DateTime @updatedAt @map("actualizado_en")
   
@@ -214,6 +215,7 @@ model SistemaParte {
   @@map("sistema_parte")
   @@index([id_sistema], name: "idx_sistema_parte_sistema_id")
   @@index([id_parte], name: "idx_sistema_parte_parte_id")
+  @@index([estado], name: "idx_sistema_parte_estado")
 }
 
 model EmbarcacionSistema {
