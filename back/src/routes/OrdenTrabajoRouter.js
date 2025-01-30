@@ -1,23 +1,29 @@
+// routes/ordenTrabajo.js
+
 import { Router } from "express";
 import {
-    asignarTrabajoAEmbarcacion,
-    gestionarEstadoOrdenTrabajo,
-    actualizarEstadoOrdenTrabajo,
-    asignarMultipleOrdenesTrabajoAEmbarcacion,
+    actualizarOrdenTrabajo,
+  asignarTrabajoAEmbarcacion,
+  desactivarOrdenTrabajo,
+  getAllOrdenesTrabajo,
+  getOrdenTrabajoById,
 } from "../controllers/OrdenTrabajoController.js";
 
 const ordenTrabajoRouter = Router();
 
-// 📌 Asignar un Trabajo a una Embarcación
-ordenTrabajoRouter.post("/asignar", asignarTrabajoAEmbarcacion);
+// 📌 Crear una nueva Orden de Trabajo (Crear o Reactivar)
+ordenTrabajoRouter.post("/", asignarTrabajoAEmbarcacion);
 
-// 📌 Gestionar el Estado de la Orden de Trabajo
-ordenTrabajoRouter.post("/gestionarestado", gestionarEstadoOrdenTrabajo);
+// 📌 Obtener todas las Ordenes de Trabajo Activas con filtrado y paginación
+ordenTrabajoRouter.get("/", getAllOrdenesTrabajo);
 
-// 📌 Actualizar el Estado de la Orden de Trabajo
-ordenTrabajoRouter.put("/actualizarestado/:id_orden_trabajo", actualizarEstadoOrdenTrabajo);
+// 📌 Obtener una Orden de Trabajo Activa por ID
+ordenTrabajoRouter.get("/:id_orden_trabajo", getOrdenTrabajoById);
 
-// 📌 Asignar múltiples Ordenes de Trabajo a una Embarcación
-ordenTrabajoRouter.post("/asignarmultiples", asignarMultipleOrdenesTrabajoAEmbarcacion);
+// 📌 Actualizar una Orden de Trabajo
+ordenTrabajoRouter.put("/:id_orden_trabajo", actualizarOrdenTrabajo);
+
+// 📌 Desactivar (Inactivar) una Orden de Trabajo
+ordenTrabajoRouter.delete("/:id_orden_trabajo", desactivarOrdenTrabajo);
 
 export default ordenTrabajoRouter;

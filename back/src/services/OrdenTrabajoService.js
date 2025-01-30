@@ -4,216 +4,250 @@ import { getUTCTime } from "../utils/Time.js";
 const prisma = new PrismaClient();
 
 /**
- * Asignar un Trabajo a una Embarcación
- * @param {Object} params - Parámetros de la orden de trabajo
- * @returns {Promise<Object>} - La orden de trabajo creada
+ * Asignar un Trabajo a una Embarcación (Crear o Reactivar Orden de Trabajo)
+ * @param {Object} data - Datos para asignar la orden de trabajo
+ * @returns {Promise<Object>} - La orden de trabajo creada o reactivada
  */
-export const asignarTrabajoAEmbarcacion = async ({
+export const asignarTrabajoAEmbarcacion = async (data) => {
+  const {
     id_tipo_trabajo,
     id_embarcacion,
     id_puerto,
     id_jefe_asigna,
-    comentarios,
-}) => {
-    // Validaciones básicas
-    if (
-        isNaN(id_tipo_trabajo) ||
-        isNaN(id_embarcacion) ||
-        isNaN(id_puerto) ||
-        isNaN(id_jefe_asigna)
-    ) {
-        throw new Error("Todos los IDs proporcionados deben ser números válidos.");
+    codigo,
+    comentarios = null, // Opcional
+    motorista = null, // Opcional
+    supervisor = null, // Opcional
+  } = data;
+
+  // ✅ Validaciones básicas
+  if (
+    isNaN(id_tipo_trabajo) ||
+    isNaN(id_embarcacion) ||
+    isNaN(id_puerto) ||
+    isNaN(id_jefe_asigna)
+  ) {
+    throw new Error("Todos los IDs proporcionados deben ser números válidos.");
+  }
+
+  const fecha_actualizacion = getUTCTime(new Date().toISOString());
+
+  return await prisma.$transaction(async (prisma) => {
+    let ordenTrabajo;
+    let mensaje;
+
+    if (codigo) {
+      // 🔹 Buscar una orden existente con el mismo código
+      ordenTrabajo = await prisma.ordenTrabajo.findUnique({
+        where: { codigo },
+      });
+
+      if (ordenTrabajo) {
+        if (ordenTrabajo.estado === "inactivo") {
+          // 🔹 Reactivar la orden si está inactiva
+          ordenTrabajo = await prisma.ordenTrabajo.update({
+            where: { codigo },
+            data: {
+              estado: "pendiente",
+              comentarios: comentarios || ordenTrabajo.comentarios,
+              motorista: motorista || ordenTrabajo.motorista,
+              supervisor: supervisor || ordenTrabajo.supervisor,
+              fecha_asignacion: fecha_actualizacion,
+              actualizado_en: fecha_actualizacion,
+            },
+          });
+          mensaje = "Orden de trabajo reactivada exitosamente.";
+        } else {
+          throw new Error(
+            `Una orden de trabajo con el código "${codigo}" ya existe y está activa.`
+          );
+        }
+      }
     }
-
-    // Verificar que el TipoTrabajo exista y esté activo
-    const tipoTrabajo = await prisma.tipoTrabajo.findUnique({
-        where: { id_tipo_trabajo },
-    });
-
-    if (!tipoTrabajo || !tipoTrabajo.estado) {
-        throw new Error(`El tipo de trabajo con ID ${id_tipo_trabajo} no existe o está inactivo.`);
-    }
-
-    // Verificar que la Embarcación exista y esté activa
-    const embarcacion = await prisma.embarcacion.findUnique({
-        where: { id_embarcacion },
-    });
-
-    if (!embarcacion || !embarcacion.estado) {
-        throw new Error(`La embarcación con ID ${id_embarcacion} no existe o está inactiva.`);
-    }
-
-    // Verificar que el Puerto exista y esté activo
-    const puerto = await prisma.puerto.findUnique({
-        where: { id_puerto },
-    });
-
-    if (!puerto || !puerto.estado) {
-        throw new Error(`El puerto con ID ${id_puerto} no existe o está inactivo.`);
-    }
-
-    // Verificar que el Usuario (Jefe que asigna) exista y esté activo
-    const jefe = await prisma.usuario.findUnique({
-        where: { id: id_jefe_asigna },
-    });
-
-    if (!jefe || !jefe.estado) {
-        throw new Error(`El usuario con ID ${id_jefe_asigna} no existe o está inactivo.`);
-    }
-
-    const fechaActual = getUTCTime(new Date().toISOString());
-
-    // Crear la Orden de Trabajo
-    const ordenTrabajo = await prisma.ordenTrabajo.create({
-        data: {
-            id_tipo_trabajo,
-            id_embarcacion,
-            id_puerto,
-            id_jefe_asigna,
-            fecha_asignacion: fechaActual,
-            estado: "pendiente",
-            comentarios,
-            creado_en: fechaActual,
-            actualizado_en: fechaActual,
-        },
-    });
-
-    return ordenTrabajo;
-};
-
-/**
- * Gestionar el Estado de la Orden de Trabajo
- * @param {number} id_orden_trabajo - ID de la orden de trabajo
- * @param {string} nuevo_estado - Nuevo estado (pendiente, en_progreso, completado, cancelado)
- * @returns {Promise<Object>} - La orden de trabajo actualizada
- */
-export const gestionarEstadoOrdenTrabajo = async (id_orden_trabajo, nuevo_estado) => {
-    const fechaActual = getUTCTime(new Date().toISOString());
-    const validEstados = ["pendiente", "en_progreso", "completado", "cancelado"];
-    if (!validEstados.includes(nuevo_estado)) {
-        throw new Error(`El estado "${nuevo_estado}" no es válido. Estados permitidos: ${validEstados.join(", ")}.`);
-    }
-
-    // Verificar que la Orden de Trabajo exista
-    const ordenTrabajo = await prisma.ordenTrabajo.findUnique({
-        where: { id_orden_trabajo },
-    });
 
     if (!ordenTrabajo) {
-        throw new Error(`La orden de trabajo con ID ${id_orden_trabajo} no existe.`);
+      // 🔹 Crear una nueva Orden de Trabajo
+      ordenTrabajo = await prisma.ordenTrabajo.create({
+        data: {
+          id_tipo_trabajo,
+          id_embarcacion,
+          id_puerto,
+          id_jefe_asigna,
+          codigo,
+          comentarios,
+          motorista,
+          supervisor,
+          fecha_asignacion: fecha_actualizacion,
+          estado: "pendiente",
+          creado_en: fecha_actualizacion,
+          actualizado_en: fecha_actualizacion,
+        },
+      });
+      mensaje = "Trabajo asignado a la embarcación exitosamente.";
     }
 
-    // Actualizar el estado
-    const ordenTrabajoActualizada = await prisma.ordenTrabajo.update({
-        where: { id_orden_trabajo },
-        data: { estado: nuevo_estado, actualizado_en: fechaActual },
-    });
-
-    return ordenTrabajoActualizada;
+    return { mensaje, ordenTrabajo };
+  });
 };
 
 /**
- * Actualizar el Estado de la Orden de Trabajo
+ * Obtener todas las órdenes de trabajo activas
+ * @returns {Promise<Array>} - Lista de órdenes de trabajo activas
+ * @throws {Error} - Si no hay órdenes de trabajo activas
+ */
+export const getAllOrdenesTrabajo = async () => {
+  const ordenesTrabajo = await prisma.ordenTrabajo.findMany({
+    where: {
+      estado: {
+        not: "inactivo", // Excluir órdenes inactivas
+      },
+    },
+    orderBy: {
+      fecha_asignacion: "desc",
+    },
+    include: {
+      orden_trabajo_usuario: {
+        include: {
+          usuario: true, // Solo se incluye la relación usuario
+        },
+      },
+      orden_trabajo_sistemas: {
+        include: {
+          sistema: true,
+          embarcacion_sistema: true,
+          orden_trabajo_parte: {
+            include: {
+              parte: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (ordenesTrabajo.length === 0) {
+    throw new Error("No hay órdenes de trabajo activas.");
+  }
+
+  return ordenesTrabajo;
+};
+
+/**
+ * Obtener una Orden de Trabajo Activa por su ID
  * @param {number} id_orden_trabajo - ID de la orden de trabajo
- * @param {string} nuevo_estado - Nuevo estado (pendiente, en_progreso, completado, cancelado)
- * @returns {Promise<Object>} - La orden de trabajo actualizada
+ * @returns {Promise<Object|null>} - Orden de trabajo si está activa, `null` si no existe o está inactiva
+ * @throws {Error} - Si el ID no es válido
  */
-export const actualizarEstadoOrdenTrabajo = async (id_orden_trabajo, nuevo_estado) => {
-    // Reutilizar la función gestionarEstadoOrdenTrabajo
-    return await gestionarEstadoOrdenTrabajo(id_orden_trabajo, nuevo_estado);
+export const getOrdenTrabajoById = async (id_orden_trabajo) => {
+  if (isNaN(id_orden_trabajo)) {
+    throw new Error("El ID de la orden de trabajo debe ser un número válido.");
+  }
+
+  const ordenTrabajo = await prisma.ordenTrabajo.findUnique({
+    where: {
+      id_orden_trabajo: parseInt(id_orden_trabajo, 10),
+      estado: {
+        not: "inactivo", // Filtra solo órdenes activas
+      },
+    },
+    include: {
+      orden_trabajo_usuario: {
+        include: {
+          usuario: true, // Solo se incluye la relación usuario
+        },
+      },
+      orden_trabajo_sistemas: {
+        include: {
+          sistema: true,
+          embarcacion_sistema: true,
+          orden_trabajo_parte: {
+            include: {
+              parte: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!ordenTrabajo) {
+    throw new Error(
+      `La orden de trabajo con ID ${id_orden_trabajo} no existe o está inactiva.`
+    );
+  }
+
+  return ordenTrabajo;
 };
 
 /**
- * Asignar múltiples Ordenes de Trabajo a una Embarcación (Transacción)
- * @param {Array} ordenes - Array de objetos que contienen los detalles de las órdenes
- * @returns {Promise<Array>} - Array de órdenes de trabajo creadas
+ * 🔹 Actualizar una Orden de Trabajo
+ * @param {number} id_orden_trabajo - ID de la orden de trabajo a actualizar
+ * @param {Object} data - Datos a actualizar
+ * @returns {Promise<Object>} - Orden de trabajo actualizada
  */
-export const asignarMultipleOrdenesTrabajoAEmbarcacion = async (ordenes) => {
-    const fechaActual = getUTCTime(new Date().toISOString());
-    /*
-        'ordenes' es un array de objetos que contienen:
-        - id_tipo_trabajo
-        - id_embarcacion
-        - id_puerto
-        - id_jefe_asigna
-        - comentarios
-    */
+export const actualizarOrdenTrabajo = async (id_orden_trabajo, data) => {
+  if (isNaN(id_orden_trabajo)) {
+    throw new Error("El ID de la orden de trabajo debe ser un número válido.");
+  }
 
-    if (!Array.isArray(ordenes) || ordenes.length === 0) {
-        throw new Error("Debe proporcionar una lista válida de órdenes de trabajo.");
-    }
+  const ordenExistente = await prisma.ordenTrabajo.findUnique({
+    where: { id_orden_trabajo },
+  });
 
-    // Iniciar una transacción
-    const resultados = await prisma.$transaction(async (tx) => {
-        const operaciones = ordenes.map(async (orden) => {
-            const {
-                id_tipo_trabajo,
-                id_embarcacion,
-                id_puerto,
-                id_jefe_asigna,
-                comentarios,
-            } = orden;
+  if (!ordenExistente || ordenExistente.estado === "inactivo") {
+    throw new Error(
+      `La orden de trabajo con ID ${id_orden_trabajo} no existe o está inactiva.`
+    );
+  }
 
-            // Validaciones similares a asignarTrabajoAEmbarcacion
-            if (
-                isNaN(id_tipo_trabajo) ||
-                isNaN(id_embarcacion) ||
-                isNaN(id_puerto) ||
-                isNaN(id_jefe_asigna)
-            ) {
-                throw new Error("Todos los IDs proporcionados deben ser números válidos.");
-            }
+  const fecha_actualizacion = getUTCTime(new Date().toISOString());
 
-            const tipoTrabajo = await tx.tipoTrabajo.findUnique({
-                where: { id_tipo_trabajo },
-            });
+  const ordenActualizada = await prisma.ordenTrabajo.update({
+    where: { id_orden_trabajo },
+    data: {
+      ...data,
+      actualizado_en: fecha_actualizacion,
+    },
+  });
 
-            if (!tipoTrabajo || !tipoTrabajo.estado) {
-                throw new Error(`El tipo de trabajo con ID ${id_tipo_trabajo} no existe o está inactivo.`);
-            }
+  return ordenActualizada;
+};
 
-            const embarcacion = await tx.embarcacion.findUnique({
-                where: { id_embarcacion },
-            });
+/**
+ * 🔹 Desactivar (Inactivar) una Orden de Trabajo
+ * @param {number} id_orden_trabajo - ID de la orden de trabajo a inactivar
+ * @returns {Promise<Object>} - Orden de trabajo desactivada
+ */
+export const desactivarOrdenTrabajo = async (id_orden_trabajo) => {
+  if (isNaN(id_orden_trabajo)) {
+    throw new Error("El ID de la orden de trabajo debe ser un número válido.");
+  }
 
-            if (!embarcacion || !embarcacion.estado) {
-                throw new Error(`La embarcación con ID ${id_embarcacion} no existe o está inactiva.`);
-            }
+  const ordenExistente = await prisma.ordenTrabajo.findUnique({
+    where: { id_orden_trabajo },
+  });
 
-            const puerto = await tx.puerto.findUnique({
-                where: { id_puerto },
-            });
+  if (!ordenExistente) {
+    throw new Error(
+      `La orden de trabajo con ID ${id_orden_trabajo} no existe.`
+    );
+  }
 
-            if (!puerto || !puerto.estado) {
-                throw new Error(`El puerto con ID ${id_puerto} no existe o está inactivo.`);
-            }
+  if (ordenExistente.estado === "inactivo") {
+    throw new Error(
+      `La orden de trabajo con ID ${id_orden_trabajo} ya está inactiva.`
+    );
+  }
 
-            const jefe = await tx.usuario.findUnique({
-                where: { id: id_jefe_asigna },
-            });
+  const fecha_actualizacion = getUTCTime(new Date().toISOString());
 
-            if (!jefe || !jefe.estado) {
-                throw new Error(`El usuario con ID ${id_jefe_asigna} no existe o está inactivo.`);
-            }
+  const ordenDesactivada = await prisma.ordenTrabajo.update({
+    where: { id_orden_trabajo },
+    data: {
+      estado: "inactivo",
+      actualizado_en: fecha_actualizacion,
+    },
+  });
 
-            // Crear la Orden de Trabajo
-            return await tx.ordenTrabajo.create({
-                data: {
-                    id_tipo_trabajo,
-                    id_embarcacion,
-                    id_puerto,
-                    id_jefe_asigna,
-                    fecha_asignacion: fechaActual,
-                    estado: "pendiente",
-                    comentarios,
-                    creado_en: fechaActual,
-                    actualizado_en: fechaActual,
-                },
-            });
-        });
-
-        return Promise.all(operaciones);
-    });
-
-    return resultados;
+  return ordenDesactivada;
 };

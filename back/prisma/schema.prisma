@@ -19,6 +19,7 @@ enum EstadoOrdenTrabajo {
   en_progreso
   completado
   cancelado
+  inactivo  // Representa el estado 0 (inactivo)
 }
 
 enum TipoAsistencia {
@@ -274,17 +275,20 @@ model TipoTrabajo {
 model OrdenTrabajo {
   id_orden_trabajo        Int                 @id @default(autoincrement()) @map("id_orden_trabajo")
   id_tipo_trabajo         Int                 @map("id_tipo_trabajo")
-  id_embarcacion          Int                 @map("id_embarcacion") // Campo agregado
+  id_embarcacion          Int                 @map("id_embarcacion")
   id_puerto               Int                 @map("id_puerto")
   id_jefe_asigna          Int                 @map("id_jefe_asigna")
   fecha_asignacion        DateTime            @map("fecha_asignacion")
   estado                  EstadoOrdenTrabajo  @default(pendiente) @map("estado")
   comentarios             String?             @map("comentarios")
+  motorista               String?             @map("motorista")
+  supervisor              String?             @map("supervisor")
+  codigo                  String?             @map("codigo")
   creado_en               DateTime            @default(now()) @map("creado_en")
   actualizado_en          DateTime            @updatedAt @map("actualizado_en")
 
   tipo_trabajo            TipoTrabajo         @relation(fields: [id_tipo_trabajo], references: [id_tipo_trabajo], onDelete: NoAction, onUpdate: Cascade)
-  embarcacion             Embarcacion         @relation("EmbarcacionOrdenTrabajo", fields: [id_embarcacion], references: [id_embarcacion], onDelete: NoAction, onUpdate: Cascade) // Relación agregada con nombre
+  embarcacion             Embarcacion         @relation("EmbarcacionOrdenTrabajo", fields: [id_embarcacion], references: [id_embarcacion], onDelete: NoAction, onUpdate: Cascade)
   puerto                  Puerto              @relation(fields: [id_puerto], references: [id_puerto], onDelete: NoAction, onUpdate: Cascade)
   jefe_asigna             Usuario             @relation("JefeAsigna", fields: [id_jefe_asigna], references: [id], onDelete: NoAction, onUpdate: Cascade)
 
@@ -294,7 +298,7 @@ model OrdenTrabajo {
 
   @@map("orden_trabajo")
   @@index([id_tipo_trabajo], name: "idx_ot_tt")
-  @@index([id_embarcacion], name: "idx_ot_embarcacion") // Índice agregado
+  @@index([id_embarcacion], name: "idx_ot_embarcacion")
   @@index([id_puerto], name: "idx_ot_pto")
   @@index([id_jefe_asigna], name: "idx_ot_jefe")
   @@index([estado], name: "idx_ot_est")
