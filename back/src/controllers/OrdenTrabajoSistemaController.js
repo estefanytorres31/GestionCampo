@@ -37,12 +37,12 @@ export const getOrdenTrabajoSistemaById = async (req, res) => {
 };
 
 /**
- * Desactivar una OrdenTrabajoSistema
+ * Actualizar una OrdenTrabajoSistema
  */
-export const deleteOrdenTrabajoSistema = async (req, res) => {
+export const updateOrdenTrabajoSistema = async (req, res) => {
     try {
-        const orden = await OrdenTrabajoSistemaService.deleteOrdenTrabajoSistema(req.params.id);
-        res.status(200).json({ message: "Orden de trabajo desactivada exitosamente.", data: orden });
+        const orden = await OrdenTrabajoSistemaService.updateOrdenTrabajoSistema(req.params.id, req.body);
+        res.status(200).json({ message: "Orden de trabajo actualizada exitosamente.", data: orden });
     } catch (error) {
         res.status(400).json({ message: error.message });
     }

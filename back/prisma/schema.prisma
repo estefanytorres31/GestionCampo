@@ -332,6 +332,9 @@ model OrdenTrabajoSistema {
   id_embarcacion_sistema  Int  @map("id_embarcacion_sistema")
   estado                  EstadoOrdenTrabajo @default(pendiente) @map("estado")
   observaciones           String? @map("observaciones")
+  avance                  Int @default(0) @map("avance") // Nuevo campo para el porcentaje de avance
+  materiales              String? @map("materiales") // Nuevo campo para materiales
+  proximo_abordaje        String? @map("proximo_abordaje") // Nuevo campo para próximo abordaje
   creado_en               DateTime @default(now()) @map("creado_en")
   actualizado_en          DateTime @updatedAt @map("actualizado_en")
   id_tipo_trabajo_embarcacion_sistema_parte Int @map("id_tipo_trabajo_embarcacion_sistema_parte")
@@ -340,7 +343,9 @@ model OrdenTrabajoSistema {
   sistema                 Sistema        @relation(fields: [id_sistema], references: [id_sistema], onDelete: NoAction, onUpdate: Cascade)
   embarcacion_sistema     EmbarcacionSistema @relation(fields: [id_embarcacion_sistema], references: [id_embarcacion_sistema], onDelete: NoAction, onUpdate: Cascade)
 
-  /// Relación a "TipoTrabajoEmbarcacionSistemaParte"
+  // Relación con la nueva tabla de fotos
+  fotos                   OrdenTrabajoSistemaFoto[]
+
   tipo_trabajo_embarcacion_sistema_parte TipoTrabajoEmbarcacionSistemaParte @relation("TTESPtoOTSIS", fields: [id_tipo_trabajo_embarcacion_sistema_parte], references: [id_tipo_trabajo_embarcacion_sistema_parte], onDelete: NoAction, onUpdate: Cascade)
 
   orden_trabajo_parte     OrdenTrabajoParte[]
@@ -352,6 +357,19 @@ model OrdenTrabajoSistema {
   @@index([id_embarcacion_sistema], name: "idx_otsis_es")
   @@index([estado], name: "idx_otsis_est")
 }
+
+model OrdenTrabajoSistemaFoto {
+  id_foto                   Int     @id @default(autoincrement()) @map("id_foto")
+  id_orden_trabajo_sistema  Int     @map("id_orden_trabajo_sistema")
+  url                       String  @map("url") // URL de la foto
+  creado_en                 DateTime @default(now()) @map("creado_en")
+
+  orden_trabajo_sistema     OrdenTrabajoSistema @relation(fields: [id_orden_trabajo_sistema], references: [id_orden_trabajo_sistema], onDelete: Cascade, onUpdate: Cascade)
+
+  @@map("orden_trabajo_sistema_foto")
+  @@index([id_orden_trabajo_sistema], name: "idx_otsf_otsis")
+}
+
 
 model OrdenTrabajoParte {
   id_orden_trabajo_parte Int                @id @default(autoincrement()) @map("id_orden_trabajo_parte")
