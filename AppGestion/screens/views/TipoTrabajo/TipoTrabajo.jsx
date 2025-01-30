@@ -1,4 +1,3 @@
-// Trabajo.js
 import React, { useEffect } from "react";
 import {
     View,
@@ -7,16 +6,40 @@ import {
     StyleSheet,
     SafeAreaView,
     Animated,
-    Dimensions
+    Dimensions,
+    StatusBar
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import { useFocusEffect } from '@react-navigation/native';
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { LinearGradient } from 'expo-linear-gradient';
 import useTipoTrabajo from "../../hooks/TipoTrabajo/useTipoTabajo";
 
 const { height } = Dimensions.get('window');
 
+const trabajoStyles = {
+    'Mantto Preventivo': {
+        gradient: ['#3A416F', '#141727'],
+        icon: 'wrench-clock'
+    },
+    'Mantto Correctivo': {
+        gradient: ['#1A73E8', '#174EA6'],
+        icon: 'tools'
+    },
+    'Proyecto': {
+        gradient: ['#344767', '#1A2035'],
+        icon: 'clipboard-check'
+    },
+    'Desmontaje / Montaje': {
+        gradient: ['#1E4DB7', '#1A237E'],
+        icon: 'engine'
+    },
+    default: {
+        gradient: ['#2D3748', '#1A202C'],
+        icon: 'cog'
+    }
+};
+
 const Trabajo = ({ navigation }) => {
-    const { tipotrabajos } = useTipoTrabajo(); // Obtén los tipos de trabajo del contexto
+    const { tipotrabajos } = useTipoTrabajo();
     const fadeAnim = React.useRef(new Animated.Value(0)).current;
     const scaleAnim = React.useRef(new Animated.Value(0.95)).current;
 
@@ -55,44 +78,78 @@ const Trabajo = ({ navigation }) => {
         navigation.navigate(screen, { clase: 'algún valor' });
     };
 
+    const getTrabajoStyle = (nombreTrabajo) => {
+        return trabajoStyles[nombreTrabajo] || trabajoStyles.default;
+    };
+
     return (
         <SafeAreaView style={styles.safeArea}>
-            <Animated.View
-                style={[
-                    styles.contentContainer,
-                    {
-                        opacity: fadeAnim,
-                        transform: [{ scale: scaleAnim }]
-                    }
-                ]}
-            >
-                <View style={styles.headerContainer}>
-                    <Text style={styles.subtitle}>Selecciona un tipo de trabajo</Text>
-                </View>
+            <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
+            <View style={styles.container}>
+                <Animated.View
+                    style={[
+                        styles.contentContainer,
+                        {
+                            opacity: fadeAnim,
+                            transform: [{ scale: scaleAnim }]
+                        }
+                    ]}
+                >
+                    <View style={styles.headerContainer}>
+                        <Text style={styles.title}>Tipos de Trabajo</Text>
+                    </View>
 
-                <View style={styles.buttonContainer}>
                     {tipotrabajos.length > 0 ? (
-                        tipotrabajos.map((trabajo, index) => (
-                            <TouchableOpacity
-                                key={index}
-                                style={[styles.button, { backgroundColor: '#7fa23d' }]} // Ejemplo de estilo
-                                onPress={() => handleButtonPress(trabajo.nombre_trabajo)} // Asume que 'nombre' es el campo del tipo de trabajo
-                                activeOpacity={0.8}
-                            >
-                                <View style={styles.buttonContent}>
-                                    <View style={styles.iconContainer}>
-                                        <Ionicons name="boat-outline" size={28} color="white" />
-                                    </View>
-                                    <Text style={styles.buttonText}>{trabajo.nombre_trabajo}</Text>
-                                    <Ionicons name="chevron-forward" size={24} color="rgba(255,255,255,0.8)" />
-                                </View>
-                            </TouchableOpacity>
-                        ))
+                        <View style={styles.buttonContainer}>
+                            {tipotrabajos.map((trabajo, index) => {
+                                const style = getTrabajoStyle(trabajo.nombre_trabajo);
+                                return (
+                                    <TouchableOpacity
+                                        key={index}
+                                        style={styles.button}
+                                        onPress={() => handleButtonPress(trabajo.nombre_trabajo)}
+                                        activeOpacity={0.9}
+                                    >
+                                        <LinearGradient
+                                            colors={style.gradient}
+                                            style={styles.buttonGradient}
+                                            start={{ x: 0, y: 0 }}
+                                            end={{ x: 1, y: 0 }}
+                                        >
+                                            <View style={styles.iconContainer}>
+                                                <MaterialCommunityIcons 
+                                                    name={style.icon} 
+                                                    size={24} 
+                                                    color="white" 
+                                                />
+                                            </View>
+                                            <Text style={styles.buttonText}>
+                                                {trabajo.nombre_trabajo}
+                                            </Text>
+                                            <MaterialCommunityIcons 
+                                                name="chevron-right" 
+                                                size={20} 
+                                                color="rgba(255,255,255,0.8)" 
+                                            />
+                                        </LinearGradient>
+                                    </TouchableOpacity>
+                                );
+                            })}
+                        </View>
                     ) : (
-                        <Text>No hay tipos de trabajo disponibles</Text>
+                        <View style={styles.emptyStateContainer}>
+                            <MaterialCommunityIcons 
+                                name="clipboard-text-outline" 
+                                size={40} 
+                                color="#94A3B8" 
+                            />
+                            <Text style={styles.emptyText}>
+                                No hay tipos de trabajo disponibles
+                            </Text>
+                        </View>
                     )}
-                </View>
-            </Animated.View>
+                </Animated.View>
+            </View>
         </SafeAreaView>
     );
 };
@@ -100,64 +157,77 @@ const Trabajo = ({ navigation }) => {
 const styles = StyleSheet.create({
     safeArea: {
         flex: 1,
+        backgroundColor: '#FFFFFF',
+    },
+    container: {
+        flex: 1,
+        backgroundColor: '#FFFFFF',
     },
     contentContainer: {
         flex: 1,
-        padding: 20,
-        justifyContent: 'space-between',
+        paddingHorizontal: 16,
     },
     headerContainer: {
-        flex: 0.2,
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginTop: 20,
+        paddingVertical: 16,
+        borderBottomWidth: 1,
+        borderBottomColor: '#E2E8F0',
+        marginBottom: 16,
     },
-    subtitle: {
+    title: {
         fontSize: 24,
-        fontWeight: '600',
-        color: '#636e72',
-        textAlign: 'center',
+        fontWeight: '700',
+        color: '#1E293B',
+        letterSpacing: 0.5,
     },
     buttonContainer: {
-        flex: 0.6,
-        justifyContent: 'center',
-        paddingHorizontal: 15,
+        paddingTop: 8,
     },
     button: {
-        marginVertical: 10,
-        borderRadius: 16,
-        elevation: 8,
+        marginBottom: 12,
+        borderRadius: 12,
+        elevation: 2,
         shadowColor: '#000',
         shadowOffset: {
             width: 0,
-            height: 4,
+            height: 2,
         },
-        shadowOpacity: 0.3,
-        shadowRadius: 4.65,
+        shadowOpacity: 0.1,
+        shadowRadius: 3,
+        overflow: 'hidden',
     },
-    buttonContent: {
+    buttonGradient: {
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: height * 0.022,
+        padding: 16,
         paddingHorizontal: 20,
     },
     iconContainer: {
         width: 40,
         height: 40,
-        borderRadius: 20,
-        backgroundColor: 'rgba(255, 255, 255, 0.2)',
+        borderRadius: 10,
+        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginRight: 16,
+    },
+    buttonText: {
+        flex: 1,
+        color: '#FFFFFF',
+        fontSize: 16,
+        fontWeight: '600',
+        letterSpacing: 0.3,
+    },
+    emptyStateContainer: {
+        flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
     },
-    buttonText: {
-        color: '#fff',
-        fontSize: 20,
-        fontWeight: '700',
-        letterSpacing: 0.5,
-        flex: 1,
-        marginLeft: 15,
-    },
+    emptyText: {
+        marginTop: 12,
+        fontSize: 16,
+        color: '#64748B',
+        textAlign: 'center',
+    }
 });
 
 export default Trabajo;

@@ -106,7 +106,7 @@ const trabajo = ({ navigation }) => {
 
                     <View style={styles.buttonContainer}>
                         {[
-                            { name: 'Mantto Preventivo', style: styles.preventivo, icon: 'boat-outline' },
+                            { name: 'Mantto Preventivo', style: styles.preventivo, icon: 'tools' },
                             { name: 'Mantto Correctivo', style: styles.correctivo, icon: 'boat-outline' },
                             { name: 'Proyecto', style: styles.proyecto, icon: 'boat-outline' },
                             { name: 'Desmontaje / Montaje', style: styles.desmontaje, icon: 'boat-outline' },
