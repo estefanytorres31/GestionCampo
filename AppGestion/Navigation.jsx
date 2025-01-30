@@ -6,6 +6,8 @@ import Clientes from "./screens/views/client/Client";
 import EmbarcacionesScreen from "./screens/views/Embarcacion/Embarcacion";
 import Inicio from "./screens/views/Scan/Inicio";
 import Trabajo from "./screens/views/TipoTrabajo/TipoTrabajo";
+import AsignarTrabajoScreen from "./screens/views/AsignarTrabajo/AsignarTrabajo";
+import SeleccionarAyudantesScreen from "./screens/views/AsignarTrabajo/SeleccionarAyudantes";
 import QRScann from "./screens/views/Scan/QRscan";
 import SistemasScreen from "./screens/views/Sistemas/Sistemas";
 import Menu from "./screens/views/Asistencia/Menu";
@@ -24,9 +26,19 @@ export default function Navigation () {
                 <Stack.Screen name="Embarcaciones" component={EmbarcacionesScreen} />
                 <Stack.Screen name="Trabajo" component={Trabajo} />
                 <Stack.Screen name="Sistemas" component={SistemasScreen} options={{title:"Sistemas"}}/>
+                <Stack.Screen
+                name="Asignar"
+                component={AsignarTrabajoScreen}
+                options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                name="SeleccionarAyudantes"
+                component={SeleccionarAyudantesScreen}
+                />
                 <Stack.Screen name="Inicio" component={Inicio} options={{ headerShown: false }}/>
                 <Stack.Screen name="QRScann" component={QRScann} options={{ title: "Escaneo de QR" }} />
                 <Stack.Screen name="Menu" component={Menu} options={{ title: "Menú"}} />
+
             </Stack.Navigator>
         </NavigationContainer>
     );
