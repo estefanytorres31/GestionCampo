@@ -7,9 +7,11 @@ import TipoTrabajoProvider from "./screens/context/TipoTrabajo/TipoTrabajoProvid
 import TipoTrabajoESPProvider from "./screens/context/TipoTrabajoESP/TipoTrabajoESPProvider.jsx";
 import UsuarioTecnicoProvider from "./screens/context/UsuarioTecnico/UsuarioTecnicoProvider.jsx";
 import PuertoProvider from "./screens/context/Puerto/PuertoProvider.js";
+import AsistenciaProvider from "./screens/context/Asistencia/AsistenciaProvider.jsx";
 export default function App() {
   return (
     <AuthProvider>
+    <AsistenciaProvider>
       <PuertoProvider>
       <TipoTrabajoESPProvider>
       <UsuarioTecnicoProvider>
@@ -23,6 +25,7 @@ export default function App() {
       </UsuarioTecnicoProvider>
       </TipoTrabajoESPProvider>
       </PuertoProvider>
+      </AsistenciaProvider>
     </AuthProvider>
   );
 }

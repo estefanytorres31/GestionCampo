@@ -150,7 +150,6 @@ model Puerto {
   actualizado_en   DateTime           @updatedAt @map("actualizado_en")
   historial_puertos HistorialPuerto[]
   orden_trabajo     OrdenTrabajo[]
-  asistencia        Asistencia[]      @relation("PuertoAsistencia")
 }
 
 model HistorialPuerto {
@@ -396,7 +395,6 @@ model Asistencia {
   id_usuario           Int              @map("id_usuario")
   id_embarcacion       Int              @map("id_embarcacion")
   id_orden_trabajo     Int?             @map("id_orden_trabajo")
-  id_puerto            Int?             @map("id_puerto")
   fecha_hora           DateTime         @map("fecha_hora")
   latitud              Decimal?         @db.Decimal(10, 6) @map("latitud")
   longitud             Decimal?         @db.Decimal(10, 6) @map("longitud")
@@ -405,8 +403,6 @@ model Asistencia {
   usuario              Usuario          @relation(fields: [id_usuario], references: [id], onDelete: NoAction, onUpdate: Cascade)
   embarcacion          Embarcacion      @relation(fields: [id_embarcacion], references: [id_embarcacion], onDelete: NoAction, onUpdate: Cascade)
   orden_trabajo        OrdenTrabajo?    @relation(fields: [id_orden_trabajo], references: [id_orden_trabajo], onDelete: SetNull, onUpdate: Cascade)
-  puerto               Puerto?          @relation("PuertoAsistencia", fields: [id_puerto], references: [id_puerto], onDelete: SetNull, onUpdate: Cascade)
-
   @@map("asistencia")
 }
 

@@ -27,7 +27,7 @@ const AuthProvider = ({ children }) => {
 
             // Store auth data
             await AsyncStorage.setItem('token', token);
-            await AsyncStorage.setItem("userId", userId.toString());
+            await AsyncStorage.setItem('userId', userId.toString());
             
             try {
                 // Attempt to get user data
