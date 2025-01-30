@@ -242,21 +242,22 @@ model EmbarcacionSistema {
 model EmbarcacionSistemaParte {
   id_embarcacion_sistema_parte Int  @id @default(autoincrement()) @map("id_embarcacion_sistema_parte")
   id_embarcacion_sistema       Int  @map("id_embarcacion_sistema")
-  id_parte                      Int  @map("id_parte")
-  estado                        Boolean @default(true) @map("estado")
-  creado_en                     DateTime @default(now()) @map("creado_en")
-  actualizado_en                DateTime @updatedAt @map("actualizado_en")
+  id_parte                     Int? @map("id_parte") // Ahora es opcional
+  estado                       Boolean @default(true) @map("estado")
+  creado_en                    DateTime @default(now()) @map("creado_en")
+  actualizado_en               DateTime @updatedAt @map("actualizado_en")
 
-  embarcacion_sistema           EmbarcacionSistema @relation(fields: [id_embarcacion_sistema], references: [id_embarcacion_sistema], onDelete: Cascade, onUpdate: Cascade)
-  parte                         Parte              @relation(fields: [id_parte], references: [id_parte], onDelete: Cascade, onUpdate: Cascade)
+  embarcacion_sistema          EmbarcacionSistema @relation(fields: [id_embarcacion_sistema], references: [id_embarcacion_sistema], onDelete: Cascade, onUpdate: Cascade)
+  parte                        Parte?             @relation(fields: [id_parte], references: [id_parte], onDelete: Cascade, onUpdate: Cascade) // Ahora es opcional
 
-  tipo_trabajo_emb_sist_par     TipoTrabajoEmbarcacionSistemaParte[] @relation("ESPtoTTESP") // Back relation
+  tipo_trabajo_emb_sist_par    TipoTrabajoEmbarcacionSistemaParte[] @relation("ESPtoTTESP") // Back relation
 
   @@unique([id_embarcacion_sistema, id_parte], name: "emb_sis_par_unique")
   @@map("embarcacion_sistema_parte")
   @@index([id_embarcacion_sistema], name: "idx_esp_es")
   @@index([id_parte], name: "idx_esp_par")
 }
+
 
 model TipoTrabajo {
   id_tipo_trabajo Int            @id @default(autoincrement()) @map("id_tipo_trabajo")
@@ -310,6 +311,7 @@ model OrdenTrabajoUsuario {
   id_usuario              Int         @map("id_usuario")
   rol_en_orden            RolEnOrden? @map("rol_en_orden")
   observaciones           String?     @map("observaciones")
+  estado                  Boolean     @default(true) @map("estado") // Nuevo campo para activación/desactivación
   creado_en               DateTime    @default(now()) @map("creado_en")
   actualizado_en          DateTime    @updatedAt @map("actualizado_en")
   orden_trabajo           OrdenTrabajo @relation(fields: [id_orden_trabajo], references: [id_orden_trabajo], onDelete: NoAction, onUpdate: Cascade)
