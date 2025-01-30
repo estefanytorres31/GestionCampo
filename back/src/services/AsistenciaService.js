@@ -75,6 +75,43 @@ export const crearAsistencia = async ({
         }
     }
 
+    // 🔹 **Nueva Validación: Asegurar la Consistencia entre Entrada y Salida**
+    if (tipo === "salida") {
+        // Obtener la última asistencia del usuario para la embarcación
+        const ultimaAsistencia = await prisma.asistencia.findFirst({
+            where: {
+                id_usuario: id_usuario,
+                id_embarcacion: id_embarcacion,
+            },
+            orderBy: { fecha_hora: "desc" },
+        });
+
+        if (!ultimaAsistencia) {
+            throw new Error("No se puede registrar una salida sin una entrada previa.");
+        }
+
+        if (ultimaAsistencia.tipo !== "entrada") {
+            throw new Error("La última asistencia registrada no es una entrada. No se puede registrar una salida.");
+        }
+
+        // Opcional: Verificar si ya existe una salida después de la última entrada
+        const asistenciaConSalida = await prisma.asistencia.findFirst({
+            where: {
+                id_usuario: id_usuario,
+                id_embarcacion: id_embarcacion,
+                tipo: "salida",
+                fecha_hora: {
+                    gt: ultimaAsistencia.fecha_hora,
+                },
+            },
+            orderBy: { fecha_hora: "desc" },
+        });
+
+        if (asistenciaConSalida) {
+            throw new Error("Ya existe una salida registrada después de la última entrada.");
+        }
+    }
+
     // Crear la Asistencia
     const asistencia = await prisma.asistencia.create({
         data: {
