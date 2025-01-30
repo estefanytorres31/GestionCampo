@@ -142,8 +142,8 @@ export const assignMultipleSistemasToEmbarcacion = async (id_embarcacion, sistem
                     id_embarcacion: parseInt(id_embarcacion, 10),
                     id_sistema: parseInt(id_sistema, 10),
                     estado_sistema: true,
+                    creado_en:fecha_creacion,
                     actualizado_en: fecha_creacion,
-                    creacion_en: fecha_creacion,
                 },
             });
         });
