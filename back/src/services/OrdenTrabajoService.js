@@ -1,9 +1,13 @@
 import { PrismaClient } from "@prisma/client";
-import { getPeruTime, getUTCTime } from "../utils/Time.js";
+import { getUTCTime } from "../utils/Time.js";
 
 const prisma = new PrismaClient();
 
-// Asignar un Trabajo a una Embarcación
+/**
+ * Asignar un Trabajo a una Embarcación
+ * @param {Object} params - Parámetros de la orden de trabajo
+ * @returns {Promise<Object>} - La orden de trabajo creada
+ */
 export const asignarTrabajoAEmbarcacion = async ({
     id_tipo_trabajo,
     id_embarcacion,
@@ -12,7 +16,12 @@ export const asignarTrabajoAEmbarcacion = async ({
     comentarios,
 }) => {
     // Validaciones básicas
-    if (isNaN(id_tipo_trabajo) || isNaN(id_embarcacion) || isNaN(id_puerto) || isNaN(id_jefe_asigna)) {
+    if (
+        isNaN(id_tipo_trabajo) ||
+        isNaN(id_embarcacion) ||
+        isNaN(id_puerto) ||
+        isNaN(id_jefe_asigna)
+    ) {
         throw new Error("Todos los IDs proporcionados deben ser números válidos.");
     }
 
@@ -24,10 +33,8 @@ export const asignarTrabajoAEmbarcacion = async ({
     if (!tipoTrabajo || !tipoTrabajo.estado) {
         throw new Error(`El tipo de trabajo con ID ${id_tipo_trabajo} no existe o está inactivo.`);
     }
-    const todayISO = new Date().toISOString();
-    const fecha_creacion = getUTCTime(todayISO);
 
-    // Verificar que la Embarcacion exista y esté activa
+    // Verificar que la Embarcación exista y esté activa
     const embarcacion = await prisma.embarcacion.findUnique({
         where: { id_embarcacion },
     });
@@ -45,7 +52,7 @@ export const asignarTrabajoAEmbarcacion = async ({
         throw new Error(`El puerto con ID ${id_puerto} no existe o está inactivo.`);
     }
 
-    // Verificar que el Usuario (Jefe que asigna) exista y tenga el rol adecuado
+    // Verificar que el Usuario (Jefe que asigna) exista y esté activo
     const jefe = await prisma.usuario.findUnique({
         where: { id: id_jefe_asigna },
     });
@@ -54,6 +61,8 @@ export const asignarTrabajoAEmbarcacion = async ({
         throw new Error(`El usuario con ID ${id_jefe_asigna} no existe o está inactivo.`);
     }
 
+    const fechaActual = getUTCTime(new Date().toISOString());
+
     // Crear la Orden de Trabajo
     const ordenTrabajo = await prisma.ordenTrabajo.create({
         data: {
@@ -61,22 +70,25 @@ export const asignarTrabajoAEmbarcacion = async ({
             id_embarcacion,
             id_puerto,
             id_jefe_asigna,
-            fecha_asignacion: fecha_creacion,
+            fecha_asignacion: fechaActual,
             estado: "pendiente",
             comentarios,
-            creado_en:fecha_creacion,
-            actualizado_en:fecha_creacion
-
+            creado_en: fechaActual,
+            actualizado_en: fechaActual,
         },
     });
 
     return ordenTrabajo;
 };
 
-// Gestionar el Estado de la Orden de Trabajo
+/**
+ * Gestionar el Estado de la Orden de Trabajo
+ * @param {number} id_orden_trabajo - ID de la orden de trabajo
+ * @param {string} nuevo_estado - Nuevo estado (pendiente, en_progreso, completado, cancelado)
+ * @returns {Promise<Object>} - La orden de trabajo actualizada
+ */
 export const gestionarEstadoOrdenTrabajo = async (id_orden_trabajo, nuevo_estado) => {
-    const todayISO = new Date().toISOString();
-    const fecha_creacion = getUTCTime(todayISO);
+    const fechaActual = getUTCTime(new Date().toISOString());
     const validEstados = ["pendiente", "en_progreso", "completado", "cancelado"];
     if (!validEstados.includes(nuevo_estado)) {
         throw new Error(`El estado "${nuevo_estado}" no es válido. Estados permitidos: ${validEstados.join(", ")}.`);
@@ -94,22 +106,30 @@ export const gestionarEstadoOrdenTrabajo = async (id_orden_trabajo, nuevo_estado
     // Actualizar el estado
     const ordenTrabajoActualizada = await prisma.ordenTrabajo.update({
         where: { id_orden_trabajo },
-        data: { estado: nuevo_estado, actualizado_en: fecha_creacion},
+        data: { estado: nuevo_estado, actualizado_en: fechaActual },
     });
 
     return ordenTrabajoActualizada;
 };
 
-// Actualizar el Estado de la Orden de Trabajo
+/**
+ * Actualizar el Estado de la Orden de Trabajo
+ * @param {number} id_orden_trabajo - ID de la orden de trabajo
+ * @param {string} nuevo_estado - Nuevo estado (pendiente, en_progreso, completado, cancelado)
+ * @returns {Promise<Object>} - La orden de trabajo actualizada
+ */
 export const actualizarEstadoOrdenTrabajo = async (id_orden_trabajo, nuevo_estado) => {
-    // Este método puede reutilizarse con gestionarEstadoOrdenTrabajo
+    // Reutilizar la función gestionarEstadoOrdenTrabajo
     return await gestionarEstadoOrdenTrabajo(id_orden_trabajo, nuevo_estado);
 };
 
-// Asignar múltiples Ordenes de Trabajo a una Embarcación (Transacción)
+/**
+ * Asignar múltiples Ordenes de Trabajo a una Embarcación (Transacción)
+ * @param {Array} ordenes - Array de objetos que contienen los detalles de las órdenes
+ * @returns {Promise<Array>} - Array de órdenes de trabajo creadas
+ */
 export const asignarMultipleOrdenesTrabajoAEmbarcacion = async (ordenes) => {
-    const todayISO = new Date().toISOString();
-    const fecha_creacion = getUTCTime(todayISO);
+    const fechaActual = getUTCTime(new Date().toISOString());
     /*
         'ordenes' es un array de objetos que contienen:
         - id_tipo_trabajo
@@ -183,11 +203,11 @@ export const asignarMultipleOrdenesTrabajoAEmbarcacion = async (ordenes) => {
                     id_embarcacion,
                     id_puerto,
                     id_jefe_asigna,
-                    fecha_asignacion: new Date(),
+                    fecha_asignacion: fechaActual,
                     estado: "pendiente",
                     comentarios,
-                    creado_en:fecha_creacion,
-                    actualizado_en: fecha_creacion,
+                    creado_en: fechaActual,
+                    actualizado_en: fechaActual,
                 },
             });
         });

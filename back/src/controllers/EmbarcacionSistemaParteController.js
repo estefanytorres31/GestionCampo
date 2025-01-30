@@ -9,13 +9,17 @@ export const assignParteToEmbarcacionSistema = async (req, res) => {
     try {
         const relacion = await EmbarcacionSistemaParteService.assignParteToEmbarcacionSistema(id_embarcacion_sistema, id_parte);
 
-        // Determinar si se creó una nueva asociación o se reactivó una existente
         const mensaje = relacion.creado_en.getTime() === relacion.actualizado_en.getTime()
             ? "Parte asignada exitosamente."
             : "Parte reactivada exitosamente.";
 
         res.status(201).json({ message: mensaje, data: relacion });
     } catch (error) {
+        if (error.code === "P2003") {
+            return res.status(400).json({
+                message: "Error de clave foránea: Verifica que id_embarcacion_sistema e id_parte existan en la base de datos.",
+            });
+        }
         res.status(error.status || 500).json({ message: error.message });
     }
 };

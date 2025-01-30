@@ -1,6 +1,8 @@
 import * as OrdenTrabajoService from "../services/OrdenTrabajoService.js";
 
-// Asignar un Trabajo a una Embarcación
+/**
+ * Asignar un Trabajo a una Embarcación
+ */
 export const asignarTrabajoAEmbarcacion = async (req, res) => {
     const { id_tipo_trabajo, id_embarcacion, id_puerto, id_jefe_asigna, comentarios } = req.body;
 
@@ -18,7 +20,9 @@ export const asignarTrabajoAEmbarcacion = async (req, res) => {
     }
 };
 
-// Gestionar el Estado de la Orden de Trabajo
+/**
+ * Gestionar el Estado de la Orden de Trabajo
+ */
 export const gestionarEstadoOrdenTrabajo = async (req, res) => {
     const { id_orden_trabajo, nuevo_estado } = req.body;
 
@@ -30,7 +34,9 @@ export const gestionarEstadoOrdenTrabajo = async (req, res) => {
     }
 };
 
-// Actualizar el Estado de la Orden de Trabajo
+/**
+ * Actualizar el Estado de la Orden de Trabajo
+ */
 export const actualizarEstadoOrdenTrabajo = async (req, res) => {
     const { id_orden_trabajo } = req.params;
     const { nuevo_estado } = req.body;
@@ -43,7 +49,9 @@ export const actualizarEstadoOrdenTrabajo = async (req, res) => {
     }
 };
 
-// Asignar múltiples Ordenes de Trabajo a una Embarcación
+/**
+ * Asignar múltiples Ordenes de Trabajo a una Embarcación
+ */
 export const asignarMultipleOrdenesTrabajoAEmbarcacion = async (req, res) => {
     const { ordenes } = req.body;
 

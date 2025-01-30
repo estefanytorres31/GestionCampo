@@ -8,37 +8,37 @@ const prisma = new PrismaClient();
  */
 export const assignParteToEmbarcacionSistema = async (id_embarcacion_sistema, id_parte) => {
     if (!id_embarcacion_sistema || !id_parte) {
-        throw { status: 400, message: "El ID de la embarcación-sistema y de la parte son obligatorios." };
+        throw { status: 400, message: "El ID de la embarcación-sistema y el ID de la parte son obligatorios." };
     }
 
     const fechaActual = getUTCTime(new Date().toISOString());
 
-    // Verificar si la asociación ya existe
-    const asociacionExistente = await prisma.embarcacionSistemaParte.findUnique({
+    // Verificar si la relación ya existe utilizando el índice único correcto
+    const relacionExistente = await prisma.embarcacionSistemaParte.findUnique({
         where: {
-            embarcacion_sistema_parte_unique: {
+            emb_sis_par_unique: {  // 🔴 CORRECCIÓN: Usa el índice único correcto
                 id_embarcacion_sistema,
-                id_parte
-            }
-        }
+                id_parte,
+            },
+        },
     });
 
-    if (asociacionExistente) {
-        if (asociacionExistente.estado) {
-            throw { status: 400, message: "Esta parte ya está asignada a este sistema en la embarcación." };
+    if (relacionExistente) {
+        if (relacionExistente.estado) {
+            throw { status: 400, message: "Esta relación ya está activa." };
         } else {
-            // Reactivar la relación si estaba desactivada
+            // Reactivar si estaba desactivada
             return await prisma.embarcacionSistemaParte.update({
-                where: { id_embarcacion_sistema_parte: asociacionExistente.id_embarcacion_sistema_parte },
+                where: { id_embarcacion_sistema_parte: relacionExistente.id_embarcacion_sistema_parte },
                 data: {
                     estado: true,
-                    actualizado_en: fechaActual
-                }
+                    actualizado_en: fechaActual,
+                },
             });
         }
     }
 
-    // Crear nueva asociación
+    // Crear nueva relación
     return await prisma.embarcacionSistemaParte.create({
         data: {
             id_embarcacion_sistema,
@@ -49,7 +49,6 @@ export const assignParteToEmbarcacionSistema = async (id_embarcacion_sistema, id
         },
     });
 };
-
 /**
  * Obtener Todas las Partes de un Sistema en una Embarcación
  */
