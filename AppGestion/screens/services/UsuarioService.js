@@ -20,3 +20,13 @@ export const getUserById = async (id) => {
         throw new Error('Error retrieving user data');
     }
 };
+
+export const getAllUsuariosByRol = async (rolId) => {
+    try {
+        const response = await apiClient.get(`/usuariorol/rol/${rolId}`);
+        return response.data;
+    } catch (error) {
+        console.error('Error obteniendo usuarios por rol:', error);
+        throw error;
+    }
+};

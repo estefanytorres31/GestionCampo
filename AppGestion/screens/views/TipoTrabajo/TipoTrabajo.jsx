@@ -52,7 +52,7 @@ const Trabajo = ({ navigation }) => {
             }),
         ]).start();
 
-        navigation.navigate(screen, { clase: 'algún valor' });
+        navigation.navigate("Asignar");
     };
 
     return (
