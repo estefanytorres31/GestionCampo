@@ -14,10 +14,10 @@ export const createOrReactivateTipoTrabajoESP = async (req, res) => {
         
         res.status(201).json({ message: mensaje, data: relacion });
     } catch (error) {
-        res.status(error.status || 500).json({ message: error.message });
+        // Manejo de errores personalizados
+        res.status(error.status || 500).json({ message: error.message || "Error interno del servidor." });
     }
 };
-
 /**
  * Obtener todas las relaciones activas
  */
@@ -43,6 +43,49 @@ export const getTipoTrabajoESPById = async (req, res) => {
         res.status(error.status || 500).json({ message: error.message });
     }
 };
+
+/**
+ * Obtener Sistemas por Tipo de Trabajo y Embarcación (Sin Partes)
+ */
+export const getSistemasPorTipoTrabajoEmbarcacion = async (req, res) => {
+    const { id_tipo_trabajo, id_embarcacion } = req.params;
+
+    try {
+        const sistemas = await TipoTrabajoESPService.getSistemasPorTipoTrabajoEmbarcacion(parseInt(id_tipo_trabajo), parseInt(id_embarcacion));
+        res.status(200).json({ message: "Sistemas obtenidos exitosamente.", data: sistemas });
+    } catch (error) {
+        res.status(error.status || 500).json({ message: error.message });
+    }
+};
+
+/**
+ * Obtener Sistemas y Partes por Tipo de Trabajo y Embarcación
+ */
+export const getSistemasPartesPorTipoTrabajoEmbarcacion = async (req, res) => {
+    const { id_tipo_trabajo, id_embarcacion } = req.params;
+
+    try {
+        const sistemasPartes = await TipoTrabajoESPService.getSistemasPartesPorTipoTrabajoEmbarcacion(parseInt(id_tipo_trabajo), parseInt(id_embarcacion));
+        res.status(200).json({ message: "Sistemas y partes obtenidos exitosamente.", data: sistemasPartes });
+    } catch (error) {
+        res.status(error.status || 500).json({ message: error.message });
+    }
+};
+
+/**
+ * Obtener Partes por Sistema, Tipo de Trabajo y Embarcación
+ */
+export const getPartesPorSistemaTipoTrabajoEmbarcacion = async (req, res) => {
+    const { id_tipo_trabajo, id_embarcacion, id_sistema } = req.params;
+
+    try {
+        const partes = await TipoTrabajoESPService.getPartesPorSistemaTipoTrabajoEmbarcacion(parseInt(id_tipo_trabajo), parseInt(id_embarcacion), parseInt(id_sistema));
+        res.status(200).json({ message: "Partes obtenidas exitosamente.", data: partes });
+    } catch (error) {
+        res.status(error.status || 500).json({ message: error.message });
+    }
+};
+
 
 /**
  * Actualizar una relación TipoTrabajoEmbarcacionSistemaParte

@@ -16,7 +16,25 @@ export const createOrReactivateTipoTrabajoESP = async (id_tipo_trabajo, id_embar
 
     const fechaActual = getUTCTime(new Date().toISOString());
 
-    // Verificar si la relación ya existe utilizando el índice único
+    // Verificar si el Tipo de Trabajo existe
+    const tipoTrabajo = await prisma.tipoTrabajo.findUnique({
+        where: { id_tipo_trabajo },
+    });
+
+    if (!tipoTrabajo) {
+        throw { status: 404, message: `Tipo de Trabajo con ID ${id_tipo_trabajo} no encontrado.` };
+    }
+
+    // Verificar si la relación EmbarcacionSistemaParte existe
+    const embarcacionSistemaParte = await prisma.embarcacionSistemaParte.findUnique({
+        where: { id_embarcacion_sistema_parte },
+    });
+
+    if (!embarcacionSistemaParte) {
+        throw { status: 404, message: `Relación Embarcación-Sistema-Parte con ID ${id_embarcacion_sistema_parte} no encontrada.` };
+    }
+
+    // Verificar si la relación TipoTrabajoEmbarcacionSistemaParte ya existe utilizando el índice único
     const relacionExistente = await prisma.tipoTrabajoEmbarcacionSistemaParte.findUnique({
         where: {
             unq_tt_esp: {
@@ -31,28 +49,50 @@ export const createOrReactivateTipoTrabajoESP = async (id_tipo_trabajo, id_embar
             throw { status: 400, message: "Esta relación ya está activa." };
         } else {
             // Reactivar la relación si estaba desactivada
-            return await prisma.tipoTrabajoEmbarcacionSistemaParte.update({
-                where: { id_tipo_trabajo_embarcacion_sistema_parte: relacionExistente.id_tipo_trabajo_embarcacion_sistema_parte },
-                data: {
-                    estado: true,
-                    actualizado_en: fechaActual,
-                },
-            });
+            try {
+                return await prisma.tipoTrabajoEmbarcacionSistemaParte.update({
+                    where: { id_tipo_trabajo_embarcacion_sistema_parte: relacionExistente.id_tipo_trabajo_embarcacion_sistema_parte },
+                    data: {
+                        estado: true,
+                        actualizado_en: fechaActual,
+                    },
+                });
+            } catch (error) {
+                handlePrismaError(error);
+            }
         }
     }
 
     // Crear nueva relación
-    const nuevaRelacion = await prisma.tipoTrabajoEmbarcacionSistemaParte.create({
-        data: {
-            id_tipo_trabajo,
-            id_embarcacion_sistema_parte,
-            estado: true,
-            creado_en: fechaActual,
-            actualizado_en: fechaActual,
-        },
-    });
+    try {
+        const nuevaRelacion = await prisma.tipoTrabajoEmbarcacionSistemaParte.create({
+            data: {
+                id_tipo_trabajo,
+                id_embarcacion_sistema_parte,
+                estado: true,
+                creado_en: fechaActual,
+                actualizado_en: fechaActual,
+            },
+        });
 
-    return nuevaRelacion;
+        return nuevaRelacion;
+    } catch (error) {
+        handlePrismaError(error);
+    }
+};
+
+/**
+ * Manejar errores de Prisma y lanzar errores personalizados
+ * @param {Object} error - Error de Prisma
+ */
+const handlePrismaError = (error) => {
+    if (error.code === 'P2002') { // Unique constraint failed
+        throw { status: 400, message: "Ya existe una relación con estos valores." };
+    } else if (error.code === 'P2003') { // Foreign key constraint failed
+        throw { status: 400, message: "Claves foráneas inválidas proporcionadas." };
+    } else {
+        throw { status: 500, message: "Error interno del servidor." };
+    }
 };
 
 /**
@@ -119,6 +159,150 @@ export const getTipoTrabajoESPById = async (id) => {
     }
 
     return relacion;
+};
+
+/**
+ * Obtener Sistemas por Tipo de Trabajo y Embarcación (Sin Partes)
+ * @param {number} id_tipo_trabajo - ID del Tipo de Trabajo
+ * @param {number} id_embarcacion - ID de la Embarcación
+ * @returns {Promise<Array>} - Lista de Sistemas
+ */
+export const getSistemasPorTipoTrabajoEmbarcacion = async (id_tipo_trabajo, id_embarcacion) => {
+    const relaciones = await prisma.tipoTrabajoEmbarcacionSistemaParte.findMany({
+        where: {
+            id_tipo_trabajo: id_tipo_trabajo,
+            embarcacion_sistema_parte: {
+                embarcacion_sistema: {
+                    id_embarcacion: id_embarcacion
+                }
+            }
+        },
+        include: {
+            embarcacion_sistema_parte: {
+                include: {
+                    embarcacion_sistema: {
+                        include: {
+                            sistema: true
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Extraer sistemas únicos
+    const sistemasMap = {};
+
+    relaciones.forEach(relacion => {
+        const sistema = relacion.embarcacion_sistema_parte.embarcacion_sistema.sistema;
+        if (!sistemasMap[sistema.id_sistema]) {
+            sistemasMap[sistema.id_sistema] = {
+                id_sistema: sistema.id_sistema,
+                nombre_sistema: sistema.nombre_sistema
+            };
+        }
+    });
+
+    return Object.values(sistemasMap);
+};
+
+/**
+ * Obtener Sistemas y Partes por Tipo de Trabajo y Embarcación
+ * @param {number} id_tipo_trabajo - ID del Tipo de Trabajo
+ * @param {number} id_embarcacion - ID de la Embarcación
+ * @returns {Promise<Array>} - Lista de Sistemas con sus Partes
+ */
+export const getSistemasPartesPorTipoTrabajoEmbarcacion = async (id_tipo_trabajo, id_embarcacion) => {
+    const relaciones = await prisma.tipoTrabajoEmbarcacionSistemaParte.findMany({
+        where: {
+            id_tipo_trabajo: id_tipo_trabajo,
+            embarcacion_sistema_parte: {
+                embarcacion_sistema: {
+                    id_embarcacion: id_embarcacion
+                }
+            }
+        },
+        include: {
+            embarcacion_sistema_parte: {
+                include: {
+                    embarcacion_sistema: {
+                        include: {
+                            sistema: true
+                        }
+                    },
+                    parte: true
+                }
+            }
+        }
+    });
+
+    // Organizar los datos por sistema
+    const sistemasMap = {};
+
+    relaciones.forEach(relacion => {
+        const sistema = relacion.embarcacion_sistema_parte.embarcacion_sistema.sistema;
+        const parte = relacion.embarcacion_sistema_parte.parte;
+
+        if (!sistemasMap[sistema.id_sistema]) {
+            sistemasMap[sistema.id_sistema] = {
+                id_sistema: sistema.id_sistema,
+                nombre_sistema: sistema.nombre_sistema,
+                partes: []
+            };
+        }
+
+        sistemasMap[sistema.id_sistema].partes.push({
+            id_parte: parte.id_parte,
+            nombre_parte: parte.nombre_parte
+        });
+    });
+
+    return Object.values(sistemasMap);
+};
+
+/**
+ * Obtener Partes por Sistema, Tipo de Trabajo y Embarcación
+ * @param {number} id_tipo_trabajo - ID del Tipo de Trabajo
+ * @param {number} id_embarcacion - ID de la Embarcación
+ * @param {number} id_sistema - ID del Sistema
+ * @returns {Promise<Array>} - Lista de Partes
+ */
+export const getPartesPorSistemaTipoTrabajoEmbarcacion = async (id_tipo_trabajo, id_embarcacion, id_sistema) => {
+    const relaciones = await prisma.tipoTrabajoEmbarcacionSistemaParte.findMany({
+        where: {
+            id_tipo_trabajo: id_tipo_trabajo,
+            embarcacion_sistema_parte: {
+                embarcacion_sistema: {
+                    id_embarcacion: id_embarcacion,
+                    sistema: {
+                        id_sistema: id_sistema
+                    }
+                }
+            }
+        },
+        include: {
+            embarcacion_sistema_parte: {
+                include: {
+                    parte: true
+                }
+            }
+        }
+    });
+
+    // Extraer partes únicas
+    const partesMap = {};
+
+    relaciones.forEach(relacion => {
+        const parte = relacion.embarcacion_sistema_parte.parte;
+        if (!partesMap[parte.id_parte]) {
+            partesMap[parte.id_parte] = {
+                id_parte: parte.id_parte,
+                nombre_parte: parte.nombre_parte
+            };
+        }
+    });
+
+    return Object.values(partesMap);
 };
 
 /**

@@ -5,7 +5,7 @@ const apiClient = axios.create({
   baseURL: process.env.EXPO_PUBLIC_API_URL
 });
 
-api.interceptors.request.use(
+apiClient.interceptors.request.use(
   async (config) => {
     const token = await AsyncStorage.getItem('userToken');
     if (token) {
