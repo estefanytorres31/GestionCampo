@@ -7,7 +7,7 @@ import EmbarcacionesScreen from "./screens/views/Embarcacion/Embarcacion";
 import Inicio from "./screens/views/Scan/Inicio";
 import Trabajo from "./screens/views/TipoTrabajo/TipoTrabajo";
 import QRScann from "./screens/views/Scan/QRscan";
-import SubcategoryScreen from "./screens/components/Subcategoria";
+import SistemasScreen from "./screens/views/Sistemas/Sistemas";
 
 import { TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
@@ -22,6 +22,7 @@ export default function Navigation () {
                 <Stack.Screen name="Clientes" component={Clientes}  options={{ title: "Clientes" , headerShown:false}} />
                 <Stack.Screen name="Embarcaciones" component={EmbarcacionesScreen} />
                 <Stack.Screen name="Trabajo" component={Trabajo} />
+                <Stack.Screen name="Sistemas" component={SistemasScreen} options={{title:"Sistemas"}}/>
                 <Stack.Screen name="Inicio" component={Inicio} options={{ headerShown: false }}/>
                 <Stack.Screen name="QRScann" component={QRScann} options={{ title: "Escaneo de QR" }} />
             </Stack.Navigator>

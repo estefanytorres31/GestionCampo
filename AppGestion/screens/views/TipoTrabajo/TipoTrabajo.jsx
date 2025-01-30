@@ -15,7 +15,8 @@ import useTipoTrabajo from "../../hooks/TipoTrabajo/useTipoTabajo";
 
 const { height } = Dimensions.get('window');
 
-const Trabajo = ({ navigation }) => {
+const Trabajo = ({ route, navigation }) => {
+    const {embarcacion}=route.params
     const { tipotrabajos } = useTipoTrabajo(); // Obtén los tipos de trabajo del contexto
     const fadeAnim = React.useRef(new Animated.Value(0)).current;
     const scaleAnim = React.useRef(new Animated.Value(0.95)).current;
@@ -36,7 +37,7 @@ const Trabajo = ({ navigation }) => {
         ]).start();
     }, []);
 
-    const handleButtonPress = (screen) => {
+    const handleButtonPress = (trabajo) => {
         Animated.sequence([
             Animated.spring(scaleAnim, {
                 toValue: 0.97,
@@ -52,7 +53,7 @@ const Trabajo = ({ navigation }) => {
             }),
         ]).start();
 
-        navigation.navigate(screen, { clase: 'algún valor' });
+        navigation.navigate("Sistemas", { embarcacion,  trabajo  });
     };
 
     return (
@@ -76,7 +77,7 @@ const Trabajo = ({ navigation }) => {
                             <TouchableOpacity
                                 key={index}
                                 style={[styles.button, { backgroundColor: '#7fa23d' }]} // Ejemplo de estilo
-                                onPress={() => handleButtonPress(trabajo.nombre_trabajo)} // Asume que 'nombre' es el campo del tipo de trabajo
+                                onPress={() => handleButtonPress(trabajo)} // Asume que 'nombre' es el campo del tipo de trabajo
                                 activeOpacity={0.8}
                             >
                                 <View style={styles.buttonContent}>
