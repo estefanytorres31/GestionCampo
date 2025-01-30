@@ -33,18 +33,15 @@ const AuthProvider = ({ children }) => {
                 // Attempt to get user data
                 const userData = await getUserById(userId);
                 setUser(userData);
-                //setRole(userData.rol);
+                setRole(userData.usuario_roles);
+                setIsAuth(true);
             } catch (userError) {
-                // If we can't get user data, we'll still consider them logged in
-                // but with minimal user data
                 console.warn('Could not fetch full user data:', userError);
                 setUser({
                     id: userId,
                     username: data.nombreUsuario
                 });
             }
-
-            // Set authenticated regardless of user data fetch
             setIsAuth(true);
             return { status, data };
 

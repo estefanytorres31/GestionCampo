@@ -76,7 +76,7 @@ const SistemasScreen = ({ route, navigation }) => {
         );
         
         // Aquí puedes navegar a la siguiente pantalla o guardar la selección
-        navigation.navigate("DetallesSistema", { 
+        navigation.navigate("Asignar", { 
             sistemas: sistemasSeleccionados,
             embarcacion,
             trabajo

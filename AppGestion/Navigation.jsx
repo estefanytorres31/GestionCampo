@@ -1,4 +1,5 @@
 import "react-native-gesture-handler";
+import { useContext, useState, useEffect } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import LoginScreen from "./screens/views/Auth/Login";
@@ -11,13 +12,23 @@ import SeleccionarAyudantesScreen from "./screens/views/AsignarTrabajo/Seleccion
 import QRScann from "./screens/views/Scan/QRscan";
 import SistemasScreen from "./screens/views/Sistemas/Sistemas";
 import Menu from "./screens/views/Asistencia/Menu";
-
-import { TouchableOpacity } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import AuthContext from "./screens/context/Auth/AuthContext";
 
 const Stack = createNativeStackNavigator();
 
 export default function Navigation () {
+    const { user, role, isAuth, loading } = useContext(AuthContext);  // Accedemos al rol y autenticación desde el contexto
+    const [isAdmin, setIsAdmin] = useState(false);
+
+    useEffect(() => {
+        if (role) {
+          // Verificamos si el usuario tiene el rol de 'Administrador'
+          setIsAdmin(role.some(r => r.rol.nombre_rol === 'Administrador')); 
+          
+        }
+      }, [role]);
+
+
     return (
         <NavigationContainer >
             <Stack.Navigator initialRouteName="Login" >
@@ -29,7 +40,6 @@ export default function Navigation () {
                 <Stack.Screen
                 name="Asignar"
                 component={AsignarTrabajoScreen}
-                options={{ headerShown: false }}
                 />
                 <Stack.Screen
                 name="SeleccionarAyudantes"
