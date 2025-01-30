@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
     View,
     Text,
@@ -22,6 +22,10 @@ const SistemasScreen = ({ route, navigation }) => {
         fetchTiposTrabajosESP 
     } = useTipoTrabajoESP();
     
+    // Estado para manejar las selecciones
+    const [selectedSistemas, setSelectedSistemas] = useState(new Set());
+    const [isLoading, setIsLoading] = useState(true);
+    
     const fadeAnim = React.useRef(new Animated.Value(0)).current;
     const scaleAnim = React.useRef(new Animated.Value(0.95)).current;
 
@@ -41,31 +45,54 @@ const SistemasScreen = ({ route, navigation }) => {
             }),
         ]).start();
 
-        // Cargar sistemas
-        fetchTiposTrabajosESP(trabajo.id_tipo_trabajo, embarcacion.id_embarcacion);
+        const loadSistemas = async () => {
+            try {
+                await fetchTiposTrabajosESP(trabajo.id_tipo_trabajo, embarcacion.id_embarcacion);
+            } catch (error) {
+                console.error('Error cargando sistemas:', error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        loadSistemas();
     }, []);
 
-    const handleSistemaPress = (sistema) => {
-        Animated.sequence([
-            Animated.spring(scaleAnim, {
-                toValue: 0.97,
-                friction: 3,
-                tension: 40,
-                useNativeDriver: true,
-            }),
-            Animated.spring(scaleAnim, {
-                toValue: 1,
-                friction: 3,
-                tension: 40,
-                useNativeDriver: true,
-            }),
-        ]).start();
+    const toggleSistemaSelection = (sistema) => {
+        setSelectedSistemas(prevSelected => {
+            const newSelected = new Set(prevSelected);
+            if (newSelected.has(sistema.id_sistema)) {
+                newSelected.delete(sistema.id_sistema);
+            } else {
+                newSelected.add(sistema.id_sistema);
+            }
+            return newSelected;
+        });
+    };
 
-        // Navegar a la siguiente pantalla con los detalles del sistema
-        navigation.navigate("DetallesSistema", { sistema });
+    const handleGuardarSeleccion = () => {
+        const sistemasSeleccionados = tipoTrabajosESP.filter(sistema => 
+            selectedSistemas.has(sistema.id_sistema)
+        );
+        
+        // Aquí puedes navegar a la siguiente pantalla o guardar la selección
+        navigation.navigate("DetallesSistema", { 
+            sistemas: sistemasSeleccionados,
+            embarcacion,
+            trabajo
+        });
     };
 
     const renderContent = () => {
+        if (isLoading) {
+            return (
+                <View style={styles.centered}>
+                    <ActivityIndicator size="large" color="#2E7D32" />
+                    <Text style={styles.loadingText}>Cargando sistemas...</Text>
+                </View>
+            );
+        }
+
         if (!tipoTrabajosESP || tipoTrabajosESP.length === 0) {
             return (
                 <View style={styles.centered}>
@@ -82,14 +109,26 @@ const SistemasScreen = ({ route, navigation }) => {
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={styles.scrollContent}
             >
-                {tipoTrabajosESP.map((sistema, index) => (
+                {tipoTrabajosESP.map((sistema) => (
                     <TouchableOpacity
                         key={sistema.id_sistema}
-                        style={styles.sistemaCard}
-                        onPress={() => handleSistemaPress(sistema)}
+                        style={[
+                            styles.sistemaCard,
+                            selectedSistemas.has(sistema.id_sistema) && styles.sistemaCardSelected
+                        ]}
+                        onPress={() => toggleSistemaSelection(sistema)}
                         activeOpacity={0.7}
                     >
                         <View style={styles.sistemaContent}>
+                            <View style={styles.checkboxContainer}>
+                                <MaterialCommunityIcons
+                                    name={selectedSistemas.has(sistema.id_sistema) 
+                                        ? "checkbox-marked-circle"
+                                        : "checkbox-blank-circle-outline"}
+                                    size={24}
+                                    color={selectedSistemas.has(sistema.id_sistema) ? "#2E7D32" : "#666"}
+                                />
+                            </View>
                             <View style={styles.iconContainer}>
                                 <MaterialCommunityIcons
                                     name="cog-outline"
@@ -105,11 +144,6 @@ const SistemasScreen = ({ route, navigation }) => {
                                     {sistema.descripcion || 'Sin descripción'}
                                 </Text>
                             </View>
-                            <MaterialCommunityIcons
-                                name="chevron-right"
-                                size={24}
-                                color="#2E7D32"
-                            />
                         </View>
                     </TouchableOpacity>
                 ))}
@@ -129,13 +163,32 @@ const SistemasScreen = ({ route, navigation }) => {
                 ]}
             >
                 <View style={styles.header}>
-                    <Text style={styles.headerTitle}>Sistemas</Text>
-                    <Text style={styles.headerSubtitle}>
+                    <Text style={styles.headerTitle}>
                         {embarcacion.nombre} - {trabajo.nombre_trabajo}
+                    </Text>
+                    <Text style={styles.selectionText}>
+                        Seleccionados: {selectedSistemas.size}
                     </Text>
                 </View>
 
                 {renderContent()}
+
+                {tipoTrabajosESP && tipoTrabajosESP.length > 0 && (
+                    <View style={styles.bottomContainer}>
+                        <TouchableOpacity
+                            style={[
+                                styles.guardarButton,
+                                selectedSistemas.size === 0 && styles.guardarButtonDisabled
+                            ]}
+                            onPress={handleGuardarSeleccion}
+                            disabled={selectedSistemas.size === 0}
+                        >
+                            <Text style={styles.guardarButtonText}>
+                                Guardar Selección ({selectedSistemas.size})
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
+                )}
             </Animated.View>
         </SafeAreaView>
     );
@@ -154,7 +207,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
     },
     headerTitle: {
-        fontSize: 28,
+        fontSize: 18,
         fontWeight: "800",
         color: "#2E7D32",
         marginBottom: 5,
@@ -220,6 +273,44 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: "#666",
         textAlign: "center",
+    },
+    sistemaCardSelected: {
+        backgroundColor: "#E8F5E9",
+        borderColor: "#2E7D32",
+        borderWidth: 1,
+    },
+    checkboxContainer: {
+        marginRight: 10,
+    },
+    bottomContainer: {
+        padding: 16,
+        backgroundColor: "#fff",
+        borderTopWidth: 1,
+        borderTopColor: "#e0e0e0",
+    },
+    guardarButton: {
+        backgroundColor: "#2E7D32",
+        padding: 16,
+        borderRadius: 12,
+        alignItems: "center",
+    },
+    guardarButtonDisabled: {
+        backgroundColor: "#ccc",
+    },
+    guardarButtonText: {
+        color: "#fff",
+        fontSize: 16,
+        fontWeight: "700",
+    },
+    selectionText: {
+        fontSize: 14,
+        color: "black",
+        marginTop: 5,
+    },
+    loadingText: {
+        marginTop: 10,
+        color: "#666",
+        fontSize: 16,
     },
 });
 
