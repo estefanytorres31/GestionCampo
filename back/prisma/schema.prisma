@@ -241,21 +241,22 @@ model EmbarcacionSistema {
 model EmbarcacionSistemaParte {
   id_embarcacion_sistema_parte Int  @id @default(autoincrement()) @map("id_embarcacion_sistema_parte")
   id_embarcacion_sistema       Int  @map("id_embarcacion_sistema")
-  id_parte                      Int  @map("id_parte")
-  estado                        Boolean @default(true) @map("estado")
-  creado_en                     DateTime @default(now()) @map("creado_en")
-  actualizado_en                DateTime @updatedAt @map("actualizado_en")
+  id_parte                     Int? @map("id_parte") // Ahora es opcional
+  estado                       Boolean @default(true) @map("estado")
+  creado_en                    DateTime @default(now()) @map("creado_en")
+  actualizado_en               DateTime @updatedAt @map("actualizado_en")
 
-  embarcacion_sistema           EmbarcacionSistema @relation(fields: [id_embarcacion_sistema], references: [id_embarcacion_sistema], onDelete: Cascade, onUpdate: Cascade)
-  parte                         Parte              @relation(fields: [id_parte], references: [id_parte], onDelete: Cascade, onUpdate: Cascade)
+  embarcacion_sistema          EmbarcacionSistema @relation(fields: [id_embarcacion_sistema], references: [id_embarcacion_sistema], onDelete: Cascade, onUpdate: Cascade)
+  parte                        Parte?             @relation(fields: [id_parte], references: [id_parte], onDelete: Cascade, onUpdate: Cascade) // Ahora es opcional
 
-  tipo_trabajo_emb_sist_par     TipoTrabajoEmbarcacionSistemaParte[] @relation("ESPtoTTESP") // Back relation
+  tipo_trabajo_emb_sist_par    TipoTrabajoEmbarcacionSistemaParte[] @relation("ESPtoTTESP") // Back relation
 
   @@unique([id_embarcacion_sistema, id_parte], name: "emb_sis_par_unique")
   @@map("embarcacion_sistema_parte")
   @@index([id_embarcacion_sistema], name: "idx_esp_es")
   @@index([id_parte], name: "idx_esp_par")
 }
+
 
 model TipoTrabajo {
   id_tipo_trabajo Int            @id @default(autoincrement()) @map("id_tipo_trabajo")
@@ -282,7 +283,7 @@ model OrdenTrabajo {
   comentarios             String?             @map("comentarios")
   motorista               String?             @map("motorista")
   supervisor              String?             @map("supervisor")
-  codigo                  String?             @map("codigo")
+  codigo                  String?             @unique @map("codigo")
   creado_en               DateTime            @default(now()) @map("creado_en")
   actualizado_en          DateTime            @updatedAt @map("actualizado_en")
 
@@ -309,6 +310,7 @@ model OrdenTrabajoUsuario {
   id_usuario              Int         @map("id_usuario")
   rol_en_orden            RolEnOrden? @map("rol_en_orden")
   observaciones           String?     @map("observaciones")
+  estado                  Boolean     @default(true) @map("estado") // Nuevo campo para activación/desactivación
   creado_en               DateTime    @default(now()) @map("creado_en")
   actualizado_en          DateTime    @updatedAt @map("actualizado_en")
   orden_trabajo           OrdenTrabajo @relation(fields: [id_orden_trabajo], references: [id_orden_trabajo], onDelete: NoAction, onUpdate: Cascade)
@@ -329,6 +331,9 @@ model OrdenTrabajoSistema {
   id_embarcacion_sistema  Int  @map("id_embarcacion_sistema")
   estado                  EstadoOrdenTrabajo @default(pendiente) @map("estado")
   observaciones           String? @map("observaciones")
+  avance                  Int @default(0) @map("avance") // Nuevo campo para el porcentaje de avance
+  materiales              String? @map("materiales") // Nuevo campo para materiales
+  proximo_abordaje        String? @map("proximo_abordaje") // Nuevo campo para próximo abordaje
   creado_en               DateTime @default(now()) @map("creado_en")
   actualizado_en          DateTime @updatedAt @map("actualizado_en")
   id_tipo_trabajo_embarcacion_sistema_parte Int @map("id_tipo_trabajo_embarcacion_sistema_parte")
@@ -337,7 +342,12 @@ model OrdenTrabajoSistema {
   sistema                 Sistema        @relation(fields: [id_sistema], references: [id_sistema], onDelete: NoAction, onUpdate: Cascade)
   embarcacion_sistema     EmbarcacionSistema @relation(fields: [id_embarcacion_sistema], references: [id_embarcacion_sistema], onDelete: NoAction, onUpdate: Cascade)
 
-  /// Relación a "TipoTrabajoEmbarcacionSistemaParte"
+  // Relación con la nueva tabla de fotos
+  fotos                   OrdenTrabajoSistemaFoto[]
+
+  // Relación con la tabla de detalles (solo para tipos de trabajo específicos)
+  detalle                 OrdenTrabajoSistemaDetalle?
+
   tipo_trabajo_embarcacion_sistema_parte TipoTrabajoEmbarcacionSistemaParte @relation("TTESPtoOTSIS", fields: [id_tipo_trabajo_embarcacion_sistema_parte], references: [id_tipo_trabajo_embarcacion_sistema_parte], onDelete: NoAction, onUpdate: Cascade)
 
   orden_trabajo_parte     OrdenTrabajoParte[]
@@ -348,6 +358,32 @@ model OrdenTrabajoSistema {
   @@index([id_sistema], name: "idx_otsis_sis")
   @@index([id_embarcacion_sistema], name: "idx_otsis_es")
   @@index([estado], name: "idx_otsis_est")
+}
+
+model OrdenTrabajoSistemaDetalle {
+  id_detalle               Int  @id @default(autoincrement()) @map("id_detalle")
+  id_orden_trabajo_sistema Int  @unique @map("id_orden_trabajo_sistema")
+  fallas                   String? @map("fallas")
+  causas                   String? @map("causas")
+  solucion                 String? @map("solucion")
+  pendiente                String? @map("pendiente")
+  creado_en                DateTime @default(now()) @map("creado_en")
+
+  orden_trabajo_sistema    OrdenTrabajoSistema @relation(fields: [id_orden_trabajo_sistema], references: [id_orden_trabajo_sistema], onDelete: Cascade, onUpdate: Cascade)
+
+  @@map("orden_trabajo_sistema_detalle")
+}
+
+model OrdenTrabajoSistemaFoto {
+  id_foto                   Int     @id @default(autoincrement()) @map("id_foto")
+  id_orden_trabajo_sistema  Int     @map("id_orden_trabajo_sistema")
+  url                       String  @map("url") // URL de la foto
+  creado_en                 DateTime @default(now()) @map("creado_en")
+
+  orden_trabajo_sistema     OrdenTrabajoSistema @relation(fields: [id_orden_trabajo_sistema], references: [id_orden_trabajo_sistema], onDelete: Cascade, onUpdate: Cascade)
+
+  @@map("orden_trabajo_sistema_foto")
+  @@index([id_orden_trabajo_sistema], name: "idx_otsf_otsis")
 }
 
 model OrdenTrabajoParte {

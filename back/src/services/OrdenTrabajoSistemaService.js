@@ -1,354 +1,282 @@
-import { getPeruTime, getUTCTime } from "../utils/Time.js";
 import { PrismaClient } from "@prisma/client";
-// import { sendNotification } from "../utils/Notification.js"; // Implementa esta función según tus necesidades
+import { getUTCTime } from "../utils/Time.js";
 
 const prisma = new PrismaClient();
 
 /**
- * Asignar un Sistema a una Orden de Trabajo
- * @param {Object} params
- * @param {number} params.id_orden_trabajo
- * @param {number} params.id_sistema
- * @param {number} params.id_embarcacion_sistema
- * @param {string} [params.observaciones]
- * @returns {Promise<Object>} Asignación creada o actualizada
+ * Crear o reactivar una OrdenTrabajoSistema
  */
-export const assignSistemaToOrdenTrabajo = async ({ id_orden_trabajo, id_sistema, id_embarcacion_sistema, observaciones }) => {
-    const todayISO = new Date().toISOString();
-    const fecha_creacion = getUTCTime(todayISO);
-    if (isNaN(id_orden_trabajo) || isNaN(id_sistema) || isNaN(id_embarcacion_sistema)) {
-        throw new Error("Los IDs de la orden de trabajo, sistema y embarcación_sistema deben ser válidos.");
+export const createOrdenTrabajoSistema = async (data) => {
+    const { 
+        id_orden_trabajo, 
+        id_sistema, 
+        id_embarcacion_sistema, 
+        id_tipo_trabajo_embarcacion_sistema_parte, 
+        materiales, 
+        proximo_abordaje, 
+        fallas, 
+        causas, 
+        solucion, 
+        pendiente, 
+        fotos 
+    } = data;
+
+    if (!id_orden_trabajo || !id_sistema || !id_embarcacion_sistema || !id_tipo_trabajo_embarcacion_sistema_parte) {
+        throw new Error("Todos los campos obligatorios deben estar completos.");
     }
 
-    // Verificar que la Orden de Trabajo exista
+    const fechaActual = getUTCTime(new Date().toISOString());
+
+    // Verificar que la OrdenTrabajo tenga la misma embarcación
     const ordenTrabajo = await prisma.ordenTrabajo.findUnique({
         where: { id_orden_trabajo },
+        select: { id_embarcacion: true }
     });
 
     if (!ordenTrabajo) {
-        throw new Error(`La orden de trabajo con ID ${id_orden_trabajo} no existe.`);
+        throw new Error(`No se encontró la Orden de Trabajo con ID ${id_orden_trabajo}.`);
     }
 
-    // Verificar que el Sistema exista y esté activo
-    const sistema = await prisma.sistema.findUnique({
-        where: { id_sistema },
-    });
-
-    if (!sistema || !sistema.estado) {
-        throw new Error(`El sistema con ID ${id_sistema} no existe o está inactivo.`);
+    if (ordenTrabajo.id_embarcacion !== id_embarcacion_sistema) {
+        throw new Error("La embarcación del sistema no coincide con la de la orden de trabajo.");
     }
 
-    // Verificar que la EmbarcacionSistema exista y esté activa
-    const embarcacionSistema = await prisma.embarcacionSistema.findUnique({
-        where: { id_embarcacion_sistema },
-    });
-
-    if (!embarcacionSistema || !embarcacionSistema.estado_sistema) {
-        throw new Error(`La embarcación_sistema con ID ${id_embarcacion_sistema} no existe o está inactiva.`);
-    }
-
-    // Verificar si la asignación ya existe
-    const asignacionExistente = await prisma.ordenTrabajoSistema.findUnique({
+    // Verificar que el sistema pertenezca a `TipoTrabajoEmbarcacionSistemaParte`
+    const existeRelacion = await prisma.tipoTrabajoEmbarcacionSistemaParte.findFirst({
         where: {
-            orden_trabajo_sistema_unique: {
-                id_orden_trabajo,
-                id_sistema,
-            },
-        },
+            id_tipo_trabajo_embarcacion_sistema_parte,
+            embarcacion_sistema_parte: {
+                id_embarcacion_sistema
+            }
+        }
     });
 
-    if (asignacionExistente) {
-        // Actualizar la asignación existente
-        const asignacionActualizada = await prisma.ordenTrabajoSistema.update({
-            where: { id_orden_trabajo_sistema: asignacionExistente.id_orden_trabajo_sistema },
-            data: {
-                estado: "pendiente", // Resetear estado o mantener el existente
-                observaciones: observaciones || asignacionExistente.observaciones,
-                actualizado_en: fecha_creacion
-            },
-        });
-
-        // Enviar notificación al encargado
-        // await sendNotification(embarcacionSistema.id_usuario, `Tu sistema ${sistema.nombre_sistema} ha sido asignado a la orden de trabajo ID ${id_orden_trabajo}.`);
-
-        return asignacionActualizada;
+    if (!existeRelacion) {
+        throw new Error("El sistema no está registrado en TipoTrabajoEmbarcacionSistemaParte para esta embarcación.");
     }
 
-    // Crear una nueva asignación
-    const nuevaAsignacion = await prisma.ordenTrabajoSistema.create({
+    // Verificar si ya existe la orden
+    const existente = await prisma.ordenTrabajoSistema.findFirst({
+        where: { id_orden_trabajo, id_sistema, id_tipo_trabajo_embarcacion_sistema_parte }
+    });
+
+    if (existente) {
+        if (existente.estado !== "inactivo") {
+            throw new Error("Ya existe una orden de trabajo para este sistema.");
+        } else {
+            // Reactivar si estaba inactivo
+            const ordenReactivada = await prisma.ordenTrabajoSistema.update({
+                where: { id_orden_trabajo_sistema: existente.id_orden_trabajo_sistema },
+                data: { 
+                    estado: "pendiente", 
+                    actualizado_en: fechaActual,
+                    materiales: materiales || existente.materiales,
+                    proximo_abordaje: proximo_abordaje || existente.proximo_abordaje
+                },
+            });
+
+            // Reactivar detalles si existen
+            if (fallas || causas || solucion || pendiente) {
+                await prisma.ordenTrabajoSistemaDetalle.upsert({
+                    where: { id_orden_trabajo_sistema: existente.id_orden_trabajo_sistema },
+                    update: {
+                        fallas: fallas || existente.detalle?.fallas,
+                        causas: causas || existente.detalle?.causas,
+                        solucion: solucion || existente.detalle?.solucion,
+                        pendiente: pendiente || existente.detalle?.pendiente,
+                        actualizado_en: fechaActual,
+                    },
+                    create: {
+                        id_orden_trabajo_sistema: existente.id_orden_trabajo_sistema,
+                        fallas,
+                        causas,
+                        solucion,
+                        pendiente,
+                        creado_en: fechaActual,
+                    }
+                });
+            }
+
+            // Manejar reactivación de fotos si es necesario
+            if (fotos && fotos.length > 0) {
+                await prisma.ordenTrabajoSistemaFoto.createMany({
+                    data: fotos.map((url) => ({
+                        id_orden_trabajo_sistema: existente.id_orden_trabajo_sistema,
+                        url,
+                        creado_en: fechaActual,
+                    })),
+                });
+            }
+
+            return ordenReactivada;
+        }
+    }
+
+    // Crear nueva orden de trabajo
+    const ordenTrabajoSistema = await prisma.ordenTrabajoSistema.create({
         data: {
             id_orden_trabajo,
             id_sistema,
             id_embarcacion_sistema,
+            id_tipo_trabajo_embarcacion_sistema_parte,
             estado: "pendiente",
-            observaciones,
-            creado_en:fecha_creacion,
-            actualizado_en: fecha_creacion,
+            avance: 0,
+            materiales,
+            proximo_abordaje,
+            creado_en: fechaActual,
+            actualizado_en: fechaActual,
+            // Crear detalles si aplican
+            detalle: (fallas || causas || solucion || pendiente) ? {
+                create: {
+                    fallas,
+                    causas,
+                    solucion,
+                    pendiente,
+                    creado_en: fechaActual,
+                }
+            } : undefined,
+        },
+        include: { 
+            fotos: true,
+            detalle: true
         },
     });
 
-    // Enviar notificación al encargado
-    // await sendNotification(embarcacionSistema.id_usuario, `Tu sistema ${sistema.nombre_sistema} ha sido asignado a la orden de trabajo ID ${id_orden_trabajo}.`);
+    // Si hay fotos, asociarlas
+    if (fotos && fotos.length > 0) {
+        await prisma.ordenTrabajoSistemaFoto.createMany({
+            data: fotos.map((url) => ({
+                id_orden_trabajo_sistema: ordenTrabajoSistema.id_orden_trabajo_sistema,
+                url,
+                creado_en: fechaActual,
+            })),
+        });
+    }
 
-    return nuevaAsignacion;
+    return ordenTrabajoSistema;
 };
 
 /**
- * Modificar la Asignación de Sistemas a una Orden de Trabajo
- * @param {number} id_orden_trabajo_sistema
- * @param {Object} data
- * @param {string} [data.estado]
- * @param {string} [data.observaciones]
- * @returns {Promise<Object>} Asignación modificada
+ * Obtener todas las órdenes de trabajo activas
  */
-export const modificarAsignacionSistema = async (id_orden_trabajo_sistema, { estado, observaciones }) => {
-    const todayISO = new Date().toISOString();
-    const fecha_creacion = getUTCTime(todayISO);
-    if (isNaN(id_orden_trabajo_sistema)) {
-        throw new Error("El ID de la asignación debe ser válido.");
-    }
-
-    // Verificar que la asignación exista
-    const asignacionExistente = await prisma.ordenTrabajoSistema.findUnique({
-        where: { id_orden_trabajo_sistema },
+export const getAllOrdenesTrabajoSistema = async () => {
+    const ordenes = await prisma.ordenTrabajoSistema.findMany({
+        where: { estado: { not: "inactivo" } },
+        include: { 
+            fotos: true,
+            detalle: true
+        },
+        orderBy: { creado_en: "desc" },
     });
 
-    if (!asignacionExistente) {
-        throw new Error(`La asignación con ID ${id_orden_trabajo_sistema} no existe.`);
+    if (ordenes.length === 0) {
+        throw new Error("No hay órdenes de trabajo disponibles.");
     }
 
-    // Validar el estado si se proporciona
-    const estadosValidos = ["pendiente", "en_progreso", "completado", "cancelado"];
-    if (estado && !estadosValidos.includes(estado)) {
-        throw new Error(`El estado "${estado}" no es válido. Estados permitidos: ${estadosValidos.join(", ")}.`);
+    return ordenes;
+};
+
+/**
+ * Obtener una OrdenTrabajoSistema por ID
+ */
+export const getOrdenTrabajoSistemaById = async (id) => {
+    const orden = await prisma.ordenTrabajoSistema.findUnique({
+        where: { id_orden_trabajo_sistema: parseInt(id) },
+        include: { 
+            fotos: true,
+            detalle: true
+        },
+    });
+
+    if (!orden || orden.estado === "inactivo") {
+        throw new Error(`La orden de trabajo con ID ${id} no existe o está inactiva.`);
     }
 
-    // Actualizar la asignación
-    const asignacionActualizada = await prisma.ordenTrabajoSistema.update({
-        where: { id_orden_trabajo_sistema },
+    return orden;
+};
+
+/**
+ * Actualizar una OrdenTrabajoSistema
+ */
+export const updateOrdenTrabajoSistema = async (id, data) => {
+    const { 
+        avance, 
+        materiales, 
+        proximo_abordaje, 
+        fallas, 
+        causas, 
+        solucion, 
+        pendiente, 
+        fotos 
+    } = data;
+
+    const fechaActualizacion = getUTCTime(new Date().toISOString());
+
+    // Actualizar la orden de trabajo
+    const ordenActualizada = await prisma.ordenTrabajoSistema.update({
+        where: { id_orden_trabajo_sistema: parseInt(id) },
         data: {
-            estado: estado || asignacionExistente.estado,
-            observaciones: observaciones || asignacionExistente.observaciones,
-            actualizado_en: fecha_creacion
+            avance: avance !== undefined ? avance : undefined,
+            materiales: materiales !== undefined ? materiales : undefined,
+            proximo_abordaje: proximo_abordaje !== undefined ? proximo_abordaje : undefined,
+            actualizado_en: fechaActualizacion,
+        },
+        include: { 
+            fotos: true,
+            detalle: true
         },
     });
 
-    // Enviar notificación al encargado
-    // await sendNotification(asignacionExistente.embarcacion_sistema.id_usuario, `Tu sistema ${asignacionExistente.sistema.nombre_sistema} en la orden de trabajo ID ${asignacionExistente.id_orden_trabajo} ha sido actualizado a estado "${asignacionActualizada.estado}".`);
+    // Actualizar detalles si aplica
+    if (fallas || causas || solucion || pendiente) {
+        await prisma.ordenTrabajoSistemaDetalle.upsert({
+            where: { id_orden_trabajo_sistema: ordenActualizada.id_orden_trabajo_sistema },
+            update: {
+                fallas: fallas !== undefined ? fallas : undefined,
+                causas: causas !== undefined ? causas : undefined,
+                solucion: solucion !== undefined ? solucion : undefined,
+                pendiente: pendiente !== undefined ? pendiente : undefined,
+                actualizado_en: fechaActualizacion,
+            },
+            create: {
+                id_orden_trabajo_sistema: ordenActualizada.id_orden_trabajo_sistema,
+                fallas,
+                causas,
+                solucion,
+                pendiente,
+                creado_en: fechaActualizacion,
+            }
+        });
+    }
 
-    return asignacionActualizada;
+    // Manejar fotos adicionales si las hay
+    if (fotos && fotos.length > 0) {
+        await prisma.ordenTrabajoSistemaFoto.createMany({
+            data: fotos.map((url) => ({
+                id_orden_trabajo_sistema: ordenActualizada.id_orden_trabajo_sistema,
+                url,
+                creado_en: fechaActualizacion,
+            })),
+        });
+    }
+
+    return ordenActualizada;
 };
 
 /**
- * Desactivar un Sistema de una Orden de Trabajo
- * @param {number} id_orden_trabajo_sistema
- * @returns {Promise<Object>} Asignación desactivada
+ * Desactivar una OrdenTrabajoSistema
  */
-export const deactivateSistemaFromOrdenTrabajo = async (id_orden_trabajo_sistema) => {
-    const todayISO = new Date().toISOString();
-    const fecha_creacion = getUTCTime(todayISO);
-    if (isNaN(id_orden_trabajo_sistema)) {
-        throw new Error("El ID de la asignación debe ser válido.");
-    }
-
-    // Verificar que la asignación exista y esté en un estado que se pueda desactivar
-    const asignacion = await prisma.ordenTrabajoSistema.findUnique({
-        where: { id_orden_trabajo_sistema },
-        include: {
-            sistema: true,
-            embarcacion_sistema: true,
-        },
+export const deleteOrdenTrabajoSistema = async (id) => {
+    const orden = await prisma.ordenTrabajoSistema.findUnique({
+        where: { id_orden_trabajo_sistema: parseInt(id) }
     });
 
-    if (!asignacion || asignacion.estado === "completado" || asignacion.estado === "cancelado") {
-        throw new Error("La asignación no existe o ya está desactivada/completada.");
+    if (!orden || orden.estado === "inactivo") {
+        throw new Error(`La orden con ID ${id} no existe o ya está inactiva.`);
     }
 
-    // Desactivar la asignación
-    const asignacionDesactivada = await prisma.ordenTrabajoSistema.update({
-        where: { id_orden_trabajo_sistema },
-        data: { estado: "cancelado", actualizado_en: fecha_creacion },
+    return await prisma.ordenTrabajoSistema.update({
+        where: { id_orden_trabajo_sistema: parseInt(id) },
+        data: { estado: "inactivo" },
     });
-
-    // Enviar notificación al encargado
-    // await sendNotification(asignacion.embarcacion_sistema.id_usuario, `Tu sistema ${asignacion.sistema.nombre_sistema} en la orden de trabajo ID ${asignacion.id_orden_trabajo} ha sido desactivado.`);
-
-    return asignacionDesactivada;
-};
-
-/**
- * Obtener todos los Sistemas asignados a una Orden de Trabajo
- * @param {number} id_orden_trabajo
- * @returns {Promise<Array>} Lista de asignaciones
- */
-export const getSistemasByOrdenTrabajo = async (id_orden_trabajo) => {
-    // Convertir el ID a un entero
-    const idOrdenTrabajo = parseInt(id_orden_trabajo, 10);
-
-    // Validar si el ID es un número válido
-    if (isNaN(idOrdenTrabajo)) {
-        throw { status: 400, message: "El ID de la orden de trabajo debe ser un número válido." };
-    }
-
-    // Buscar la orden de trabajo
-    const ordenTrabajo = await prisma.ordenTrabajo.findUnique({
-        where: { id_orden_trabajo: idOrdenTrabajo },
-    });
-
-    // Verificar si existe la orden de trabajo
-    if (!ordenTrabajo) {
-        throw { status: 404, message: `La orden de trabajo con ID ${idOrdenTrabajo} no existe.` };
-    }
-
-    return ordenTrabajo;
-};
-
-/**
- * Generar Reportes de Ordenes de Trabajo con Sistemas
- * @param {Object} filtros
- * @returns {Promise<Array>} Lista de órdenes de trabajo
- */
-export const generarReporteOrdenesTrabajoConSistemas = async (filtros) => {
-    /*
-        'filtros' puede contener:
-        - fecha_inicio
-        - fecha_fin
-        - estado
-        - id_sistema
-        - id_embarcacion_sistema
-        etc.
-    */
-
-    const where = {};
-
-    if (filtros.fecha_inicio && filtros.fecha_fin) {
-        where.fecha_asignacion = {
-            gte: new Date(filtros.fecha_inicio),
-            lte: new Date(filtros.fecha_fin),
-        };
-    }
-
-    if (filtros.estado) {
-        where.estado = filtros.estado;
-    }
-
-    if (filtros.id_sistema) {
-        where.orden_trabajo_sistemas = {
-            some: {
-                id_sistema: parseInt(filtros.id_sistema, 10),
-            },
-        };
-    }
-
-    if (filtros.id_embarcacion_sistema) {
-        where.orden_trabajo_sistemas = {
-            some: {
-                id_embarcacion_sistema: parseInt(filtros.id_embarcacion_sistema, 10),
-            },
-        };
-    }
-
-    // Agregar otros filtros según sea necesario
-
-    const reportes = await prisma.ordenTrabajo.findMany({
-        where,
-        include: {
-            tipo_trabajo: true,
-            embarcacion: true,
-            puerto: true,
-            jefe_asigna: true,
-            orden_trabajo_usuario: {
-                include: {
-                    usuario: true,
-                },
-            },
-            orden_trabajo_sistemas: {
-                include: {
-                    sistema: true,
-                    embarcacion_sistema: {
-                        include: {
-                            embarcacion: true,
-                            sistema: true,
-                        },
-                    },
-                },
-            },
-        },
-    });
-
-    return reportes;
-};
-
-/**
- * Finalizar una Orden de Trabajo y Actualizar Estados
- * @param {number} id_orden_trabajo
- * @returns {Promise<Object>} Orden de Trabajo finalizada
- */
-export const finalizarOrdenTrabajo = async (id_orden_trabajo) => {
-    const todayISO = new Date().toISOString();
-    const fecha_creacion = getUTCTime(todayISO);
-    if (isNaN(id_orden_trabajo)) {
-        throw new Error("El ID de la orden de trabajo debe ser válido.");
-    }
-
-    // Iniciar una transacción
-    const ordenTrabajoFinalizada = await prisma.$transaction(async (tx) => {
-        // Verificar que la Orden de Trabajo exista
-        const ordenTrabajo = await tx.ordenTrabajo.findUnique({
-            where: { id_orden_trabajo },
-        });
-
-        if (!ordenTrabajo) {
-            throw new Error(`La orden de trabajo con ID ${id_orden_trabajo} no existe.`);
-        }
-
-        // Actualizar el estado de la Orden de Trabajo a 'completado'
-        const updatedOrdenTrabajo = await tx.ordenTrabajo.update({
-            where: { id_orden_trabajo },
-            data: { estado: "completado", actualizado_en: new Date() },
-        });
-
-        // Actualizar el estado de todas las OrdenTrabajoSistema relacionadas a 'completado'
-        const sistemasAsignados = await tx.ordenTrabajoSistema.findMany({
-            where: { id_orden_trabajo },
-            include: { sistema: true, embarcacion_sistema: true },
-        });
-
-        const actualizarSistemas = sistemasAsignados.map(asignacion =>
-            tx.ordenTrabajoSistema.update({
-                where: { id_orden_trabajo_sistema: asignacion.id_orden_trabajo_sistema },
-                data: { estado: "completado", actualizado_en: fecha_creacion},
-            })
-        );
-
-        await Promise.all(actualizarSistemas);
-
-        // Actualizar observaciones en OrdenTrabajoUsuario si aplica
-        const usuariosAsignados = await tx.ordenTrabajoUsuario.findMany({
-            where: { id_orden_trabajo },
-            include: { usuario: true },
-        });
-
-        const actualizarUsuarios = usuariosAsignados.map(asignacion =>
-            tx.ordenTrabajoUsuario.update({
-                where: { id_orden_trabajo_usuario: asignacion.id_orden_trabajo_usuario },
-                data: { observaciones: "Orden de trabajo completada.", actualizado_en: fecha_creacion },
-            })
-        );
-
-        await Promise.all(actualizarUsuarios);
-
-        // Enviar notificaciones a los usuarios y encargados de sistemas
-        // for (const usuarioAsignado of usuariosAsignados) {
-        //     await sendNotification(usuarioAsignado.id_usuario, `La orden de trabajo ID ${id_orden_trabajo} ha sido completada.`);
-        // }
-
-        // for (const asignacion of sistemasAsignados) {
-        //     await sendNotification(asignacion.embarcacion_sistema.id_usuario, `El sistema ${asignacion.sistema.nombre_sistema} ha sido completado en la orden de trabajo ID ${id_orden_trabajo}.`);
-        // }
-
-        return updatedOrdenTrabajo;
-    });
-
-    return ordenTrabajoFinalizada;
 };

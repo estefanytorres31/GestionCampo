@@ -4,9 +4,9 @@ import { getUTCTime } from "../utils/Time.js";
 const prisma = new PrismaClient();
 
 /**
- * Asignar un Trabajo a una Embarcación (Crear o Reactivar Orden de Trabajo)
- * @param {Object} data - Datos para asignar la orden de trabajo
- * @returns {Promise<Object>} - La orden de trabajo creada o reactivada
+ * 🔹 Asignar un Trabajo a una Embarcación (Crear o Reactivar Orden de Trabajo)
+ * @param {Object} data - Datos para la orden de trabajo
+ * @returns {Promise<Object>} - Orden de trabajo creada o reactivada
  */
 export const asignarTrabajoAEmbarcacion = async (data) => {
   const {
@@ -15,12 +15,24 @@ export const asignarTrabajoAEmbarcacion = async (data) => {
     id_puerto,
     id_jefe_asigna,
     codigo,
-    comentarios = null, // Opcional
-    motorista = null, // Opcional
-    supervisor = null, // Opcional
+    comentarios = null,
+    motorista = null,
+    supervisor = null,
   } = data;
 
-  // ✅ Validaciones básicas
+  // ✅ Validaciones obligatorias
+  if (
+    !id_tipo_trabajo ||
+    !id_embarcacion ||
+    !id_puerto ||
+    !id_jefe_asigna ||
+    !codigo
+  ) {
+    throw new Error(
+      "Los campos 'id_tipo_trabajo', 'id_embarcacion', 'id_puerto', 'id_jefe_asigna' y 'codigo' son obligatorios."
+    );
+  }
+
   if (
     isNaN(id_tipo_trabajo) ||
     isNaN(id_embarcacion) ||
@@ -36,36 +48,32 @@ export const asignarTrabajoAEmbarcacion = async (data) => {
     let ordenTrabajo;
     let mensaje;
 
-    if (codigo) {
-      // 🔹 Buscar una orden existente con el mismo código
-      ordenTrabajo = await prisma.ordenTrabajo.findUnique({
-        where: { codigo },
-      });
+    // 🔹 Buscar una orden existente con el mismo código
+    ordenTrabajo = await prisma.ordenTrabajo.findUnique({
+      where: { codigo },
+    });
 
-      if (ordenTrabajo) {
-        if (ordenTrabajo.estado === "inactivo") {
-          // 🔹 Reactivar la orden si está inactiva
-          ordenTrabajo = await prisma.ordenTrabajo.update({
-            where: { codigo },
-            data: {
-              estado: "pendiente",
-              comentarios: comentarios || ordenTrabajo.comentarios,
-              motorista: motorista || ordenTrabajo.motorista,
-              supervisor: supervisor || ordenTrabajo.supervisor,
-              fecha_asignacion: fecha_actualizacion,
-              actualizado_en: fecha_actualizacion,
-            },
-          });
-          mensaje = "Orden de trabajo reactivada exitosamente.";
-        } else {
-          throw new Error(
-            `Una orden de trabajo con el código "${codigo}" ya existe y está activa.`
-          );
-        }
+    if (ordenTrabajo) {
+      if (ordenTrabajo.estado === "inactivo") {
+        // 🔹 Reactivar la orden si está inactiva
+        ordenTrabajo = await prisma.ordenTrabajo.update({
+          where: { codigo },
+          data: {
+            estado: "pendiente",
+            comentarios: comentarios || ordenTrabajo.comentarios,
+            motorista: motorista || ordenTrabajo.motorista,
+            supervisor: supervisor || ordenTrabajo.supervisor,
+            fecha_asignacion: fecha_actualizacion,
+            actualizado_en: fecha_actualizacion,
+          },
+        });
+        mensaje = "Orden de trabajo reactivada exitosamente.";
+      } else {
+        throw new Error(
+          `Una orden de trabajo con el código "${codigo}" ya existe y está activa.`
+        );
       }
-    }
-
-    if (!ordenTrabajo) {
+    } else {
       // 🔹 Crear una nueva Orden de Trabajo
       ordenTrabajo = await prisma.ordenTrabajo.create({
         data: {
@@ -88,6 +96,40 @@ export const asignarTrabajoAEmbarcacion = async (data) => {
 
     return { mensaje, ordenTrabajo };
   });
+};
+
+/**
+ * 🔹 Actualizar una Orden de Trabajo
+ * @param {number} id_orden_trabajo - ID de la orden de trabajo a actualizar
+ * @param {Object} data - Datos a actualizar
+ * @returns {Promise<Object>} - Orden de trabajo actualizada
+ */
+export const actualizarOrdenTrabajo = async (id_orden_trabajo, data) => {
+  if (isNaN(id_orden_trabajo)) {
+    throw new Error("El ID de la orden de trabajo debe ser un número válido.");
+  }
+
+  const ordenExistente = await prisma.ordenTrabajo.findUnique({
+    where: { id_orden_trabajo },
+  });
+
+  if (!ordenExistente || ordenExistente.estado === "inactivo") {
+    throw new Error(
+      `La orden de trabajo con ID ${id_orden_trabajo} no existe o está inactiva.`
+    );
+  }
+
+  const fecha_actualizacion = getUTCTime(new Date().toISOString());
+
+  const ordenActualizada = await prisma.ordenTrabajo.update({
+    where: { id_orden_trabajo },
+    data: {
+      ...data, // Solo actualiza los campos enviados en la solicitud
+      actualizado_en: fecha_actualizacion,
+    },
+  });
+
+  return ordenActualizada;
 };
 
 /**
@@ -177,40 +219,6 @@ export const getOrdenTrabajoById = async (id_orden_trabajo) => {
   }
 
   return ordenTrabajo;
-};
-
-/**
- * 🔹 Actualizar una Orden de Trabajo
- * @param {number} id_orden_trabajo - ID de la orden de trabajo a actualizar
- * @param {Object} data - Datos a actualizar
- * @returns {Promise<Object>} - Orden de trabajo actualizada
- */
-export const actualizarOrdenTrabajo = async (id_orden_trabajo, data) => {
-  if (isNaN(id_orden_trabajo)) {
-    throw new Error("El ID de la orden de trabajo debe ser un número válido.");
-  }
-
-  const ordenExistente = await prisma.ordenTrabajo.findUnique({
-    where: { id_orden_trabajo },
-  });
-
-  if (!ordenExistente || ordenExistente.estado === "inactivo") {
-    throw new Error(
-      `La orden de trabajo con ID ${id_orden_trabajo} no existe o está inactiva.`
-    );
-  }
-
-  const fecha_actualizacion = getUTCTime(new Date().toISOString());
-
-  const ordenActualizada = await prisma.ordenTrabajo.update({
-    where: { id_orden_trabajo },
-    data: {
-      ...data,
-      actualizado_en: fecha_actualizacion,
-    },
-  });
-
-  return ordenActualizada;
 };
 
 /**
