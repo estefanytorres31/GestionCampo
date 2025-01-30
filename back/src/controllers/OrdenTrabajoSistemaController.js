@@ -47,3 +47,15 @@ export const updateOrdenTrabajoSistema = async (req, res) => {
         res.status(400).json({ message: error.message });
     }
 };
+
+/**
+ * Desactivar una OrdenTrabajoSistema
+ */
+export const deleteOrdenTrabajoSistema = async (req, res) => {
+    try {
+        const orden = await OrdenTrabajoSistemaService.deleteOrdenTrabajoSistema(req.params.id);
+        res.status(200).json({ message: "Orden de trabajo desactivada exitosamente.", data: orden });
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+};

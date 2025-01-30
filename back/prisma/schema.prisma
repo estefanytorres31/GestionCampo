@@ -346,6 +346,9 @@ model OrdenTrabajoSistema {
   // Relación con la nueva tabla de fotos
   fotos                   OrdenTrabajoSistemaFoto[]
 
+  // Relación con la tabla de detalles (solo para tipos de trabajo específicos)
+  detalle                 OrdenTrabajoSistemaDetalle?
+
   tipo_trabajo_embarcacion_sistema_parte TipoTrabajoEmbarcacionSistemaParte @relation("TTESPtoOTSIS", fields: [id_tipo_trabajo_embarcacion_sistema_parte], references: [id_tipo_trabajo_embarcacion_sistema_parte], onDelete: NoAction, onUpdate: Cascade)
 
   orden_trabajo_parte     OrdenTrabajoParte[]
@@ -356,6 +359,20 @@ model OrdenTrabajoSistema {
   @@index([id_sistema], name: "idx_otsis_sis")
   @@index([id_embarcacion_sistema], name: "idx_otsis_es")
   @@index([estado], name: "idx_otsis_est")
+}
+
+model OrdenTrabajoSistemaDetalle {
+  id_detalle               Int  @id @default(autoincrement()) @map("id_detalle")
+  id_orden_trabajo_sistema Int  @unique @map("id_orden_trabajo_sistema")
+  fallas                   String? @map("fallas")
+  causas                   String? @map("causas")
+  solucion                 String? @map("solucion")
+  pendiente                String? @map("pendiente")
+  creado_en                DateTime @default(now()) @map("creado_en")
+
+  orden_trabajo_sistema    OrdenTrabajoSistema @relation(fields: [id_orden_trabajo_sistema], references: [id_orden_trabajo_sistema], onDelete: Cascade, onUpdate: Cascade)
+
+  @@map("orden_trabajo_sistema_detalle")
 }
 
 model OrdenTrabajoSistemaFoto {
@@ -369,7 +386,6 @@ model OrdenTrabajoSistemaFoto {
   @@map("orden_trabajo_sistema_foto")
   @@index([id_orden_trabajo_sistema], name: "idx_otsf_otsis")
 }
-
 
 model OrdenTrabajoParte {
   id_orden_trabajo_parte Int                @id @default(autoincrement()) @map("id_orden_trabajo_parte")
