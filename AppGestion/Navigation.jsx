@@ -9,6 +9,7 @@ import Trabajo from "./screens/views/TipoTrabajo/TipoTrabajo";
 import QRScann from "./screens/views/Scan/QRscan";
 import AsignarTrabajoScreen from "./screens/views/AsignarTrabajo/AsignarTrabajo";
 import SeleccionarAyudantesScreen from "./screens/views/AsignarTrabajo/SeleccionarAyudantes";
+import SeleccionarTecnicoScreen from "./screens/views/AsignarTrabajo/SeleccionarTecnico";
 
 const Stack = createNativeStackNavigator();
 
@@ -36,6 +37,10 @@ export default function Navigation() {
         <Stack.Screen
           name="SeleccionarAyudantes"
           component={SeleccionarAyudantesScreen}
+        />
+        <Stack.Screen
+          name="SeleccionarTecnico"
+          component={SeleccionarTecnicoScreen}
         />
         <Stack.Screen
           name="Inicio"

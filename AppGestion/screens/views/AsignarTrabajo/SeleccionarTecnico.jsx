@@ -13,11 +13,16 @@ import { Ionicons } from "@expo/vector-icons";
 import useUsuarioTecnico from "../../hooks/UsuarioTecnico/useUsuarioTecnico";
 
 const SeleccionarTecnicoScreen = ({ route, navigation }) => {
-  const { tecnicoSeleccionado, onSelect } = route.params;
+  const { tecnicoSeleccionado, onSelect, usuariosExcluidos = [] } = route.params;
   const { usuariosTecnicos } = useUsuarioTecnico();
 
   const [busqueda, setBusqueda] = useState("");
   const [seleccionado, setSeleccionado] = useState(tecnicoSeleccionado || null);
+
+  const filteredData = usuariosTecnicos.filter(u => 
+    !usuariosExcluidos.includes(u.id) && 
+    u.nombre_completo.toLowerCase().includes(busqueda.toLowerCase())
+  );
 
   const fadeAnim = React.useRef(new Animated.Value(0)).current;
   const scaleAnim = React.useRef(new Animated.Value(0.95)).current;
@@ -78,7 +83,7 @@ const SeleccionarTecnicoScreen = ({ route, navigation }) => {
           onChangeText={setBusqueda}
         />
         <FlatList
-          data={usuariosTecnicos.filter((u) =>
+          data={filteredData.filter((u) =>
             u.nombre_completo.toLowerCase().includes(busqueda.toLowerCase())
           )}
           renderItem={renderItem}
