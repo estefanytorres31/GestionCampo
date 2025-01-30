@@ -5,7 +5,8 @@ import Select from "../../components/Select";
 import useUsuarioTecnico from "../../hooks/UsuarioTecnico/useUsuarioTecnico";
 import usePuerto from "../../hooks/Puerto/usePuerto";
 
-const AsignarTrabajoScreen = ({ navigation }) => {
+const AsignarTrabajoScreen = ({route, navigation }) => {
+  const {sistemas,empresa,embarcacion,trabajo,codigoOT }=route.params;
   const [puerto, setPuerto] = useState(null);
   const [tecnico, setTecnico] = useState(null);
   const [motorista, setMotorista] = useState("");
@@ -58,6 +59,23 @@ const AsignarTrabajoScreen = ({ navigation }) => {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Asignar Trabajo</Text>
+      <View style={styles.field}>
+        <Text style={styles.label}>Código de OT:</Text>
+        <Text style={styles.selectedText}>{codigoOT}</Text>
+      </View>
+      <View style={styles.field}>
+        <Text style={styles.label}>Sistemas:</Text>
+        {sistemas.length > 0 ? (
+          sistemas.map((sistema, index) => (
+            <Text key={index} style={styles.selectedText}>
+              • {sistema.nombre_sistema}
+            </Text>
+          ))
+        ) : (
+          <Text style={styles.selectedText}>No hay sistemas seleccionados</Text>
+        )}
+      </View>
+
 
       <View style={styles.field}>
         <Text style={styles.label}>Puerto:</Text>
@@ -115,7 +133,7 @@ const styles = StyleSheet.create({
   button: { backgroundColor: "#5c6bc0", borderRadius: 8, paddingVertical: 10, alignItems: "center", marginVertical: 8 },
   buttonSave: { marginTop: 20, backgroundColor: "#2E7D32", borderRadius: 8, paddingVertical: 12, alignItems: "center" },
   buttonText: { color: "#fff", fontSize: 16, fontWeight: "bold" },
-  selectedText: { fontSize: 14, color: "#333", marginTop: 4 },
+  selectedText: { fontSize: 14, color: "#333", marginTop: 2, marginLeft:10 },
 });
 
 export default AsignarTrabajoScreen;

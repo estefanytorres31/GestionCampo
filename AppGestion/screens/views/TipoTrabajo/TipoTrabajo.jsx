@@ -16,7 +16,7 @@ import useTipoTrabajo from "../../hooks/TipoTrabajo/useTipoTabajo";
 const { height } = Dimensions.get('window');
 
 const Trabajo = ({ route, navigation }) => {
-    const {embarcacion}=route.params
+    const {empresa, embarcacion}=route.params
     const { tipotrabajos } = useTipoTrabajo(); // Obtén los tipos de trabajo del contexto
     const fadeAnim = React.useRef(new Animated.Value(0)).current;
     const scaleAnim = React.useRef(new Animated.Value(0.95)).current;
@@ -53,7 +53,7 @@ const Trabajo = ({ route, navigation }) => {
             }),
         ]).start();
 
-        navigation.navigate("Sistemas", { embarcacion,  trabajo  });
+        navigation.navigate("Sistemas", { empresa, embarcacion,  trabajo  });
     };
 
     return (

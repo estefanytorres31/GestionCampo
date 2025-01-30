@@ -11,7 +11,7 @@ const UsuarioTecnicoProvider = ({ children }) => {
         if (isAuth) {
             const fetchUsuariosTecnicos = async () => {
                 try {
-                    const response = await getAllUsuariosByRol(1); // Rol técnico = 1
+                    const response = await getAllUsuariosByRol(2); // Rol técnico = 1
                     if (response) {
                         setUsuariosTecnicos(response.data);
                         console.log('Usuarios técnicos cargados correctamente:', response.data);

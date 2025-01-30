@@ -16,7 +16,7 @@ import useTipoTrabajoESP from "../../hooks/TipoTrabajoESP/useTipoTrabajoESP";
 const { width, height } = Dimensions.get('window');
 
 const SistemasScreen = ({ route, navigation }) => {
-    const { embarcacion, trabajo } = route.params;
+    const { empresa, embarcacion, trabajo } = route.params;
     const { 
         tipoTrabajosESP, 
         fetchTiposTrabajosESP 
@@ -70,16 +70,41 @@ const SistemasScreen = ({ route, navigation }) => {
         });
     };
 
+    const generarCodigoOT = (empresa, embarcacion, trabajo) => {
+        const fecha = new Date();
+        const dia = String(fecha.getDate()).padStart(2, '0');
+        const mes = String(fecha.getMonth() + 1).padStart(2, '0'); // Los meses van de 0 a 11
+        const año = fecha.getFullYear();
+        
+        const codigoEmpresa = empresa.nombre.slice(0, 4).toUpperCase();
+        const codigoEmbarcacion = embarcacion.nombre.slice(0, 4).toUpperCase();
+        const codigoTrabajo = `R${trabajo.nombre_trabajo.slice(0, 3).toUpperCase()}`;
+    
+        const codigoOT = `${codigoEmpresa}_${codigoEmbarcacion}_${codigoTrabajo}_${dia}${mes}${año}`;
+        return codigoOT;
+    };
+
+
     const handleGuardarSeleccion = () => {
         const sistemasSeleccionados = tipoTrabajosESP.filter(sistema => 
             selectedSistemas.has(sistema.id_sistema)
         );
+
+        if (sistemasSeleccionados.length === 0) {
+            alert("Debe seleccionar al menos un sistema para generar la orden de trabajo.");
+            return;
+        }
+        
+        const codigoOT = generarCodigoOT(empresa, embarcacion, trabajo);
+        console.log("Código de la orden de trabajo:", codigoOT);
         
         // Aquí puedes navegar a la siguiente pantalla o guardar la selección
         navigation.navigate("Asignar", { 
             sistemas: sistemasSeleccionados,
+            empresa,
             embarcacion,
-            trabajo
+            trabajo,
+            codigoOT 
         });
     };
 
