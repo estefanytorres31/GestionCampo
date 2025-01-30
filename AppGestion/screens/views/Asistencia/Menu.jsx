@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, Alert } from "react-native";
 import QRCode from "react-native-qrcode-svg";
 import { useNavigation } from "@react-navigation/native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import * as Location from 'expo-location';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import apiClient from '../../API/apiClient'; // Update this path to match your project structure
 
 const Menu = ({ route }) => {
   const qrData = route?.params?.qrData || "";
@@ -11,28 +13,137 @@ const Menu = ({ route }) => {
   const [location, setLocation] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [lastAttendance, setLastAttendance] = useState(null);
+  const [userData, setUserData] = useState(null);
+
+  useEffect(() => {
+    const getUserData = async () => {
+      try {
+        const storedUserData = await AsyncStorage.getItem('userData');
+        if (storedUserData) {
+          setUserData(JSON.parse(storedUserData));
+        } else {
+          setError('No se encontraron datos del usuario');
+        }
+      } catch (err) {
+        console.error('Error al obtener datos del usuario:', err);
+        setError('Error al cargar datos del usuario');
+      }
+    };
+
+    getUserData();
+  }, []);
+
+  useEffect(() => {
+    const checkLastAttendance = async () => {
+      if (!userData?.id) return;
+
+      try {
+        // Using apiClient instead of axios directly
+        const response = await apiClient.get(`/asistencias/usuario/${userData.id}`);
+        if (response.data?.data?.length > 0) {
+          setLastAttendance(response.data.data[0]);
+        }
+      } catch (err) {
+        console.error('Error al verificar última asistencia:', err);
+        // Don't show error to user as this is not critical
+      }
+    };
+
+    if (userData) {
+      checkLastAttendance();
+    }
+  }, [userData]);
+
+  const determinarTipoAsistencia = () => {
+    if (!lastAttendance) return "entrada";
+    return lastAttendance.tipo === "entrada" ? "salida" : "entrada";
+  };
 
   const getLocation = async () => {
+    if (!userData?.id) {
+      Alert.alert('Error', 'No se encontraron datos del usuario');
+      return;
+    }
+
+    if (!qrData) {
+      Alert.alert('Error', 'Código QR inválido');
+      return;
+    }
+
     setLoading(true);
     setError(null);
+
     try {
-      let { status } = await Location.requestForegroundPermissionsAsync();
+      const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
-        setError('Se requiere permiso para acceder a la ubicación');
-        return;
+        throw new Error('Se requiere permiso para acceder a la ubicación');
       }
 
-      let location = await Location.getCurrentPositionAsync({
+      const locationData = await Location.getCurrentPositionAsync({
         accuracy: Location.Accuracy.High,
       });
-      setLocation(location);
-      // Aquí puedes implementar la lógica para registrar la asistencia
-      alert(`Asistencia registrada!\nLatitud: ${location.coords.latitude}\nLongitud: ${location.coords.longitude}`);
+
+      if (!locationData) {
+        throw new Error('No se pudo obtener la ubicación');
+      }
+
+      setLocation(locationData);
+
+      const asistenciaData = {
+        id_usuario: userData.id,
+        id_embarcacion: parseInt(qrData, 10),
+        tipo: determinarTipoAsistencia(),
+        latitud: locationData.coords.latitude,
+        longitud: locationData.coords.longitude
+      };
+
+      // Using apiClient instead of axios directly
+      const response = await apiClient.post('/asistencias', asistenciaData);
+
+      if (response.data?.data) {
+        setLastAttendance(response.data.data);
+        Alert.alert(
+          'Éxito',
+          `Asistencia de ${asistenciaData.tipo} registrada exitosamente`,
+          [{ text: 'OK' }]
+        );
+      } else {
+        throw new Error('Error en la respuesta del servidor');
+      }
     } catch (err) {
-      setError('Error al obtener la ubicación');
+      const errorMessage = err.response?.data?.message || err.message || 'Error al registrar la asistencia';
+      setError(errorMessage);
+      Alert.alert('Error', errorMessage);
     } finally {
       setLoading(false);
     }
+  };
+
+  const renderAttendanceButton = () => {
+    const tipoAsistencia = determinarTipoAsistencia();
+    const buttonText = tipoAsistencia === "entrada" ? "Registrar Entrada" : "Registrar Salida";
+    const buttonIcon = tipoAsistencia === "entrada" ? "login" : "logout";
+
+    return (
+      <TouchableOpacity
+        style={[
+          styles.attendanceButton,
+          { backgroundColor: tipoAsistencia === "entrada" ? "#4299E1" : "#48BB78" }
+        ]}
+        onPress={getLocation}
+        disabled={loading || !userData}
+      >
+        {loading ? (
+          <ActivityIndicator color="#FFF" />
+        ) : (
+          <>
+            <Icon name={buttonIcon} size={24} color="#FFF" style={styles.buttonIcon} />
+            <Text style={styles.buttonText}>{buttonText}</Text>
+          </>
+        )}
+      </TouchableOpacity>
+    );
   };
 
   if (!qrData) {
@@ -48,7 +159,7 @@ const Menu = ({ route }) => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Inicia tu asistencia</Text>
+        <Text style={styles.title}>Registro de Asistencia</Text>
         <Text style={styles.subtitle}>con coordenadas GPS</Text>
       </View>
 
@@ -56,26 +167,24 @@ const Menu = ({ route }) => {
         <View style={styles.qrWrapper}>
           <QRCode value={qrData} size={200} />
         </View>
-        <Text style={styles.qrText}>{qrData}</Text>
+        <Text style={styles.qrText}>ID Embarcación: {qrData}</Text>
       </View>
 
+      {lastAttendance && (
+        <View style={styles.lastAttendanceInfo}>
+          <Icon 
+            name={lastAttendance.tipo === "entrada" ? "login" : "logout"} 
+            size={24} 
+            color="#4CAF50" 
+          />
+          <Text style={styles.lastAttendanceText}>
+            Última {lastAttendance.tipo}: {new Date(lastAttendance.fecha_hora).toLocaleTimeString()}
+          </Text>
+        </View>
+      )}
+
       <View style={styles.attendanceContainer}>
-        <TouchableOpacity
-          style={styles.attendanceButton}
-          onPress={getLocation}
-          disabled={loading}
-        >
-          {loading ? (
-            <ActivityIndicator color="#FFF" />
-          ) : (
-            <>
-              <Icon name="map-marker-radius" size={24} color="#FFF" style={styles.buttonIcon} />
-              <Text style={styles.buttonText}>
-                Iniciar Jornada
-              </Text>
-            </>
-          )}
-        </TouchableOpacity>
+        {renderAttendanceButton()}
 
         {location && (
           <View style={styles.locationInfo}>
@@ -96,6 +205,22 @@ const Menu = ({ route }) => {
 };
 
 const styles = StyleSheet.create({
+  
+  lastAttendanceInfo: {
+    backgroundColor: '#E8F5E9',
+    padding: 16,
+    borderRadius: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+    marginHorizontal: 20,
+  },
+  lastAttendanceText: {
+    marginLeft: 12,
+    fontSize: 16,
+    color: '#2E7D32',
+    fontWeight: '500',
+  },
   container: {
     flex: 1,
     backgroundColor: "#F5F7FA",
