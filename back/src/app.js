@@ -20,8 +20,6 @@ import tipoTrabajoRouter from './routes/TipoTrabajoRouter.js';
 import ordenTrabajoUsuarioRouter from './routes/OrdenTrabajoUsuarioRouter.js';
 import ordenTrabajoSistemaRouter from './routes/OrdenTrabajoSistemaRouter.js';
 import parteRouter from './routes/ParteRoute.js';
-import asistenciaRouter from './routes/AsistenciaRoute.js';
-import { getPartesBySistema } from './controllers/SistemaParteController.js';
 import sistemaParteRouter from './routes/SistemaParteRoute.js';
 import embarcacionSistemaParteRouter from './routes/EmbarcacionSistemaParteRouter.js';
 import usuarioRolRouter from './routes/UsuarioRolRouter.js';
