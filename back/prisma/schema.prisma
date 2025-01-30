@@ -283,7 +283,7 @@ model OrdenTrabajo {
   comentarios             String?             @map("comentarios")
   motorista               String?             @map("motorista")
   supervisor              String?             @map("supervisor")
-  codigo                  String?             @map("codigo")
+  codigo                  String?             @unique @map("codigo")
   creado_en               DateTime            @default(now()) @map("creado_en")
   actualizado_en          DateTime            @updatedAt @map("actualizado_en")
 
