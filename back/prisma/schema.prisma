@@ -387,20 +387,6 @@ model TipoTrabajoEmbarcacionSistemaParte {
   @@index([id_embarcacion_sistema_parte], name: "idx_tt_esp_esp")
 }
 
-model TareaRealizada {
-  id_tarea_realizada    Int              @id @default(autoincrement()) @map("id_tarea_realizada")
-  id_usuario            Int              @map("id_usuario")
-  id_tarea              Int              @map("id_tarea")
-  fecha_hora            DateTime         @map("fecha_hora")
-  comentarios           String?          @map("comentarios")
-  creado_en             DateTime         @default(now()) @map("creado_en")
-  usuario               Usuario           @relation(fields: [id_usuario], references: [id], onDelete: NoAction, onUpdate: Cascade)
-  comentario_tarea      ComentarioTarea[] @relation("ComentarioToTareaRealizada") // Relación nombrada
-
-  @@map("tarea_realizada")
-}
-
-
 model Asistencia {
   id_asistencia        Int              @id @default(autoincrement()) @map("id_asistencia")
   id_usuario           Int              @map("id_usuario")
@@ -418,6 +404,19 @@ model Asistencia {
   puerto               Puerto?          @relation("PuertoAsistencia", fields: [id_puerto], references: [id_puerto], onDelete: SetNull, onUpdate: Cascade)
 
   @@map("asistencia")
+}
+
+model TareaRealizada {
+  id_tarea_realizada    Int              @id @default(autoincrement()) @map("id_tarea_realizada")
+  id_usuario            Int              @map("id_usuario")
+  id_tarea              Int              @map("id_tarea")
+  fecha_hora            DateTime         @map("fecha_hora")
+  comentarios           String?          @map("comentarios")
+  creado_en             DateTime         @default(now()) @map("creado_en")
+  usuario               Usuario           @relation(fields: [id_usuario], references: [id], onDelete: NoAction, onUpdate: Cascade)
+  comentario_tarea      ComentarioTarea[] @relation("ComentarioToTareaRealizada") // Relación nombrada
+
+  @@map("tarea_realizada")
 }
 
 model ComentarioTarea {
