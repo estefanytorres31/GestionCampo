@@ -6,9 +6,11 @@ import EmbarcacionProvider from "./screens/context/Embarcacion/EmbarcacionProvid
 import TipoTrabajoProvider from "./screens/context/TipoTrabajo/TipoTrabajoProvider.jsx";
 import TipoTrabajoESPProvider from "./screens/context/TipoTrabajoESP/TipoTrabajoESPProvider.jsx";
 import UsuarioTecnicoProvider from "./screens/context/UsuarioTecnico/UsuarioTecnicoProvider.jsx";
+import PuertoProvider from "./screens/context/Puerto/PuertoProvider.js";
 export default function App() {
   return (
     <AuthProvider>
+      <PuertoProvider>
       <TipoTrabajoESPProvider>
       <UsuarioTecnicoProvider>
         <TipoTrabajoProvider>
@@ -20,6 +22,7 @@ export default function App() {
         </TipoTrabajoProvider>
       </UsuarioTecnicoProvider>
       </TipoTrabajoESPProvider>
+      </PuertoProvider>
     </AuthProvider>
   );
 }

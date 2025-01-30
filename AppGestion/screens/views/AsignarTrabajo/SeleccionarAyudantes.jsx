@@ -13,7 +13,7 @@ import { Ionicons } from "@expo/vector-icons";
 import useUsuarioTecnico from "../../hooks/UsuarioTecnico/useUsuarioTecnico";
 
 const SeleccionarAyudantesScreen = ({ route, navigation }) => {
-  const { ayudantesSeleccionados, onSelect } = route.params;
+  const { ayudantesSeleccionados, onSelect, usuarioExcluido = [] } = route.params;
   const { usuariosTecnicos } = useUsuarioTecnico();
 
   const [busqueda, setBusqueda] = useState("");
@@ -69,6 +69,12 @@ const SeleccionarAyudantesScreen = ({ route, navigation }) => {
     </TouchableOpacity>
   );
 
+  // Filtrar usuarios excluyendo al técnico seleccionado
+  const usuariosFiltrados = usuariosTecnicos.filter((u) =>
+    !usuarioExcluido.includes(u.id) &&
+    u.nombre_completo.toLowerCase().includes(busqueda.toLowerCase())
+  );
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <Animated.View
@@ -82,9 +88,7 @@ const SeleccionarAyudantesScreen = ({ route, navigation }) => {
           onChangeText={setBusqueda}
         />
         <FlatList
-          data={usuariosTecnicos.filter((u) =>
-            u.nombre_completo.toLowerCase().includes(busqueda.toLowerCase())
-          )}
+          data={usuariosFiltrados}
           renderItem={renderItem}
           keyExtractor={(item) => item.id.toString()}
           contentContainerStyle={styles.list}

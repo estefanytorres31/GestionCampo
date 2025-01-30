@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from "react-nati
 import Input from "../../components/Input";
 import Select from "../../components/Select";
 import useUsuarioTecnico from "../../hooks/UsuarioTecnico/useUsuarioTecnico";
+import usePuerto from "../../hooks/Puerto/usePuerto";
 
 const AsignarTrabajoScreen = ({ navigation }) => {
   const [puerto, setPuerto] = useState(null);
@@ -11,31 +12,41 @@ const AsignarTrabajoScreen = ({ navigation }) => {
   const [supervisor, setSupervisor] = useState("");
   const [ayudantes, setAyudantes] = useState([]);
 
-  const { usuariosTecnicos } = useUsuarioTecnico(); // Obtener usuarios técnicos del contexto
-  const [tecnicosOptions, setTecnicosOptions] = useState([]);
+  const { usuariosTecnicos } = useUsuarioTecnico();
+  const { puertos } = usePuerto();
 
-  const puertos = [
-    { label: "Puerto 1", value: "puerto1" },
-    { label: "Puerto 2", value: "puerto2" },
-  ];
+  const [puertosOptions, setPuertosOptions] = useState([]);
 
   useEffect(() => {
-    // Convertir los usuarios técnicos en opciones para el Select
-    const options = usuariosTecnicos.map((usuario) => ({
-      label: usuario.nombre_completo,
-      value: usuario.id,
+    const options = puertos.map((puerto) => ({
+      label: puerto.nombre,
+      value: puerto.id_puerto,
     }));
-    setTecnicosOptions(options);
-  }, [usuariosTecnicos]);
+    setPuertosOptions(options);
+  }, [puertos]);
+
+  const handleSeleccionarTecnico = () => {
+    navigation.navigate("SeleccionarTecnico", {
+      tecnicoSeleccionado: tecnico,
+      onSelect: (nuevoTecnico) => setTecnico(nuevoTecnico),
+      usuariosExcluidos: ayudantes.map((a) => a.id),
+    });
+  };
 
   const handleSeleccionarAyudantes = () => {
     navigation.navigate("SeleccionarAyudantes", {
       ayudantesSeleccionados: ayudantes,
       onSelect: (nuevosAyudantes) => setAyudantes(nuevosAyudantes),
+      usuarioExcluido: tecnico ? [tecnico.id] : [],
     });
   };
 
   const handleGuardar = () => {
+    if (tecnico && ayudantes.some((a) => a.id === tecnico.id)) {
+      alert("El técnico seleccionado no puede estar en la lista de ayudantes.");
+      return;
+    }
+
     console.log("Puerto:", puerto);
     console.log("Técnico:", tecnico);
     console.log("Motorista:", motorista);
@@ -52,7 +63,7 @@ const AsignarTrabajoScreen = ({ navigation }) => {
         <Text style={styles.label}>Puerto:</Text>
         <Select
           placeholder="Seleccione un puerto"
-          items={puertos}
+          items={puertosOptions}
           value={puerto}
           onValueChange={setPuerto}
         />
@@ -60,12 +71,11 @@ const AsignarTrabajoScreen = ({ navigation }) => {
 
       <View style={styles.field}>
         <Text style={styles.label}>Técnico:</Text>
-        <Select
-          placeholder="Seleccione un técnico"
-          items={tecnicosOptions}
-          value={tecnico}
-          onValueChange={setTecnico}
-        />
+        <TouchableOpacity style={styles.button} onPress={handleSeleccionarTecnico}>
+          <Text style={styles.buttonText}>
+            {tecnico ? tecnico.nombre_completo : "Seleccionar Técnico"}
+          </Text>
+        </TouchableOpacity>
       </View>
 
       <View style={styles.field}>
@@ -82,20 +92,12 @@ const AsignarTrabajoScreen = ({ navigation }) => {
 
       <View style={styles.field}>
         <Text style={styles.label}>Motorista:</Text>
-        <Input
-          placeholder="Ingrese el nombre del motorista"
-          value={motorista}
-          onChangeText={setMotorista}
-        />
+        <Input placeholder="Ingrese el nombre del motorista" value={motorista} onChangeText={setMotorista} />
       </View>
 
       <View style={styles.field}>
         <Text style={styles.label}>Supervisor:</Text>
-        <Input
-          placeholder="Ingrese el nombre del supervisor"
-          value={supervisor}
-          onChangeText={setSupervisor}
-        />
+        <Input placeholder="Ingrese el nombre del supervisor" value={supervisor} onChangeText={setSupervisor} />
       </View>
 
       <TouchableOpacity style={styles.buttonSave} onPress={handleGuardar}>
@@ -106,50 +108,14 @@ const AsignarTrabajoScreen = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flexGrow: 1,
-    padding: 20,
-    backgroundColor: "#F5F6F8",
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 20,
-    textAlign: "center",
-  },
-  field: {
-    marginBottom: 16,
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: "500",
-    marginBottom: 8,
-    color: "#333",
-  },
-  button: {
-    backgroundColor: "#5c6bc0",
-    borderRadius: 8,
-    paddingVertical: 10,
-    alignItems: "center",
-    marginVertical: 8,
-  },
-  buttonSave: {
-    marginTop: 20,
-    backgroundColor: "#2E7D32",
-    borderRadius: 8,
-    paddingVertical: 12,
-    alignItems: "center",
-  },
-  buttonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  selectedText: {
-    fontSize: 14,
-    color: "#333",
-    marginTop: 4,
-  },
+  container: { flexGrow: 1, padding: 20, backgroundColor: "#F5F6F8" },
+  title: { fontSize: 24, fontWeight: "bold", marginBottom: 20, textAlign: "center" },
+  field: { marginBottom: 16 },
+  label: { fontSize: 16, fontWeight: "500", marginBottom: 8, color: "#333" },
+  button: { backgroundColor: "#5c6bc0", borderRadius: 8, paddingVertical: 10, alignItems: "center", marginVertical: 8 },
+  buttonSave: { marginTop: 20, backgroundColor: "#2E7D32", borderRadius: 8, paddingVertical: 12, alignItems: "center" },
+  buttonText: { color: "#fff", fontSize: 16, fontWeight: "bold" },
+  selectedText: { fontSize: 14, color: "#333", marginTop: 4 },
 });
 
 export default AsignarTrabajoScreen;
