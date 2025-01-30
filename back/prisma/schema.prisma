@@ -128,7 +128,7 @@ model Embarcacion {
   id_embarcacion          Int                      @id @default(autoincrement()) @map("id_embarcacion")
   empresa_id              Int                      @map("empresa_id")
   nombre                  String                   @map("nombre")
-  qr_code                 String                   @unique @map("qr_code")
+  qr_code                 String?                   @unique @map("qr_code")
   estado                  Boolean                  @default(true) @map("estado")
   creado_en               DateTime                 @default(now()) @map("creado_en")
   actualizado_en          DateTime                 @updatedAt @map("actualizado_en")

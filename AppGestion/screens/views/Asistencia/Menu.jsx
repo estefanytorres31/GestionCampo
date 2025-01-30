@@ -4,8 +4,6 @@ import QRCode from "react-native-qrcode-svg";
 import { useNavigation } from "@react-navigation/native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import * as Location from 'expo-location';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import apiClient from '../../API/apiClient'; // Update this path to match your project structure
 
 const Menu = ({ route }) => {
   const qrData = route?.params?.qrData || "";
@@ -16,49 +14,6 @@ const Menu = ({ route }) => {
   const [lastAttendance, setLastAttendance] = useState(null);
   const [userData, setUserData] = useState(null);
 
-  useEffect(() => {
-    const getUserData = async () => {
-      try {
-        const storedUserData = await AsyncStorage.getItem('userData');
-        if (storedUserData) {
-          setUserData(JSON.parse(storedUserData));
-        } else {
-          setError('No se encontraron datos del usuario');
-        }
-      } catch (err) {
-        console.error('Error al obtener datos del usuario:', err);
-        setError('Error al cargar datos del usuario');
-      }
-    };
-
-    getUserData();
-  }, []);
-
-  useEffect(() => {
-    const checkLastAttendance = async () => {
-      if (!userData?.id) return;
-
-      try {
-        // Using apiClient instead of axios directly
-        const response = await apiClient.get(`/asistencias/usuario/${userData.id}`);
-        if (response.data?.data?.length > 0) {
-          setLastAttendance(response.data.data[0]);
-        }
-      } catch (err) {
-        console.error('Error al verificar última asistencia:', err);
-        // Don't show error to user as this is not critical
-      }
-    };
-
-    if (userData) {
-      checkLastAttendance();
-    }
-  }, [userData]);
-
-  const determinarTipoAsistencia = () => {
-    if (!lastAttendance) return "entrada";
-    return lastAttendance.tipo === "entrada" ? "salida" : "entrada";
-  };
 
   const getLocation = async () => {
     if (!userData?.id) {
