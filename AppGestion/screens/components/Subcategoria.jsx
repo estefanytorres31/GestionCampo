@@ -6,7 +6,6 @@ const { width } = Dimensions.get("window");
 
 const SubcategoryScreen = ({ route, navigation }) => {
     const { category, subcategories, clase } = route.params;
-
     const fadeAnim = React.useRef(new Animated.Value(0)).current;
     const translateY = React.useRef(new Animated.Value(50)).current;
 
