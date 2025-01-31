@@ -22,6 +22,11 @@ const AsignarTrabajoScreen = ({route, navigation }) => {
 
   const [puertosOptions, setPuertosOptions] = useState([]);
 
+  const promises = sistemas.map(sistema => 
+      sistema.id_tipo_trabajo_embarcacion_sistema_parte
+  );
+  console.log(promises);
+
   useEffect(() => {
     const options = puertos.map((puerto) => ({
       label: puerto.nombre,
