@@ -79,7 +79,7 @@ const AsignarTrabajoScreen = ({route, navigation }) => {
           <Text style={styles.selectedText}>No hay sistemas seleccionados</Text>
         )}
       </View>
-      
+
       <View style={styles.field}>
         <Text style={styles.label}>Puerto:</Text>
         <Select
@@ -112,12 +112,12 @@ const AsignarTrabajoScreen = ({route, navigation }) => {
       </View>
 
       <View style={styles.field}>
-        <Text style={styles.label}>Motorista:</Text>
+        <Text style={styles.label}>Motorista (Opcional):</Text>
         <Input placeholder="Ingrese el nombre del motorista" value={motorista} onChangeText={setMotorista} />
       </View>
 
       <View style={styles.field}>
-        <Text style={styles.label}>Supervisor:</Text>
+        <Text style={styles.label}>Supervisor (Opcional):</Text>
         <Input placeholder="Ingrese el nombre del supervisor" value={supervisor} onChangeText={setSupervisor} />
       </View>
 
