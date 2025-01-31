@@ -134,8 +134,7 @@ export const actualizarOrdenTrabajo = async (id_orden_trabajo, data) => {
 
 /**
  * Obtener todas las órdenes de trabajo activas
- * @returns {Promise<Array>} - Lista de órdenes de trabajo activas
- * @throws {Error} - Si no hay órdenes de trabajo activas
+ * @returns {Promise<Array>} - Lista de órdenes de trabajo activas (puede estar vacía)
  */
 export const getAllOrdenesTrabajo = async () => {
   const ordenesTrabajo = await prisma.ordenTrabajo.findMany({
@@ -155,8 +154,19 @@ export const getAllOrdenesTrabajo = async () => {
       },
       orden_trabajo_sistemas: {
         include: {
-          sistema: true,
-          embarcacion_sistema: true,
+          tipo_trabajo_embarcacion_sistema_parte: {
+            include: {
+              embarcacion_sistema_parte: {
+                include: {
+                  embarcacion_sistema: {
+                    include: {
+                      sistema: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
           orden_trabajo_parte: {
             include: {
               parte: true,
@@ -167,25 +177,23 @@ export const getAllOrdenesTrabajo = async () => {
     },
   });
 
-  if (ordenesTrabajo.length === 0) {
-    throw new Error("No hay órdenes de trabajo activas.");
-  }
-
+  // ✅ Retornar la lista incluso si está vacía
   return ordenesTrabajo;
 };
 
 /**
  * Obtener una Orden de Trabajo Activa por su ID
  * @param {number} id_orden_trabajo - ID de la orden de trabajo
- * @returns {Promise<Object|null>} - Orden de trabajo si está activa, `null` si no existe o está inactiva
- * @throws {Error} - Si el ID no es válido
+ * @returns {Promise<Object>} - Orden de trabajo si está activa
+ * @throws {Error} - Si no existe o está inactiva
  */
 export const getOrdenTrabajoById = async (id_orden_trabajo) => {
   if (isNaN(id_orden_trabajo)) {
     throw new Error("El ID de la orden de trabajo debe ser un número válido.");
   }
 
-  const ordenTrabajo = await prisma.ordenTrabajo.findUnique({
+  // Utilizamos findFirst para poder filtrar por 'estado' además de 'id_orden_trabajo'
+  const ordenTrabajo = await prisma.ordenTrabajo.findFirst({
     where: {
       id_orden_trabajo: parseInt(id_orden_trabajo, 10),
       estado: {
@@ -200,8 +208,19 @@ export const getOrdenTrabajoById = async (id_orden_trabajo) => {
       },
       orden_trabajo_sistemas: {
         include: {
-          sistema: true,
-          embarcacion_sistema: true,
+          tipo_trabajo_embarcacion_sistema_parte: {
+            include: {
+              embarcacion_sistema_parte: {
+                include: {
+                  embarcacion_sistema: {
+                    include: {
+                      sistema: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
           orden_trabajo_parte: {
             include: {
               parte: true,

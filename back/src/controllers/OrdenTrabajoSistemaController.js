@@ -6,7 +6,13 @@ import * as OrdenTrabajoSistemaService from "../services/OrdenTrabajoSistemaServ
 export const createOrdenTrabajoSistema = async (req, res) => {
     try {
         const orden = await OrdenTrabajoSistemaService.createOrdenTrabajoSistema(req.body);
-        res.status(201).json({ message: "Orden de trabajo creada exitosamente.", data: orden });
+        
+        // Determinar si se creó o se reactivó
+        const mensaje = orden.creado_en.getTime() === orden.actualizado_en.getTime()
+            ? "Orden de trabajo creada exitosamente."
+            : "Orden de trabajo reactivada exitosamente.";
+
+        res.status(201).json({ message: mensaje, data: orden });
     } catch (error) {
         res.status(400).json({ message: error.message });
     }
@@ -28,8 +34,10 @@ export const getAllOrdenesTrabajoSistema = async (req, res) => {
  * Obtener una OrdenTrabajoSistema por ID
  */
 export const getOrdenTrabajoSistemaById = async (req, res) => {
+    const { id } = req.params;
+
     try {
-        const orden = await OrdenTrabajoSistemaService.getOrdenTrabajoSistemaById(req.params.id);
+        const orden = await OrdenTrabajoSistemaService.getOrdenTrabajoSistemaById(id);
         res.status(200).json({ message: "Orden de trabajo obtenida exitosamente.", data: orden });
     } catch (error) {
         res.status(404).json({ message: error.message });
@@ -40,8 +48,21 @@ export const getOrdenTrabajoSistemaById = async (req, res) => {
  * Actualizar una OrdenTrabajoSistema
  */
 export const updateOrdenTrabajoSistema = async (req, res) => {
+    const { id } = req.params;
+    const { 
+        avance, 
+        materiales, 
+        proximo_abordaje, 
+        fallas, 
+        causas, 
+        solucion, 
+        pendiente, 
+        fotos,
+        observaciones
+    } = req.body;
+
     try {
-        const orden = await OrdenTrabajoSistemaService.updateOrdenTrabajoSistema(req.params.id, req.body);
+        const orden = await OrdenTrabajoSistemaService.updateOrdenTrabajoSistema(id, req.body);
         res.status(200).json({ message: "Orden de trabajo actualizada exitosamente.", data: orden });
     } catch (error) {
         res.status(400).json({ message: error.message });
@@ -52,10 +73,16 @@ export const updateOrdenTrabajoSistema = async (req, res) => {
  * Desactivar una OrdenTrabajoSistema
  */
 export const deleteOrdenTrabajoSistema = async (req, res) => {
+    const { id } = req.params;
+
     try {
-        const orden = await OrdenTrabajoSistemaService.deleteOrdenTrabajoSistema(req.params.id);
+        const orden = await OrdenTrabajoSistemaService.deleteOrdenTrabajoSistema(id);
         res.status(200).json({ message: "Orden de trabajo desactivada exitosamente.", data: orden });
     } catch (error) {
-        res.status(400).json({ message: error.message });
+        if (error.message.includes("no existe") || error.message.includes("inactiva")) {
+            res.status(404).json({ message: error.message });
+        } else {
+            res.status(400).json({ message: error.message });
+        }
     }
 };
