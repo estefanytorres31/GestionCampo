@@ -28,7 +28,7 @@ enum TipoAsistencia {
 }
 
 enum RolEnOrden {
-  Tecnico_Principal  @map("Técnico Principal")
+  Responsable  @map("Responsable")
   Ayudante
 }
 
