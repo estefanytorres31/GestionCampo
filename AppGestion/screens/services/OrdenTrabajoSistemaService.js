@@ -2,7 +2,7 @@ import apiClient from "../API/apiClient";
 
 export const createOrdenTrabajoSistema=async(id_orden_trabajo, id_tipo_trabajo_embarcacion_sistema_parte)=>{
     try {
-        const response = await apiClient.post(`/ordentrabajosistemas`, {
+        const response = await apiClient.post(`/ordenestrabajosistema`, {
             id_orden_trabajo,
             id_tipo_trabajo_embarcacion_sistema_parte
         });
