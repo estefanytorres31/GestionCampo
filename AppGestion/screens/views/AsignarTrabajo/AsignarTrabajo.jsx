@@ -7,6 +7,7 @@ import usePuerto from "../../hooks/Puerto/usePuerto";
 import useOrdenTrabajo from "../../hooks/OrdenTrabajo/useOrdenTrabajo";
 import useOrdenTrabajoUsuario from "../../hooks/OrdenTrabajoUsuario/useOrdenTrabajoUsuario";
 import useOrdenTrabajoSistema from "../../hooks/OrdenTrabajoSistema/useOrdenTrabajoSistema";
+import { CommonActions } from '@react-navigation/native';
 
 const AsignarTrabajoScreen = ({route, navigation }) => {
   const {sistemas,empresa,embarcacion,trabajo,codigoOT }=route.params;
@@ -105,7 +106,12 @@ const AsignarTrabajoScreen = ({route, navigation }) => {
         }
   
         alert("Orden de trabajo y usuarios asociados guardados con éxito");
-        navigation.goBack();
+        navigation.dispatch(
+          CommonActions.reset({
+            index: 1,
+            routes: [ { name: 'Clientes' }],
+          })
+        );
       }
     } catch (error) {
       alert("Error al guardar la orden de trabajo: " + error);
@@ -160,10 +166,14 @@ const AsignarTrabajoScreen = ({route, navigation }) => {
         <TouchableOpacity style={styles.button} onPress={handleSeleccionarAyudantes}>
           <Text style={styles.buttonText}>Seleccionar Ayudantes</Text>
         </TouchableOpacity>
-        {ayudantes.length > 0 && (
-          <Text style={styles.selectedText}>
-            {ayudantes.length} ayudantes seleccionados
-          </Text>
+        {ayudantes.length > 0 ? (
+          ayudantes.map((ayudante, index) => (
+            <Text key={index} style={styles.selectedText}>
+              • {ayudante.nombre_completo}
+            </Text>
+          ))
+        ) : (
+          <Text style={styles.selectedText}>No hay ayudantes seleccionados</Text>
         )}
       </View>
 
