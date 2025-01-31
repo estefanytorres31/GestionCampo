@@ -23,17 +23,20 @@ const AuthProvider = ({ children }) => {
                 throw new Error('Invalid credentials');
             }
 
-            const { userId, token } = data;
+            const { roles, userId, token } = data;
 
             // Store auth data
             await AsyncStorage.setItem('token', token);
             await AsyncStorage.setItem('userId', userId.toString());
+            await AsyncStorage.setItem('roles', JSON.stringify(roles));
+
             
             try {
                 // Attempt to get user data
                 const userData = await getUserById(userId);
-                setUser(userData);
-                setRole(userData.usuario_roles);
+                setUser(userData.data);
+                setRole(roles);
+                console.log('Roles: ',roles)
                 setIsAuth(true);
             } catch (userError) {
                 console.warn('Could not fetch full user data:', userError);
@@ -42,7 +45,7 @@ const AuthProvider = ({ children }) => {
                     username: data.nombreUsuario
                 });
             }
-            setIsAuth(true);
+
             return { status, data };
 
         } catch (error) {

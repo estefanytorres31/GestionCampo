@@ -116,16 +116,6 @@ const ClientScreen = ({ navigation }) => {
                     <View style={styles.footerContainer}>
                         <TouchableOpacity 
                             style={styles.logoutButton} 
-                            onPress={handleMove}
-                            activeOpacity={0.9}
-                        >
-                            <Ionicons name="log-out-outline" size={24} color="#EB1111" style={styles.logoutIcon} />
-                            <Text style={styles.logoutText}>Escanear QR</Text>
-                        </TouchableOpacity>
-                    </View>
-                    <View style={styles.footerContainer}>
-                        <TouchableOpacity 
-                            style={styles.logoutButton} 
                             onPress={handleLogout}
                             activeOpacity={0.9}
                         >

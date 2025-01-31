@@ -34,18 +34,18 @@ const LoginScreen = () => {
   });
   const [alertVisible, setAlertVisible] = useState(false);
 
- /* const validateInputs = () => {
-    if (!credentials.username.trim() || !credentials.password.trim()) {
-      setAlertConfig({
-        type: 'INFO',
-        title: 'Campos incompletos',
-        message: 'Por favor, complete todos los campos'
-      });
-      setAlertVisible(true);
-      return false;
+  const navigateToRoleScreen = (role) => {
+    switch (role) {
+        case 'Administrador':
+            navigation.navigate('Clientes');
+            break;
+        case 'Técnico':
+            navigation.navigate('Inicio');
+            break;
+        default:
+            navigation.navigate('Login');
     }
-    return true;
-  };*/
+};
 
   const handleLogin = async () => {
     const { username, password } = credentials;
@@ -62,9 +62,24 @@ const LoginScreen = () => {
     try {
       setIsLoading(true);
       const result = await loginAccess(username, password);
+
       if (result.status === 200 && result.data?.token) {
-          navigation.navigate('Clientes');
+        const roles = result.data?.roles; 
+
+        if (roles.length === 1) {
+          navigateToRoleScreen(roles[0]);
+      } else if (roles.length > 1) {
+          navigation.navigate('Rol', { roles });
       } else {
+          setAlertConfig({
+              type: 'ERROR',
+              title: 'Acceso denegado',
+              message: 'No tienes un rol asignado. Contacta al administrador.',
+          });
+          setAlertVisible(true);
+      }
+
+  } else {
         setAlertConfig({
           type: 'ERROR',
           title: 'Inicio de sesión fallido',
