@@ -8,6 +8,7 @@ import useAsistencia from "../../hooks/Asistencia/useAsistencia";
 
 const Menu = ({ route }) => {
   const qrData = route?.params?.qrData || "";
+  const idOrden = route?.params?.idOrden || null;
   const navigation = useNavigation();
   const [location, setLocation] = useState(null);
   const [error, setError] = useState(null);
@@ -34,7 +35,7 @@ const Menu = ({ route }) => {
         tipo,
         latitud: location.coords.latitude.toString(),
         longitud: location.coords.longitude.toString(),
-        id_orden_trabajo: null // opcional, se puede agregar si es necesario
+        id_orden_trabajo: idOrden
       });
       console.log(response);
       if (response.error) {

@@ -6,7 +6,8 @@ import { Overlay } from '../../components/Overlay';
 
 const { width, height } = Dimensions.get("window");
 
-const QRScann = ({ navigation }) => {
+const QRScann = ({ route, navigation }) => {
+  const { idOrden } = route.params;
   const [cameraPermission, requestCameraPermission] = useCameraPermissions();
   const [scanning, setScanning] = useState(false);
   const [isActive, setIsActive] = useState(true);
@@ -71,7 +72,7 @@ const QRScann = ({ navigation }) => {
     if (!qrCodeLock.current && isActive) {
       qrCodeLock.current = true;
       setScanning(true);
-      navigation.navigate('Menu', { qrData: data });
+      navigation.navigate('Menu', { qrData: data, idOrden: idOrden });
     }
   };
 
