@@ -162,12 +162,18 @@ export const getTipoTrabajoESPById = async (id) => {
 };
 
 /**
- * Obtener Sistemas por Tipo de Trabajo y Embarcación (Sin Partes)
+ * 🔹 Obtener Sistemas por Tipo de Trabajo y Embarcación (Sin Partes)
  * @param {number} id_tipo_trabajo - ID del Tipo de Trabajo
  * @param {number} id_embarcacion - ID de la Embarcación
- * @returns {Promise<Array>} - Lista de Sistemas
+ * @returns {Promise<Array>} - Lista de Sistemas con su clave primaria
  */
 export const getSistemasPorTipoTrabajoEmbarcacion = async (id_tipo_trabajo, id_embarcacion) => {
+    // Validar los parámetros
+    if (isNaN(id_tipo_trabajo) || isNaN(id_embarcacion)) {
+        throw new Error("Los IDs proporcionados deben ser números válidos.");
+    }
+
+    // Buscar las relaciones TipoTrabajoEmbarcacionSistemaParte que coinciden con el tipo de trabajo y embarcación
     const relaciones = await prisma.tipoTrabajoEmbarcacionSistemaParte.findMany({
         where: {
             id_tipo_trabajo: id_tipo_trabajo,
@@ -190,13 +196,17 @@ export const getSistemasPorTipoTrabajoEmbarcacion = async (id_tipo_trabajo, id_e
         }
     });
 
-    // Extraer sistemas únicos
+    // Extraer sistemas únicos con su clave primaria
     const sistemasMap = {};
 
     relaciones.forEach(relacion => {
         const sistema = relacion.embarcacion_sistema_parte.embarcacion_sistema.sistema;
+        const id_tt_esp = relacion.id_tipo_trabajo_embarcacion_sistema_parte;
+
+        // Asegurarse de que cada sistema esté representado una sola vez
         if (!sistemasMap[sistema.id_sistema]) {
             sistemasMap[sistema.id_sistema] = {
+                id_tipo_trabajo_embarcacion_sistema_parte: id_tt_esp,
                 id_sistema: sistema.id_sistema,
                 nombre_sistema: sistema.nombre_sistema
             };
