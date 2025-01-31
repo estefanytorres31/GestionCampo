@@ -21,6 +21,7 @@ import Preventivo from "./screens/views/Formularios/Preventivo";
 
 import { TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import TrabajosAsignadosScreen from "./screens/views/AsignarTrabajo/TrabajosAsignados";
 
 const Stack = createNativeStackNavigator();
 
@@ -31,7 +32,7 @@ export default function Navigation () {
 
     return (
         <NavigationContainer >
-            <Stack.Navigator initialRouteName="Login" >
+            <Stack.Navigator initialRouteName="TrabajosAsignados" >
                 <Stack.Screen name="Login" component={LoginScreen}  options={{ headerShown: false }} />
                 <Stack.Screen name="Rol" component={Rol} options={{ headerShown: false }} />
                 <Stack.Screen name="Clientes" component={Clientes}  options={{ title: "Clientes" , headerShown:false}} />
@@ -50,6 +51,12 @@ export default function Navigation () {
                 name="SeleccionarTecnico"
                 component={SeleccionarTecnicoScreen}
                 />
+                <Stack.Screen 
+                name="TrabajosAsignados" 
+                component={TrabajosAsignadosScreen} 
+                options={{ title: "Mis Trabajos" }} 
+                />
+
                 <Stack.Screen name="Inicio" component={Inicio} options={{ headerShown: false }}/>
                 <Stack.Screen name="QRScann" component={QRScann} options={{ title: "Escaneo de QR" }} />
                 <Stack.Screen name="Menu" component={Menu} options={{ title: "Menú"}} />
