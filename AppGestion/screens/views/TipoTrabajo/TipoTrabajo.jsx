@@ -82,7 +82,7 @@ const Trabajo = ({ route, navigation }) => {
                             >
                                 <View style={styles.buttonContent}>
                                     <View style={styles.iconContainer}>
-                                        <Ionicons name="boat-outline" size={28} color="white" />
+                                        <Ionicons name="hammer" size={28} color="white" />
                                     </View>
                                     <Text style={styles.buttonText}>{trabajo.nombre_trabajo}</Text>
                                     <Ionicons name="chevron-forward" size={24} color="rgba(255,255,255,0.8)" />

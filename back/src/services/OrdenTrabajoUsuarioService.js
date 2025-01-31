@@ -4,7 +4,7 @@ import { getUTCTime } from "../utils/Time.js";
 const prisma = new PrismaClient();
 
 /**
- * Crear o reactivar un OrdenTrabajoUsuario (Responsable o Ayudante)
+ * Crear o reactivar una OrdenTrabajoUsuario (Responsable o Ayudante)
  */
 export const createOrdenTrabajoUsuario = async (data) => {
     const { id_orden_trabajo, id_usuario, rol_en_orden, observaciones } = data;
@@ -15,7 +15,25 @@ export const createOrdenTrabajoUsuario = async (data) => {
 
     const fechaActual = getUTCTime(new Date().toISOString());
 
-    // Verificar si ya existe un Responsable para esta orden de trabajo
+    // Verificar si la Orden de Trabajo existe
+    const ordenTrabajo = await prisma.ordenTrabajo.findUnique({
+        where: { id_orden_trabajo }
+    });
+
+    if (!ordenTrabajo) {
+        throw new Error(`No se encontró la Orden de Trabajo con ID ${id_orden_trabajo}.`);
+    }
+
+    // Verificar si el Usuario existe
+    const usuario = await prisma.usuario.findUnique({
+        where: { id: id_usuario }
+    });
+
+    if (!usuario) {
+        throw new Error(`No se encontró el Usuario con ID ${id_usuario}.`);
+    }
+
+    // Verificar si ya existe un Responsable en esta orden
     if (rol_en_orden === "Responsable") {
         const responsableExistente = await prisma.ordenTrabajoUsuario.findFirst({
             where: {
@@ -26,7 +44,7 @@ export const createOrdenTrabajoUsuario = async (data) => {
         });
 
         if (responsableExistente) {
-            throw new Error("Ya existe un responsable asignado para esta orden de trabajo.");
+            throw new Error("Ya existe un responsable asignado para esta Orden de Trabajo.");
         }
     }
 
@@ -92,12 +110,12 @@ export const updateOrdenTrabajoUsuario = async (id, data) => {
                 id_orden_trabajo: asignacion.id_orden_trabajo,
                 rol_en_orden: "Responsable",
                 estado: true,
-                id_orden_trabajo_usuario: { not: asignacion.id_orden_trabajo_usuario } // Excluir la asignación actual
+                id_orden_trabajo_usuario: { not: asignacion.id_orden_trabajo_usuario }
             }
         });
 
         if (responsableExistente) {
-            throw new Error("Ya existe un responsable asignado para esta orden de trabajo.");
+            throw new Error("Ya existe un responsable asignado para esta Orden de Trabajo.");
         }
     }
 
@@ -116,20 +134,30 @@ export const updateOrdenTrabajoUsuario = async (id, data) => {
 };
 
 /**
- * Obtener todas las asignaciones activas
+ * Obtener todas las asignaciones activas con filtros opcionales
  */
-export const getAllOrdenTrabajoUsuarios = async () => {
+export const getAllOrdenTrabajoUsuarios = async (filters) => {
+    const { rol_en_orden, id_orden_trabajo, id_usuario } = filters;
+
+    const whereClause = {
+        estado: true, // Solo asignaciones activas
+        ...(rol_en_orden && { rol_en_orden }), 
+        ...(id_orden_trabajo && { id_orden_trabajo: parseInt(id_orden_trabajo) }),
+        ...(id_usuario && { id_usuario: parseInt(id_usuario) })
+    };
+
     const asignaciones = await prisma.ordenTrabajoUsuario.findMany({
-        where: { estado: true },
+        where: whereClause,
         orderBy: { creado_en: "desc" }
     });
 
     if (asignaciones.length === 0) {
-        throw new Error("No hay asignaciones activas.");
+        throw new Error("No se encontraron asignaciones con los filtros aplicados.");
     }
 
     return asignaciones;
 };
+
 
 /**
  * Obtener una asignación por ID
