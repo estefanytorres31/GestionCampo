@@ -27,11 +27,11 @@ export const updateOrdenTrabajoUsuario = async (req, res) => {
 };
 
 /**
- * Obtener todas las asignaciones activas
+ * Obtener todas las asignaciones activas con filtros opcionales
  */
 export const getAllOrdenTrabajoUsuarios = async (req, res) => {
     try {
-        const asignaciones = await OrdenTrabajoUsuarioService.getAllOrdenTrabajoUsuarios();
+        const asignaciones = await OrdenTrabajoUsuarioService.getAllOrdenTrabajoUsuarios(req.query);
         res.status(200).json({ message: "Asignaciones obtenidas exitosamente.", data: asignaciones });
     } catch (error) {
         res.status(404).json({ message: error.message });
