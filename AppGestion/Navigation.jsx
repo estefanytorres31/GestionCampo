@@ -32,7 +32,7 @@ export default function Navigation () {
 
     return (
         <NavigationContainer >
-            <Stack.Navigator initialRouteName="TrabajosAsignados" >
+            <Stack.Navigator initialRouteName="Login" >
                 <Stack.Screen name="Login" component={LoginScreen}  options={{ headerShown: false }} />
                 <Stack.Screen name="Rol" component={Rol} options={{ headerShown: false }} />
                 <Stack.Screen name="Clientes" component={Clientes}  options={{ title: "Clientes" , headerShown:false}} />

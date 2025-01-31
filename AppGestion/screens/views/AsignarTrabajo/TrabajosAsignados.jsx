@@ -1,85 +1,70 @@
-import React, { useRef, useEffect } from "react";
+import React, { useEffect } from "react";
 import { 
     View, 
     Text, 
     TouchableOpacity, 
     StyleSheet, 
-    Animated, 
-    ScrollView 
+    ScrollView, 
+    ActivityIndicator 
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-
-const trabajosAsignados = [
-    { id: 1, nombre: "Revisión de motor" },
-    { id: 2, nombre: "Mantenimiento preventivo" },
-    { id: 3, nombre: "Reparación eléctrica" },
-    { id: 4, nombre: "Cambio de aceite" },
-];
+import useTrabajoAsignado from "../../hooks/TrabajoAsignado/useTrabajoAsignado";
 
 const TrabajosAsignadosScreen = ({ navigation }) => {
-    const fadeAnim = useRef(new Animated.Value(0)).current;
-    const scaleAnim = useRef(new Animated.Value(0.9)).current;
+    const { trabajos, loading, error, fetchTrabajosAsignados } = useTrabajoAsignado();
 
     useEffect(() => {
-        Animated.parallel([
-            Animated.timing(fadeAnim, {
-                toValue: 1,
-                duration: 800,
-                useNativeDriver: true,
-            }),
-            Animated.spring(scaleAnim, {
-                toValue: 1,
-                friction: 6,
-                tension: 40,
-                useNativeDriver: true,
-            }),
-        ]).start();
+        fetchTrabajosAsignados();
     }, []);
 
-    const handleTrabajoPress = (trabajo) => {
-        Animated.sequence([
-            Animated.spring(scaleAnim, {
-                toValue: 0.95,
-                friction: 3,
-                tension: 40,
-                useNativeDriver: true,
-            }),
-            Animated.spring(scaleAnim, {
-                toValue: 1,
-                friction: 3,
-                tension: 40,
-                useNativeDriver: true,
-            }),
-        ]).start();
-
-        navigation.navigate("Inicio", { trabajo });
+    const handleTrabajoPress = (idOrden) => {
+        navigation.navigate("Inicio", { idOrden });
     };
 
+    if (loading) {
+        return (
+            <View style={styles.centered}>
+                <ActivityIndicator size="large" color="#2E7D32" />
+                <Text style={styles.loadingText}>Cargando trabajos...</Text>
+            </View>
+        );
+    }
+
+    if (error) {
+        return (
+            <View style={styles.centered}>
+                <Text style={styles.errorText}>{error}</Text>
+                <TouchableOpacity style={styles.retryButton} onPress={fetchTrabajosAsignados}>
+                    <Text style={styles.retryText}>Reintentar</Text>
+                </TouchableOpacity>
+            </View>
+        );
+    }
+
     return (
-        <Animated.View style={[styles.container, { opacity: fadeAnim, transform: [{ scale: scaleAnim }] }]}>
+        <ScrollView style={styles.container}>
             <View style={styles.header}>
                 <MaterialCommunityIcons name="clipboard-list" size={40} color="#2E7D32" />
                 <Text style={styles.headerTitle}>Trabajos Asignados</Text>
+                <Text style={styles.headerSubtitle}>Seleccione un trabajo</Text>
             </View>
 
-            <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-                <View style={styles.buttonsContainer}>
-                    {trabajosAsignados.map((trabajo) => (
-                        <TouchableOpacity
-                            key={trabajo.id}
-                            style={styles.button}
-                            onPress={() => handleTrabajoPress(trabajo)}
-                        >
-                            <View style={styles.buttonContent}>
-                                <MaterialCommunityIcons name="wrench" size={32} color="#fff" />
-                                <Text style={styles.buttonText}>{trabajo.nombre}</Text>
-                                <MaterialCommunityIcons name="chevron-right" size={24} color="#ffffff80" />
-                            </View>
-                        </TouchableOpacity>
-                    ))}
-                </View>
-            </ScrollView>
-        </Animated.View>
+            <View style={styles.buttonsContainer}>
+                {trabajos.map((trabajo) => (
+                    <TouchableOpacity
+                        key={trabajo.id_orden_trabajo}
+                        style={styles.button}
+                        onPress={() => handleTrabajoPress(trabajo.id_orden_trabajo)}
+                    >
+                        <View style={styles.buttonContent}>
+                            <MaterialCommunityIcons name="wrench" size={32} color="#fff" />
+                            <Text style={styles.buttonText}>{trabajo.nombre_trabajo}</Text>
+                            <MaterialCommunityIcons name="chevron-right" size={24} color="#ffffff80" />
+                        </View>
+                    </TouchableOpacity>
+                ))}
+            </View>
+        </ScrollView>
     );
 };
 
@@ -87,46 +72,66 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: "#F5F6F8",
-        paddingHorizontal: 16,
-        paddingTop: 20,
     },
     header: {
         alignItems: "center",
-        marginBottom: 20,
+        marginVertical: 20,
     },
     headerTitle: {
         fontSize: 24,
         fontWeight: "bold",
         color: "#2E7D32",
+    },
+    headerSubtitle: {
+        fontSize: 16,
+        color: "#555",
         marginTop: 5,
     },
-    scrollView: {
-        flex: 1,
-    },
     buttonsContainer: {
-        paddingBottom: 20,
+        paddingHorizontal: 16,
     },
     button: {
         backgroundColor: "#2E7D32",
         marginVertical: 8,
-        borderRadius: 12,
-        padding: 16,
+        padding: 15,
+        borderRadius: 10,
         flexDirection: "row",
         alignItems: "center",
-        justifyContent: "space-between",
-        elevation: 4,
     },
     buttonContent: {
         flexDirection: "row",
         alignItems: "center",
         flex: 1,
+        justifyContent: "space-between",
     },
     buttonText: {
-        flex: 1,
         fontSize: 18,
         fontWeight: "600",
         color: "#fff",
-        marginLeft: 15,
+    },
+    centered: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    loadingText: {
+        fontSize: 18,
+        marginTop: 10,
+        color: "#555",
+    },
+    errorText: {
+        fontSize: 16,
+        color: "red",
+    },
+    retryButton: {
+        marginTop: 10,
+        padding: 10,
+        backgroundColor: "#2E7D32",
+        borderRadius: 5,
+    },
+    retryText: {
+        color: "#fff",
+        fontWeight: "bold",
     },
 });
 

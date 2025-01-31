@@ -10,13 +10,15 @@ import PuertoProvider from "./screens/context/Puerto/PuertoProvider.js";
 import AsistenciaProvider from "./screens/context/Asistencia/AsistenciaProvider.jsx";
 import OrdenTrabajoProvider from "./screens/context/OrdenTrabajo/OrdenTrabajoProvider.jsx";
 import OrdenTrabajoUsuarioProvider from "./screens/context/OrdenTrabajoUsuario/OrdenTrabajoUsuarioProvider.jsx";
+import TrabajoAsignadoProvider from "./screens/context/TrabajoAsignado/TrabajoAsignadoProvider.jsx";
 
 export default function App() {
   return (
     <AuthProvider>
-      <OrdenTrabajoUsuarioProvider>
-        <OrdenTrabajoProvider>
-          <AsistenciaProvider>
+      <TrabajoAsignadoProvider>
+        <OrdenTrabajoUsuarioProvider>
+          <OrdenTrabajoProvider>
+            <AsistenciaProvider>
               <PuertoProvider>
                 <TipoTrabajoESPProvider>
                   <UsuarioTecnicoProvider>
@@ -33,7 +35,7 @@ export default function App() {
             </AsistenciaProvider>
           </OrdenTrabajoProvider>
         </OrdenTrabajoUsuarioProvider>
+      </TrabajoAsignadoProvider>
     </AuthProvider>
-
   );
 }
