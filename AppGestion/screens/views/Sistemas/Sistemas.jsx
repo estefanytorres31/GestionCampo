@@ -75,14 +75,50 @@ const SistemasScreen = ({ route, navigation }) => {
         const dia = String(fecha.getDate()).padStart(2, '0');
         const mes = String(fecha.getMonth() + 1).padStart(2, '0'); // Los meses van de 0 a 11
         const año = fecha.getFullYear();
-        
-        const codigoEmpresa = empresa.nombre.slice(0, 4).toUpperCase();
-        const codigoEmbarcacion = embarcacion.nombre.slice(0, 4).toUpperCase();
-        const codigoTrabajo = `R${trabajo.nombre_trabajo.slice(0, 3).toUpperCase()}`;
     
-        const codigoOT = `${codigoEmpresa}_${codigoEmbarcacion}_${codigoTrabajo}_${dia}${mes}${año}`;
+        const horas = String(fecha.getHours()).padStart(2, '0');
+        const minutos = String(fecha.getMinutes()).padStart(2, '0');
+        const segundos = String(fecha.getSeconds()).padStart(2, '0');
+    
+        const codigoEmpresa = empresa.nombre.slice(0, 4).toUpperCase();
+    
+        // Determinar el código de la embarcación
+        let codigoEmbarcacion;
+        const regexTasa = /^Tasa\s*(\d+)/i;
+        const match = embarcacion.nombre.match(regexTasa);
+    
+        if (match) {
+            codigoEmbarcacion = `T${match[1]}`;
+        } else {
+            codigoEmbarcacion = embarcacion.nombre.slice(0, 4).toUpperCase();
+        }
+    
+        // Determinar el código del trabajo
+        let codigoTrabajo;
+        switch (trabajo.nombre_trabajo.toLowerCase()) {
+            case "mantenimiento preventivo":
+                codigoTrabajo = "RMPR";
+                break;
+            case "mantenimiento correctivo":
+                codigoTrabajo = "RMCO";
+                break;
+            case "proyecto":
+                codigoTrabajo = "RPRO";
+                break;
+            case "desmontaje/montaje":
+                codigoTrabajo = "RDESM";
+                break;
+            default:
+                codigoTrabajo = "RGEN"; 
+                break;
+        }
+    
+        // Construcción del código OT
+        const codigoOT = `${codigoEmpresa}_${codigoEmbarcacion}_${codigoTrabajo}_${dia}${mes}${año}_${horas}${minutos}${segundos}`;
         return codigoOT;
     };
+    
+    
 
 
     const handleGuardarSeleccion = () => {
