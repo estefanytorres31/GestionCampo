@@ -4,23 +4,18 @@ import { getUTCTime } from "../utils/Time.js";
 const prisma = new PrismaClient();
 
 /**
- * Asignar una Parte a un Sistema en una Embarcación
+ * Asignar una Parte a un Sistema en una Embarcación (id_parte opcional)
  */
-export const assignParteToEmbarcacionSistema = async (id_embarcacion_sistema, id_parte) => {
-    if (!id_embarcacion_sistema || !id_parte) {
-        throw { status: 400, message: "El ID de la embarcación-sistema y el ID de la parte son obligatorios." };
+export const assignParteToEmbarcacionSistema = async (id_embarcacion_sistema, id_parte = null) => {
+    if (!id_embarcacion_sistema) {
+        throw { status: 400, message: "El ID de la embarcación-sistema es obligatorio." };
     }
 
     const fechaActual = getUTCTime(new Date().toISOString());
 
-    // Verificar si la relación ya existe utilizando el índice único correcto
-    const relacionExistente = await prisma.embarcacionSistemaParte.findUnique({
-        where: {
-            emb_sis_par_unique: {  // 🔴 CORRECCIÓN: Usa el índice único correcto
-                id_embarcacion_sistema,
-                id_parte,
-            },
-        },
+    // Verificar si la relación ya existe
+    const relacionExistente = await prisma.embarcacionSistemaParte.findFirst({
+        where: { id_embarcacion_sistema, id_parte },
     });
 
     if (relacionExistente) {
@@ -49,8 +44,9 @@ export const assignParteToEmbarcacionSistema = async (id_embarcacion_sistema, id
         },
     });
 };
+
 /**
- * Obtener Todas las Partes de un Sistema en una Embarcación
+ * Obtener todas las Partes de un Sistema en una Embarcación
  */
 export const getPartesByEmbarcacionSistema = async (id_embarcacion_sistema) => {
     if (!id_embarcacion_sistema) {
@@ -89,7 +85,7 @@ export const updateEmbarcacionSistemaParte = async (id_embarcacion_sistema_parte
 };
 
 /**
- * "Eliminar" una Asociación entre Embarcación, Sistema y Parte (Desactivar)
+ * Desactivar una Asociación entre Embarcación, Sistema y Parte
  */
 export const deleteEmbarcacionSistemaParte = async (id_embarcacion_sistema_parte) => {
     if (!id_embarcacion_sistema_parte) {

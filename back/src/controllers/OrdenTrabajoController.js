@@ -1,64 +1,112 @@
 import * as OrdenTrabajoService from "../services/OrdenTrabajoService.js";
 
 /**
- * Asignar un Trabajo a una Embarcación
+ * 🔹 Asignar un Trabajo a una Embarcación (Crear o Reactivar)
  */
 export const asignarTrabajoAEmbarcacion = async (req, res) => {
-    const { id_tipo_trabajo, id_embarcacion, id_puerto, id_jefe_asigna, comentarios } = req.body;
-
-    try {
-        const ordenTrabajo = await OrdenTrabajoService.asignarTrabajoAEmbarcacion({
-            id_tipo_trabajo,
-            id_embarcacion,
-            id_puerto,
-            id_jefe_asigna,
-            comentarios,
-        });
-        res.status(201).json({ message: "Trabajo asignado a la embarcación exitosamente.", data: ordenTrabajo });
-    } catch (error) {
-        res.status(400).json({ message: error.message });
-    }
+  try {
+    const resultado = await OrdenTrabajoService.asignarTrabajoAEmbarcacion(req.body);
+    res.status(201).json({
+      message: resultado.mensaje,
+      data: resultado.ordenTrabajo,
+    });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
 };
 
 /**
- * Gestionar el Estado de la Orden de Trabajo
+ * 🔹 Actualizar una Orden de Trabajo
  */
-export const gestionarEstadoOrdenTrabajo = async (req, res) => {
-    const { id_orden_trabajo, nuevo_estado } = req.body;
+export const actualizarOrdenTrabajo = async (req, res) => {
+  const { id_orden_trabajo } = req.params;
 
-    try {
-        const ordenTrabajoActualizada = await OrdenTrabajoService.gestionarEstadoOrdenTrabajo(id_orden_trabajo, nuevo_estado);
-        res.status(200).json({ message: "Estado de la orden de trabajo actualizado exitosamente.", data: ordenTrabajoActualizada });
-    } catch (error) {
-        res.status(400).json({ message: error.message });
-    }
+  try {
+    const ordenTrabajoActualizada = await OrdenTrabajoService.actualizarOrdenTrabajo(
+      id_orden_trabajo,
+      req.body
+    );
+
+    res.status(200).json({
+      message: "Orden de trabajo actualizada exitosamente.",
+      data: ordenTrabajoActualizada,
+    });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
 };
 
 /**
- * Actualizar el Estado de la Orden de Trabajo
+ * Obtener todas las órdenes de trabajo activas
  */
-export const actualizarEstadoOrdenTrabajo = async (req, res) => {
-    const { id_orden_trabajo } = req.params;
-    const { nuevo_estado } = req.body;
-
-    try {
-        const ordenTrabajoActualizada = await OrdenTrabajoService.actualizarEstadoOrdenTrabajo(id_orden_trabajo, nuevo_estado);
-        res.status(200).json({ message: "Estado de la orden de trabajo actualizado exitosamente.", data: ordenTrabajoActualizada });
-    } catch (error) {
-        res.status(400).json({ message: error.message });
+export const getAllOrdenesTrabajo = async (req, res) => {
+  try {
+    const ordenesTrabajo = await OrdenTrabajoService.getAllOrdenesTrabajo();
+    
+    if (ordenesTrabajo.length === 0) {
+      return res.status(200).json({
+        message: "No se encontraron registros de órdenes de trabajo disponibles.",
+        data: [],
+      });
     }
+
+    res.status(200).json({
+      message: "Órdenes de trabajo obtenidas exitosamente.",
+      data: ordenesTrabajo,
+    });
+  } catch (error) {
+    // Aunque ahora el servicio no lanza un error por lista vacía,
+    // se mantiene el manejo de otros posibles errores
+    res.status(500).json({
+      message: "Error al obtener las órdenes de trabajo.",
+      error: error.message,
+    });
+  }
 };
 
 /**
- * Asignar múltiples Ordenes de Trabajo a una Embarcación
+ * Obtener una Orden de Trabajo Activa por su ID
  */
-export const asignarMultipleOrdenesTrabajoAEmbarcacion = async (req, res) => {
-    const { ordenes } = req.body;
+export const getOrdenTrabajoById = async (req, res) => {
+  const { id_orden_trabajo } = req.params;
 
-    try {
-        const ordenesTrabajo = await OrdenTrabajoService.asignarMultipleOrdenesTrabajoAEmbarcacion(ordenes);
-        res.status(201).json({ message: "Múltiples órdenes de trabajo asignadas exitosamente.", data: ordenesTrabajo });
-    } catch (error) {
-        res.status(400).json({ message: error.message });
+  try {
+    const ordenTrabajo = await OrdenTrabajoService.getOrdenTrabajoById(
+      id_orden_trabajo
+    );
+    res.status(200).json({
+      message: "Orden de trabajo obtenida exitosamente.",
+      data: ordenTrabajo,
+    });
+  } catch (error) {
+    if (
+      error.message.includes("no existe") ||
+      error.message.includes("inactiva")
+    ) {
+      return res.status(404).json({ message: error.message });
     }
+    res.status(500).json({
+      message: "Error al obtener la orden de trabajo.",
+      error: error.message,
+    });
+  }
+};
+
+/**
+ * 🔹 Desactivar (Inactivar) una Orden de Trabajo
+ */
+export const desactivarOrdenTrabajo = async (req, res) => {
+  const { id_orden_trabajo } = req.params;
+
+  try {
+    const ordenTrabajoDesactivada =
+      await OrdenTrabajoService.desactivarOrdenTrabajo(id_orden_trabajo);
+
+    res.status(200).json({
+      message: "Orden de trabajo desactivada exitosamente.",
+      data: ordenTrabajoDesactivada,
+    });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
 };

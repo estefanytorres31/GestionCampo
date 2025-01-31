@@ -4,6 +4,7 @@ import * as AsistenciaService from "../services/AsistenciaService.js";
  * Crear una Asistencia (Entrada o Salida)
  */
 export const crearAsistencia = async (req, res) => {
+    
     const {
         id_usuario,
         id_embarcacion,
@@ -11,7 +12,6 @@ export const crearAsistencia = async (req, res) => {
         latitud,
         longitud,
         id_orden_trabajo,
-        id_puerto,
     } = req.body;
 
     try {
@@ -22,7 +22,6 @@ export const crearAsistencia = async (req, res) => {
             latitud,
             longitud,
             id_orden_trabajo,
-            id_puerto,
         });
         res.status(201).json({ message: "Asistencia registrada exitosamente.", data: asistencia });
     } catch (error) {

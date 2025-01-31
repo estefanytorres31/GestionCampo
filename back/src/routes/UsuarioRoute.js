@@ -8,12 +8,12 @@ import {
     getAllUsers
 } from "../controllers/UsuarioController.js";
 import { Router } from "express";
-import {verificarAuth } from "../middleware/verificarAuth.js"
+import {verificarAuth, isAdmin } from "../middleware/verificarAuth.js"
 
 const usuarioRouter = Router();
 
 usuarioRouter.get('/', verificarAuth, getFilteredUsers);
-usuarioRouter.get('/all', verificarAuth, getAllUsers);
+usuarioRouter.get('/all', verificarAuth, isAdmin, getAllUsers);
 usuarioRouter.get('/nombre/:nombre_usuario', getUserByUsername);
 usuarioRouter.post('/', createUsuario);
 usuarioRouter.get('/:id', getUserById);

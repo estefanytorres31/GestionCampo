@@ -12,7 +12,7 @@ cloudinary.config({
   export async function uploadQR(filePath, nombre) {
     try {
         return await cloudinary.uploader.upload(filePath, {
-            folder: 'embarcaciones',
+            folder: 'qr_embarcaciones',
             public_id: `${nombre}_QR`,
             transformation: [
                 { quality: 'auto:best' },

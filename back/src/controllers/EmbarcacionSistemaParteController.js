@@ -1,13 +1,13 @@
 import * as EmbarcacionSistemaParteService from "../services/EmbarcacionSistemaParteService.js";
 
 /**
- * Asignar una Parte a un Sistema en una Embarcación
+ * Asignar una Parte a un Sistema en una Embarcación (id_parte opcional)
  */
 export const assignParteToEmbarcacionSistema = async (req, res) => {
     const { id_embarcacion_sistema, id_parte } = req.body;
 
     try {
-        const relacion = await EmbarcacionSistemaParteService.assignParteToEmbarcacionSistema(id_embarcacion_sistema, id_parte);
+        const relacion = await EmbarcacionSistemaParteService.assignParteToEmbarcacionSistema(id_embarcacion_sistema, id_parte || null);
 
         const mensaje = relacion.creado_en.getTime() === relacion.actualizado_en.getTime()
             ? "Parte asignada exitosamente."
@@ -62,32 +62,6 @@ export const deleteEmbarcacionSistemaParte = async (req, res) => {
     try {
         const embarcacionSistemaParte = await EmbarcacionSistemaParteService.deleteEmbarcacionSistemaParte(parseInt(id_embarcacion_sistema_parte, 10));
         res.status(200).json({ message: "Asociación desactivada exitosamente.", data: embarcacionSistemaParte });
-    } catch (error) {
-        res.status(error.status || 500).json({ message: error.message });
-    }
-};
-
-/**
- * Reactivar una Asociación previamente desactivada
- */
-export const reactivateEmbarcacionSistemaParte = async (req, res) => {
-    const { id_embarcacion_sistema, id_parte } = req.body;
-
-    try {
-        const relacion = await EmbarcacionSistemaParteService.reactivateEmbarcacionSistemaParte(id_embarcacion_sistema, id_parte);
-        res.status(200).json({ message: "Asociación reactivada exitosamente.", data: relacion });
-    } catch (error) {
-        res.status(error.status || 500).json({ message: error.message });
-    }
-};
-
-/**
- * Obtener todas las embarcaciones con sus sistemas y partes activas
- */
-export const getAllEmbarcacionesWithSistemasAndPartes = async (req, res) => {
-    try {
-        const embarcaciones = await EmbarcacionSistemaParteService.getAllEmbarcacionesWithSistemasAndPartes();
-        res.status(200).json({ message: "Embarcaciones y sus sistemas obtenidos exitosamente.", data: embarcaciones });
     } catch (error) {
         res.status(error.status || 500).json({ message: error.message });
     }

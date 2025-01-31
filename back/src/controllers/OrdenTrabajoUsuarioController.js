@@ -1,46 +1,49 @@
 import * as OrdenTrabajoUsuarioService from "../services/OrdenTrabajoUsuarioService.js";
 
 /**
- * Asignar un Usuario a una Orden de Trabajo
+ * Crear una asignación de usuario en Orden de Trabajo
  */
-export const assignUserToOrdenTrabajo = async (req, res) => {
-    const { id_orden_trabajo, id_usuario, rol_en_orden, observaciones } = req.body;
-
+export const createOrdenTrabajoUsuario = async (req, res) => {
     try {
-        const asignacion = await OrdenTrabajoUsuarioService.assignUserToOrdenTrabajo({
-            id_orden_trabajo,
-            id_usuario,
-            rol_en_orden,
-            observaciones,
-        });
-        res.status(201).json({ message: "Usuario asignado a la orden de trabajo exitosamente.", data: asignacion });
+        const asignacion = await OrdenTrabajoUsuarioService.createOrdenTrabajoUsuario(req.body);
+
+        const mensaje = asignacion.creado_en.getTime() === asignacion.actualizado_en.getTime()
+            ? "Asignación creada exitosamente."
+            : "Asignación reactivada exitosamente.";
+
+        res.status(201).json({ message: mensaje, data: asignacion });
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+};
+
+export const updateOrdenTrabajoUsuario = async (req, res) => {
+    try {
+        const asignacion = await OrdenTrabajoUsuarioService.updateOrdenTrabajoUsuario(req.params.id, req.body);
+        res.status(200).json({ message: "Asignación actualizada exitosamente.", data: asignacion });
     } catch (error) {
         res.status(400).json({ message: error.message });
     }
 };
 
 /**
- * Obtener todos los Usuarios asignados a una Orden de Trabajo
+ * Obtener todas las asignaciones activas
  */
-export const getUsuariosByOrdenTrabajo = async (req, res) => {
-    const { id_orden_trabajo } = req.params;
-
+export const getAllOrdenTrabajoUsuarios = async (req, res) => {
     try {
-        const usuariosAsignados = await OrdenTrabajoUsuarioService.getUsuariosByOrdenTrabajo(id_orden_trabajo);
-        res.status(200).json({ message: "Usuarios asignados obtenidos exitosamente.", data: usuariosAsignados });
+        const asignaciones = await OrdenTrabajoUsuarioService.getAllOrdenTrabajoUsuarios();
+        res.status(200).json({ message: "Asignaciones obtenidas exitosamente.", data: asignaciones });
     } catch (error) {
         res.status(404).json({ message: error.message });
     }
 };
 
 /**
- * Obtener una Asignación por su ID
+ * Obtener una asignación por ID
  */
-export const getAsignacionById = async (req, res) => {
-    const { id_orden_trabajo_usuario } = req.params;
-
+export const getOrdenTrabajoUsuarioById = async (req, res) => {
     try {
-        const asignacion = await OrdenTrabajoUsuarioService.getAsignacionById(id_orden_trabajo_usuario);
+        const asignacion = await OrdenTrabajoUsuarioService.getOrdenTrabajoUsuarioById(req.params.id);
         res.status(200).json({ message: "Asignación obtenida exitosamente.", data: asignacion });
     } catch (error) {
         res.status(404).json({ message: error.message });
@@ -48,71 +51,12 @@ export const getAsignacionById = async (req, res) => {
 };
 
 /**
- * Actualizar una Asignación
+ * Desactivar una asignación
  */
-export const updateAsignacion = async (req, res) => {
-    const { id_orden_trabajo_usuario } = req.params;
-    const { rol_en_orden, observaciones } = req.body;
-
+export const deleteOrdenTrabajoUsuario = async (req, res) => {
     try {
-        const asignacionActualizada = await OrdenTrabajoUsuarioService.updateAsignacion(id_orden_trabajo_usuario, { rol_en_orden, observaciones });
-        res.status(200).json({ message: "Asignación actualizada exitosamente.", data: asignacionActualizada });
-    } catch (error) {
-        res.status(400).json({ message: error.message });
-    }
-};
-
-/**
- * Eliminar una Asignación
- */
-export const removeAsignacion = async (req, res) => {
-    const { id_orden_trabajo_usuario } = req.params;
-
-    try {
-        const asignacionEliminada = await OrdenTrabajoUsuarioService.removeAsignacion(id_orden_trabajo_usuario);
-        res.status(200).json({ message: "Asignación eliminada exitosamente.", data: asignacionEliminada });
-    } catch (error) {
-        res.status(400).json({ message: error.message });
-    }
-};
-
-/**
- * Reasignar una Orden de Trabajo a Otros Usuarios
- */
-export const reasignarOrdenTrabajo = async (req, res) => {
-    const { id_orden_trabajo, nuevos_usuarios } = req.body;
-
-    try {
-        const resultados = await OrdenTrabajoUsuarioService.reasignarOrdenTrabajo(id_orden_trabajo, nuevos_usuarios);
-        res.status(200).json({ message: "Orden de trabajo reasignada exitosamente.", data: resultados });
-    } catch (error) {
-        res.status(400).json({ message: error.message });
-    }
-};
-
-/**
- * Generar Reportes de Órdenes de Trabajo
- */
-export const generarReporteOrdenesTrabajo = async (req, res) => {
-    const filtros = req.query; // Obtener filtros desde query params
-
-    try {
-        const reportes = await OrdenTrabajoUsuarioService.generarReporteOrdenesTrabajo(filtros);
-        res.status(200).json({ message: "Reporte generado exitosamente.", data: reportes });
-    } catch (error) {
-        res.status(400).json({ message: error.message });
-    }
-};
-
-/**
- * Generar Informes de Productividad por Usuario Técnico
- */
-export const generarInformeProductividad = async (req, res) => {
-    const filtros = req.query; // Obtener filtros desde query params
-
-    try {
-        const informe = await OrdenTrabajoUsuarioService.generarInformeProductividad(filtros);
-        res.status(200).json({ message: "Informe de productividad generado exitosamente.", data: informe });
+        const asignacion = await OrdenTrabajoUsuarioService.deleteOrdenTrabajoUsuario(req.params.id);
+        res.status(200).json({ message: "Asignación desactivada exitosamente.", data: asignacion });
     } catch (error) {
         res.status(400).json({ message: error.message });
     }

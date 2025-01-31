@@ -12,7 +12,6 @@ const prisma = new PrismaClient();
  * @param {Decimal} [params.latitud]
  * @param {Decimal} [params.longitud]
  * @param {number} [params.id_orden_trabajo]
- * @param {number} [params.id_puerto]
  * @returns {Promise<Object>} Asistencia creada
  */
 export const crearAsistencia = async ({
@@ -22,7 +21,6 @@ export const crearAsistencia = async ({
     latitud,
     longitud,
     id_orden_trabajo,
-    id_puerto,
 }) => {
     const fechaActual = getUTCTime(new Date().toISOString());
 
@@ -37,7 +35,7 @@ export const crearAsistencia = async ({
 
     // Verificar que el Usuario exista y esté activo
     const usuario = await prisma.usuario.findUnique({
-        where: { id: id_usuario },
+        where: { id: parseInt(id_usuario) },
     });
 
     if (!usuario || !usuario.estado) {
@@ -46,7 +44,7 @@ export const crearAsistencia = async ({
 
     // Verificar que la Embarcación exista y esté activa
     const embarcacion = await prisma.embarcacion.findUnique({
-        where: { id_embarcacion: id_embarcacion },
+        where: { id_embarcacion: parseInt(id_embarcacion)},
     });
 
     if (!embarcacion || !embarcacion.estado) {
@@ -56,7 +54,7 @@ export const crearAsistencia = async ({
     // Opcional: Verificar que la Orden de Trabajo exista si se proporciona
     if (id_orden_trabajo) {
         const ordenTrabajo = await prisma.ordenTrabajo.findUnique({
-            where: { id_orden_trabajo: id_orden_trabajo },
+            where: { id_orden_trabajo: parseInt(id_orden_trabajo) },
         });
 
         if (!ordenTrabajo) {
@@ -64,16 +62,6 @@ export const crearAsistencia = async ({
         }
     }
 
-    // Opcional: Verificar que el Puerto exista si se proporciona
-    if (id_puerto) {
-        const puerto = await prisma.puerto.findUnique({
-            where: { id_puerto: id_puerto },
-        });
-
-        if (!puerto || !puerto.estado) {
-            throw new Error(`El puerto con ID ${id_puerto} no existe o está inactivo.`);
-        }
-    }
 
     // 🔹 **Nueva Validación: Asegurar la Consistencia entre Entrada y Salida**
     if (tipo === "salida") {
@@ -97,8 +85,8 @@ export const crearAsistencia = async ({
         // Opcional: Verificar si ya existe una salida después de la última entrada
         const asistenciaConSalida = await prisma.asistencia.findFirst({
             where: {
-                id_usuario: id_usuario,
-                id_embarcacion: id_embarcacion,
+                id_usuario: parseInt(id_usuario),
+                id_embarcacion: parseInt(id_embarcacion),
                 tipo: "salida",
                 fecha_hora: {
                     gt: ultimaAsistencia.fecha_hora,
@@ -121,10 +109,8 @@ export const crearAsistencia = async ({
             latitud,
             longitud,
             id_orden_trabajo,
-            id_puerto,
             fecha_hora: fechaActual,
-            creado_en: fechaActual,
-            actualizado_en: fechaActual,
+            creado_en: fechaActual
         },
     });
 
@@ -146,7 +132,6 @@ export const obtenerAsistenciasPorUsuario = async (id_usuario) => {
         include: {
             embarcacion: true,
             orden_trabajo: true,
-            puerto: true,
             usuario: true,
         },
         orderBy: { fecha_hora: "desc" },
@@ -170,7 +155,6 @@ export const obtenerAsistenciasPorEmbarcacion = async (id_embarcacion) => {
         include: {
             embarcacion: true,
             orden_trabajo: true,
-            puerto: true,
             usuario: true,
         },
         orderBy: { fecha_hora: "desc" },

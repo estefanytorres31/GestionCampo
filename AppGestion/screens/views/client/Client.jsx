@@ -29,6 +29,10 @@ const ClientScreen = ({ navigation }) => {
         logout();
         navigation.navigate('Login');
     };
+
+    const handleMove = () => {
+        navigation.navigate('QRScann');
+    }
     
     useEffect(() => {
         Animated.parallel([

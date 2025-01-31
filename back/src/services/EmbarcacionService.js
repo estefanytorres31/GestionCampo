@@ -40,8 +40,21 @@ export const createEmbarcacion = async (nombre, empresa_id) => {
     const tempDir = path.join(process.cwd(), 'temp');
     await fs.ensureDir(tempDir);
 
-    // Generar QR
-    const qrData = `Embarcación: ${nombre} | Empresa: ${empresa.nombre}`;
+    const embarcacion = await prisma.embarcacion.create({
+      data: {
+        nombre,
+        empresa_id,
+        creado_en: fecha_creacion,
+        actualizado_en: fecha_creacion,
+      },
+    });
+
+    const qrData = JSON.stringify({
+      id: embarcacion.id_embarcacion,
+      nombre: embarcacion.nombre,
+      empresa: empresa.nombre
+    });
+    
     const qrPath = path.join(tempDir, `${nombre}_qr_temp.png`);
     await QRCode.toFile(qrPath, qrData, {
       width: 400,
@@ -76,13 +89,10 @@ export const createEmbarcacion = async (nombre, empresa_id) => {
     const cloudinaryResult = await uploadQR(finalImagePath, nombre);
 
     // Crear la embarcación en la base de datos
-    const embarcacion = await prisma.embarcacion.create({
+    const embarcacionActualizada = await prisma.embarcacion.update({
+      where: { id_embarcacion: embarcacion.id_embarcacion },
       data: {
-        nombre,
         qr_code: cloudinaryResult.secure_url,
-        empresa_id,
-        creado_en: fecha_creacion,
-        actualizado_en: fecha_creacion,
       },
     });
 
@@ -90,7 +100,8 @@ export const createEmbarcacion = async (nombre, empresa_id) => {
     await fs.remove(qrPath);
     await fs.remove(finalImagePath);
 
-    return embarcacion;
+    
+    return embarcacionActualizada;
   } catch (error) {
     console.error('Error en createEmbarcacion:', error);
     throw new Error("Error al crear la embarcación: " + error.message);

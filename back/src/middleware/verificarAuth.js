@@ -50,7 +50,7 @@ export const verificarAuth = async (req, res, next) => {
 
 
 /**
- * Middleware para verificar que el usuario autenticado sea un administrador.
+ * Middleware para verificar que el usuario autenticado tenga el rol de administrador.
  *
  * @param {Object} req - El objeto de solicitud HTTP.
  * @param {Object} res - El objeto de respuesta HTTP.
@@ -65,22 +65,31 @@ export const verificarAuth = async (req, res, next) => {
  */
 export const isAdmin = async (req, res, next) => {
     try {
-        const usuario = await prisma.usuario.findUnique({
+        // Buscar los roles del usuario autenticado
+        const roles = await prisma.usuarioRol.findMany({
             where: {
-                id: req.usuario.id,
-            }
-        })
-    
-        if(usuario && usuario.rol === "Admin") {
-            next()
-        } else {
-            return res.status(403).json({message: "Requiere rol de Administrador"})
+                usuario_id: req.usuario.id,
+                estado: true, // Solo roles activos
+            },
+            include: {
+                rol: true, // Incluir el rol asociado
+            },
+        });
+
+        // Comprobar si el usuario tiene el rol de "Administrador"
+        const esAdmin = roles.some(rol => rol.rol.nombre_rol === "Administrador");
+
+        if (esAdmin) {
+            return next(); // Continúa con el siguiente middleware
         }
-        } catch (error) {
+
+        return res.status(403).json({ message: "Requiere rol de Administrador" });
+    } catch (error) {
         console.error("Error en middleware", error);
         return res.status(500).json({ message: "Error en el servidor" });
     }
-}
+};
+
 
 
 /**
