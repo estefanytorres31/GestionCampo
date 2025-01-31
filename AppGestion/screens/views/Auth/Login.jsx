@@ -39,6 +39,9 @@ const LoginScreen = () => {
         case 'Administrador':
             navigation.navigate('Clientes');
             break;
+        case 'Jefe':
+            navigation.navigate('Clientes');
+            break;
         case 'Técnico':
             navigation.navigate('Inicio');
             break;

@@ -64,6 +64,10 @@ const AsignarTrabajoScreen = ({route, navigation }) => {
         <Text style={styles.selectedText}>{codigoOT}</Text>
       </View>
       <View style={styles.field}>
+        <Text style={styles.label}>Trabajo:</Text>
+        <Text style={styles.selectedText}>{trabajo.nombre_trabajo}</Text>
+      </View>
+      <View style={styles.field}>
         <Text style={styles.label}>Sistemas:</Text>
         {sistemas.length > 0 ? (
           sistemas.map((sistema, index) => (
@@ -75,8 +79,7 @@ const AsignarTrabajoScreen = ({route, navigation }) => {
           <Text style={styles.selectedText}>No hay sistemas seleccionados</Text>
         )}
       </View>
-
-
+      
       <View style={styles.field}>
         <Text style={styles.label}>Puerto:</Text>
         <Select
