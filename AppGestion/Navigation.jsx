@@ -15,6 +15,9 @@ import SistemasScreen from "./screens/views/Sistemas/Sistemas";
 import Menu from "./screens/views/Asistencia/Menu";
 import SeleccionarTecnicoScreen from "./screens/views/AsignarTrabajo/SeleccionarTecnico";
 import AuthContext from "./screens/context/Auth/AuthContext";
+import Mantto from "./screens/views/Checklist/Mantto";
+import Montaje from "./screens/views/Checklist/Montaje";
+import Preventivo from "./screens/views/Formularios/Preventivo";
 
 import { TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
@@ -50,7 +53,9 @@ export default function Navigation () {
                 <Stack.Screen name="Inicio" component={Inicio} options={{ headerShown: false }}/>
                 <Stack.Screen name="QRScann" component={QRScann} options={{ title: "Escaneo de QR" }} />
                 <Stack.Screen name="Menu" component={Menu} options={{ title: "Menú"}} />
-
+                <Stack.Screen name="Mantto" component={Mantto} options={{ title: "Mantto Preventivo" }} />
+                <Stack.Screen name="Montaje" component={Montaje} options={{ title: "Desmontaje / Montaje" }} />
+                <Stack.Screen name="Preventivo" component={Preventivo} options={{ title: "Formulario Preventivo" }} />
             </Stack.Navigator>
         </NavigationContainer>
     );
