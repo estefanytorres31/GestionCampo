@@ -8,24 +8,32 @@ import TipoTrabajoESPProvider from "./screens/context/TipoTrabajoESP/TipoTrabajo
 import UsuarioTecnicoProvider from "./screens/context/UsuarioTecnico/UsuarioTecnicoProvider.jsx";
 import PuertoProvider from "./screens/context/Puerto/PuertoProvider.js";
 import AsistenciaProvider from "./screens/context/Asistencia/AsistenciaProvider.jsx";
+import OrdenTrabajoProvider from "./screens/context/OrdenTrabajo/OrdenTrabajoProvider.jsx";
+import OrdenTrabajoUsuarioProvider from "./screens/context/OrdenTrabajoUsuario/OrdenTrabajoUsuarioProvider.jsx";
+
 export default function App() {
   return (
     <AuthProvider>
-    <AsistenciaProvider>
-      <PuertoProvider>
-      <TipoTrabajoESPProvider>
-      <UsuarioTecnicoProvider>
-        <TipoTrabajoProvider>
-          <EmbarcacionProvider>
-            <EmpresaProvider>
-              <Navigation />
-            </EmpresaProvider>
-          </EmbarcacionProvider>
-        </TipoTrabajoProvider>
-      </UsuarioTecnicoProvider>
-      </TipoTrabajoESPProvider>
-      </PuertoProvider>
-      </AsistenciaProvider>
+      <OrdenTrabajoUsuarioProvider>
+        <OrdenTrabajoProvider>
+          <AsistenciaProvider>
+              <PuertoProvider>
+                <TipoTrabajoESPProvider>
+                  <UsuarioTecnicoProvider>
+                    <TipoTrabajoProvider>
+                      <EmbarcacionProvider>
+                        <EmpresaProvider>
+                          <Navigation />
+                        </EmpresaProvider>
+                      </EmbarcacionProvider>
+                    </TipoTrabajoProvider>
+                  </UsuarioTecnicoProvider>
+                </TipoTrabajoESPProvider>
+              </PuertoProvider>
+            </AsistenciaProvider>
+          </OrdenTrabajoProvider>
+        </OrdenTrabajoUsuarioProvider>
     </AuthProvider>
+
   );
 }

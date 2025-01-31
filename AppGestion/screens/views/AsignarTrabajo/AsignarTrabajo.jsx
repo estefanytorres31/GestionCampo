@@ -4,6 +4,8 @@ import Input from "../../components/Input";
 import Select from "../../components/Select";
 import useUsuarioTecnico from "../../hooks/UsuarioTecnico/useUsuarioTecnico";
 import usePuerto from "../../hooks/Puerto/usePuerto";
+import useOrdenTrabajo from "../../hooks/OrdenTrabajo/useOrdenTrabajo";
+import useOrdenTrabajoUsuario from "../../hooks/OrdenTrabajoUsuario/useOrdenTrabajoUsuario";
 
 const AsignarTrabajoScreen = ({route, navigation }) => {
   const {sistemas,empresa,embarcacion,trabajo,codigoOT }=route.params;
@@ -15,8 +17,15 @@ const AsignarTrabajoScreen = ({route, navigation }) => {
 
   const { usuariosTecnicos } = useUsuarioTecnico();
   const { puertos } = usePuerto();
+  const { guardarOrdenTrabajo, loading, error } = useOrdenTrabajo(); 
+  const { guardarOrdenTrabajoUsuario } = useOrdenTrabajoUsuario();
 
   const [puertosOptions, setPuertosOptions] = useState([]);
+
+  const promises = sistemas.map(sistema => 
+      sistema.id_tipo_trabajo_embarcacion_sistema_parte
+  );
+  console.log(promises);
 
   useEffect(() => {
     const options = puertos.map((puerto) => ({
@@ -42,18 +51,48 @@ const AsignarTrabajoScreen = ({route, navigation }) => {
     });
   };
 
-  const handleGuardar = () => {
-    if (tecnico && ayudantes.some((a) => a.id === tecnico.id)) {
-      alert("El técnico seleccionado no puede estar en la lista de ayudantes.");
+  const handleGuardar = async () => {
+    if (!tecnico || !puerto) {
+      alert("Debe seleccionar un técnico y un puerto.");
       return;
     }
+    
+    try {
+      const response = await guardarOrdenTrabajo(
+        trabajo.id_tipo_trabajo,
+        embarcacion.id_embarcacion,
+        puerto,
+        codigoOT,
+        motorista || null,
+        supervisor || null
+      );
 
-    console.log("Puerto:", puerto);
-    console.log("Técnico:", tecnico);
-    console.log("Motorista:", motorista);
-    console.log("Supervisor:", supervisor);
-    console.log("Ayudantes:", ayudantes);
-    alert("Formulario guardado correctamente.");
+      console.log({
+        trabajoId: trabajo.id_tipo_trabajo,
+        embarcacionId: embarcacion.id_embarcacion,
+        puerto,
+        codigoOT,
+        motorista: motorista || null,
+        supervisor: supervisor || null
+      });
+
+      if (response) {
+        console.log(response.id_orden_trabajo)
+        console.log(tecnico.id)
+        console.log(ayudantes.map((a) => a.id))
+        await guardarOrdenTrabajoUsuario(response.id_orden_trabajo, tecnico.id, "Responsable");
+
+        // Luego guardamos los ayudantes con rol de ayudante
+        for (let ayudante of ayudantes) {
+          await guardarOrdenTrabajoUsuario(response.id_orden_trabajo, ayudante.id, "Ayudante");
+        }
+  
+        alert("Orden de trabajo y usuarios asociados guardados con éxito");
+        navigation.goBack();
+      }
+    } catch (error) {
+      alert("Error al guardar la orden de trabajo: " + error);
+    }
   };
 
   return (
