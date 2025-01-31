@@ -36,7 +36,7 @@ const SideBar = () => {
       {
         open: {
           x: 0,
-          width: "16rem",
+          width: "14rem",
           transition: {
             damping: 40,
           },
@@ -126,8 +126,9 @@ const SideBar = () => {
           </div>
         </div>
         {/* menu */}
+        {/* el 78% es para aumentar la altura del menú */}
         <nav className="flex flex-col h-full">
-          <ul className="whitespace-pre pl-2.5 text-[0.9rem] py-5 flex flex-col gap-0 overflow-x-hidden scrollbar-thin scrollbar-track-white scrollbar-thumb-slate-100 md:h-[68%] h-[70%]">
+          <ul className="whitespace-pre pl-2.5 text-[0.9rem] py-5 flex flex-col gap-0 overflow-x-hidden scrollbar-thin scrollbar-track-black scrollbar-thumb-slate-100 md:h-[78%] h-[70%]"> 
             {link.map(({ to, icon, label }) => (
               <li key={to}>
                 <NavLink
@@ -144,7 +145,7 @@ const SideBar = () => {
           </ul>
           {/* footer */}
           <div className="flex-1 text-sm z-50 max-h-48 my-auto whitespace-pre w-full font-medium">
-            <span onClick={logout} className="flex items-center justify-between-border border-y border-slate-300 p-4">
+            <span onClick={logout} className="flex items-center justify-between-border border-y border-slate-300 p-4 cursor-pointer duration-300">
                 <span className="flex rounded-md gap-6 items-center md:cursor-pointer cursor-default duration-300 font-medium text-blue-900 pl-2 text-sm-medium">
                   <span className="flex gap-6">
                     <img src={apagar} alt="A" className="min-w-max" />
