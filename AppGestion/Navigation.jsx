@@ -9,7 +9,8 @@ import Trabajo from "./screens/views/TipoTrabajo/TipoTrabajo";
 import QRScann from "./screens/views/Scan/QRscan";
 import Menu from "./screens/views/Asistencia/Menu";
 import Mantto from "./screens/views/Checklist/Mantto";
-import Preventivo from "./screens/views/Formulario/Preventivo";
+import Montaje from "./screens/views/Checklist/Montaje";
+import Preventivo from "./screens/views/Formularios/Preventivo";
 
 import { TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
@@ -19,7 +20,7 @@ const Stack = createNativeStackNavigator();
 export default function Navigation () {
     return (
         <NavigationContainer >
-            <Stack.Navigator initialRouteName="Preventivo" >
+            <Stack.Navigator initialRouteName="Montaje" >
                 <Stack.Screen name="Login" component={LoginScreen}  options={{ headerShown: false }} />
                 <Stack.Screen name="Clientes" component={Clientes}  options={{ title: "Clientes" , headerShown:false}} />
                 <Stack.Screen name="Embarcaciones" component={EmbarcacionesScreen} />
@@ -28,7 +29,8 @@ export default function Navigation () {
                 <Stack.Screen name="QRScann" component={QRScann} options={{ title: "Escaneo de QR" }} />
                 <Stack.Screen name="Menu" component={Menu} options={{ title: "Menú"}} />
                 <Stack.Screen name="Mantto" component={Mantto} options={{ title: "Mantto Preventivo" }} />
-                <Stack.Screen name="Preventivo" component={Preventivo} options={{ title: "Formulario de Mantto Preventivo" }} />
+                <Stack.Screen name="Montaje" component={Montaje} options={{ title: "Desmontaje / Montaje" }} />
+                <Stack.Screen name="Preventivo" component={Preventivo} options={{ title: "Formulario Preventivo" }} />
             </Stack.Navigator>
         </NavigationContainer>
     );
