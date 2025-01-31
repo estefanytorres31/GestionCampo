@@ -37,3 +37,16 @@ export const createAsistencia = async (id_embarcacion, tipo, latitud, longitud, 
         throw new Error('Error al crear la asistencia');
     }
 };
+
+export const getAsistenciasByOrden = async (idOrden) => {
+    try {
+        const userId = await AsyncStorage.getItem("userId");
+        const userIdInt = parseInt(userId, 10);
+
+        const response = await apiClient.get(`/asistencia?id_orden_trabajo=${idOrden}`);
+        return response.data;
+    } catch (error) {
+        console.error("Error obteniendo asistencias:", error.response?.data || error.message);
+        return [];
+    }
+};

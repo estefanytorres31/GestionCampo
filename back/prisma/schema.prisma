@@ -150,6 +150,8 @@ model Puerto {
   actualizado_en   DateTime           @updatedAt @map("actualizado_en")
   historial_puertos HistorialPuerto[]
   orden_trabajo     OrdenTrabajo[]
+
+  @@map("puerto")
 }
 
 model HistorialPuerto {

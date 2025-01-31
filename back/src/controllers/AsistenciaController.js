@@ -30,30 +30,32 @@ export const crearAsistencia = async (req, res) => {
 };
 
 /**
- * Obtener Asistencias por Usuario
+ * 🔹 Obtener Asistencias con Filtros
  */
-export const obtenerAsistenciasPorUsuario = async (req, res) => {
-    const { id_usuario } = req.params;
-
+export const obtenerAsistencias = async (req, res) => {
     try {
-        const asistencias = await AsistenciaService.obtenerAsistenciasPorUsuario(parseInt(id_usuario, 10));
-        res.status(200).json({ message: "Asistencias obtenidas exitosamente.", data: asistencias });
+        const asistencias = await AsistenciaService.obtenerAsistencias(req.query);
+        res.status(200).json({
+            message: "Asistencias obtenidas exitosamente.",
+            data: asistencias,
+        });
     } catch (error) {
-        res.status(error.status || 500).json({ message: error.message });
+        res.status(404).json({ message: error.message });
     }
 };
 
 /**
- * Obtener Asistencias por Embarcación
+ * 🔹 Obtener una Asistencia por su ID
  */
-export const obtenerAsistenciasPorEmbarcacion = async (req, res) => {
-    const { id_embarcacion } = req.params;
-
+export const obtenerAsistenciaPorId = async (req, res) => {
     try {
-        const asistencias = await AsistenciaService.obtenerAsistenciasPorEmbarcacion(parseInt(id_embarcacion, 10));
-        res.status(200).json({ message: "Asistencias obtenidas exitosamente.", data: asistencias });
+        const asistencia = await AsistenciaService.obtenerAsistenciaPorId(req.params.id);
+        res.status(200).json({
+            message: "Asistencia obtenida exitosamente.",
+            data: asistencia,
+        });
     } catch (error) {
-        res.status(error.status || 500).json({ message: error.message });
+        res.status(404).json({ message: error.message });
     }
 };
 

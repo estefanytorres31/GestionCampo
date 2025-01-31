@@ -118,49 +118,61 @@ export const crearAsistencia = async ({
 };
 
 /**
- * Obtener Asistencias por Usuario
- * @param {number} id_usuario
+ * 🔹 Obtener Asistencias con Filtros Opcionales (Usuario, Embarcación, OrdenTrabajo)
+ * @param {Object} query - Parámetros de búsqueda
  * @returns {Promise<Array>} Lista de asistencias
  */
-export const obtenerAsistenciasPorUsuario = async (id_usuario) => {
-    if (isNaN(id_usuario)) {
-        throw { status: 400, message: "El ID de usuario debe ser válido." };
-    }
+export const obtenerAsistencias = async (query) => {
+    const { id_usuario, id_embarcacion, id_orden_trabajo } = query;
+
+    // Construcción del objeto where dinámico
+    const whereClause = {
+        ...(id_usuario && { id_usuario: parseInt(id_usuario) }),
+        ...(id_embarcacion && { id_embarcacion: parseInt(id_embarcacion) }),
+        ...(id_orden_trabajo && { id_orden_trabajo: parseInt(id_orden_trabajo) }),
+    };
 
     const asistencias = await prisma.asistencia.findMany({
-        where: { id_usuario },
+        where: whereClause,
         include: {
+            usuario: true,
             embarcacion: true,
             orden_trabajo: true,
-            usuario: true,
         },
         orderBy: { fecha_hora: "desc" },
     });
+
+    if (asistencias.length === 0) {
+        throw new Error("No se encontraron asistencias con los criterios especificados.");
+    }
 
     return asistencias;
 };
 
 /**
- * Obtener Asistencias por Embarcación
- * @param {number} id_embarcacion
- * @returns {Promise<Array>} Lista de asistencias
+ * 🔹 Obtener una Asistencia por su ID
+ * @param {number} id_asistencia - ID de la asistencia
+ * @returns {Promise<Object>} Asistencia encontrada
  */
-export const obtenerAsistenciasPorEmbarcacion = async (id_embarcacion) => {
-    if (isNaN(id_embarcacion)) {
-        throw { status: 400, message: "El ID de embarcación debe ser válido." };
+export const obtenerAsistenciaPorId = async (id_asistencia) => {
+    if (isNaN(id_asistencia)) {
+        throw new Error("El ID de asistencia debe ser un número válido.");
     }
 
-    const asistencias = await prisma.asistencia.findMany({
-        where: { id_embarcacion },
+    const asistencia = await prisma.asistencia.findUnique({
+        where: { id_asistencia: parseInt(id_asistencia) },
         include: {
+            usuario: true,
             embarcacion: true,
             orden_trabajo: true,
-            usuario: true,
         },
-        orderBy: { fecha_hora: "desc" },
     });
 
-    return asistencias;
+    if (!asistencia) {
+        throw new Error(`No se encontró la asistencia con ID ${id_asistencia}.`);
+    }
+
+    return asistencia;
 };
 
 /**
