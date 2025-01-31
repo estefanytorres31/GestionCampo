@@ -125,11 +125,19 @@ export const getAllOrdenesTrabajo = async (query) => {
   };
 
   // Obtener las órdenes filtradas
-  return await prisma.ordenTrabajo.findMany({
+  const ordenesTrabajo = await prisma.ordenTrabajo.findMany({
       where: whereClause,
       orderBy: { fecha_asignacion: "desc" },
   });
+
+  // Validar si hay resultados
+  if (ordenesTrabajo.length === 0) {
+      throw new Error("No hay órdenes de trabajo disponibles con los criterios especificados.");
+  }
+
+  return ordenesTrabajo;
 };
+
 
 /**
  * Obtener una Orden de Trabajo por ID
