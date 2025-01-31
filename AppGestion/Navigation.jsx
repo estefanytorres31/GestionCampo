@@ -18,7 +18,7 @@ import AuthContext from "./screens/context/Auth/AuthContext";
 import Mantto from "./screens/views/Checklist/Mantto";
 import Montaje from "./screens/views/Checklist/Montaje";
 import Preventivo from "./screens/views/Formularios/Preventivo";
-
+import Desmont from "./screens/views/Boton/Desmont";
 import { TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
@@ -31,7 +31,7 @@ export default function Navigation () {
 
     return (
         <NavigationContainer >
-            <Stack.Navigator initialRouteName="Login" >
+            <Stack.Navigator initialRouteName="Desmont" >
                 <Stack.Screen name="Login" component={LoginScreen}  options={{ headerShown: false }} />
                 <Stack.Screen name="Rol" component={Rol} options={{ headerShown: false }} />
                 <Stack.Screen name="Clientes" component={Clientes}  options={{ title: "Clientes" , headerShown:false}} />
@@ -56,6 +56,7 @@ export default function Navigation () {
                 <Stack.Screen name="Mantto" component={Mantto} options={{ title: "Mantto Preventivo" }} />
                 <Stack.Screen name="Montaje" component={Montaje} options={{ title: "Desmontaje / Montaje" }} />
                 <Stack.Screen name="Preventivo" component={Preventivo} options={{ title: "Formulario Preventivo" }} />
+                <Stack.Screen name="Desmont" component={Desmont} options={{ title: "Botón Desmontado" }} />
             </Stack.Navigator>
         </NavigationContainer>
     );

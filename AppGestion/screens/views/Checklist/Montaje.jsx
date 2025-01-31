@@ -105,7 +105,7 @@ const MaintenanceChecklist = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <Text style={styles.title}>Checklist de Mantto Preventivo</Text>
+      <Text style={styles.title}>Checklist</Text>
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
         <View style={styles.content}>
           {checklistData.map((section) => (
