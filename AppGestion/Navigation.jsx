@@ -56,7 +56,7 @@ export default function Navigation () {
                 <Stack.Screen name="Mantto" component={Mantto} options={{ title: "Mantto Preventivo" }} />
                 <Stack.Screen name="Montaje" component={Montaje} options={{ title: "Desmontaje / Montaje" }} />
                 <Stack.Screen name="Preventivo" component={Preventivo} options={{ title: "Formulario Preventivo" }} />
-                <Stack.Screen name="Desmont" component={Desmont} options={{ title: "Botón Desmontado" }} />
+                <Stack.Screen name="Desmont" component={Desmont} options={{ title: "Desmontaje / Montaje" }} />
             </Stack.Navigator>
         </NavigationContainer>
     );
