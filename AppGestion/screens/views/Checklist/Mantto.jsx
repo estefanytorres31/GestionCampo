@@ -3,6 +3,7 @@ import { ChevronDown, ChevronUp, CheckCircle, Circle, Save } from "lucide-react-
 import { View, Text, ScrollView, SafeAreaView, ActivityIndicator, StyleSheet, TouchableOpacity, Animated, Alert } from "react-native";
 import useOrdenTrabajo from "../../hooks/OrdenTrabajo/useOrdenTrabajo";
 import useTipoTrabajoESP from "../../hooks/TipoTrabajoESP/useTipoTrabajoESP";
+import useTipoTrabajo from "../../hooks/TipoTrabajo/useTipoTabajo";
 
 const CollapsibleSistema = ({ sistema, selectedParts, onTogglePart }) => {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -29,6 +30,7 @@ const CollapsibleSistema = ({ sistema, selectedParts, onTogglePart }) => {
     const { count, total } = getProgress();
     if (total === 0) return null;
     const percentage = (count / total) * 100;
+    
 
     return (
       <View style={styles.progressBarContainer}>
@@ -104,6 +106,7 @@ const SistemasPartes = ({ route, navigation }) => {
   const { idOrden } = route.params;
   const { fetchTiposTrabajosWithPartsESP } = useTipoTrabajoESP();
   const { obtenerOrdenTrabajo } = useOrdenTrabajo();
+  const {getTipoTrabajoPorID}=useOrdenTrabajo();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
