@@ -142,14 +142,14 @@
 }
 
 /* Text xl/medium */
-.header-layout h1 {
-  color: var(--colores-texto-t-tulo, #fff);
+/* .header-layout h1 {
+  color: var(--colores-texto-t-tulo, #284c9a);
   font-family: var(--text-xl-medium-font-family);
   font-size: var(--text-xl-medium-font-size);
   font-style: var(--text-xl-medium-font-style);
   font-weight: var(--text-xl-medium-font-weight);
   line-height: var(--text-xl-medium-line-height);
-}
+} */
 
 .header-layout .text-wrapper {
   color: var(--colores-texto-t-tulo, #284c9a);

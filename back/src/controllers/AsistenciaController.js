@@ -30,6 +30,18 @@ export const crearAsistencia = async (req, res) => {
 };
 
 /**
+ * Obtener la lista de asistencias con cálculos de entrada y salida
+ */
+export const getAsistencias = async (req, res) => {
+    try {
+        const asistencias = await AsistenciaService.getAsistencias();
+        res.status(200).json({ message: "Asistencias obtenidas exitosamente.", data: asistencias });
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+};
+
+/**
  * 🔹 Obtener Asistencias con Filtros
  */
 export const obtenerAsistencias = async (req, res) => {

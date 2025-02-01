@@ -118,6 +118,69 @@ export const crearAsistencia = async ({
 };
 
 /**
+ * Obtener asistencias con cálculos de entrada y salida sin usar la vista
+ */
+export const getAsistencias = async () => {
+    const asistencias = await prisma.asistencia.findMany({
+        where: { tipo: "entrada" },
+        include: {
+            usuario: {
+                select: { nombre_completo: true },
+            },
+            embarcacion: {
+                select: { nombre: true },
+            },
+        },
+        orderBy: { fecha_hora: "desc" },
+    });
+
+    // Obtener las salidas correspondientes y calcular horas trabajadas
+    const asistenciasConSalidas = await Promise.all(
+        asistencias.map(async (entrada) => {
+            const salida = await prisma.asistencia.findFirst({
+                where: {
+                    id_usuario: entrada.id_usuario,
+                    id_embarcacion: entrada.id_embarcacion,
+                    tipo: "salida",
+                    fecha_hora: {
+                        gte: entrada.fecha_hora, // Buscar salida después de la entrada
+                    },
+                },
+                orderBy: { fecha_hora: "asc" },
+            });
+
+            // Cálculo de horas trabajadas (si hay salida)
+            let horas_trabajo = null;
+            if (salida) {
+                const diffMs = new Date(salida.fecha_hora) - new Date(entrada.fecha_hora);
+                const hours = Math.floor(diffMs / 3600000);
+                const minutes = Math.floor((diffMs % 3600000) / 60000);
+                const seconds = Math.floor((diffMs % 60000) / 1000);
+                horas_trabajo = `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+            }
+
+            return {
+                id_entrada: entrada.id_asistencia,
+                nombre_completo: entrada.usuario.nombre_completo,
+                fecha: entrada.fecha_hora.toISOString().split("T")[0], // Solo la fecha
+                fecha_hora_entrada: entrada.fecha_hora,
+                fecha_hora_salida: salida ? salida.fecha_hora : null,
+                latitud: entrada.latitud,
+                longitud: entrada.longitud,
+                embarcacion: entrada.embarcacion.nombre,
+                horas_trabajo,
+            };
+        })
+    );
+
+    if (asistenciasConSalidas.length === 0) {
+        throw new Error("No hay asistencias registradas.");
+    }
+
+    return asistenciasConSalidas;
+};
+
+/**
  * 🔹 Obtener Asistencias con Filtros Opcionales (Usuario, Embarcación, OrdenTrabajo)
  * @param {Object} query - Parámetros de búsqueda
  * @returns {Promise<Array>} Lista de asistencias
