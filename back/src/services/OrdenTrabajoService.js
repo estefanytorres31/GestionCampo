@@ -112,11 +112,12 @@ export const actualizarOrdenTrabajo = async (id_orden_trabajo, data) => {
 };
 
 export const getAllOrdenesTrabajo = async (query) => {
-  const { id_tipo_trabajo, id_embarcacion, id_puerto, id_jefe_asigna, codigo } = query;
+  const { id_tipo_trabajo, id_embarcacion, id_puerto, id_jefe_asigna, codigo, estados } = query;
 
-  // Construcción del objeto where dinámico
+  // Construcción dinámica del objeto de filtrado
   const whereClause = {
-      estado: { not: "inactivo" }, // Solo traer órdenes activas
+      estado: { not: "inactivo" }, // Por defecto, excluye las órdenes inactivas
+      ...(estados && { estado: { in: estados.split(",") } }), // Filtrar por múltiples estados
       ...(id_tipo_trabajo && { id_tipo_trabajo: parseInt(id_tipo_trabajo) }),
       ...(id_embarcacion && { id_embarcacion: parseInt(id_embarcacion) }),
       ...(id_puerto && { id_puerto: parseInt(id_puerto) }),
