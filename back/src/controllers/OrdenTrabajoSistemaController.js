@@ -31,6 +31,20 @@ export const getAllOrdenesTrabajoSistema = async (req, res) => {
 };
 
 /**
+ * Obtener los sistemas y partes de una Orden de Trabajo por ID
+ */
+export const getSistemasYPartesPorOrdenTrabajo = async (req, res) => {
+    const { id_orden_trabajo } = req.params;
+
+    try {
+        const resultado = await OrdenTrabajoSistemaService.getSistemasYPartesPorOrdenTrabajo(id_orden_trabajo);
+        res.status(200).json({ message: "Sistemas y partes obtenidos exitosamente.", data: resultado });
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+};
+
+/**
  * Obtener una OrdenTrabajoSistema por ID
  */
 export const getOrdenTrabajoSistemaById = async (req, res) => {
