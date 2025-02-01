@@ -1,104 +1,139 @@
 import { useState, useCallback } from "react"
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, SafeAreaView, Animated } from "react-native"
-import { ChevronDown, ChevronUp, CheckCircle, Circle, Save, Subtitles } from "lucide-react-native"
+import { View, Text, ScrollView, TouchableOpacity, TextInput, StyleSheet, SafeAreaView, Animated } from "react-native"
+import { ChevronDown, ChevronUp, CheckCircle, Circle, Save } from "lucide-react-native"
 import { useNavigation } from "@react-navigation/native"
 
-// Definimos los datos del checklist
 const checklistData = [
   {
     id: 1,
-    title: "TRANSMISIÓN SATELITAL",
+    title: "Transmisión Satelital",
     items: [
       { id: "1.1", text: "Coordinaciones" },
       { id: "1.2", text: "Soldadura" },
       { id: "1.3", text: "Cableado" },
       { id: "1.4", text: "Instalación de equipos" },
       { id: "1.5", text: "Programación y configuración" },
-      { id: "1.6", text: "Prueba de funcionamiento" },
+      { id: "1.6", text: "Prueba de funcionamiento" }
     ],
+    hasNote: true
   },
   {
     id: 2,
-    title: "CONTROL DE COMBUSTIBLE MP",
-    Subtitles: "TALLER",
-    items: [
-        
-      { id: "2.1", text: "Armado de  tablero" },
-    ],
+    title: "Control de Combustible MP",
+    sections: [
+      {
+        subtitle: "TALLER",
+        items: [
+          { id: "3.1", text: "Armado de tablero" }
+        ],
+        hasNote: true
+      },
+      {
+        subtitle: "CAMPO",
+        items: [
+          { id: "3.2", text: "Coordinaciones" },
+          { id: "3.3", text: "Soldadura" },
+          { id: "3.4", text: "Cableado" },
+          { id: "3.5", text: "Instalación de equipos y componentes" },
+          { id: "3.6", text: "Programación y configuración" },
+          { id: "3.7", text: "Prueba de funcionamiento" }
+        ],
+        hasNote: true
+      }
+    ]
   },
   {
     id: 3,
-    title: "CONTROL DE COMBUSTIBLE AUXILIARES",
-    items: [
-      { id: "3.1", text: "Verificar kit de flujómetros" },
-      { id: "3.2", text: "Revisión interna de los flujómetros" },
-      { id: "3.3", text: "Revisión de los sensores (Pulsos y Temperatura)" },
-      { id: "3.4", text: "Verificar estado de los cables" },
-      { id: "3.5", text: "Revisión de PLC" },
-      { id: "3.6", text: "Revisión de módulos" },
-      { id: "3.7", text: "Revisión de HMI" },
-      { id: "3.8", text: "Revisión de aislador galvanico" },
-      { id: "3.9", text: "Prueba de funcionamiento con motor puesto en marcha" },
-      { id: "3.10", text: "Verificar envío de datos" },
-    ],
+    title: "Control de Combustible Auxiliares",
+    sections: [
+      {
+        subtitle: "TALLER",
+        items: [
+          { id: "3.1", text: "Armado de tablero" }
+        ],
+        hasNote: true
+      },
+      {
+        subtitle: "CAMPO",
+        items: [
+          { id: "3.2", text: "Coordinaciones" },
+          { id: "3.3", text: "Soldadura" },
+          { id: "3.4", text: "Cableado" },
+          { id: "3.5", text: "Instalación de equipos y componentes" },
+          { id: "3.6", text: "Programación y configuración" },
+          { id: "3.7", text: "Prueba de funcionamiento" }
+        ],
+        hasNote: true
+      }
+    ]
   },
   {
     id: 4,
-    title: "CONTROL DE COMBUSTIBLE MP ELECTRONICO",
-    items: [
-      { id: "4.1", text: "Revisión del conexionado ECM - Terminal Satelital" },
-      { id: "4.2", text: "Revisión del cableado: Verificar estado de los cables, conectores y terminales" },
-      { id: "4.3", text: "Prueba de funcionamiento con motor puesto en marcha" },
-      { id: "4.4", text: "Verificar envío de datos" },
-    ],
+    title: "Gestión Pesca – PC",
+    sections: [
+      {
+        subtitle: "TALLER",
+        items: [
+          { id: "4.1", text: "Ensamble de equipos" },
+          { id: "4.2", text: "Programación de CPU" }
+        ],
+        hasNote: true
+      },
+      {
+        subtitle: "CAMPO",
+        items: [
+          { id: "4.3", text: "Coordinaciones" },
+          { id: "4.4", text: "Cableado" },
+          { id: "4.5", text: "Instalación de equipos" },
+          { id: "4.6", text: "Programación y configuración" },
+          { id: "4.7", text: "Prueba de funcionamiento" }
+        ],
+        hasNote: true
+      }
+    ]
   },
   {
     id: 5,
-    title: "CONTROL DE COMBUSTIBLE AUXILIARES ELECTRONICO",
-    items: [
-      { id: "5.1", text: "Inspección de PLC – Terminal Satelital / Convertidores" },
-      { id: "5.2", text: "Revisión del cableado: Verificar estado de los cables, conectores y terminales" },
-      { id: "5.3", text: "Prueba de funcionamiento con motor puesto en marcha" },
-      { id: "5.4", text: "Verificar envío de datos" },
-    ],
-  },
-  {
-    id: 6,
-    title: "BNWAS SATELITAL",
-    items: [
-      { id: "6.1", text: "Inspección de los relés de estado solido" },
-      { id: "6.2", text: "Revisión del cableado: Verificar estado de los cables, conectores y terminales" },
-      { id: "6.3", text: "Prueba de encendido/apagado del BNWAS por geocerca" },
-      { id: "6.4", text: "Verificar el envío de alarmas Power, On/Off y Sirena" },
-    ],
-  },
-  {
-    id: 7,
-    title: "MONITOREO DE TEMPERATURAS RSW",
-    items: [
-      { id: "7.1", text: "Revisión de PLC" },
-      { id: "7.2", text: "Revisión de HMI" },
-      { id: "7.3", text: "Revisión de módulos" },
-      { id: "7.4", text: "Revisión de aislador galvanico" },
-      { id: "7.5", text: "Revisión de sensores" },
-      { id: "7.6", text: "Revisión de cableado: Verificar estado de cables, conectores y terminales" },
-      { id: "7.7", text: "Verificar envío de datos" },
-    ],
-  },
+    title: "Nivel de Tanques",
+    sections: [
+      {
+        subtitle: "TALLER",
+        items: [
+          { id: "5.1", text: "Fabricación y ensamble de vasos comunicantes/sensores" },
+          { id: "5.2", text: "Armado de tablero" }
+        ],
+        hasNote: true
+      },
+      {
+        subtitle: "CAMPO",
+        items: [
+          { id: "5.3", text: "Coordinaciones" },
+          { id: "5.4", text: "Soldadura" },
+          { id: "5.5", text: "Cableado" },
+          { id: "5.6", text: "Instalación de equipos" },
+          { id: "5.7", text: "Calibración de sensores" },
+          { id: "5.8", text: "Programación y configuración" },
+          { id: "5.9", text: "Prueba de funcionamiento" }
+        ],
+        hasNote: true
+      }
+    ]
+  }
 ]
 
 const MaintenanceChecklist = () => {
   const navigation = useNavigation()
   const [expandedSections, setExpandedSections] = useState({})
   const [checkedItems, setCheckedItems] = useState({})
+  const [notes, setNotes] = useState({})
   const [animations] = useState(() =>
     checklistData.reduce(
       (acc, section) => ({
         ...acc,
         [section.id]: new Animated.Value(0),
       }),
-      {},
-    ),
+      {}
+    )
   )
 
   const toggleSection = useCallback(
@@ -116,7 +151,7 @@ const MaintenanceChecklist = () => {
         [sectionId]: !prev[sectionId],
       }))
     },
-    [expandedSections, animations],
+    [expandedSections, animations]
   )
 
   const toggleItem = useCallback((itemId) => {
@@ -126,17 +161,20 @@ const MaintenanceChecklist = () => {
     }))
   }, [])
 
+  const updateNote = useCallback((sectionId, subsectionIndex, text) => {
+    setNotes((prev) => ({
+      ...prev,
+      [`${sectionId}${subsectionIndex !== undefined ? `-${subsectionIndex}` : ''}`]: text,
+    }))
+  }, [])
+
   const getProgress = useCallback(
     (items) => {
       const checkedCount = items.filter((item) => checkedItems[item.id]).length
       return { count: checkedCount, total: items.length }
     },
-    [checkedItems],
+    [checkedItems]
   )
-
-  const saveData = useCallback(() => {
-    navigation.navigate("FormMontaje")
-  }, [navigation])
 
   const renderProgressBar = useCallback(
     (items) => {
@@ -150,12 +188,53 @@ const MaintenanceChecklist = () => {
         </View>
       )
     },
-    [getProgress],
+    [getProgress]
+  )
+
+  const renderItems = useCallback(
+    (items, sectionId, subsectionIndex) => (
+      <View style={styles.itemsContainer}>
+        {items.map((item) => (
+          <TouchableOpacity
+            key={item.id}
+            style={styles.item}
+            onPress={() => toggleItem(item.id)}
+            activeOpacity={0.7}
+          >
+            {checkedItems[item.id] ? (
+              <CheckCircle size={24} color="#6366f1" />
+            ) : (
+              <Circle size={24} color="#d1d5db" />
+            )}
+            <Text style={[styles.itemText, checkedItems[item.id] && styles.checkedItemText]}>
+              {item.text}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+    ),
+    [checkedItems, toggleItem]
+  )
+
+  const renderNoteInput = useCallback(
+    (sectionId, subsectionIndex) => (
+      <View style={styles.noteContainer}>
+        <Text style={styles.noteLabel}>Nota:</Text>
+        <TextInput
+          style={styles.noteInput}
+          multiline
+          placeholder="Agregar nota..."
+          value={notes[`${sectionId}${subsectionIndex !== undefined ? `-${subsectionIndex}` : ''}`]}
+          onChangeText={(text) => updateNote(sectionId, subsectionIndex, text)}
+        />
+      </View>
+    ),
+    [notes, updateNote]
   )
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <Text style={styles.title}>Checklist de Mantto Preventivo</Text>
+      {/*<Text style={styles.title}>Checklist de Mantenimiento</Text>*/}
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
         <View style={styles.content}>
           {checklistData.map((section) => (
@@ -188,28 +267,24 @@ const MaintenanceChecklist = () => {
                     <ChevronDown size={24} color="#6366f1" />
                   )}
                 </View>
-                {renderProgressBar(section.items)}
               </TouchableOpacity>
 
               {expandedSections[section.id] && (
-                <View style={styles.itemsContainer}>
-                  {section.items.map((item) => (
-                    <TouchableOpacity
-                      key={item.id}
-                      style={styles.item}
-                      onPress={() => toggleItem(item.id)}
-                      activeOpacity={0.7}
-                    >
-                      {checkedItems[item.id] ? (
-                        <CheckCircle size={24} color="#6366f1" />
-                      ) : (
-                        <Circle size={24} color="#d1d5db" />
-                      )}
-                      <Text style={[styles.itemText, checkedItems[item.id] && styles.checkedItemText]}>
-                        {item.text}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
+                <View>
+                  {section.sections ? (
+                    section.sections.map((subsection, index) => (
+                      <View key={index} style={styles.subsection}>
+                        <Text style={styles.subtitle}>{subsection.subtitle}</Text>
+                        {renderItems(subsection.items, section.id, index)}
+                        {subsection.hasNote && renderNoteInput(section.id, index)}
+                      </View>
+                    ))
+                  ) : (
+                    <>
+                      {renderItems(section.items, section.id)}
+                      {section.hasNote && renderNoteInput(section.id)}
+                    </>
+                  )}
                 </View>
               )}
             </Animated.View>
@@ -217,7 +292,7 @@ const MaintenanceChecklist = () => {
         </View>
       </ScrollView>
       <View style={styles.footer}>
-        <TouchableOpacity style={styles.saveButton} onPress={saveData} activeOpacity={0.8}>
+        <TouchableOpacity style={styles.saveButton} onPress={() => navigation.navigate("FormMontaje")} activeOpacity={0.8}>
           <Save size={24} color="#ffffff" />
           <Text style={styles.saveButtonText}>Guardar Datos</Text>
         </TouchableOpacity>
@@ -239,7 +314,7 @@ const styles = StyleSheet.create({
     paddingBottom: 80,
   },
   title: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: "800",
     marginVertical: 20,
     color: "#1e293b",
@@ -263,7 +338,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 8,
   },
   sectionTitle: {
     fontSize: 18,
@@ -271,31 +345,18 @@ const styles = StyleSheet.create({
     color: "#1e293b",
     flex: 1,
   },
-  progressBarContainer: {
-    height: 6,
-    backgroundColor: "#e2e8f0",
-    borderRadius: 3,
-    overflow: "hidden",
-    position: "relative",
+  subsection: {
+    paddingHorizontal: 16,
+    marginBottom: 16,
   },
-  progressBar: {
-    position: "absolute",
-    left: 0,
-    top: 0,
-    bottom: 0,
-    backgroundColor: "#6366f1",
-    borderRadius: 3,
-  },
-  progressText: {
-    position: "absolute",
-    right: 0,
-    top: -20,
-    fontSize: 12,
-    color: "#64748b",
+  subtitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#6366f1",
+    marginVertical: 8,
   },
   itemsContainer: {
-    padding: 16,
-    paddingTop: 8,
+    marginTop: 8,
   },
   item: {
     flexDirection: "row",
@@ -312,6 +373,27 @@ const styles = StyleSheet.create({
   checkedItemText: {
     color: "#94a3b8",
     textDecorationLine: "line-through",
+  },
+  noteContainer: {
+    marginTop: 16,
+    padding: 12,
+    backgroundColor: "#f1f5f9",
+    borderRadius: 12,
+  },
+  noteLabel: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#64748b",
+    marginBottom: 8,
+  },
+  noteInput: {
+    backgroundColor: "#ffffff",
+    borderRadius: 8,
+    padding: 12,
+    minHeight: 80,
+    textAlignVertical: "top",
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
   },
   footer: {
     position: "absolute",
@@ -346,4 +428,3 @@ const styles = StyleSheet.create({
 })
 
 export default MaintenanceChecklist
-
