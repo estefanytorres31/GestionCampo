@@ -214,6 +214,62 @@ export const getAllOrdenesTrabajoSistema = async () => {
     return ordenes;
 };
 
+export const getSistemasYPartesPorOrdenTrabajo = async (id_orden_trabajo) => {
+    // Validar que se proporcione el ID de la orden de trabajo
+    if (!id_orden_trabajo) {
+        throw new Error("El ID de la orden de trabajo es obligatorio.");
+    }
+
+    // Buscar los sistemas asociados a la orden de trabajo
+    const sistemas = await prisma.ordenTrabajoSistema.findMany({
+        where: { id_orden_trabajo: parseInt(id_orden_trabajo) },
+        include: {
+            tipo_trabajo_embarcacion_sistema_parte: {
+                include: {
+                    embarcacion_sistema_parte: {
+                        include: {
+                            embarcacion_sistema: {
+                                include: {
+                                    sistema: true,
+                                    embarcacion: true
+                                }
+                            }
+                        }
+                    },
+                    tipo_trabajo: true
+                }
+            },
+            orden_trabajo_parte: {
+                include: {
+                    parte: true
+                }
+            }
+        },
+        orderBy: { creado_en: "desc" }
+    });
+
+    if (sistemas.length === 0) {
+        throw new Error(`No se encontraron sistemas para la orden de trabajo con ID ${id_orden_trabajo}.`);
+    }
+
+    // Transformar los datos para devolver solo lo necesario
+    const resultado = sistemas.map(sistema => ({
+        id_orden_trabajo_sistema: sistema.id_orden_trabajo_sistema,
+        estado_sistema: sistema.estado,
+        comentario_sistema: sistema.observaciones || null,
+        sistema: sistema.tipo_trabajo_embarcacion_sistema_parte.embarcacion_sistema_parte.embarcacion_sistema.sistema,
+        partes: sistema.orden_trabajo_parte.map(parte => ({
+            id_orden_trabajo_parte: parte.id_orden_trabajo_parte,
+            estado_parte: parte.estado,
+            comentario_parte: parte.comentario || null,
+            parte: parte.parte
+        }))
+    }));
+
+    return resultado;
+};
+
+
 /**
  * Obtener una OrdenTrabajoSistema por ID
  */
