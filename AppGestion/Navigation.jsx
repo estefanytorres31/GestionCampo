@@ -17,13 +17,12 @@ import SeleccionarTecnicoScreen from "./screens/views/AsignarTrabajo/Seleccionar
 import AuthContext from "./screens/context/Auth/AuthContext";
 import Mantto from "./screens/views/Checklist/Mantto";
 import Montaje from "./screens/views/Checklist/Montaje";
-import Proyecto from "./screens/views/Checklist/Proyecto";
 import FormPreventivo from "./screens/views/Formularios/FormPreventivo";
 import FormMontaje from "./screens/views/Formularios/FormMontaje";
-import FormCorrectivo from "./screens/views/Formularios/FormCorrectivo";
 import Desmont from "./screens/views/Boton/Desmont";
 import { TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import TrabajosAsignadosScreen from "./screens/views/AsignarTrabajo/TrabajosAsignados";
 
 const Stack = createNativeStackNavigator();
 
@@ -34,7 +33,7 @@ export default function Navigation () {
 
     return (
         <NavigationContainer >
-            <Stack.Navigator initialRouteName="Proyecto" >
+            <Stack.Navigator initialRouteName="Login" >
                 <Stack.Screen name="Login" component={LoginScreen}  options={{ headerShown: false }} />
                 <Stack.Screen name="Rol" component={Rol} options={{ headerShown: false }} />
                 <Stack.Screen name="Clientes" component={Clientes}  options={{ title: "Clientes" , headerShown:false}} />
@@ -53,16 +52,20 @@ export default function Navigation () {
                 name="SeleccionarTecnico"
                 component={SeleccionarTecnicoScreen}
                 />
+                <Stack.Screen 
+                name="TrabajosAsignados" 
+                component={TrabajosAsignadosScreen} 
+                options={{ title: "Mis Trabajos" }} 
+                />
+
                 <Stack.Screen name="Inicio" component={Inicio} options={{ headerShown: false }}/>
                 <Stack.Screen name="QRScann" component={QRScann} options={{ title: "Escaneo de QR" }} />
                 <Stack.Screen name="Menu" component={Menu} options={{ title: "Menú"}} />
-                <Stack.Screen name="Mantto" component={Mantto} options={{ title: "Mantto Preventivo" }} />
+                <Stack.Screen name="Mantto" component={Mantto} options={{ title: "Mantenimiento Preventivo" }} />
                 <Stack.Screen name="Montaje" component={Montaje} options={{ title: "Desmontaje / Montaje" }} />
                 <Stack.Screen name="FormPreventivo" component={FormPreventivo} options={{ title: "Formulario Preventivo" }} />
                 <Stack.Screen name="FormMontaje" component={FormMontaje} options={{ title: "Formulario Montaje" }} />
-                <Stack.Screen name="FormCorrectivo" component={FormCorrectivo} options={{ title: "Formulario Correctivo" }} />
                 <Stack.Screen name="Desmont" component={Desmont} options={{ title: "Desmontaje / Montaje" }} />
-                <Stack.Screen name="Proyecto" component={Proyecto} options={{ title:Proyecto}}/>
             </Stack.Navigator>
         </NavigationContainer>
     );

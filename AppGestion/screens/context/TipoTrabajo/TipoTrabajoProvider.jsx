@@ -1,7 +1,7 @@
 import React, { useContext, useState, useEffect, Children } from 'react';
 import TipoTrabajoContext from "./TipoTrabajoContext";
 import AuthContext from "../Auth/AuthContext";
-import {getAllTipoTrabajo} from "../../services/TipoTrabajoService";
+import {getAllTipoTrabajo, getTipoTrabajoById } from "../../services/TipoTrabajoService";
 
 const TipoTrabajoProvider=({children})=>{
     const [tipotrabajos, setTipoTrabajos]=useState([]);
@@ -26,9 +26,18 @@ const TipoTrabajoProvider=({children})=>{
             fetchTipoTrabajos();
         }
     }, [isAuth]);
+
+    const getTipoTrabajoPorID=async(id_tipo_trabajo)=>{
+        try{
+            const response=await getTipoTrabajoById(id_tipo_trabajo);
+            return response.data;
+        }catch(error){
+            console.error("Error fetching tipo de trabajo: ", error);
+        }
+    }
     
     return(
-        <TipoTrabajoContext.Provider value={{tipotrabajos, setTipoTrabajos}}>
+        <TipoTrabajoContext.Provider value={{tipotrabajos, setTipoTrabajos, getTipoTrabajoPorID}}>
             {children}
         </TipoTrabajoContext.Provider>
     );

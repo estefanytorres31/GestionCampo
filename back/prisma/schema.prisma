@@ -150,6 +150,8 @@ model Puerto {
   actualizado_en   DateTime           @updatedAt @map("actualizado_en")
   historial_puertos HistorialPuerto[]
   orden_trabajo     OrdenTrabajo[]
+
+  @@map("puerto")
 }
 
 model HistorialPuerto {
@@ -385,12 +387,12 @@ model OrdenTrabajoParte {
   id_orden_trabajo_sistema Int             @map("id_orden_trabajo_sistema")
   id_parte               Int                @map("id_parte")
   estado                 EstadoOrdenTrabajo @default(pendiente) @map("estado")
+  comentario             String?            @map("comentario") // Nueva columna opcional
   creado_en              DateTime           @default(now()) @map("creado_en")
   actualizado_en         DateTime           @updatedAt @map("actualizado_en")
   orden_trabajo_sistema  OrdenTrabajoSistema @relation(fields: [id_orden_trabajo_sistema], references: [id_orden_trabajo_sistema], onDelete: NoAction, onUpdate: Cascade)
   parte                   Parte              @relation(fields: [id_parte], references: [id_parte], onDelete: NoAction, onUpdate: Cascade)
   
-
   @@unique([id_orden_trabajo_sistema, id_parte], name: "orden_trabajo_parte_unique")
   @@map("orden_trabajo_parte")
 }

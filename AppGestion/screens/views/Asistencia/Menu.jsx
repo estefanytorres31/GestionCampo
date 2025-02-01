@@ -1,26 +1,41 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  ActivityIndicator,
+} from "react-native";
 import QRCode from "react-native-qrcode-svg";
 import { useNavigation } from "@react-navigation/native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
-import * as Location from 'expo-location';
+import * as Location from "expo-location";
 import useAsistencia from "../../hooks/Asistencia/useAsistencia";
 
 const Menu = ({ route }) => {
   const qrData = route?.params?.qrData || "";
+  const idOrden = route?.params?.idOrden || null;
   const navigation = useNavigation();
   const [location, setLocation] = useState(null);
   const [error, setError] = useState(null);
-  
-  const { registerAttendance, lastAttendance, loading } = useAsistencia();
+
+  const { registerAttendance, lastAttendance, loading, loadLastAttendance } =
+    useAsistencia();
   const parsedQrData = qrData ? JSON.parse(qrData) : null;
+
+  // Cargar la última asistencia al montar la pantalla
+  useEffect(() => {
+    if (idOrden) {
+      loadLastAttendance(idOrden);
+    }
+  }, [idOrden]);
 
   const handleAttendance = async (tipo) => {
     setError(null);
     try {
       let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        setError('Se requiere permiso para acceder a la ubicación');
+      if (status !== "granted") {
+        setError("Se requiere permiso para acceder a la ubicación");
         return;
       }
 
@@ -29,21 +44,23 @@ const Menu = ({ route }) => {
       });
       setLocation(location);
 
-      const response= await registerAttendance({
+      const response = await registerAttendance({
         id_embarcacion: parsedQrData.id,
         tipo,
         latitud: location.coords.latitude.toString(),
         longitud: location.coords.longitude.toString(),
-        id_orden_trabajo: null // opcional, se puede agregar si es necesario
+        id_orden_trabajo: idOrden,
       });
       console.log(response);
+      if (response && !response.error) {
+        navigation.navigate("Mantto", { idOrden });
+      }
       if (response.error) {
         setError(response.error);
         return;
       }
-
     } catch (err) {
-      setError(err.message || 'Error al obtener la ubicación');
+      setError(err.message || "Error al obtener la ubicación");
     }
   };
 
@@ -56,6 +73,10 @@ const Menu = ({ route }) => {
       </View>
     );
   }
+
+  // 🔍 Determinar qué botón mostrar
+  const showEntrada = !lastAttendance || lastAttendance.tipo === "salida";
+  const showSalida = lastAttendance && lastAttendance.tipo === "entrada";
 
   return (
     <View style={styles.container}>
@@ -74,36 +95,52 @@ const Menu = ({ route }) => {
       </View>
 
       <View style={styles.attendanceContainer}>
-        <TouchableOpacity
-          style={[styles.attendanceButton, { backgroundColor: '#4CAF50' }]}
-          onPress={() => handleAttendance('entrada')}
-          disabled={loading}
-        >
-          {loading ? (
-            <ActivityIndicator color="#FFF" />
-          ) : (
-            <>
-              <Icon name="login" size={24} color="#FFF" style={styles.buttonIcon} />
-              <Text style={styles.buttonText}>Registrar Entrada</Text>
-            </>
-          )}
-        </TouchableOpacity>
+        {showEntrada && (
+          <TouchableOpacity
+            style={[styles.attendanceButton, { backgroundColor: "#4CAF50" }]}
+            onPress={() => handleAttendance("entrada")}
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator color="#FFF" />
+            ) : (
+              <>
+                <Icon
+                  name="login"
+                  size={24}
+                  color="#FFF"
+                  style={styles.buttonIcon}
+                />
+                <Text style={styles.buttonText}>Registrar Entrada</Text>
+              </>
+            )}
+          </TouchableOpacity>
+        )}
 
-        <TouchableOpacity
-          style={[styles.attendanceButton, { backgroundColor: '#f44336', marginTop: 16 }]}
-          onPress={() => handleAttendance('salida')}
-          disabled={loading}
-        >
-          {loading ? (
-            <ActivityIndicator color="#FFF" />
-          ) : (
-            <>
-              <Icon name="logout" size={24} color="#FFF" style={styles.buttonIcon} />
-              <Text style={styles.buttonText}>Registrar Salida</Text>
-            </>
-          )}
-        </TouchableOpacity>
-
+        {showSalida && (
+          <TouchableOpacity
+            style={[
+              styles.attendanceButton,
+              { backgroundColor: "#f44336", marginTop: 16 },
+            ]}
+            onPress={() => handleAttendance("salida")}
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator color="#FFF" />
+            ) : (
+              <>
+                <Icon
+                  name="logout"
+                  size={24}
+                  color="#FFF"
+                  style={styles.buttonIcon}
+                />
+                <Text style={styles.buttonText}>Registrar Salida</Text>
+              </>
+            )}
+          </TouchableOpacity>
+        )}
         {location && (
           <View style={styles.locationInfo}>
             <Icon name="map-marker-check" size={20} color="#4CAF50" />

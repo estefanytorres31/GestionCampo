@@ -18,7 +18,7 @@ const SeleccionarRol = ({ route, navigation }) => {
                 navigation.replace('Clientes');
                 break;
             case 'Técnico':
-                navigation.replace('Inicio');
+                navigation.replace('TrabajosAsignados');
                 break;
             default:
                 navigation.replace('Login');

@@ -26,3 +26,14 @@ export const getAllTipoTrabajo = async () => {
         throw error;
     }
 }
+
+export const getTipoTrabajoById = async (id_tipo_trabajo) => {
+    try {
+        const token = await getToken();
+        const response = await apiClient.get(`/tipotrabajo/${id_tipo_trabajo}`, { headers: { Authorization: `Bearer ${token}` } });
+        return response.data;
+    } catch (error) {
+        console.error(`Error obteniendo el tipo de trabajo con ID ${id_tipo_trabajo}:`, error);
+        throw error;
+    }
+}

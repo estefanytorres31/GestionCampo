@@ -1,10 +1,10 @@
 import { Router } from "express";
 import {
     crearAsistencia,
-    obtenerAsistenciasPorUsuario,
-    obtenerAsistenciasPorEmbarcacion,
     actualizarAsistencia,
     eliminarAsistencia,
+    obtenerAsistenciaPorId,
+    obtenerAsistencias,
 } from "../controllers/AsistenciaController.js";
 
 const asistenciaRouter = Router();
@@ -12,11 +12,11 @@ const asistenciaRouter = Router();
 // 📌 Crear una Asistencia (Entrada o Salida)
 asistenciaRouter.post("/", crearAsistencia);
 
-// 📌 Obtener Asistencias por Usuario
-asistenciaRouter.get("/usuario/:id_usuario", obtenerAsistenciasPorUsuario);
+// 📌 Obtener Asistencias con filtros (?id_usuario= , ?id_embarcacion= , ?id_orden_trabajo= )
+asistenciaRouter.get("/", obtenerAsistencias);
 
-// 📌 Obtener Asistencias por Embarcación
-asistenciaRouter.get("/embarcacion/:id_embarcacion", obtenerAsistenciasPorEmbarcacion);
+// 📌 Obtener una asistencia por su ID
+asistenciaRouter.get("/:id", obtenerAsistenciaPorId);
 
 // 📌 Actualizar una Asistencia
 asistenciaRouter.put("/:id_asistencia", actualizarAsistencia);

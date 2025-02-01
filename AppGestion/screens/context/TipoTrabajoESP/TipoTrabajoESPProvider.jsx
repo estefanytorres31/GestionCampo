@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { getAllTipoTrabajoESP } from "../../services/TipoTrabajoESPService";
+import { getAllTipoTrabajoESP, getAllTipoTrabajoWithPartsESP } from "../../services/TipoTrabajoESPService";
 import TipoTrabajoESPContext from "./TipoTrabajoESPContext";
 
 
@@ -16,9 +16,21 @@ const TipoTrabajoESPProvider=({children})=>{
         }
     }
 
+    const fetchTiposTrabajosWithPartsESP = async(id_tipo_trabajo, id_embarcacion) => {
+        try {
+            const response = await getAllTipoTrabajoWithPartsESP(id_tipo_trabajo, id_embarcacion);;
+            setTipoTrabajosESP(response.data);
+            return response;
+        } catch (error) {
+            console.error("Error fetching tipo trabajos ESP: ", error);
+            throw error; // Re-lanzamos el error para manejarlo en el componente
+        }
+    }
+
     const value={
         tipoTrabajosESP,
-        fetchTiposTrabajosESP
+        fetchTiposTrabajosESP,
+        fetchTiposTrabajosWithPartsESP
     }
     
     return(

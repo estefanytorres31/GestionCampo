@@ -1,237 +1,239 @@
-import { useState, useCallback } from "react"
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, SafeAreaView, Alert, Animated } from "react-native"
-import { ChevronDown, ChevronUp, CheckCircle, Circle, Save } from "lucide-react-native"
+import React, { useState, useCallback, useEffect } from "react";
+import { ChevronDown, ChevronUp, CheckCircle, Circle, Save } from "lucide-react-native";
+import { View, Text, ScrollView, SafeAreaView, ActivityIndicator, StyleSheet, TouchableOpacity, Animated, Alert } from "react-native";
+import useOrdenTrabajo from "../../hooks/OrdenTrabajo/useOrdenTrabajo";
+import useTipoTrabajoESP from "../../hooks/TipoTrabajoESP/useTipoTrabajoESP";
+import useTipoTrabajo from "../../hooks/TipoTrabajo/useTipoTabajo";
 
-// Definimos los datos del checklist
-const checklistData = [
-  {
-    id: 1,
-    title: "GESTION PESCA – CPU",
-    items: [
-      { id: '1.1', text: 'Revisión de CPU' },
-      { id: '1.2', text: 'Revisión de Monitor' },
-      { id: '1.3', text: 'Revisión de periféricos' },
-      { id: '1.4', text: 'Revisión de PLC' },
-      { id: '1.5', text: 'Revisión de módulos' },
-      { id: '1.6', text: 'Revisión de cableado: Verificar estado de cables, conectores y terminales' },
-      { id: '1.7', text: 'Revisión de aislador galvanico' },
-      { id: '1.8', text: 'Verificar operatividad del repetidor' },
-      { id: '1.9', text: 'Prueba del sistema, simulación de faena de pesca' },
-    ]
-  },
-  {
-    id: 2,
-    title: "CONTROL DE COMBUSTIBLE MP",
-    items: [
-      { id: '2.1', text: 'Verificar kit de flujómetros' },
-      { id: '2.2', text: 'Revisión interna de los flujómetros' },
-      { id: '2.3', text: 'Revisión de los sensores (Pulsos, Temperatura, RPM y Horómetro)' },
-      { id: '2.4', text: 'Verificar estado de los cables' },
-      { id: '2.5', text: 'Revisión de PLC' },
-      { id: '2.6', text: 'Revisión de módulos' },
-      { id: '2.7', text: 'Revisión de HMI' },
-      { id: '2.8', text: 'Revisión de aislador galvanico' },
-      { id: '2.9', text: 'Revisión de interfaces de RPM y % de Paso' },
-      { id: '2.10', text: 'Prueba de funcionamiento con motor puesto en marcha' },
-      { id: '2.11', text: 'Verificar envío de datos' },
-    ]
-  },
-  {
-    id: 3,
-    title: "CONTROL DE COMBUSTIBLE AUXILIARES",
-    items: [
-      { id: '3.1', text: 'Verificar kit de flujómetros' },
-      { id: '3.2', text: 'Revisión interna de los flujómetros' },
-      { id: '3.3', text: 'Revisión de los sensores (Pulsos y Temperatura)' },
-      { id: '3.4', text: 'Verificar estado de los cables' },
-      { id: '3.5', text: 'Revisión de PLC' },
-      { id: '3.6', text: 'Revisión de módulos' },
-      { id: '3.7', text: 'Revisión de HMI' },
-      { id: '3.8', text: 'Revisión de aislador galvanico' },
-      { id: '3.9', text: 'Prueba de funcionamiento con motor puesto en marcha' },
-      { id: '3.10', text: 'Verificar envío de datos' },
-    ]
-  },
-  {
-    id: 4,
-    title: "CONTROL DE COMBUSTIBLE MP ELECTRONICO",
-    items: [
-      { id: '4.1', text: 'Revisión del conexionado ECM - Terminal Satelital' },
-      { id: '4.2', text: 'Revisión del cableado: Verificar estado de los cables, conectores y terminales' },
-      { id: '4.3', text: 'Prueba de funcionamiento con motor puesto en marcha' },
-      { id: '4.4', text: 'Verificar envío de datos' },
-    ]
-  },
-  {
-    id: 5,
-    title: "CONTROL DE COMBUSTIBLE AUXILIARES ELECTRONICO",
-    items: [
-      { id: '5.1', text: 'Inspección de PLC – Terminal Satelital / Convertidores' },
-      { id: '5.2', text: 'Revisión del cableado: Verificar estado de los cables, conectores y terminales' },
-      { id: '5.3', text: 'Prueba de funcionamiento con motor puesto en marcha' },
-      { id: '5.4', text: 'Verificar envío de datos' },
-    ]
-  },
-  {
-    id: 6,
-    title: "BNWAS SATELITAL",
-    items: [
-      { id: '6.1', text: 'Inspección de los relés de estado solido' },
-      { id: '6.2', text: 'Revisión del cableado: Verificar estado de los cables, conectores y terminales' },
-      { id: '6.3', text: 'Prueba de encendido/apagado del BNWAS por geocerca' },
-      { id: '6.4', text: 'Verificar el envío de alarmas Power, On/Off y Sirena' },
-    ]
-  },
-  {
-    id: 7,
-    title: "MONITOREO DE TEMPERATURAS RSW",
-    items: [
-      { id: '7.1', text: 'Revisión de PLC' },
-      { id: '7.2', text: 'Revisión de HMI' },
-      { id: '7.3', text: 'Revisión de módulos' },
-      { id: '7.4', text: 'Revisión de aislador galvanico' },
-      { id: '7.5', text: 'Revisión de sensores' },
-      { id: '7.6', text: 'Revisión de cableado: Verificar estado de cables, conectores y terminales' },
-      { id: '7.7', text: 'Verificar envío de datos' },
-    ]
-  },
-];
+const CollapsibleSistema = ({ sistema, selectedParts, onTogglePart }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [animation] = useState(new Animated.Value(0));
 
-const MaintenanceChecklist = () => {
-  // El resto del código se mantiene igual...
-  const [expandedSections, setExpandedSections] = useState({})
-  const [checkedItems, setCheckedItems] = useState({})
-  const [animations] = useState(() => 
-    checklistData.reduce((acc, section) => ({
-      ...acc,
-      [section.id]: new Animated.Value(0)
-    }), {})
-  )
-
-  const toggleSection = useCallback((sectionId) => {
-    const toValue = expandedSections[sectionId] ? 0 : 1
-    Animated.spring(animations[sectionId], {
+  const toggleExpand = useCallback(() => {
+    const toValue = isExpanded ? 0 : 1;
+    Animated.spring(animation, {
       toValue,
       useNativeDriver: true,
       tension: 40,
       friction: 8
-    }).start()
+    }).start();
+    setIsExpanded(!isExpanded);
+  }, [isExpanded, animation]);
 
-    setExpandedSections((prev) => ({
-      ...prev,
-      [sectionId]: !prev[sectionId],
-    }))
-  }, [expandedSections, animations])
+  const getProgress = useCallback(() => {
+    if (!sistema.partes || sistema.partes.length === 0) return { count: 0, total: 0 };
+    const checkedCount = sistema.partes.filter(parte => selectedParts[parte.id_parte]).length;
+    return { count: checkedCount, total: sistema.partes.length };
+  }, [sistema.partes, selectedParts]);
 
-  const toggleItem = useCallback((itemId) => {
-    setCheckedItems((prev) => ({
-      ...prev,
-      [itemId]: !prev[itemId],
-    }))
-  }, [])
-
-  const getProgress = useCallback((items) => {
-    const checkedCount = items.filter((item) => checkedItems[item.id]).length
-    return { count: checkedCount, total: items.length }
-  }, [checkedItems])
-
-  const saveData = useCallback(() => {
-    Alert.alert(
-      "¡Éxito!",
-      "Datos guardados correctamente",
-      [{ text: "OK", style: "default" }]
-    )
-  }, [])
-
-  const renderProgressBar = useCallback((items) => {
-    const { count, total } = getProgress(items)
-    const percentage = (count / total) * 100
+  const renderProgressBar = () => {
+    const { count, total } = getProgress();
+    if (total === 0) return null;
+    const percentage = (count / total) * 100;
+    
 
     return (
       <View style={styles.progressBarContainer}>
         <View style={[styles.progressBar, { width: `${percentage}%` }]} />
         <Text style={styles.progressText}>{`${count}/${total}`}</Text>
       </View>
-    )
-  }, [getProgress])
+    );
+  };
+
+  return (
+    <Animated.View 
+      style={[
+        styles.section,
+        {
+          transform: [{
+            scale: animation.interpolate({
+              inputRange: [0, 1],
+              outputRange: [1, 1.02]
+            })
+          }]
+        }
+      ]}
+    >
+      <TouchableOpacity 
+        style={styles.sectionHeader} 
+        onPress={toggleExpand}
+        activeOpacity={0.7}
+      >
+        <View style={styles.sectionHeaderContent}>
+          <Text style={styles.sectionTitle}>{sistema.nombre_sistema}</Text>
+          {isExpanded ? (
+            <ChevronUp size={24} color="#6366f1" />
+          ) : (
+            <ChevronDown size={24} color="#6366f1" />
+          )}
+        </View>
+        {renderProgressBar()}
+      </TouchableOpacity>
+
+      {isExpanded && (
+        <View style={styles.itemsContainer}>
+          {sistema.partes && sistema.partes.length > 0 ? (
+            sistema.partes.map((parte) => (
+              <TouchableOpacity
+                key={parte.id_parte}
+                style={styles.item}
+                onPress={() => onTogglePart(parte.id_parte)}
+                activeOpacity={0.7}
+              >
+                {selectedParts[parte.id_parte] ? (
+                  <CheckCircle size={24} color="#6366f1" />
+                ) : (
+                  <Circle size={24} color="#d1d5db" />
+                )}
+                <Text style={[
+                  styles.itemText,
+                  selectedParts[parte.id_parte] && styles.checkedItemText
+                ]}>
+                  {parte.nombre_parte}
+                </Text>
+              </TouchableOpacity>
+            ))
+          ) : (
+            <Text style={styles.emptyMessage}>No hay partes disponibles</Text>
+          )}
+        </View>
+      )}
+    </Animated.View>
+  );
+};
+
+const SistemasPartes = ({ route, navigation }) => {
+  const { idOrden } = route.params;
+  const { fetchTiposTrabajosWithPartsESP } = useTipoTrabajoESP();
+  const { obtenerOrdenTrabajo } = useOrdenTrabajo();
+  const {getTipoTrabajoPorID}=useOrdenTrabajo();
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [selectedParts, setSelectedParts] = useState({});
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchSistemasPartes = async () => {
+      try {
+        const responseOrden = await obtenerOrdenTrabajo(idOrden);
+        if (!responseOrden) {
+          throw new Error("No se pudo obtener la orden de trabajo.");
+        }
+
+        const { id_tipo_trabajo, id_embarcacion } = responseOrden;
+        if (!id_tipo_trabajo || !id_embarcacion) {
+          throw new Error("Datos de orden de trabajo incompletos.");
+        }
+
+        const response = await fetchTiposTrabajosWithPartsESP(id_tipo_trabajo, id_embarcacion);
+        if (!response || !response.data || !Array.isArray(response.data)) {
+          throw new Error("La respuesta no contiene datos válidos");
+        }
+
+        if (isMounted) {
+          setData(response.data);
+        }
+      } catch (error) {
+        if (isMounted) {
+          setError(error.message || "Error desconocido al cargar los datos.");
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchSistemasPartes();
+    return () => { isMounted = false; };
+  }, [idOrden]);
+
+  const togglePart = useCallback((partId) => {
+    setSelectedParts(prev => ({
+      ...prev,
+      [partId]: !prev[partId]
+    }));
+  }, []);
+
+  const saveSelectedParts = useCallback(() => {
+    const selectedPartsList = Object.entries(selectedParts)
+      .filter(([_, isSelected]) => isSelected)
+      .map(([partId]) => partId);
+
+    if (selectedPartsList.length === 0) {
+      Alert.alert(
+        "Advertencia",
+        "Por favor seleccione al menos una parte para continuar."
+      );
+      return;
+    }
+
+    Alert.alert(
+      "Éxito",
+      "Partes seleccionadas guardadas correctamente",
+      [{ 
+        text: "OK",
+        onPress: () => {
+          navigation.navigate('FormPreventivo', { selectedParts: selectedPartsList });
+        }
+      }]
+    );
+  }, [selectedParts]);
+
+  if (loading) {
+    return (
+      <View style={styles.centerContainer}>
+        <ActivityIndicator size="large" color="#0000ff" />
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.centerContainer}>
+        <Text style={styles.errorText}>Error: {error}</Text>
+      </View>
+    );
+  }
+
+  if (!data || data.length === 0) {
+    return (
+      <View style={styles.centerContainer}>
+        <Text style={styles.messageText}>No hay sistemas o partes disponibles.</Text>
+      </View>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <Text style={styles.title}>Checklist de Mantto Preventivo</Text>
+      <Text style={styles.title}>Sistemas y Partes</Text>
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
         <View style={styles.content}>
-          {checklistData.map((section) => (
-            <Animated.View 
-              key={section.id} 
-              style={[
-                styles.section,
-                {
-                  transform: [{
-                    scale: animations[section.id].interpolate({
-                      inputRange: [0, 1],
-                      outputRange: [1, 1.02]
-                    })
-                  }]
-                }
-              ]}
-            >
-              <TouchableOpacity 
-                style={styles.sectionHeader} 
-                onPress={() => toggleSection(section.id)}
-                activeOpacity={0.7}
-              >
-                <View style={styles.sectionHeaderContent}>
-                  <Text style={styles.sectionTitle}>{section.title}</Text>
-                  {expandedSections[section.id] ? (
-                    <ChevronUp size={24} color="#6366f1" />
-                  ) : (
-                    <ChevronDown size={24} color="#6366f1" />
-                  )}
-                </View>
-                {renderProgressBar(section.items)}
-              </TouchableOpacity>
-
-              {expandedSections[section.id] && (
-                <View style={styles.itemsContainer}>
-                  {section.items.map((item) => (
-                    <TouchableOpacity 
-                      key={item.id} 
-                      style={styles.item} 
-                      onPress={() => toggleItem(item.id)}
-                      activeOpacity={0.7}
-                    >
-                      {checkedItems[item.id] ? (
-                        <CheckCircle size={24} color="#6366f1" />
-                      ) : (
-                        <Circle size={24} color="#d1d5db" />
-                      )}
-                      <Text style={[
-                        styles.itemText,
-                        checkedItems[item.id] && styles.checkedItemText
-                      ]}>
-                        {item.text}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              )}
-            </Animated.View>
+          {data.map((sistema) => (
+            <CollapsibleSistema 
+              key={sistema.id_sistema} 
+              sistema={sistema}
+              selectedParts={selectedParts}
+              onTogglePart={togglePart}
+            />
           ))}
         </View>
       </ScrollView>
       <View style={styles.footer}>
         <TouchableOpacity 
           style={styles.saveButton} 
-          onPress={saveData}
+          onPress={saveSelectedParts}
           activeOpacity={0.8}
         >
           <Save size={24} color="#ffffff" />
-          <Text style={styles.saveButtonText}>Guardar Datos</Text>
+          <Text style={styles.saveButtonText}>Guardar Selección</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
-  )
-}
+  );
+};
 
 const styles = StyleSheet.create({
   safeArea: {
@@ -320,6 +322,22 @@ const styles = StyleSheet.create({
     color: "#94a3b8",
     textDecorationLine: "line-through",
   },
+  centerContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 16,
+  },
+  errorText: {
+    fontSize: 16,
+    color: "#ef4444",
+    textAlign: "center",
+  },
+  emptyMessage: {
+    fontSize: 16,
+    color: "#94a3b8",
+    textAlign: "center",
+  },
   footer: {
     position: "absolute",
     bottom: 0,
@@ -350,6 +368,6 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     marginLeft: 12,
   },
-})
+});
 
-export default MaintenanceChecklist
+export default SistemasPartes;

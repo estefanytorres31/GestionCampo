@@ -25,6 +25,7 @@ import embarcacionSistemaParteRouter from './routes/EmbarcacionSistemaParteRoute
 import usuarioRolRouter from './routes/UsuarioRolRouter.js';
 import tipoTrabajoESPRouter from './routes/TipoTrabajoEmbarcacionSistemaParteRouter.js';
 import asistenciaRouter from './routes/AsistenciaRouter.js';
+import ordenTrabajoParteRouter from './routes/OrdenTrabajoParteRouter.js';
 
 const app = express();
 
@@ -56,6 +57,7 @@ app.use("/api/tipotrabajo", tipoTrabajoRouter);
 app.use("/api/ordenestrabajo", ordenTrabajoRouter);
 app.use("/api/ordenestrabajousuario", ordenTrabajoUsuarioRouter);
 app.use("/api/ordenestrabajosistema", ordenTrabajoSistemaRouter);
+app.use("/api/ordenestrabajoparte", ordenTrabajoParteRouter);
 app.use("/api/parte", parteRouter);
 app.use("/api/asistencia", asistenciaRouter);
 app.use("/api/sistemaparte", sistemaParteRouter);

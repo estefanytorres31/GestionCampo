@@ -20,3 +20,12 @@ export const createOrdenTrabajo=async(id_tipo_trabajo, id_embarcacion, id_puerto
     }
  
 }
+
+export const getOrdenTrabajoById=async(id_orden_trabajo)=>{
+    try {
+        const response = await apiClient.get(`/ordentrabajo/${id_orden_trabajo}`);
+        return response.data;
+    } catch (error) {
+        throw new Error(`Error al obtener la orden de trabajo: ${error.message}`);
+    }
+}
