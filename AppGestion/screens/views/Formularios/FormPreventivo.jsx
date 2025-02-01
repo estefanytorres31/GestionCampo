@@ -83,7 +83,6 @@ const MaintenanceForm = () => {
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-        <Text style={styles.title}>Formulario de Mantenimiento</Text>
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Material</Text>

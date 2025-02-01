@@ -18,7 +18,7 @@ const TipoTrabajoESPProvider=({children})=>{
 
     const fetchTiposTrabajosWithPartsESP = async(id_tipo_trabajo, id_embarcacion) => {
         try {
-            const response = await getAllTipoTrabajoWithPartsESP(id_tipo_trabajo, id_embarcacion);
+            const response = await getAllTipoTrabajoWithPartsESP(id_tipo_trabajo, id_embarcacion);;
             setTipoTrabajosESP(response.data);
             return response;
         } catch (error) {

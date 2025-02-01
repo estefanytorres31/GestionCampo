@@ -61,7 +61,7 @@ export default function Navigation () {
                 <Stack.Screen name="Inicio" component={Inicio} options={{ headerShown: false }}/>
                 <Stack.Screen name="QRScann" component={QRScann} options={{ title: "Escaneo de QR" }} />
                 <Stack.Screen name="Menu" component={Menu} options={{ title: "Menú"}} />
-                <Stack.Screen name="Mantto" component={Mantto} options={{ title: "Mantto Preventivo" }} />
+                <Stack.Screen name="Mantto" component={Mantto} options={{ title: "Mantenimiento Preventivo" }} />
                 <Stack.Screen name="Montaje" component={Montaje} options={{ title: "Desmontaje / Montaje" }} />
                 <Stack.Screen name="FormPreventivo" component={FormPreventivo} options={{ title: "Formulario Preventivo" }} />
                 <Stack.Screen name="FormMontaje" component={FormMontaje} options={{ title: "Formulario Montaje" }} />
