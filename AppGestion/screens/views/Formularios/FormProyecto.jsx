@@ -17,10 +17,9 @@ import Slider from '@react-native-community/slider';
 
 const MaintenanceForm = () => {
   const [formData, setFormData] = useState({
-    material: '',
-    observations: '',
-    nextVisitItems: '',
-    boarding: '',
+    Observaciones: '',
+    Llevar: '',
+    Abordaje: '',
     progress: 0,
     images: []
   });
@@ -71,8 +70,8 @@ const MaintenanceForm = () => {
   };
 
   const handleSave = () => {
-    if (!formData.material.trim()) {
-      Alert.alert('Error', 'Por favor ingrese el material');
+    if (!formData.Observaciones.trim()) {
+      Alert.alert('Error', 'Por favor ingrese los datos');
       return;
     }
     
@@ -83,50 +82,40 @@ const MaintenanceForm = () => {
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-        {/*<Text style={styles.title}>Formulario de Mantenimiento</Text>*/}
+        {/*<Text style={styles.title}>Llena el formulario</Text>*/}
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Material</Text>
+          <Text style={styles.sectionTitle}>Observaciones / Recomendaciones</Text>
           <TextInput
             style={styles.input}
-            value={formData.material}
-            onChangeText={(text) => setFormData(prev => ({ ...prev, material: text }))}
-            placeholder="Ingrese el material utilizado"
+            value={formData.Observaciones}
+            onChangeText={(text) => setFormData(prev => ({ ...prev, Observaciones: text }))}
+            placeholder="Ingrese la observación"
             multiline
           />
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Observaciones / Recomendaciones</Text>
+          <Text style={styles.sectionTitle}>Llevar la proxima vez</Text>
           <TextInput
             style={[styles.input, styles.textArea]}
-            value={formData.observations}
-            onChangeText={(text) => setFormData(prev => ({ ...prev, observations: text }))}
-            placeholder="Ingrese observaciones o recomendaciones"
+            value={formData.Llevar}
+            onChangeText={(text) => setFormData(prev => ({ ...prev, Llevar: text }))}
+            placeholder="¿Qué materiales se necesitarán en la próxima visita?"
             multiline
             numberOfLines={4}
           />
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Llevar próxima vez</Text>
-          <TextInput
-            style={[styles.input, styles.textArea]}
-            value={formData.nextVisitItems}
-            onChangeText={(text) => setFormData(prev => ({ ...prev, nextVisitItems: text }))}
-            placeholder="¿Qué materiales se necesitarán en la próxima visita?"
-            multiline
-            numberOfLines={3}
-          />
-        </View>
-
-        <View style={styles.section}>
           <Text style={styles.sectionTitle}>Abordaje</Text>
           <TextInput
-            style={styles.input}
-            value={formData.boarding}
-            onChangeText={(text) => setFormData(prev => ({ ...prev, boarding: text }))}
+            style={[styles.input, styles.textArea]}
+            value={formData.Abordaje}
+            onChangeText={(text) => setFormData(prev => ({ ...prev, Abordaje: text }))}
             placeholder="Detalles del abordaje"
+            multiline
+            numberOfLines={3}
           />
         </View>
 

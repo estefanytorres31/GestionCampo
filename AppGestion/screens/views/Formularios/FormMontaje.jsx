@@ -17,10 +17,9 @@ import Slider from '@react-native-community/slider';
 
 const MaintenanceForm = () => {
   const [formData, setFormData] = useState({
-    material: '',
-    observations: '',
-    nextVisitItems: '',
-    boarding: '',
+    Observaciones: '',
+    Llevar: '',
+    Abordaje: '',
     progress: 0,
     images: []
   });
@@ -71,8 +70,8 @@ const MaintenanceForm = () => {
   };
 
   const handleSave = () => {
-    if (!formData.material.trim()) {
-      Alert.alert('Error', 'Por favor ingrese el material');
+    if (!formData.Observaciones.trim()) {
+      Alert.alert('Error', 'Por favor ingrese los datos');
       return;
     }
     
@@ -89,7 +88,7 @@ const MaintenanceForm = () => {
           <Text style={styles.sectionTitle}>Observaciones</Text>
           <TextInput
             style={styles.input}
-            value={formData.Observaciiones}
+            value={formData.Observaciones}
             onChangeText={(text) => setFormData(prev => ({ ...prev, Observaciones: text }))}
             placeholder="Ingrese la observación"
             multiline

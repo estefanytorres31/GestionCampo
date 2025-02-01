@@ -17,10 +17,11 @@ import Slider from '@react-native-community/slider';
 
 const MaintenanceForm = () => {
   const [formData, setFormData] = useState({
-    material: '',
-    observations: '',
-    nextVisitItems: '',
-    boarding: '',
+    falla: '',
+    causas: '',
+    solucion: '',
+    prox: '',
+    materiales: '',
     progress: 0,
     images: []
   });
@@ -72,7 +73,7 @@ const MaintenanceForm = () => {
 
   const handleSave = () => {
     if (!formData.material.trim()) {
-      Alert.alert('Error', 'Por favor ingrese el material');
+      Alert.alert('Error', 'Por favor llene el formulario');
       return;
     }
     
@@ -86,13 +87,49 @@ const MaintenanceForm = () => {
         {/*<Text style={styles.title}>Formulario de Mantenimiento</Text>*/}
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Material</Text>
+          <Text style={styles.sectionTitle}>Falla</Text>
           <TextInput
             style={styles.input}
-            value={formData.material}
-            onChangeText={(text) => setFormData(prev => ({ ...prev, material: text }))}
-            placeholder="Ingrese el material utilizado"
+            value={formData.falla}
+            onChangeText={(text) => setFormData(prev => ({ ...prev, falla: text }))}
+            placeholder="Ingrese la falla"
             multiline
+          />
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Causas</Text>
+          <TextInput
+            style={[styles.input, styles.textArea]}
+            value={formData.causas}
+            onChangeText={(text) => setFormData(prev => ({ ...prev, causas: text }))}
+            placeholder="Ingrese las causas"
+            multiline
+            numberOfLines={4}
+          />
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Solución</Text>
+          <TextInput
+            style={[styles.input, styles.textArea]}
+            value={formData.solucion}
+            onChangeText={(text) => setFormData(prev => ({ ...prev, solucion: text }))}
+            placeholder="Ingrese la soluciono"
+            multiline
+            numberOfLines={3}
+          />
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Pendiente</Text>
+          <TextInput
+            style={[styles.input, styles.textArea]}
+            value={formData.pendiente}
+            onChangeText={(text) => setFormData(prev => ({ ...prev, pendiente: text }))}
+            placeholder="Ingrese los pendientes"
+            multiline
+            numberOfLines={3}
           />
         </View>
 
@@ -100,33 +137,31 @@ const MaintenanceForm = () => {
           <Text style={styles.sectionTitle}>Observaciones / Recomendaciones</Text>
           <TextInput
             style={[styles.input, styles.textArea]}
-            value={formData.observations}
-            onChangeText={(text) => setFormData(prev => ({ ...prev, observations: text }))}
-            placeholder="Ingrese observaciones o recomendaciones"
-            multiline
-            numberOfLines={4}
-          />
-        </View>
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Llevar próxima vez</Text>
-          <TextInput
-            style={[styles.input, styles.textArea]}
-            value={formData.nextVisitItems}
-            onChangeText={(text) => setFormData(prev => ({ ...prev, nextVisitItems: text }))}
-            placeholder="¿Qué materiales se necesitarán en la próxima visita?"
+            value={formData.observaciones}
+            onChangeText={(text) => setFormData(prev => ({ ...prev, observaciones: text }))}
+            placeholder="Ingrese Observaciones o recomendaciones"
             multiline
             numberOfLines={3}
           />
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Abordaje</Text>
+          <Text style={styles.sectionTitle}>Llevar próxima vez</Text>
           <TextInput
             style={styles.input}
-            value={formData.boarding}
-            onChangeText={(text) => setFormData(prev => ({ ...prev, boarding: text }))}
-            placeholder="Detalles del abordaje"
+            value={formData.prox}
+            onChangeText={(text) => setFormData(prev => ({ ...prev, prox: text }))}
+            placeholder="¿Qué materiales se necesitarán en la próxima visita?"
+          />
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Agregar materiales</Text>
+          <TextInput
+            style={styles.input}
+            value={formData.materiales}
+            onChangeText={(text) => setFormData(prev => ({ ...prev, materiales: text }))}
+            placeholder="Ingrese los materiales"
           />
         </View>
 
