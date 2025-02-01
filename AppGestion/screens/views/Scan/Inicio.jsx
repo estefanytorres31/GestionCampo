@@ -17,7 +17,7 @@ const { width } = Dimensions.get("window");
 
 const Inicio = ({ route, navigation }) => {
   const { logout } = useAuth();
-  const { idOrden } = route.params;
+  // const { idOrden } = route.params;
 
   useFocusEffect(
     React.useCallback(() => {
@@ -61,7 +61,7 @@ const Inicio = ({ route, navigation }) => {
               <TouchableOpacity
                 style={styles.card}
                 onPress={() => navigation.navigate("QRScann", {
-                    idOrden
+                    // idOrden
                 })}
                 activeOpacity={0.7}
               >

@@ -43,7 +43,7 @@ const LoginScreen = () => {
             navigation.navigate('Clientes');
             break;
         case 'Técnico':
-            navigation.navigate('TrabajosAsignados');
+            navigation.navigate('Inicio');
             break;
         default:
             navigation.navigate('Login');
