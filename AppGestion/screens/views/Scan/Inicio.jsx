@@ -16,7 +16,7 @@ import useAuth from "../../hooks/Auth/useAuth";
 const { width } = Dimensions.get("window");
 
 const Inicio = ({ route, navigation }) => {
-  const { logout } = useAuth();
+  const { logout, role } = useAuth();
   // const { idOrden } = route.params;
 
   useFocusEffect(
@@ -80,7 +80,7 @@ const Inicio = ({ route, navigation }) => {
                 </View>
               </TouchableOpacity>
             </View>
-
+        {!role.includes("Jefe")&&(
             <TouchableOpacity
               style={styles.logoutButton}
               onPress={handleLogout}
@@ -94,6 +94,7 @@ const Inicio = ({ route, navigation }) => {
               />
               <Text style={styles.logoutText}>CERRAR SESIÓN</Text>
             </TouchableOpacity>
+          )}
           </View>
         </View>
       </LinearGradient>

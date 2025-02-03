@@ -16,9 +16,11 @@ const SeleccionarRol = ({ route, navigation }) => {
         switch (role) {
             case 'Administrador':
                 navigation.replace('Clientes');
+            case 'Jefe':
+                navigation.replace('InicioJefe');
                 break;
             case 'Técnico':
-                navigation.replace('TrabajosAsignados');
+                navigation.replace('Inicio');
                 break;
             default:
                 navigation.replace('Login');
