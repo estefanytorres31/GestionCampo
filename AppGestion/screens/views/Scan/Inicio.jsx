@@ -37,7 +37,10 @@ const Inicio = ({ route, navigation }) => {
   const handleLogout = () => {
     logout();
     navigation.navigate("Login");
+
+   
   };
+  const showLogoutButton = role && !role.includes("Jefe");
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -80,21 +83,21 @@ const Inicio = ({ route, navigation }) => {
                 </View>
               </TouchableOpacity>
             </View>
-        {!role.includes("Jefe")&&(
-            <TouchableOpacity
-              style={styles.logoutButton}
-              onPress={handleLogout}
-              activeOpacity={0.8}
-            >
-              <MaterialCommunityIcons
-                name="logout"
-                size={24}
-                color="#fff"
-                style={styles.logoutIcon}
-              />
-              <Text style={styles.logoutText}>CERRAR SESIÓN</Text>
-            </TouchableOpacity>
-          )}
+            {showLogoutButton && (
+              <TouchableOpacity
+                style={styles.logoutButton}
+                onPress={handleLogout}
+                activeOpacity={0.8}
+              >
+                <MaterialCommunityIcons
+                  name="logout"
+                  size={24}
+                  color="#fff"
+                  style={styles.logoutIcon}
+                />
+                <Text style={styles.logoutText}>CERRAR SESIÓN</Text>
+              </TouchableOpacity>
+            )}
           </View>
         </View>
       </LinearGradient>
