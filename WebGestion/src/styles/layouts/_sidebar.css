@@ -1,6 +1,6 @@
 @layer base {
     body {
-      background: #101828;
+      background: #0D1E4C;
     }
   
     h1 {
@@ -10,7 +10,7 @@
   
   .link {
     @apply p-2.5 flex gap-6 items-center md:cursor-pointer cursor-default duration-300 font-medium whitespace-nowrap;
-    color: #101828;
+    color: #0D1E4C;
   }
   
   .link:hover {

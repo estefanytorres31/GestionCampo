@@ -1,16 +1,16 @@
 import { useState } from "react";
-import { Table } from "../components/Table";
-import { Pagination } from "../components/Pagination";
-import { Filters } from "../components/Filters";
-import { Button } from "@/components/Button";
+import Pagination from "../components/Pagination";
+import Filters from "../components/Filters";
+import { Button } from "../components/Button";
 import { VscFilePdf } from "react-icons/vsc";
 import { RiFileExcel2Fill } from "react-icons/ri";
 import * as xlsx from "node-xlsx";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 import { saveAs } from "file-saver";
+import Table from "./Table";
 
-const ListPage = ({ useFetchHook, columns, filterFields, title }) => {
+const ListPage = ({ useFetchHook, columns, filterFields, title, render = {} }) => {
   const [filters, setFilters] = useState(
     filterFields.reduce((acc, field) => ({ ...acc, [field.key]: "" }), {})
   );
@@ -62,9 +62,6 @@ const ListPage = ({ useFetchHook, columns, filterFields, title }) => {
     doc.save(`${title}.pdf`);
   };
 
-  if (loading) return <p>Cargando {title.toLowerCase()}...</p>;
-  if (error) return <p>Error: {error}</p>;
-
   return (
     <>
       <section className="flex flex-col justify-between items-center gap-4 w-full">
@@ -83,7 +80,7 @@ const ListPage = ({ useFetchHook, columns, filterFields, title }) => {
         </div>
       </section>
       <main className="list-layout">
-        <Table columns={columns} data={data} />
+        <Table columns={columns} data={data} render={render} loading={loading} error={error} />
       </main>
       <Pagination pagination={pagination} setPage={setPage} />
     </>

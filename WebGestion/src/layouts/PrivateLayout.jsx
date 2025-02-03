@@ -3,7 +3,7 @@ import useTimer from "@/hooks/useTimer";
 import SideBar from "./Sidebar";
 import Header from "./Header";
 import { useLocation } from "react-router-dom";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 
 export const PrivateLayout = ({ children }) => {
   const { isAuth, logout } = useAuth();
@@ -28,10 +28,15 @@ export const PrivateLayout = ({ children }) => {
       "/asistencias": "Gestión de Asistencias",
       "/usuarios": "Gestión de Usuarios",
       "/roles": "Gestión de Roles",
-      "/reportes": "Reportes y Análisis",
+      "/permisos": "Gestión de Permisos",
     };
     return titles[location.pathname] || "Gestión de Campo";
   }, [location.pathname]);
+
+  // 🔹 Actualizar el title del <head>
+  useEffect(() => {
+    document.title = `${pageTitle} - Gestión de Campo`;
+  }, [pageTitle]);
 
   return (
     <div className="flex h-screen bg-slate-100">

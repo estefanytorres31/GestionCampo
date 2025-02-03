@@ -1,20 +1,37 @@
-import React, { forwardRef } from "react";
+import { forwardRef } from "react";
 
 export const Input = forwardRef(
-  ({ placeholder, iconLeft, className, ...props }, ref) => {
+  (
+    {
+      className = "",
+      iconLeft = null, // Ícono a la izquierda
+      iconRight = null, // Ícono a la derecha
+      ...props
+    },
+    ref
+  ) => {
     return (
-      <div className="relative w-full">
+      <div className="relative flex items-center justify-start w-full">
+        {/* Ícono a la izquierda */}
         {iconLeft && (
-          <span className="absolute left-3 top-1/2 transform -translate-y-1/2">
+          <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
             {iconLeft}
-          </span>
+          </div>
         )}
+        {/* Input */}
         <input
-          ref={ref} // <-- Pasamos la referencia al input
-          className={`border rounded-lg py-2 px-4 pl-10 focus:outline-none focus:ring w-full ${className}`}
-          placeholder={placeholder}
+          ref={ref}
+          className={`input w-full ${iconLeft ? "pl-10" : ""} ${
+            iconRight ? "pr-10" : ""
+          } ${className}`}
           {...props}
         />
+        {/* Ícono a la derecha */}
+        {iconRight && (
+          <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
+            {iconRight}
+          </div>
+        )}
       </div>
     );
   }
