@@ -62,11 +62,11 @@ export const getAllUsers = async (filters, page = 1, pageSize = 10) => {
     };
 
     if (nombre_usuario) {
-        whereClause.nombre_usuario = { contains: nombre_usuario }; // ❌ Eliminamos mode: "insensitive"
+        whereClause.nombre_usuario = { contains: nombre_usuario };
     }
 
     if (email) {
-        whereClause.email = { contains: email }; // ❌ Eliminamos mode: "insensitive"
+        whereClause.email = { contains: email };
     }
 
     // Filtrado por rol_id (si está presente)
@@ -83,24 +83,33 @@ export const getAllUsers = async (filters, page = 1, pageSize = 10) => {
             where: whereClause,
             include: {
                 usuario_roles: {
-                    include: { rol: true },
+                    select: {
+                        rol: { select: { nombre_rol: true } }, // Solo traemos el nombre del rol
+                    },
                 },
             },
             orderBy: { creado_en: "desc" },
             skip,
             take: pageSize,
         }),
-        prisma.usuario.count({ where: whereClause }), // Obtener total de registros filtrados
+        prisma.usuario.count({ where: whereClause }),
     ]);
+
+    // Transformar los datos para incluir solo una lista de nombres de roles y excluir `usuario_roles`
+    const usuariosTransformados = usuarios.map(({ usuario_roles, contrasena_hash, ...user }) => ({
+        ...user,
+        roles: usuario_roles.map(r => r.rol.nombre_rol), // Extraemos solo los nombres de los roles
+    }));
 
     return {
         total,
         page,
         pageSize,
         totalPages: Math.ceil(total / pageSize),
-        data: usuarios,
+        data: usuariosTransformados,
     };
 };
+
 
 export const getFilteredUsers = async (filters) => {
     const { nombre_usuario, email, estado, rol_id } = filters;

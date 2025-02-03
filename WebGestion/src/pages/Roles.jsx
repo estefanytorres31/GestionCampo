@@ -13,7 +13,7 @@ import Table from "../components/Table";
 import { BsSearch } from "react-icons/bs";
 import { formatId } from "../utils/formatId";
 
-const Usuarios = () => {
+const Roles = () => {
   const [filters, setFilters] = useState({
     nombre_usuario: "",
     nombre_completo: "",
@@ -134,4 +134,4 @@ const usuariosColumns = [
   { name: "⚙️ Acciones", uuid: "acciones" },
 ];
 
-export default Usuarios;
+export default Roles;

@@ -2,7 +2,7 @@ import { useRef } from "react";
 import { BsSearch } from "react-icons/bs";
 import { Input } from "./Input";
 
-export const Filters = ({ filters, setFilters, filterFields }) => {
+const Filters = ({ filters, setFilters, filterFields }) => {
   const lastInputRef = useRef(null); // Guardar referencia al último input utilizado
 
   const handleInputChange = (key, value, inputRef) => {
@@ -35,3 +35,5 @@ export const Filters = ({ filters, setFilters, filterFields }) => {
     </div>
   );
 };
+
+export default Filters;
