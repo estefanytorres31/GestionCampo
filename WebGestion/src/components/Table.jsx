@@ -1,30 +1,36 @@
 import React from "react";
 
-export const Table = ({ columns, data, render }) => {
+export const Table = ({ columns, data }) => {
   return (
-    <>
-      <table>
-        <thead>
-          <tr className="bg-gray-400 text-white rounded-t-lg">
-            {columns?.map(({ name, uuid }) => (
-              <th key={uuid} className={uuid}>
-                {name || uuid}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {data.map((row) => (
-            <tr key={row.id} className="border-b border-gray-200 hover:bg-gray-100 transition-colors duration-300">
+    <table className="w-full border-collapse border-blue-500">
+      <thead>
+        <tr className="bg-blue-400 text-white">
+          {columns.map(({ name, uuid }) => (
+            <th key={uuid} className=" p-2">
+              {name}
+            </th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        {data.length > 0 ? (
+          data.map((row, rowIndex) => (
+            <tr key={row.id || rowIndex} className=" ">
               {columns.map(({ uuid }) => (
-                <td key={uuid} className={uuid}>
-                  {render && render[uuid] ? render[uuid](row) : row[uuid]}
+                <td key={`${row.id || rowIndex}-${uuid}`} className="  p-2">
+                  {row[uuid] !== undefined ? row[uuid] : "-"}
                 </td>
               ))}
             </tr>
-          ))}
-        </tbody>
-      </table>
-    </>
+          ))
+        ) : (
+          <tr>
+            <td colSpan={columns.length} className="text-center p-2">
+              No hay datos disponibles.
+            </td>
+          </tr>
+        )}
+      </tbody>
+    </table>
   );
 };

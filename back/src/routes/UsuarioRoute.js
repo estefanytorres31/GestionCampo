@@ -4,16 +4,15 @@ import {
     getUserById,
     deleteUser,
     updateUser,
-    getFilteredUsers,
-    getAllUsers
+    getUsersController
 } from "../controllers/UsuarioController.js";
 import { Router } from "express";
 import {verificarAuth, isAdmin } from "../middleware/verificarAuth.js"
 
 const usuarioRouter = Router();
 
-usuarioRouter.get('/', verificarAuth, getFilteredUsers);
-usuarioRouter.get('/all', verificarAuth, isAdmin, getAllUsers);
+// usuarioRouter.get('/', verificarAuth, getFilteredUsers);
+usuarioRouter.get('/', getUsersController);
 usuarioRouter.get('/nombre/:nombre_usuario', getUserByUsername);
 usuarioRouter.post('/', createUsuario);
 usuarioRouter.get('/:id', getUserById);

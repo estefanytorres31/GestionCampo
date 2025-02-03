@@ -40,18 +40,18 @@ const LoginScreen = () => {
             navigation.navigate('Clientes');
             break;
         case 'Jefe':
-            navigation.navigate('Clientes');
+            navigation.navigate('InicioJefe');
             break;
         case 'Técnico':
-            navigation.navigate('TrabajosAsignados');
+            navigation.navigate('Inicio');
             break;
         default:
             navigation.navigate('Login');
     }
 };
 
-  const handleLogin = async () => {
-    const { username, password } = credentials;
+const handleLogin = async () => {
+  const { username, password } = credentials;
   if (!username || !password) {
     setAlertConfig({
       type: 'INFO',
@@ -59,49 +59,51 @@ const LoginScreen = () => {
       message: 'Por favor, completa todos los campos.',
     });
     setAlertVisible(true);
-    //shakeAnimation();
     return;
   }
-    try {
-      setIsLoading(true);
-      const result = await loginAccess(username, password);
 
-      if (result.status === 200 && result.data?.token) {
-        const roles = result.data?.roles; 
+  try {
+    setIsLoading(true);
+    const result = await loginAccess(username, password);
 
-        if (roles.length === 1) {
-          navigateToRoleScreen(roles[0]);
-      } else if (roles.length > 1) {
-          navigation.navigate('Rol', { roles });
+    if (result.status === 200 && result.data?.token) {
+      const roles = result.data?.roles || []; // Asegura que 'roles' sea un array válido
+
+      if (roles.includes("Jefe")) {
+        navigation.replace("InicioJefe");
+      } else if (roles.includes("Técnico")) {
+        navigation.replace("Inicio");
+      } else if (roles.includes("Administrador")) {
+        navigation.replace("Clientes");
       } else {
-          setAlertConfig({
-              type: 'ERROR',
-              title: 'Acceso denegado',
-              message: 'No tienes un rol asignado. Contacta al administrador.',
-          });
-          setAlertVisible(true);
-      }
-
-  } else {
         setAlertConfig({
           type: 'ERROR',
-          title: 'Inicio de sesión fallido',
-          message: 'Usuario o contraseña incorrectos.',
+          title: 'Acceso denegado',
+          message: 'No tienes un rol válido asignado. Contacta al administrador.',
         });
         setAlertVisible(true);
       }
-    } catch (error) {
-      console.error('Login error:', error);
+    } else {
       setAlertConfig({
         type: 'ERROR',
-        title: 'Error de conexión',
-        message: 'No se pudo conectar al servidor. Por favor, intenta más tarde.'
+        title: 'Inicio de sesión fallido',
+        message: 'Usuario o contraseña incorrectos.',
       });
       setAlertVisible(true);
-    } finally {
-      setIsLoading(false);
     }
-  };
+  } catch (error) {
+    console.error("Login error:", error);
+    setAlertConfig({
+      type: 'ERROR',
+      title: 'Error de conexión',
+      message: 'No se pudo conectar al servidor. Por favor, intenta más tarde.',
+    });
+    setAlertVisible(true);
+  } finally {
+    setIsLoading(false);
+  }
+};
+
 
   const showAlert = () => {
     if (alertVisible) {

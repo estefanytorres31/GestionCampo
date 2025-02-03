@@ -53,22 +53,53 @@ export const createUsuario = async (nombre_usuario, contrasena_hash, nombre_comp
 };
 
 // 🔹 Obtener todos los usuarios con sus roles
-export const getAllUsers = async () => {
-    const usuarios = await prisma.usuario.findMany({
-        where: { estado: true },
-        include: {
-            usuario_roles: {
-                include: { rol: true },
-            },
-        },
-        orderBy: { creado_en: "desc" },
-    });
+export const getAllUsers = async (filters, page = 1, pageSize = 10) => {
+    const { nombre_usuario, email, estado, rol_id } = filters;
 
-    if (usuarios.length === 0) {
-        throw new Error("No hay usuarios disponibles.");
+    // Construcción dinámica de filtros
+    const whereClause = {
+        estado: estado !== undefined ? estado === "true" : true, // Filtra por estado (true por defecto)
+    };
+
+    if (nombre_usuario) {
+        whereClause.nombre_usuario = { contains: nombre_usuario }; // ❌ Eliminamos mode: "insensitive"
     }
 
-    return usuarios;
+    if (email) {
+        whereClause.email = { contains: email }; // ❌ Eliminamos mode: "insensitive"
+    }
+
+    // Filtrado por rol_id (si está presente)
+    if (rol_id) {
+        whereClause.usuario_roles = {
+            some: { rol_id: parseInt(rol_id, 10) },
+        };
+    }
+
+    const skip = (page - 1) * pageSize; // Calcular cuántos registros omitir
+
+    const [usuarios, total] = await Promise.all([
+        prisma.usuario.findMany({
+            where: whereClause,
+            include: {
+                usuario_roles: {
+                    include: { rol: true },
+                },
+            },
+            orderBy: { creado_en: "desc" },
+            skip,
+            take: pageSize,
+        }),
+        prisma.usuario.count({ where: whereClause }), // Obtener total de registros filtrados
+    ]);
+
+    return {
+        total,
+        page,
+        pageSize,
+        totalPages: Math.ceil(total / pageSize),
+        data: usuarios,
+    };
 };
 
 export const getFilteredUsers = async (filters) => {

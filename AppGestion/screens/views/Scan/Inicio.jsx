@@ -16,8 +16,8 @@ import useAuth from "../../hooks/Auth/useAuth";
 const { width } = Dimensions.get("window");
 
 const Inicio = ({ route, navigation }) => {
-  const { logout } = useAuth();
-  const { idOrden } = route.params;
+  const { logout, role } = useAuth();
+  // const { idOrden } = route.params;
 
   useFocusEffect(
     React.useCallback(() => {
@@ -37,7 +37,10 @@ const Inicio = ({ route, navigation }) => {
   const handleLogout = () => {
     logout();
     navigation.navigate("Login");
+
+   
   };
+  const showLogoutButton = role && !role.includes("Jefe");
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -61,7 +64,7 @@ const Inicio = ({ route, navigation }) => {
               <TouchableOpacity
                 style={styles.card}
                 onPress={() => navigation.navigate("QRScann", {
-                    idOrden
+                    // idOrden
                 })}
                 activeOpacity={0.7}
               >
@@ -80,20 +83,21 @@ const Inicio = ({ route, navigation }) => {
                 </View>
               </TouchableOpacity>
             </View>
-
-            <TouchableOpacity
-              style={styles.logoutButton}
-              onPress={handleLogout}
-              activeOpacity={0.8}
-            >
-              <MaterialCommunityIcons
-                name="logout"
-                size={24}
-                color="#fff"
-                style={styles.logoutIcon}
-              />
-              <Text style={styles.logoutText}>CERRAR SESIÓN</Text>
-            </TouchableOpacity>
+            {showLogoutButton && (
+              <TouchableOpacity
+                style={styles.logoutButton}
+                onPress={handleLogout}
+                activeOpacity={0.8}
+              >
+                <MaterialCommunityIcons
+                  name="logout"
+                  size={24}
+                  color="#fff"
+                  style={styles.logoutIcon}
+                />
+                <Text style={styles.logoutText}>CERRAR SESIÓN</Text>
+              </TouchableOpacity>
+            )}
           </View>
         </View>
       </LinearGradient>

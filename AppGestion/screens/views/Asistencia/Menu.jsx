@@ -53,7 +53,7 @@ const Menu = ({ route }) => {
       });
       console.log(response);
       if (response && !response.error) {
-        navigation.navigate("Mantto", { idOrden });
+        navigation.navigate("Inicio", { idOrden });
       }
       if (response.error) {
         setError(response.error);
