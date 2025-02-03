@@ -9,6 +9,7 @@ import { Login } from "./pages/Login";
 import { PrivateLayout } from "./layouts/PrivateLayout";
 import { Asistencias } from "./pages/Asistencias";
 import Usuarios from "./pages/Usuarios";
+import { Permisos } from "./pages/Permisos";
 
 const PrivateRoute = ({ children }) => {
   const { isAuth } = useAuth();
@@ -45,7 +46,17 @@ const AppContent = () => {
           element={
             <PrivateRoute>
               <PrivateLayout>
-                ROles
+                Roles
+              </PrivateLayout>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/permisos"
+          element={
+            <PrivateRoute>
+              <PrivateLayout>
+                <Permisos />
               </PrivateLayout>
             </PrivateRoute>
           }

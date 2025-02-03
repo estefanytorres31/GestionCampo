@@ -6,9 +6,10 @@ import { useMediaQuery } from "react-responsive";
 
 import { IoIosArrowBack } from "react-icons/io";
 import { MdMenu, MdKeyboardArrowDown } from "react-icons/md";
-import { RiShieldUserFill } from "react-icons/ri";
+import { RiGroup2Fill, RiShieldUserFill } from "react-icons/ri";
 import { IoLogOut } from "react-icons/io5";
 import { FaShip, FaUserFriends } from "react-icons/fa";
+import { FaList } from "react-icons/fa6";
 
 import icono from "@/assets/logo.svg";
 import { useAuth } from "@/context/AuthContext";
@@ -95,12 +96,17 @@ const SideBar = () => {
           {
             to: "/usuarios",
             label: "Usuarios",
-            icon: <FaUserFriends size={16} className="min-w-max" />,
+            icon: <FaUserFriends size={18} className="min-w-max" />,
           },
           {
             to: "/roles",
             label: "Roles",
-            icon: <RiShieldUserFill size={16} className="min-w-max" />,
+            icon: <RiShieldUserFill size={18} className="min-w-max" />,
+          },
+          {
+            to: "/permisos",
+            label: "Permisos",
+            icon: <RiGroup2Fill size={18} className="min-w-max" />,
           },
         ],
       },
@@ -195,7 +201,9 @@ const SideBar = () => {
                                   }`}
                                 >
                                   {sub.icon}
-                                  <span className="text-sm-medium">{sub.label}</span>
+                                  <span className="text-sm-medium">
+                                    {sub.label}
+                                  </span>
                                 </NavLink>
                               </li>
                             ))}
@@ -241,7 +249,9 @@ const SideBar = () => {
 
         {/* Botón para ocultar menú (solo en desktop) */}
         <motion.div
-          animate={isOpen ? { x: 0, y: 0, rotate: 0 } : { x: -10, y: 0, rotate: 180 }}
+          animate={
+            isOpen ? { x: 0, y: 0, rotate: 0 } : { x: -10, y: 0, rotate: 180 }
+          }
           transition={{ duration: 0 }}
           onClick={() => setIsOpen(!isOpen)}
           className="absolute w-fit h-fit z-50 right-2 bottom-5 cursor-pointer md:block hidden"

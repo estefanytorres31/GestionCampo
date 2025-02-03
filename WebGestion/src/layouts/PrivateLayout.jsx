@@ -28,7 +28,7 @@ export const PrivateLayout = ({ children }) => {
       "/asistencias": "Gestión de Asistencias",
       "/usuarios": "Gestión de Usuarios",
       "/roles": "Gestión de Roles",
-      "/reportes": "Reportes y Análisis",
+      "/permisos": "Gestión de Permisos",
     };
     return titles[location.pathname] || "Gestión de Campo";
   }, [location.pathname]);

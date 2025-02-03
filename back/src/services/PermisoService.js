@@ -42,18 +42,39 @@ export const createPermiso = async (nombre, descripcion) => {
     return nuevoPermiso;
 };
 
-// Obtener todos los permisos activos
-export const getAllPermisos = async () => {
-    const permisos = await prisma.permiso.findMany({
-        where: { estado: true },
-        orderBy: { creado_en: "desc" },
-    });
+// 🔹 Obtener todos los permisos con paginación
+export const getAllPermisos = async (filters, page = 1, pageSize = 10) => {
+    const { nombre, estado } = filters;
 
-    if (permisos.length === 0) {
-        throw new Error("No hay permisos disponibles.");
+    // Construcción dinámica de filtros
+    const whereClause = {
+        estado: estado !== undefined ? estado === "true" : true, // Filtra por estado activo por defecto
+    };
+
+    if (nombre) {
+        whereClause.nombre = { contains: nombre }; // Filtra por nombre si está presente
     }
 
-    return permisos;
+    const skip = (page - 1) * pageSize; // Calcular cuántos registros omitir
+
+    // Obtener permisos y total de registros en paralelo
+    const [permisos, total] = await Promise.all([
+        prisma.permiso.findMany({
+            where: whereClause,
+            orderBy: { creado_en: "desc" },
+            skip,
+            take: pageSize,
+        }),
+        prisma.permiso.count({ where: whereClause }), // Obtener total de registros filtrados
+    ]);
+
+    return {
+        total,
+        page,
+        pageSize,
+        totalPages: Math.ceil(total / pageSize),
+        data: permisos,
+    };
 };
 
 // Obtener un permiso por su ID
