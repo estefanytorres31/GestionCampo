@@ -62,11 +62,11 @@ export const getAllUsers = async (filters, page = 1, pageSize = 10) => {
     };
 
     if (nombre_usuario) {
-        whereClause.nombre_usuario = { contains: nombre_usuario, mode: "insensitive" };
+        whereClause.nombre_usuario = { contains: nombre_usuario }; // ❌ Eliminamos mode: "insensitive"
     }
 
     if (email) {
-        whereClause.email = { contains: email, mode: "insensitive" };
+        whereClause.email = { contains: email }; // ❌ Eliminamos mode: "insensitive"
     }
 
     // Filtrado por rol_id (si está presente)
@@ -101,8 +101,6 @@ export const getAllUsers = async (filters, page = 1, pageSize = 10) => {
         data: usuarios,
     };
 };
-
-
 
 export const getFilteredUsers = async (filters) => {
     const { nombre_usuario, email, estado, rol_id } = filters;

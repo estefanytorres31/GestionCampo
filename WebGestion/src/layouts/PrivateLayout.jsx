@@ -24,7 +24,7 @@ export const PrivateLayout = ({ children }) => {
   // 🔹 Definir títulos según la ruta
   const pageTitle = useMemo(() => {
     const titles = {
-      "/dashboard": "Asistencias",
+      "/dashboard": "Panel de Control",
       "/asistencias": "Gestión de Asistencias",
       "/usuarios": "Gestión de Usuarios",
       "/roles": "Gestión de Roles",

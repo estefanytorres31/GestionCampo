@@ -9,6 +9,7 @@ import { MdMenu } from "react-icons/md";
 import { TbLayoutDashboardFilled } from "react-icons/tb";
 import { RiShieldUserFill } from "react-icons/ri";
 import { IoLogOut } from "react-icons/io5";
+import { FaShip } from "react-icons/fa";
 
 import icono from "@/assets/logo.svg";
 import apagar from "@/assets/apagar.svg";
@@ -80,6 +81,12 @@ const SideBar = () => {
         to: "/dashboard",
         icon: <TbLayoutDashboardFilled size={20} className="min-w-max" />,
         label: "Dashboard",
+        roles: ["admin"],
+      },
+      {
+        to: "/asistencias",
+        icon: <FaShip size={20} className="min-w-max" />,
+        label: "Asistencias",
         roles: ["admin"],
       },
       // {
