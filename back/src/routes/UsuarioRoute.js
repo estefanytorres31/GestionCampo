@@ -12,7 +12,7 @@ import {verificarAuth, isAdmin } from "../middleware/verificarAuth.js"
 const usuarioRouter = Router();
 
 // usuarioRouter.get('/', verificarAuth, getFilteredUsers);
-usuarioRouter.get('/', verificarAuth, isAdmin, getUsersController);
+usuarioRouter.get('/', getUsersController);
 usuarioRouter.get('/nombre/:nombre_usuario', getUserByUsername);
 usuarioRouter.post('/', createUsuario);
 usuarioRouter.get('/:id', getUserById);
