@@ -8,6 +8,8 @@ import { useAuth, AuthProvider } from "./context/AuthContext";
 import { Login } from "./pages/Login";
 import { PrivateLayout } from "./layouts/PrivateLayout";
 import { Dashboard } from "./pages/Dashboard";
+import { Usuarios } from "./pages/Usuarios";
+import { Asistencias } from "./pages/Asistencias";
 
 const PrivateRoute = ({ children }) => {
   const { isAuth } = useAuth();
@@ -30,15 +32,25 @@ const AppContent = () => {
           }
         />
         <Route
+          path="/asistencias"
+          element={
+            <PrivateRoute>
+              <PrivateLayout>
+                <Asistencias />
+              </PrivateLayout>
+            </PrivateRoute>
+          }
+        />
+        <Route
           path="/usuarios"
           element={
             <PrivateRoute>
               <PrivateLayout>
-                Usuarios
+                <Usuarios />
               </PrivateLayout>
             </PrivateRoute>
           }
-        />s
+        />
         <Route path="/" element={<Navigate to="/login" />} />
         <Route path="*" element={<div>Página no encontrada</div>} />
       </Routes>

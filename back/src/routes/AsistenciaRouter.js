@@ -5,7 +5,7 @@ import {
     eliminarAsistencia,
     obtenerAsistenciaPorId,
     obtenerAsistencias,
-    getAsistencias,
+    getAsistenciasController,
 } from "../controllers/AsistenciaController.js";
 
 const asistenciaRouter = Router();
@@ -14,8 +14,8 @@ const asistenciaRouter = Router();
 asistenciaRouter.post("/", crearAsistencia);
 
 // 📌 Obtener Asistencias con filtros (?id_usuario= , ?id_embarcacion= , ?id_orden_trabajo= )
-asistenciaRouter.get("/", obtenerAsistencias);
-asistenciaRouter.get("/view", getAsistencias);
+// asistenciaRouter.get("/", obtenerAsistencias);
+asistenciaRouter.get("/", getAsistenciasController);
 
 // 📌 Obtener una asistencia por su ID
 asistenciaRouter.get("/:id", obtenerAsistenciaPorId);

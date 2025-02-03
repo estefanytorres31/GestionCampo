@@ -31,10 +31,10 @@ export const Login = () => {
       const response = await axiosInstance.post("/auth/login", { usuario, contrasena });
 
       if (response.status === 200) {
-        const { token, expiracion, usuario: usuarioData } = response.data;
+        const { token, expiracion, userId, nombreUsuario, roles } = response.data;
 
         // Llama al contexto de login
-        login({ token, expiracion, usuario: usuarioData });
+        login({ token, expiracion, userId, nombreUsuario, roles });
 
         // Redirige al dashboard
         navigate("/dashboard");

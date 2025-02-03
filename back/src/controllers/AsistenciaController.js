@@ -32,12 +32,22 @@ export const crearAsistencia = async (req, res) => {
 /**
  * Obtener la lista de asistencias con cálculos de entrada y salida
  */
-export const getAsistencias = async (req, res) => {
+export const getAsistenciasController = async (req, res) => {
     try {
-        const asistencias = await AsistenciaService.getAsistencias();
-        res.status(200).json({ message: "Asistencias obtenidas exitosamente.", data: asistencias });
+        const filters = {
+            nombre_completo: req.query.nombre_completo || undefined,
+            fecha: req.query.fecha || undefined,
+            nombre_embarcacion: req.query.nombre_embarcacion || undefined, // Cambiado de id_embarcacion a nombre_embarcacion
+        };
+
+        const page = parseInt(req.query.page) || 1;
+        const pageSize = parseInt(req.query.pageSize) || 10;
+
+        const result = await AsistenciaService.getAsistencias(filters, page, pageSize);
+        
+        res.status(200).json(result);
     } catch (error) {
-        res.status(400).json({ message: error.message });
+        res.status(500).json({ message: error.message });
     }
 };
 

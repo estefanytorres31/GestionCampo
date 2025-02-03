@@ -1,30 +1,35 @@
 import React from "react";
 
-export const Table = ({ columns, data, render }) => {
+export const Table = ({ columns, data }) => {
   return (
-    <table>
+    <table className="w-full border-collapse border-blue-500">
       <thead>
-        <tr className="bg-gray-400 text-white rounded-t-lg">
-          {columns?.map(({ name, uuid }) => (
-            <th key={uuid} className={uuid}>
-              {name || uuid}
+        <tr className="bg-blue-400 text-white">
+          {columns.map(({ name, uuid }) => (
+            <th key={uuid} className=" p-2">
+              {name}
             </th>
           ))}
         </tr>
       </thead>
       <tbody>
-        {data.map((row, rowIndex) => (
-          <tr
-            key={row.id_entrada || rowIndex} // Usar ID único o índice como fallback
-            className="border-b border-gray-200 hover:bg-gray-100 transition-colors duration-300"
-          >
-            {columns.map(({ uuid }) => (
-              <td key={`${row.id_entrada || rowIndex}-${uuid}`} className={uuid}>
-                {render && render[uuid] ? render[uuid](row) : row[uuid]}
-              </td>
-            ))}
+        {data.length > 0 ? (
+          data.map((row, rowIndex) => (
+            <tr key={row.id || rowIndex} className=" ">
+              {columns.map(({ uuid }) => (
+                <td key={`${row.id || rowIndex}-${uuid}`} className="  p-2">
+                  {row[uuid] !== undefined ? row[uuid] : "-"}
+                </td>
+              ))}
+            </tr>
+          ))
+        ) : (
+          <tr>
+            <td colSpan={columns.length} className="text-center p-2">
+              No hay datos disponibles.
+            </td>
           </tr>
-        ))}
+        )}
       </tbody>
     </table>
   );

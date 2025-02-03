@@ -120,19 +120,46 @@ export const crearAsistencia = async ({
 /**
  * Obtener asistencias con cálculos de entrada y salida sin usar la vista
  */
-export const getAsistencias = async () => {
-    const asistencias = await prisma.asistencia.findMany({
-        where: { tipo: "entrada" },
-        include: {
-            usuario: {
-                select: { nombre_completo: true },
+export const getAsistencias = async (filters, page = 1, pageSize = 10) => {
+    const { nombre_completo, fecha, nombre_embarcacion } = filters;
+
+    // Construcción dinámica de filtros
+    const whereClause = { tipo: "entrada" };
+
+    if (nombre_completo) {
+        whereClause.usuario = {
+            nombre_completo: { contains: nombre_completo },
+        };
+    }
+
+    if (fecha) {
+        whereClause.fecha_hora = {
+            gte: new Date(`${fecha}T00:00:00.000Z`),
+            lt: new Date(`${fecha}T23:59:59.999Z`),
+        };
+    }
+
+    if (nombre_embarcacion) {
+        whereClause.embarcacion = {
+            nombre: { contains: nombre_embarcacion }, // Filtrar por nombre de embarcación
+        };
+    }
+
+    const skip = (page - 1) * pageSize; // Calcular cuántos registros omitir
+
+    const [asistencias, total] = await Promise.all([
+        prisma.asistencia.findMany({
+            where: whereClause,
+            include: {
+                usuario: { select: { nombre_completo: true } },
+                embarcacion: { select: { nombre: true } },
             },
-            embarcacion: {
-                select: { nombre: true },
-            },
-        },
-        orderBy: { fecha_hora: "desc" },
-    });
+            orderBy: { fecha_hora: "desc" },
+            skip,
+            take: pageSize,
+        }),
+        prisma.asistencia.count({ where: whereClause }), // Obtener total de registros filtrados
+    ]);
 
     // Obtener las salidas correspondientes y calcular horas trabajadas
     const asistenciasConSalidas = await Promise.all(
@@ -142,14 +169,11 @@ export const getAsistencias = async () => {
                     id_usuario: entrada.id_usuario,
                     id_embarcacion: entrada.id_embarcacion,
                     tipo: "salida",
-                    fecha_hora: {
-                        gte: entrada.fecha_hora, // Buscar salida después de la entrada
-                    },
+                    fecha_hora: { gte: entrada.fecha_hora }, // Buscar salida después de la entrada
                 },
                 orderBy: { fecha_hora: "asc" },
             });
 
-            // Cálculo de horas trabajadas (si hay salida)
             let horas_trabajo = null;
             if (salida) {
                 const diffMs = new Date(salida.fecha_hora) - new Date(entrada.fecha_hora);
@@ -160,9 +184,9 @@ export const getAsistencias = async () => {
             }
 
             return {
-                id_entrada: entrada.id_asistencia,
+                id: entrada.id_asistencia,
                 nombre_completo: entrada.usuario.nombre_completo,
-                fecha: entrada.fecha_hora.toISOString().split("T")[0], // Solo la fecha
+                fecha: entrada.fecha_hora.toISOString().split("T")[0],
                 fecha_hora_entrada: entrada.fecha_hora,
                 fecha_hora_salida: salida ? salida.fecha_hora : null,
                 latitud: entrada.latitud,
@@ -173,12 +197,16 @@ export const getAsistencias = async () => {
         })
     );
 
-    if (asistenciasConSalidas.length === 0) {
-        throw new Error("No hay asistencias registradas.");
-    }
-
-    return asistenciasConSalidas;
+    return {
+        total,
+        page,
+        pageSize,
+        totalPages: Math.ceil(total / pageSize),
+        data: asistenciasConSalidas,
+    };
 };
+
+
 
 /**
  * 🔹 Obtener Asistencias con Filtros Opcionales (Usuario, Embarcación, OrdenTrabajo)
