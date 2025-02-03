@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import axiosInstance from "../config/axiosConfig";
 
 const useFetchData = (endpoint, filters = {}, page = 1, pageSize = 10) => {
@@ -12,9 +12,6 @@ const useFetchData = (endpoint, filters = {}, page = 1, pageSize = 10) => {
     totalPages: 0,
   });
 
-  // 🔹 Memoizar `filters` para evitar recreaciones innecesarias
-  const stableFilters = useMemo(() => filters, [JSON.stringify(filters)]);
-
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -22,10 +19,9 @@ const useFetchData = (endpoint, filters = {}, page = 1, pageSize = 10) => {
 
       try {
         const response = await axiosInstance.get(endpoint, {
-          params: { ...stableFilters, page, pageSize },
+          params: { ...filters, page, pageSize },
         });
 
-        console.log("Fetching data...");
         setData(response.data.data);
         setPagination({
           total: response.data.total,
@@ -41,7 +37,7 @@ const useFetchData = (endpoint, filters = {}, page = 1, pageSize = 10) => {
     };
 
     fetchData();
-  }, [endpoint, stableFilters, page, pageSize]); // 🔹 Ahora `filters` es estable
+  }, [endpoint, filters, page, pageSize]);
 
   return { data, loading, error, pagination };
 };
