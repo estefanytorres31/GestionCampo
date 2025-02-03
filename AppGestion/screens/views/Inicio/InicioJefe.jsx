@@ -4,7 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import useAuth from "../../hooks/Auth/useAuth";
 
-const { width } = Dimensions.get("window");
+const { width, height } = Dimensions.get("window");
 
 const JefeScreen = ({ navigation }) => {
   const { logout } = useAuth();
@@ -15,7 +15,7 @@ const JefeScreen = ({ navigation }) => {
 
   return (
     <LinearGradient 
-      colors={["#352F44", "#5D3587"]} 
+      colors={["#549fcb", "#cfe3ea","#0a4472"]} 
       style={styles.container}
     >
       <View style={styles.overlay}>
@@ -31,7 +31,7 @@ const JefeScreen = ({ navigation }) => {
             activeOpacity={0.7}
           >
             <LinearGradient
-              colors={["#6A5ACD", "#483D8B"]}
+              colors={["#3766b8", "#6087ca"]}
               style={styles.buttonGradient}
             >
               <Ionicons name="clipboard-outline" size={24} color="white" />
@@ -45,14 +45,16 @@ const JefeScreen = ({ navigation }) => {
             activeOpacity={0.7}
           >
             <LinearGradient
-              colors={["#4B0082", "#8A2BE2"]}
+              colors={["#044597", "#3877c8"]}
               style={styles.buttonGradient}
             >
               <Ionicons name="qr-code-outline" size={24} color="white" />
               <Text style={styles.buttonText}>Escanear QR</Text>
             </LinearGradient>
           </TouchableOpacity>
+        </View>
 
+        <View style={styles.logoutContainer}>
           <TouchableOpacity
             style={styles.logoutButton}
             onPress={handleLogout}
@@ -78,27 +80,31 @@ const styles = StyleSheet.create({
   },
   overlay: {
     flex: 1,
-    justifyContent: "center",
+    justifyContent: "space-between",
     alignItems: "center",
     paddingHorizontal: 20,
+    paddingVertical: 80,
   },
   headerContainer: {
-    marginBottom: 40,
     alignItems: "center",
   },
   title: {
     fontSize: 32,
-    fontWeight: "900",
-    color: "white",
+    fontWeight: "800",
+    color: "#2e4357",
     letterSpacing: 1,
+    shadowColor: "#000",
   },
   subtitle: {
     fontSize: 18,
-    color: "#CAC4CE",
+    color: "#5c7085",
+    shadowColor: "#000",
+    fontWeight: "600",
     marginTop: 10,
   },
   buttonContainer: {
     width: width * 0.8,
+    justifyContent: "center",
   },
   button: {
     marginBottom: 20,
@@ -118,10 +124,17 @@ const styles = StyleSheet.create({
     marginLeft: 10,
     fontWeight: "600",
   },
+  logoutContainer: {
+    width: width * 0.8,
+  },
   logoutButton: {
-    marginTop: 20,
     borderRadius: 15,
     overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.30,
+    shadowRadius: 4.65,
+    elevation: 8,
   },
   logoutText: {
     color: "white",
