@@ -5,9 +5,10 @@ import { motion } from "framer-motion";
 import { useMediaQuery } from "react-responsive";
 
 import { IoIosArrowBack } from "react-icons/io";
-import { TiThLarge } from "react-icons/ti";
-import { MdMenu, MdViewAgenda } from "react-icons/md";
-import { FaUserLarge } from "react-icons/fa6";
+import { MdMenu } from "react-icons/md";
+import { TbLayoutDashboardFilled } from "react-icons/tb";
+import { RiShieldUserFill } from "react-icons/ri";
+import { IoLogOut } from "react-icons/io5";
 
 import icono from "@/assets/logo.svg";
 import apagar from "@/assets/apagar.svg";
@@ -19,7 +20,7 @@ const SideBar = () => {
   const { pathname } = useLocation();
   const [screens, setScreens] = useState();
   const [link, setLink] = useState([]);
-  
+
   const user = {
     username: "yoiber",
     nombre: "Yoiber",
@@ -77,7 +78,7 @@ const SideBar = () => {
     const elements = [
       {
         to: "/dashboard",
-        icon: <TiThLarge size={20} className="min-w-max" />,
+        icon: <TbLayoutDashboardFilled size={20} className="min-w-max" />,
         label: "Dashboard",
         roles: ["admin"],
       },
@@ -89,13 +90,13 @@ const SideBar = () => {
       // },
       {
         to: "/usuarios",
-        icon: <FaUserLarge size={20} className="min-w-max" />,
+        icon: <RiShieldUserFill size={20} className="min-w-max" />,
         label: "Usuarios",
         roles: ["admin"],
       },
     ];
     const rol = roleMapper(user?.rol || 0);
-    const elementsFiltered = elements.filter(element => 
+    const elementsFiltered = elements.filter((element) =>
       element?.roles?.includes(rol)
     );
     elementsFiltered.length > 0 && setLink(elementsFiltered);
@@ -105,7 +106,7 @@ const SideBar = () => {
     <aside>
       <div
         onClick={() => setIsOpen(false)}
-        className={`md:hidden fixed inset-0 max-h-screen z-[50] bg-black/50 ${
+        className={`md:hidden fixed inset-0 max-h-screen z-[20] bg-black/50 ${
           isOpen ? "block" : "hidden"
         } `}
       ></div>
@@ -133,7 +134,7 @@ const SideBar = () => {
                 <NavLink
                   to={to}
                   className={`link ${
-                    pathname.includes(to) ? "link-active border-r-8 border-teal-500" : ""
+                    pathname.includes(to) ? "bg-blue-100 hover:bg-blue-200" : ""
                   }`}
                 >
                   {icon}
@@ -144,12 +145,15 @@ const SideBar = () => {
           </ul>
           {/* footer */}
           <div className="flex-1 text-sm z-50 max-h-48 my-auto whitespace-pre w-full font-medium">
-            <span onClick={logout} className="flex items-center justify-between-border border-y border-slate-300 p-4">
-                <span className="flex rounded-md gap-6 items-center md:cursor-pointer cursor-default duration-300 font-medium text-blue-900 pl-2 text-sm-medium">
-                  <span className="flex gap-6">
-                    <img src={apagar} alt="A" className="min-w-max" />
-                    Salir
-                  </span>
+            <span
+              onClick={logout}
+              className="flex items-center justify-between-border border-y border-slate-300 p-4"
+            >
+              <span className="flex rounded-md gap-6 items-center md:cursor-pointer cursor-default duration-300 font-medium text-blue-400 pl-2 text-sm-medium">
+                <span className="flex gap-6">
+                  <IoLogOut size={20} className="min-w-max" />
+                  Cerrar sesión
+                </span>
               </span>
             </span>
           </div>

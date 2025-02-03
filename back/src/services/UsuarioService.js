@@ -53,22 +53,88 @@ export const createUsuario = async (nombre_usuario, contrasena_hash, nombre_comp
 };
 
 // 🔹 Obtener todos los usuarios con sus roles
-export const getAllUsers = async () => {
-    const usuarios = await prisma.usuario.findMany({
-        where: { estado: true },
-        include: {
-            usuario_roles: {
-                include: { rol: true },
-            },
-        },
-        orderBy: { creado_en: "desc" },
-    });
+export const getAsistencias = async (filters, page = 1, pageSize = 10) => {
+    const { nombre_completo, fecha, id_embarcacion } = filters;
 
-    if (usuarios.length === 0) {
-        throw new Error("No hay usuarios disponibles.");
+    // Construcción dinámica de filtros
+    const whereClause = { tipo: "entrada" };
+
+    if (nombre_completo) {
+        whereClause.usuario = {
+            nombre_completo: { contains: nombre_completo.toLowerCase() }, // Convertir el filtro a minúsculas
+        };
     }
 
-    return usuarios;
+    if (fecha) {
+        whereClause.fecha_hora = {
+            gte: new Date(`${fecha}T00:00:00.000Z`),
+            lt: new Date(`${fecha}T23:59:59.999Z`),
+        };
+    }
+
+    if (id_embarcacion) {
+        whereClause.id_embarcacion = parseInt(id_embarcacion, 10);
+    }
+
+    const skip = (page - 1) * pageSize; // Calcular cuántos registros omitir
+
+    const [asistencias, total] = await Promise.all([
+        prisma.asistencia.findMany({
+            where: whereClause,
+            include: {
+                usuario: { select: { nombre_completo: true } },
+                embarcacion: { select: { nombre: true } },
+            },
+            orderBy: { fecha_hora: "desc" },
+            skip,
+            take: pageSize,
+        }),
+        prisma.asistencia.count({ where: whereClause }), // Obtener total de registros filtrados
+    ]);
+
+    // Obtener las salidas correspondientes y calcular horas trabajadas
+    const asistenciasConSalidas = await Promise.all(
+        asistencias.map(async (entrada) => {
+            const salida = await prisma.asistencia.findFirst({
+                where: {
+                    id_usuario: entrada.id_usuario,
+                    id_embarcacion: entrada.id_embarcacion,
+                    tipo: "salida",
+                    fecha_hora: { gte: entrada.fecha_hora }, // Buscar salida después de la entrada
+                },
+                orderBy: { fecha_hora: "asc" },
+            });
+
+            let horas_trabajo = null;
+            if (salida) {
+                const diffMs = new Date(salida.fecha_hora) - new Date(entrada.fecha_hora);
+                const hours = Math.floor(diffMs / 3600000);
+                const minutes = Math.floor((diffMs % 3600000) / 60000);
+                const seconds = Math.floor((diffMs % 60000) / 1000);
+                horas_trabajo = `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+            }
+
+            return {
+                id: entrada.id_asistencia,
+                nombre_completo: entrada.usuario.nombre_completo,
+                fecha: entrada.fecha_hora.toISOString().split("T")[0],
+                fecha_hora_entrada: entrada.fecha_hora,
+                fecha_hora_salida: salida ? salida.fecha_hora : null,
+                latitud: entrada.latitud,
+                longitud: entrada.longitud,
+                embarcacion: entrada.embarcacion.nombre,
+                horas_trabajo,
+            };
+        })
+    );
+
+    return {
+        total,
+        page,
+        pageSize,
+        totalPages: Math.ceil(total / pageSize),
+        data: asistenciasConSalidas,
+    };
 };
 
 export const getFilteredUsers = async (filters) => {

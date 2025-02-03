@@ -5,7 +5,7 @@ export const Input = ({
   ...props
 }) => {
   return (
-    <div className="relative flex items-center">
+    <div className="relative flex items-center justify-start w-full">
       {/* Ícono a la izquierda */}
       {iconLeft && (
         <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">

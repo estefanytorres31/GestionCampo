@@ -20,12 +20,23 @@ export const createUsuario = async (req, res) => {
     }
 };
 
-export const getAllUsers = async (req, res) => {
+export const getUsersController = async (req, res) => {
     try {
-        const usuarios = await UsuarioService.getAllUsers();
-        res.status(200).json({ message: "Usuarios obtenidos exitosamente.", data: usuarios });
+        const filters = {
+            nombre_usuario: req.query.nombre_usuario || undefined,
+            email: req.query.email || undefined,
+            estado: req.query.estado || undefined,
+            rol_id: req.query.rol_id || undefined,
+        };
+
+        const page = parseInt(req.query.page) || 1;
+        const pageSize = parseInt(req.query.pageSize) || 10;
+
+        const result = await UsuarioService.getAllUsers(filters, page, pageSize);
+        
+        res.status(200).json(result);
     } catch (error) {
-        res.status(404).json({ message: error.message });
+        res.status(500).json({ message: error.message });
     }
 };
 
