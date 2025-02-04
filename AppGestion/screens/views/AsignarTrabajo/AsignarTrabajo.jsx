@@ -55,7 +55,7 @@ const AsignarTrabajoScreen = ({route, navigation }) => {
       const promises = sistemas.map(sistema => 
         guardarOrdenTrabajoSistema(
           ordenTrabajoId,
-          sistema.id_tipo_trabajo_embarcacion_sistema_parte
+          sistema.id_embarcacion_sistema
         )
       );
       
@@ -136,7 +136,7 @@ const AsignarTrabajoScreen = ({route, navigation }) => {
         {sistemas.length > 0 ? (
           sistemas.map((sistema, index) => (
             <Text key={index} style={styles.selectedText}>
-              • {sistema.nombre_sistema}
+              • {sistema.id_embarcacion_sistema}
             </Text>
           ))
         ) : (
