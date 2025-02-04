@@ -1,7 +1,8 @@
-import usePermisos from "../hooks/usePermisos";
-import ListPage from "../components/ListPage";
+import usePermisos from "../../hooks/usePermisos";
+import ListPage from "../../components/ListPage";
 import { BsSearch } from "react-icons/bs";
-import { formatId } from "../utils/formatId";
+import { formatId } from "../../utils/formatId";
+import CreatePermissionModal from "./CreatePermisoModal";
 
 // ✅ Columnas de la tabla de permisos
 const permisosColumns = [
@@ -12,10 +13,9 @@ const permisosColumns = [
   { name: "⏳ Estado", uuid: "estado" },
 ];
 
-// ✅ Filtros de búsqueda para la lista de permisos
+// ✅ Filtros de búsqueda
 const permisosFilters = [
   { key: "nombre", type: "text", placeholder: "Buscar por nombre", icon: <BsSearch className="text-gray-400" /> },
-  { key: "estado", type: "select", options: ["Todos", "Activo", "Inactivo"], placeholder: "Filtrar por estado" },
 ];
 
 /** ✅ Formatea la fecha a YYYY-MM-DD HH:mm:ss */
@@ -32,6 +32,7 @@ export const Permisos = () => {
       columns={permisosColumns}
       filterFields={permisosFilters}
       title="Permisos"
+      createButton={<CreatePermissionModal />}
       render={{
         id: (row) => formatId(row.id),
         creado_en: (row) => formatFecha(row.creado_en),

@@ -9,7 +9,7 @@ import { Login } from "./pages/Login";
 import { PrivateLayout } from "./layouts/PrivateLayout";
 import { Asistencias } from "./pages/Asistencias";
 import Usuarios from "./pages/Usuarios";
-import { Permisos } from "./pages/Permisos";
+import { Permisos } from "./pages/permisos/Permisos";
 
 const PrivateRoute = ({ children }) => {
   const { isAuth } = useAuth();
@@ -21,6 +21,16 @@ const AppContent = () => {
     <>
       <Routes>
         <Route path="/login" element={<Login />} />
+        <Route
+          path="/dashboard"
+          element={
+            <PrivateRoute>
+              <PrivateLayout>
+                <Asistencias />
+              </PrivateLayout>
+            </PrivateRoute>
+          }
+        />
         <Route
           path="/asistencias"
           element={

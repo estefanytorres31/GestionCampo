@@ -17,12 +17,37 @@ export const createOrdenTrabajoParte = async (req, res) => {
  */
 export const getAllOrdenesTrabajoParte = async (req, res) => {
     try {
-        const ordenes = await OrdenTrabajoParteService.getAllOrdenesTrabajoParte();
-        res.status(200).json({ message: "Órdenes de trabajo parte obtenidas exitosamente.", data: ordenes });
+      const { estado, id_orden_trabajo_sistema, id_parte } = req.query;
+  
+      // Validaciones de entrada
+      if (id_orden_trabajo_sistema && isNaN(parseInt(id_orden_trabajo_sistema))) {
+        return res.status(400).json({ message: "El ID de orden de trabajo sistema debe ser un número válido." });
+      }
+      if (id_parte && isNaN(parseInt(id_parte))) {
+        return res.status(400).json({ message: "El ID de parte debe ser un número válido." });
+      }
+  
+      // Llamar al service y obtener datos
+      const ordenes = await OrdenTrabajoParteService.getAllOrdenesTrabajoParte({
+        estado,
+        id_orden_trabajo_sistema,
+        id_parte,
+      });
+  
+      // Responder
+      return res.status(200).json({ 
+        message: "Órdenes de trabajo parte obtenidas exitosamente.",
+        data: ordenes
+      });
     } catch (error) {
-        res.status(404).json({ message: error.message });
+      // Distinción de errores
+      if (error.message === "No hay órdenes de trabajo parte disponibles con los criterios especificados.") {
+        return res.status(404).json({ message: error.message });
+      }
+      console.error("Error al obtener órdenes de trabajo parte:", error);
+      return res.status(500).json({ message: "Ocurrió un error interno en el servidor." });
     }
-};
+  };
 
 /**
  * Obtener una OrdenTrabajoParte por ID
