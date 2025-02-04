@@ -17,7 +17,6 @@ const { width } = Dimensions.get("window");
 
 const Inicio = ({ route, navigation }) => {
   const { logout, role } = useAuth();
-  // const { idOrden } = route.params;
 
   useFocusEffect(
     React.useCallback(() => {
@@ -37,9 +36,8 @@ const Inicio = ({ route, navigation }) => {
   const handleLogout = () => {
     logout();
     navigation.navigate("Login");
-
-   
   };
+
   const showLogoutButton = role && !role.includes("Jefe");
 
   return (
@@ -63,9 +61,11 @@ const Inicio = ({ route, navigation }) => {
             <View style={styles.cardContainer}>
               <TouchableOpacity
                 style={styles.card}
-                onPress={() => navigation.navigate("QRScann", {
+                onPress={() =>
+                  navigation.navigate("QRScann", {
                     // idOrden
-                })}
+                  })
+                }
                 activeOpacity={0.7}
               >
                 <View style={styles.cardContent}>
@@ -82,7 +82,28 @@ const Inicio = ({ route, navigation }) => {
                   </View>
                 </View>
               </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.card}
+                onPress={() => navigation.navigate("TrabajosAsignados")}
+                activeOpacity={0.7}
+              >
+                <View style={styles.cardContent}>
+                  <View style={styles.iconContainer}>
+                    <MaterialCommunityIcons
+                      name="clipboard-list"
+                      size={32}
+                      color="#1A2980"
+                    />
+                  </View>
+                  <View style={styles.cardTextContainer}>
+                    <Text style={styles.cardTitle}>Lista de OT</Text>
+                    <View style={styles.chevron} />
+                  </View>
+                </View>
+              </TouchableOpacity>
             </View>
+
             {showLogoutButton && (
               <TouchableOpacity
                 style={styles.logoutButton}

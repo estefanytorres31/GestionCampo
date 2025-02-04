@@ -38,7 +38,7 @@ export default function Navigation () {
             <Stack.Navigator initialRouteName="Login" >
                 <Stack.Screen name="Login" component={LoginScreen}  options={{ headerShown: false }} />
                 <Stack.Screen name="InicioJefe" component={InicioJefe} options={{ tittle:"Inicio",headerShown: false }} />
-                <Stack.Screen name="Clientes" component={Clientes}  options={{ title: "Clientes"}} />
+                <Stack.Screen name="Clientes" component={Clientes} />
                 <Stack.Screen name="Embarcaciones" component={EmbarcacionesScreen} />
                 <Stack.Screen name="Trabajo" component={Trabajo} />
                 <Stack.Screen name="Sistemas" component={SistemasScreen} options={{title:"Sistemas"}}/>
@@ -59,10 +59,11 @@ export default function Navigation () {
                 component={TrabajosAsignadosScreen} 
                 options={{ title: "Mis Trabajos" }} 
                 />
-
-
-
-                <Stack.Screen name="Inicio" component={Inicio}  options={{ headerShown: role?.[0] === "Técnico" ? false : true }}/>
+                <Stack.Screen 
+                name="Inicio" 
+                component={Inicio}  
+                options={{ headerShown: role?.includes("Jefe") ? true : false }}
+                />
                 <Stack.Screen name="QRScann" component={QRScann} options={{ title: "Escaneo de QR" }} />
                 <Stack.Screen name="Menu" component={Menu} options={{ title: "Menú"}} />
                 <Stack.Screen name="Mantto" component={Mantto} options={{ title: "Mantenimiento Preventivo" }} />

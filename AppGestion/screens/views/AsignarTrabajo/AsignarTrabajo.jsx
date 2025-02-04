@@ -109,7 +109,9 @@ const AsignarTrabajoScreen = ({route, navigation }) => {
         navigation.dispatch(
           CommonActions.reset({
             index: 1,
-            routes: [ { name: 'Clientes' }],
+            routes: [
+              { name: 'InicioJefe' }
+            ],
           })
         );
       }
