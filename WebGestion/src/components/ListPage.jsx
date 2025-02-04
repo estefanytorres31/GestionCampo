@@ -10,7 +10,14 @@ import "jspdf-autotable";
 import { saveAs } from "file-saver";
 import Table from "./Table";
 
-const ListPage = ({ useFetchHook, columns, filterFields, title, render = {} }) => {
+const ListPage = ({
+  useFetchHook,
+  columns,
+  filterFields,
+  title,
+  render = {},
+  createButton,
+}) => {
   const [filters, setFilters] = useState(
     filterFields.reduce((acc, field) => ({ ...acc, [field.key]: "" }), {})
   );
@@ -30,12 +37,16 @@ const ListPage = ({ useFetchHook, columns, filterFields, title, render = {} }) =
     }
 
     const header = columns.map((col) => col.name);
-    const body = data.map((row) => columns.map((col) => row[col.uuid] || "N/A"));
+    const body = data.map((row) =>
+      columns.map((col) => row[col.uuid] || "N/A")
+    );
 
     const sheetData = [header, ...body];
     const buffer = xlsx.build([{ name: title, data: sheetData }]);
 
-    const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+    const blob = new Blob([buffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
 
     saveAs(blob, `${title}.xlsx`);
   };
@@ -66,7 +77,16 @@ const ListPage = ({ useFetchHook, columns, filterFields, title, render = {} }) =
     <>
       <section className="flex flex-col justify-between items-center gap-4 w-full">
         <div className="flex gap-2 items-center justify-between w-full overflow-auto">
-          { filterFields.length > 0 && <Filters filters={filters} setFilters={setFilters} filterFields={filterFields} /> }
+          {/* Filtros de búsqueda */}
+          {filterFields.length > 0 && (
+            <Filters
+              filters={filters}
+              setFilters={setFilters}
+              filterFields={filterFields}
+            />
+          )}
+
+          {/* Botón de Crear y Exportar */}
           <div className="flex gap-2 flex-col justify-end md:flex-row w-max-[100px] z-10">
             <Button className="flex gap-1" onClick={exportToPDF}>
               <VscFilePdf size={20} className="min-w-max" />
@@ -76,12 +96,21 @@ const ListPage = ({ useFetchHook, columns, filterFields, title, render = {} }) =
               <RiFileExcel2Fill size={20} className="min-w-max" />
               Excel
             </Button>
+            {createButton && createButton} {/* Renderiza el botón si existe */}
           </div>
         </div>
       </section>
+
       <main className="list-layout">
-        <Table columns={columns} data={data} render={render} loading={loading} error={error} />
+        <Table
+          columns={columns}
+          data={data}
+          render={render}
+          loading={loading}
+          error={error}
+        />
       </main>
+
       <Pagination pagination={pagination} setPage={setPage} />
     </>
   );
