@@ -1,28 +1,36 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Modal from "@/components/Modal";
 import { InputLabel } from "@/components/InputLabel";
 import Button from "@/components/Button";
-import usePostData from "@/hooks/usePostData"; // Asegúrate de que la ruta sea correcta
+import usePutData from "@/hooks/usePutData"; // Asegúrate de que la ruta sea correcta
 
-const CreateRoleModal = ({ isOpen, onClose, onSuccess }) => {
-  const [nombreRol, setNombreRol] = useState("");
+const EditPermissionModal = ({ isOpen, onClose, onSuccess, permission }) => {
+  const [nombre, setNombre] = useState("");
   const [descripcion, setDescripcion] = useState("");
-  const { postData, loading, error } = usePostData("/rol");
+
+  // Actualizamos los estados locales cuando el permiso cambia
+  useEffect(() => {
+    if (permission) {
+      setNombre(permission.nombre || "");
+      setDescripcion(permission.descripcion || "");
+    }
+  }, [permission]);
+
+  // Definimos el endpoint usando el id del permiso
+  const endpoint = permission ? `/permiso/${permission.id}` : null;
+  const { putData, loading, error } = usePutData(endpoint);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!permission) return;
     try {
-      // Ejecuta la petición POST usando el hook, incluyendo la descripción
-      const data = await postData({ 
-        nombre_rol: nombreRol,
-        descripcion: descripcion,
+      const data = await putData({
+        nombre,
+        descripcion,
       });
       onSuccess(data); // Notifica al componente padre el éxito
       onClose(); // Cierra el modal
-      setNombreRol(""); // Reinicia el formulario
-      setDescripcion("");
     } catch (err) {
-      // El error se maneja en el hook, pero aquí podrías realizar acciones adicionales si lo requieres
       console.error(err);
     }
   };
@@ -31,7 +39,7 @@ const CreateRoleModal = ({ isOpen, onClose, onSuccess }) => {
     <Modal isOpen={isOpen} onClose={onClose}>
       <Modal.Header>
         <h2 className="text-xl font-bold border-b border-[#1c2c4f]/20 py-3 text-[#1c2c4f]">
-          Crear Rol
+          Editar Permiso
         </h2>
       </Modal.Header>
 
@@ -41,20 +49,20 @@ const CreateRoleModal = ({ isOpen, onClose, onSuccess }) => {
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <div>
               <InputLabel
-                id="nombreRol"
-                label="Nombre del Rol"
-                placeholder="Nombre del Rol"
-                value={nombreRol}
-                onChange={(e) => setNombreRol(e.target.value)}
+                id="nombrePermiso"
+                label="Nombre del Permiso"
+                placeholder="Nombre del Permiso"
+                value={nombre}
+                onChange={(e) => setNombre(e.target.value)}
                 type="text"
                 required
               />
             </div>
             <div>
               <InputLabel
-                id="descripcion"
+                id="descripcionPermiso"
                 label="Descripción"
-                placeholder="Descripción del Rol"
+                placeholder="Descripción del Permiso"
                 value={descripcion}
                 onChange={(e) => setDescripcion(e.target.value)}
                 type="text"
@@ -63,7 +71,7 @@ const CreateRoleModal = ({ isOpen, onClose, onSuccess }) => {
             </div>
             <Modal.Footer>
               <Button type="submit" className="my-2" disabled={loading}>
-                {loading ? "Guardando..." : "Guardar"}
+                {loading ? "Guardando..." : "Guardar Cambios"}
               </Button>
             </Modal.Footer>
           </form>
@@ -73,4 +81,4 @@ const CreateRoleModal = ({ isOpen, onClose, onSuccess }) => {
   );
 };
 
-export default CreateRoleModal;
+export default EditPermissionModal;

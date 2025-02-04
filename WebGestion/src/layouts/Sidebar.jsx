@@ -167,7 +167,7 @@ const SideBar = () => {
                         }))
                       }
                     >
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-6">
                         {element.icon}
                         <span className="text-sm-medium">{element.label}</span>
                       </div>

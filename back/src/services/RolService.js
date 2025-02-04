@@ -52,40 +52,54 @@ export const createRol = async (nombre_rol, descripcion) => {
   return nuevoRol;
 };
 
-// 🔹 Obtener todos los roles
+// 🔹 Obtener todos los roles (modificado para incluir solo los nombres de los permisos asignados)
 export const getAllRoles = async (filters, page = 1, pageSize = 10) => {
-  const { nombre_rol, estado } = filters;
-
-  // Construcción dinámica de filtros
-  const whereClause = {
-    estado: estado !== undefined ? estado === "true" : true, // Filtra por estado activo por defecto
-  };
-
-  if (nombre_rol) {
-    whereClause.nombre_rol = { contains: nombre_rol }; // Filtra por nombre_rol si se proporciona
-  }
-
-  const skip = (page - 1) * pageSize; // Calcular cuántos registros omitir
-
-  // Obtener roles y total de registros en paralelo
-  const [roles, total] = await Promise.all([
-    prisma.rol.findMany({
-      where: whereClause,
-      orderBy: { creado_en: "desc" },
-      skip,
-      take: pageSize,
-    }),
-    prisma.rol.count({ where: whereClause }), // Contar total de registros filtrados
-  ]);
-
-  return {
-    total,
-    page,
-    pageSize,
-    totalPages: Math.ceil(total / pageSize),
-    data: roles,
-  };
-};
+    const { nombre_rol, estado } = filters;
+  
+    // Construcción dinámica de filtros
+    const whereClause = {
+      estado: estado !== undefined ? estado === "true" : true, // Filtra por estado activo por defecto
+    };
+  
+    if (nombre_rol) {
+      whereClause.nombre_rol = { contains: nombre_rol };
+    }
+  
+    const skip = (page - 1) * pageSize;
+  
+    // Obtener roles y total de registros en paralelo, incluyendo la relación roles_permisos
+    const [roles, total] = await Promise.all([
+      prisma.rol.findMany({
+        where: whereClause,
+        orderBy: { creado_en: "desc" },
+        skip,
+        take: pageSize,
+        include: {
+          roles_permisos: {
+            where: { estado: true }, // Opcional: filtra solo permisos activos
+            select: {
+              permiso: { select: { nombre: true } }, // Solo obtenemos el nombre del permiso
+            },
+          },
+        },
+      }),
+      prisma.rol.count({ where: whereClause }),
+    ]);
+  
+    // Transformar cada rol para que roles_permisos sea un array de nombres (strings)
+    const rolesTransformados = roles.map(({ roles_permisos, ...rol }) => ({
+      ...rol,
+      roles_permisos: roles_permisos.map(rp => rp.permiso.nombre),
+    }));
+  
+    return {
+      total,
+      page,
+      pageSize,
+      totalPages: Math.ceil(total / pageSize),
+      data: rolesTransformados,
+    };
+  };  
 
 // Obtener un rol por su ID
 export const getRolById = async (id) => {

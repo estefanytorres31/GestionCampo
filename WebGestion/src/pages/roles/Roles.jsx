@@ -1,18 +1,22 @@
 import React, { useMemo, useState, useRef } from "react";
 import ListPage from "@/components/ListPage";
-import useRoles from "../../hooks/roles/useRoles";
-import { BsSearch } from "react-icons/bs";
-import { formatId } from "@/utils/formatId";
 import CreateRoleModal from "./CreateRoleModal";
 import EditRoleModal from "./EditRoleModal";
+import DeleteRoleModal from "./DeleteRoleModal";
 import Button from "@/components/Button";
+import RowActions from "@/components/RowActions";
+import useRoles from "../../hooks/roles/useRoles";
+import AssignPermissionsModal from "./AssignPermissionsModal";
+import { BsSearch } from "react-icons/bs";
+import { formatId } from "@/utils/formatId";
 import { IoAdd } from "react-icons/io5";
-import { MdDelete, MdEdit } from "react-icons/md";
+import { MdAssignmentAdd } from "react-icons/md";
 
 const rolesColumns = [
   { name: "ID", uuid: "id" },
   { name: "🔑 Nombre", uuid: "nombre_rol" },
   { name: "📝 Descripción", uuid: "descripcion" },
+  { name: "📜 Permisos", uuid: "permisos" },
   { name: "⏳ Estado", uuid: "estado" },
   { name: "⚙️ Acciones", uuid: "acciones" },
 ];
@@ -29,14 +33,22 @@ const rolesFilters = [
 const Roles = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [roleToEdit, setRoleToEdit] = useState(null);
+  const [roleToDelete, setRoleToDelete] = useState(null);
+  const [isAssignPermissionsModalOpen, setIsAssignPermissionsModalOpen] =
+    useState(false);
+  const [roleToAssign, setRoleToAssign] = useState(null);
 
-  // Usamos un ref para guardar la función refetch
   const listPageRefetchRef = useRef(null);
 
-  // Si manejas filtros a nivel de Roles (esto es opcional)
   const [filters, setFilters] = useState({});
   const memoizedFilters = useMemo(() => filters, [filters]);
+
+  const handleAssignPermissions = (row) => {
+    setRoleToAssign(row);
+    setIsAssignPermissionsModalOpen(true);
+  };
 
   const handleSuccess = async (data) => {
     console.log("Operación exitosa", data);
@@ -55,6 +67,16 @@ const Roles = () => {
         listPageRefetchRef.current
       );
     }
+  };
+
+  const handleEdit = (row) => {
+    setRoleToEdit(row);
+    setIsEditModalOpen(true);
+  };
+
+  const handleDelete = (row) => {
+    setRoleToDelete(row);
+    setIsDeleteModalOpen(true);
   };
 
   return (
@@ -77,6 +99,30 @@ const Roles = () => {
         />
       )}
 
+      {roleToDelete && (
+        <DeleteRoleModal
+          isOpen={isDeleteModalOpen}
+          onClose={() => {
+            setIsDeleteModalOpen(false);
+            setRoleToDelete(null);
+          }}
+          role={roleToDelete}
+          onSuccess={handleSuccess}
+        />
+      )}
+
+      {roleToAssign && (
+        <AssignPermissionsModal
+          isOpen={isAssignPermissionsModalOpen}
+          onClose={() => {
+            setIsAssignPermissionsModalOpen(false);
+            setRoleToAssign(null);
+          }}
+          role={roleToAssign}
+          onSuccess={handleSuccess}
+        />
+      )}
+
       <ListPage
         useFetchHook={useRoles}
         columns={rolesColumns}
@@ -88,7 +134,6 @@ const Roles = () => {
             Crear Rol
           </Button>
         }
-        // En lugar de usar state, asignamos la función refetch al ref
         onRefetch={(refetch) => {
           if (typeof refetch === "function") {
             listPageRefetchRef.current = refetch;
@@ -97,25 +142,22 @@ const Roles = () => {
         render={{
           id: (row) => formatId(row.id),
           estado: (row) => (row.estado ? "🟢 Activo" : "🔴 Inactivo"),
+          permisos: (row) =>
+            row.roles_permisos && row.roles_permisos.length > 0
+              ? row.roles_permisos.join(", ")
+              : "-",
           acciones: (row) => (
             <>
+              <RowActions
+                row={row}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+              />
               <Button
-                color="icon"
-                onClick={() => {
-                  setRoleToEdit(row);
-                  setIsEditModalOpen(true);
-                }}
+                onClick={() => handleAssignPermissions(row)}
+                color="secondary"
               >
-                <MdEdit size={20} className="min-w-max" />
-              </Button>
-              <Button
-                color="icon"
-                onClick={() => {
-                  setRoleToEdit(row);
-                  setIsEditModalOpen(true);
-                }}
-              >
-                <MdDelete size={20} className="min-w-max" />
+                <MdAssignmentAdd size={20} className="min-w-max" />
               </Button>
             </>
           ),
