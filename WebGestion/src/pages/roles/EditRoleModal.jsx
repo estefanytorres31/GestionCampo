@@ -1,17 +1,15 @@
-// components/EditRoleModal.jsx
 import React, { useState, useEffect } from "react";
 import Modal from "@/components/Modal";
-import axiosInstance from "@/config/axiosConfig";
 import { InputLabel } from "@/components/InputLabel";
 import Button from "@/components/Button";
+import usePutData from "@/hooks/usePutData";
 
 const EditRoleModal = ({ isOpen, onClose, onSuccess, role }) => {
-  // Estados para manejar el nombre y la descripción del rol
+  // Estados locales para manejar el nombre y la descripción del rol
   const [nombreRol, setNombreRol] = useState("");
   const [descripcion, setDescripcion] = useState("");
-  const [error, setError] = useState(null);
 
-  // Al abrir el modal o cuando el rol cambie, asigna los valores actuales a los estados locales.
+  // Actualizamos los estados locales cuando el rol cambia
   useEffect(() => {
     if (role) {
       setNombreRol(role.nombre_rol || "");
@@ -19,22 +17,24 @@ const EditRoleModal = ({ isOpen, onClose, onSuccess, role }) => {
     }
   }, [role]);
 
+  // Inicializamos el hook usePutData solo si role existe y tiene un id
+  const endpoint = role ? `/rol/${role.id}` : null;
+  const { putData, loading, error } = usePutData(endpoint);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(null);
+    if (!role) return;
     try {
-      // Se realiza la petición PUT para actualizar el rol.
-      // Se envían tanto el nombre como la descripción en el cuerpo de la petición.
-      const response = await axiosInstance.put(`/rol/${role.id}`, {
+      // Ejecuta la petición PUT usando el hook
+      const data = await putData({
         nombre_rol: nombreRol,
         descripcion: descripcion,
       });
-      onSuccess(response.data); // Notifica el éxito al componente padre
+      onSuccess(data); // Notifica el éxito al componente padre
       onClose(); // Cierra el modal
     } catch (err) {
-      setError(
-        err.response?.data?.message || "Error al actualizar el rol."
-      );
+      // El error se maneja en el hook, aquí podrías realizar acciones adicionales si lo requieres
+      console.error(err);
     }
   };
 
@@ -73,8 +73,8 @@ const EditRoleModal = ({ isOpen, onClose, onSuccess, role }) => {
               />
             </div>
             <Modal.Footer>
-              <Button type="submit" className="my-2">
-                Guardar Cambios
+              <Button type="submit" className="my-2" disabled={loading}>
+                {loading ? "Guardando..." : "Guardar Cambios"}
               </Button>
             </Modal.Footer>
           </form>

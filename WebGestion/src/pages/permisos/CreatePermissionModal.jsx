@@ -1,28 +1,32 @@
+// components/CreatePermissionModal.jsx
 import React, { useState } from "react";
 import Modal from "@/components/Modal";
 import { InputLabel } from "@/components/InputLabel";
 import Button from "@/components/Button";
 import usePostData from "@/hooks/usePostData"; // Asegúrate de que la ruta sea correcta
 
-const CreateRoleModal = ({ isOpen, onClose, onSuccess }) => {
-  const [nombreRol, setNombreRol] = useState("");
+const CreatePermissionModal = ({ isOpen, onClose, onSuccess }) => {
+  // Estados para almacenar los valores de los campos
+  const [nombre, setNombre] = useState("");
   const [descripcion, setDescripcion] = useState("");
-  const { postData, loading, error } = usePostData("/rol");
+  
+  // Usamos el hook usePostData con el endpoint de permisos
+  const { postData, loading, error } = usePostData("/permiso");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // Ejecuta la petición POST usando el hook, incluyendo la descripción
-      const data = await postData({ 
-        nombre_rol: nombreRol,
+      // Ejecuta la petición POST usando el hook, incluyendo nombre y descripción
+      const data = await postData({
+        nombre: nombre,
         descripcion: descripcion,
       });
       onSuccess(data); // Notifica al componente padre el éxito
       onClose(); // Cierra el modal
-      setNombreRol(""); // Reinicia el formulario
+      // Reinicia los campos del formulario
+      setNombre("");
       setDescripcion("");
     } catch (err) {
-      // El error se maneja en el hook, pero aquí podrías realizar acciones adicionales si lo requieres
       console.error(err);
     }
   };
@@ -31,7 +35,7 @@ const CreateRoleModal = ({ isOpen, onClose, onSuccess }) => {
     <Modal isOpen={isOpen} onClose={onClose}>
       <Modal.Header>
         <h2 className="text-xl font-bold border-b border-[#1c2c4f]/20 py-3 text-[#1c2c4f]">
-          Crear Rol
+          Crear Permiso
         </h2>
       </Modal.Header>
 
@@ -41,20 +45,20 @@ const CreateRoleModal = ({ isOpen, onClose, onSuccess }) => {
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <div>
               <InputLabel
-                id="nombreRol"
-                label="Nombre del Rol"
-                placeholder="Nombre del Rol"
-                value={nombreRol}
-                onChange={(e) => setNombreRol(e.target.value)}
+                id="nombrePermiso"
+                label="Nombre del Permiso"
+                placeholder="Ej: Crear usuario"
+                value={nombre}
+                onChange={(e) => setNombre(e.target.value)}
                 type="text"
                 required
               />
             </div>
             <div>
               <InputLabel
-                id="descripcion"
+                id="descripcionPermiso"
                 label="Descripción"
-                placeholder="Descripción del Rol"
+                placeholder="Ej: Permiso para crear usuarios"
                 value={descripcion}
                 onChange={(e) => setDescripcion(e.target.value)}
                 type="text"
@@ -73,4 +77,4 @@ const CreateRoleModal = ({ isOpen, onClose, onSuccess }) => {
   );
 };
 
-export default CreateRoleModal;
+export default CreatePermissionModal;

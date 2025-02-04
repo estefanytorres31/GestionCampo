@@ -21,22 +21,22 @@ export const createRol = async (req, res) => {
 
 // Obtener todos los roles
 export const getAllRolesController = async (req, res) => {
-  try {
-    const filters = {
-      nombre_rol: req.query.nombre_rol || undefined,
-      estado: req.query.estado || undefined,
-    };
-
-    const page = parseInt(req.query.page) || 1;
-    const pageSize = parseInt(req.query.pageSize) || 10;
-
-    const result = await RolService.getAllRoles(filters, page, pageSize);
-
-    res.status(200).json(result);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
+    try {
+      const filters = {
+        nombre_rol: req.query.nombre_rol || undefined,
+        estado: req.query.estado || undefined,
+      };
+  
+      const page = parseInt(req.query.page) || 1;
+      const pageSize = parseInt(req.query.pageSize) || 10;
+  
+      const result = await RolService.getAllRoles(filters, page, pageSize);
+  
+      res.status(200).json(result);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  };
 
 // Obtener un rol por su ID
 export const getRolById = async (req, res) => {

@@ -220,15 +220,19 @@ model SistemaParte {
 }
 
 model EmbarcacionSistema {
-  id_embarcacion_sistema Int              @id @default(autoincrement()) @map("id_embarcacion_sistema")
-  id_embarcacion        Int              @map("id_embarcacion")
-  id_sistema            Int              @map("id_sistema")
-  estado_sistema        Boolean          @default(true) @map("estado_sistema")
-  creado_en             DateTime         @default(now()) @map("creado_en")
-  actualizado_en        DateTime         @updatedAt @map("actualizado_en")
-  embarcacion           Embarcacion      @relation(fields: [id_embarcacion], references: [id_embarcacion], onDelete: NoAction, onUpdate: Cascade)
-  sistema               Sistema          @relation(fields: [id_sistema], references: [id_sistema], onDelete: NoAction, onUpdate: Cascade)
+  id_embarcacion_sistema     Int                      @id @default(autoincrement()) @map("id_embarcacion_sistema")
+  id_embarcacion             Int                      @map("id_embarcacion")
+  id_sistema                 Int                      @map("id_sistema")
+  estado_sistema             Boolean                  @default(true) @map("estado_sistema")
+  creado_en                  DateTime                 @default(now()) @map("creado_en")
+  actualizado_en             DateTime                 @updatedAt @map("actualizado_en")
+  
+  embarcacion              Embarcacion              @relation(fields: [id_embarcacion], references: [id_embarcacion], onDelete: NoAction, onUpdate: Cascade)
+  sistema                  Sistema                  @relation(fields: [id_sistema], references: [id_sistema], onDelete: NoAction, onUpdate: Cascade)
   embarcacion_sistema_partes EmbarcacionSistemaParte[] // Relación inversa con EmbarcacionSistemaParte
+
+  // Nueva relación inversa para acceder a las órdenes de trabajo asociadas
+  orden_trabajo_sistemas   OrdenTrabajoSistema[]
 
   @@unique([id_embarcacion, id_sistema], name: "embarcacion_sistema_unique")
   @@map("embarcacion_sistema")
@@ -327,30 +331,28 @@ model OrdenTrabajoUsuario {
 model OrdenTrabajoSistema {
   id_orden_trabajo_sistema  Int                 @id @default(autoincrement())
   id_orden_trabajo          Int                 // FK a la orden principal
-  id_tipo_trabajo_embarcacion_sistema_parte     Int // Nuevo “único” FK
-  
-  estado        EstadoOrdenTrabajo @default(pendiente)
-  observaciones String?
-  avance        Int @default(0)
-  materiales    String?
-  proximo_abordaje String?
-  creado_en     DateTime @default(now())
-  actualizado_en DateTime @updatedAt
+  id_embarcacion_sistema    Int                 // Nueva FK a EmbarcacionSistema
+
+  estado             EstadoOrdenTrabajo @default(pendiente)
+  observaciones      String?
+  avance             Int                @default(0)
+  materiales         String?
+  proximo_abordaje   String?
+  creado_en          DateTime           @default(now())
+  actualizado_en     DateTime           @updatedAt
 
   /// Relaciones
-  orden_trabajo  OrdenTrabajo @relation(fields: [id_orden_trabajo], references: [id_orden_trabajo], onDelete: NoAction, onUpdate: Cascade)
-  // Relación al join “TipoTrabajoEmbarcacionSistemaParte”
-  tipo_trabajo_embarcacion_sistema_parte TipoTrabajoEmbarcacionSistemaParte @relation("TTESPtoOTSIS", fields: [id_tipo_trabajo_embarcacion_sistema_parte], references: [id_tipo_trabajo_embarcacion_sistema_parte], onDelete: NoAction, onUpdate: Cascade)
+  orden_trabajo      OrdenTrabajo       @relation(fields: [id_orden_trabajo], references: [id_orden_trabajo], onDelete: NoAction, onUpdate: Cascade)
+  embarcacion_sistema EmbarcacionSistema @relation(fields: [id_embarcacion_sistema], references: [id_embarcacion_sistema], onDelete: NoAction, onUpdate: Cascade)
 
-  // Resto de relaciones que ya tenías (detalles, fotos, etc.)
-  detalle                 OrdenTrabajoSistemaDetalle?
-  fotos                   OrdenTrabajoSistemaFoto[]
-  orden_trabajo_parte     OrdenTrabajoParte[]
+  // Relaciones adicionales existentes
+  detalle            OrdenTrabajoSistemaDetalle?
+  fotos              OrdenTrabajoSistemaFoto[]
+  orden_trabajo_parte OrdenTrabajoParte[]
 
-  // Ajustar la constraint única a lo que ahora tienes:
-  @@unique([id_orden_trabajo, id_tipo_trabajo_embarcacion_sistema_parte], name: "orden_trabajo_sistema_unique")
+  // Constraint única ajustada para la nueva relación
+  @@unique([id_orden_trabajo, id_embarcacion_sistema], name: "orden_trabajo_sistema_unique")
   @@map("orden_trabajo_sistema")
-  // Índices
   @@index([id_orden_trabajo], name: "idx_otsis_ot")
   @@index([estado], name: "idx_otsis_est")
 }
@@ -412,9 +414,6 @@ model TipoTrabajoEmbarcacionSistemaParte {
 
   /// Relación a "EmbarcacionSistemaParte" con la back-rel
   embarcacion_sistema_parte EmbarcacionSistemaParte @relation("ESPtoTTESP", fields: [id_embarcacion_sistema_parte], references: [id_embarcacion_sistema_parte], onDelete: Cascade, onUpdate: Cascade)
-
-  /// Back-rel a "OrdenTrabajoSistema"
-  orden_trabajo_sistemas OrdenTrabajoSistema[] @relation("TTESPtoOTSIS")
 
   @@unique([id_tipo_trabajo, id_embarcacion_sistema_parte], name: "unq_tt_esp")
   @@map("tipo_trabajo_esp") // nombre acortado para la tabla
