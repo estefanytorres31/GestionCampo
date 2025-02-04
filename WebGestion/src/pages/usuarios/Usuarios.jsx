@@ -1,17 +1,18 @@
 import { useState } from "react";
-import useUsuarios from "../hooks/useUsuarios";
-import Filters from "../components/Filters";
-import Pagination from "../components/Pagination";
-import { Button } from "../components/Button";
+import useUsuarios from "../../hooks/usuarios/useUsuarios";
+import Filters from "../../components/Filters";
+import Pagination from "../../components/Pagination";
+import Button from "../../components/Button";
 import { VscFilePdf } from "react-icons/vsc";
 import { RiFileExcel2Fill } from "react-icons/ri";
 import * as xlsx from "node-xlsx";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 import { saveAs } from "file-saver";
-import Table from "../components/Table";
+import Table from "../../components/Table";
 import { BsSearch } from "react-icons/bs";
-import { formatId } from "../utils/formatId";
+import { formatId } from "../../utils/formatId";
+import { MdEdit } from "react-icons/md";
 
 const Usuarios = () => {
   const [filters, setFilters] = useState({
@@ -22,7 +23,12 @@ const Usuarios = () => {
   const [page, setPage] = useState(1);
   const [pageSize] = useState(10);
 
-  const { data: usuarios, loading, error, pagination } = useUsuarios(filters, page, pageSize);
+  const {
+    data: usuarios,
+    loading,
+    error,
+    pagination,
+  } = useUsuarios(filters, page, pageSize);
 
   /** Exportar a Excel */
   const exportToExcel = () => {
@@ -82,9 +88,24 @@ const Usuarios = () => {
             filters={filters}
             setFilters={setFilters}
             filterFields={[
-              { key: "nombre_usuario", type: "text", placeholder: "Buscar usuario", icon: <BsSearch className="text-gray-400" /> },
-              { key: "nombre_completo", type: "text", placeholder: "Buscar nombre completo", icon: <BsSearch className="text-gray-400" /> },
-              { key: "email", type: "text", placeholder: "Buscar por email", icon: <BsSearch className="text-gray-400" /> },
+              {
+                key: "nombre_usuario",
+                type: "text",
+                placeholder: "Buscar usuario",
+                icon: <BsSearch className="text-gray-400" />,
+              },
+              {
+                key: "nombre_completo",
+                type: "text",
+                placeholder: "Buscar nombre completo",
+                icon: <BsSearch className="text-gray-400" />,
+              },
+              {
+                key: "email",
+                type: "text",
+                placeholder: "Buscar por email",
+                icon: <BsSearch className="text-gray-400" />,
+              },
             ]}
           />
           <div className="flex gap-2 flex-col justify-end md:flex-row">
@@ -108,12 +129,15 @@ const Usuarios = () => {
           error={error}
           render={{
             id: (row) => formatId(row.id),
-            roles: (row) => (row.roles.length > 0 ? row.roles.join(", ") : "Sin rol"),
+            roles: (row) =>
+              row.roles.length > 0 ? row.roles.join(", ") : "Sin rol",
             estado: (row) => (row.estado ? "🟢 Activo" : "🔴 Inactivo"),
             acciones: (row) => (
-              <Button className="bg-blue-500 text-white px-3 py-1 rounded" onClick={() => handleEdit(row)}>
-                Editar
-              </Button>
+              <>
+                <Button color="icon" onClick={() => handleEdit(row)}>
+                  <MdEdit size={20} className="min-w-max" />
+                </Button>
+              </>
             ),
           }}
         />

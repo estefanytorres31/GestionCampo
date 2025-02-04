@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import axiosInstance from "../config/axiosConfig";
 
 const useFetchData = (endpoint, filters = {}, page = 1, pageSize = 10) => {
@@ -12,33 +12,16 @@ const useFetchData = (endpoint, filters = {}, page = 1, pageSize = 10) => {
     totalPages: 0,
   });
 
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      // Validamos que los filtros tengan al menos 3 caracteres antes de hacer la petición
-      const validFilters = Object.entries(filters).reduce((acc, [key, value]) => {
-        if (value.length >= 3 || value === "") {
-          acc[key] = value;
-        }
-        return acc;
-      }, {});
+  // Se utiliza JSON.stringify para "estabilizar" el objeto filters.
+  const memoizedFilters = useMemo(() => filters, [JSON.stringify(filters)]);
 
-      if (Object.keys(validFilters).length > 0) {
-        fetchData(validFilters);
-      }
-    }, 1000); // 1 segundo de debounce
-
-    return () => clearTimeout(timeoutId);
-  }, [endpoint, filters, page, pageSize]);
-
-  const fetchData = async (validFilters) => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     setError(null);
-
     try {
       const response = await axiosInstance.get(endpoint, {
-        params: { ...validFilters, page, pageSize },
+        params: { ...memoizedFilters, page, pageSize },
       });
-
       setData(response.data.data);
       setPagination({
         total: response.data.total,
@@ -51,9 +34,13 @@ const useFetchData = (endpoint, filters = {}, page = 1, pageSize = 10) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [endpoint, memoizedFilters, page, pageSize]);
 
-  return { data, loading, error, pagination };
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  return { data, loading, error, pagination, refetch: fetchData };
 };
 
 export default useFetchData;

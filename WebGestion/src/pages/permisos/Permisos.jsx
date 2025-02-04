@@ -1,8 +1,10 @@
-import usePermisos from "../../hooks/usePermisos";
+import usePermisos from "../../hooks/permisos/usePermisos";
 import ListPage from "../../components/ListPage";
 import { BsSearch } from "react-icons/bs";
 import { formatId } from "../../utils/formatId";
-import CreatePermissionModal from "./CreatePermisoModal";
+import Button from "@/components/Button";
+import { formatFecha } from "@/utils/formatFecha";
+import { IoAdd } from "react-icons/io5";
 
 // ✅ Columnas de la tabla de permisos
 const permisosColumns = [
@@ -18,21 +20,19 @@ const permisosFilters = [
   { key: "nombre", type: "text", placeholder: "Buscar por nombre", icon: <BsSearch className="text-gray-400" /> },
 ];
 
-/** ✅ Formatea la fecha a YYYY-MM-DD HH:mm:ss */
-const formatFecha = (fecha) => {
-  if (!fecha) return "⏳ Pendiente";
-  const date = new Date(fecha);
-  return `${date.toISOString().split("T")[0]} ${date.toISOString().split("T")[1].split(".")[0]}`;
-};
-
-export const Permisos = () => {
+const Permisos = () => {
   return (
     <ListPage
       useFetchHook={usePermisos}
       columns={permisosColumns}
       filterFields={permisosFilters}
       title="Permisos"
-      createButton={<CreatePermissionModal />}
+      createButton={
+        <Button onClick={() => setIsCreateModalOpen(true)}>
+          <IoAdd size={20} className="min-w-max" />
+          Crear Rol
+        </Button>
+      }
       render={{
         id: (row) => formatId(row.id),
         creado_en: (row) => formatFecha(row.creado_en),
@@ -41,3 +41,5 @@ export const Permisos = () => {
     />
   );
 };
+
+export default Permisos;
