@@ -13,31 +13,45 @@ const useFetchData = (endpoint, filters = {}, page = 1, pageSize = 10) => {
   });
 
   useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      setError(null);
+    const timeoutId = setTimeout(() => {
+      // Validamos que los filtros tengan al menos 3 caracteres antes de hacer la petición
+      const validFilters = Object.entries(filters).reduce((acc, [key, value]) => {
+        if (value.length >= 3 || value === "") {
+          acc[key] = value;
+        }
+        return acc;
+      }, {});
 
-      try {
-        const response = await axiosInstance.get(endpoint, {
-          params: { ...filters, page, pageSize },
-        });
-
-        setData(response.data.data);
-        setPagination({
-          total: response.data.total,
-          page: response.data.page,
-          pageSize: response.data.pageSize,
-          totalPages: response.data.totalPages,
-        });
-      } catch (err) {
-        setError(err.response?.data?.message || `Error al obtener datos de ${endpoint}`);
-      } finally {
-        setLoading(false);
+      if (Object.keys(validFilters).length > 0) {
+        fetchData(validFilters);
       }
-    };
+    }, 1000); // 1 segundo de debounce
 
-    fetchData();
+    return () => clearTimeout(timeoutId);
   }, [endpoint, filters, page, pageSize]);
+
+  const fetchData = async (validFilters) => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await axiosInstance.get(endpoint, {
+        params: { ...validFilters, page, pageSize },
+      });
+
+      setData(response.data.data);
+      setPagination({
+        total: response.data.total,
+        page: response.data.page,
+        pageSize: response.data.pageSize,
+        totalPages: response.data.totalPages,
+      });
+    } catch (err) {
+      setError(err.response?.data?.message || `Error al obtener datos de ${endpoint}`);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return { data, loading, error, pagination };
 };

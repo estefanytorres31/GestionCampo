@@ -31,7 +31,6 @@ const CollapsibleSistema = ({ sistema, selectedParts, onTogglePart }) => {
     if (total === 0) return null;
     const percentage = (count / total) * 100;
     
-
     return (
       <View style={styles.progressBarContainer}>
         <View style={[styles.progressBar, { width: `${percentage}%` }]} />

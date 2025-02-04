@@ -49,40 +49,32 @@ export const createOrdenTrabajoParte = async (data) => {
         }
     });
 };
-
-/**
- * Obtener todas las órdenes de trabajo parte activas con filtros opcionales
- */
-export const getAllOrdenesTrabajoParte = async (req, res) => {
-    try {
-        const { estado, id_orden_trabajo_sistema, id_parte } = req.query;
-
-        // Construcción dinámica de filtros
-        const filtros = {
-            estado: estado ? estado : { not: "inactivo" },
-            ...(id_orden_trabajo_sistema && { id_orden_trabajo_sistema: parseInt(id_orden_trabajo_sistema) }),
-            ...(id_parte && { id_parte: parseInt(id_parte) })
-        };
-
-        const ordenes = await prisma.ordenTrabajoParte.findMany({
-            where: filtros,
-            include: {
-                orden_trabajo_sistema: true,
-                parte: true
-            },
-            orderBy: { creado_en: "desc" },
-        });
-
-        if (ordenes.length === 0) {
-            throw new Error("No hay órdenes de trabajo parte disponibles con los filtros aplicados.");
-        }
-
-        res.status(200).json({ message: "Órdenes de trabajo parte obtenidas exitosamente.", data: ordenes });
-
-    } catch (error) {
-        res.status(400).json({ message: error.message });
+export const getAllOrdenesTrabajoParte = async (filters) => {
+    const whereClause = {
+      estado: filters.estado || { not: "inactivo" },
+      ...(filters.id_orden_trabajo_sistema && { id_orden_trabajo_sistema: parseInt(filters.id_orden_trabajo_sistema) }),
+      ...(filters.id_parte && { id_parte: parseInt(filters.id_parte) }),
+    };
+  
+    const ordenes = await prisma.ordenTrabajoParte.findMany({
+      where: whereClause,
+      include: {
+        orden_trabajo_sistema: {
+          select: { id_orden_trabajo_sistema: true, estado: true },
+        },
+        parte: {
+          select: { id_parte: true, nombre_parte: true }, // Usa el campo REAL de la BD
+        },
+      },
+      orderBy: { creado_en: "desc" },
+    });
+  
+    if (ordenes.length === 0) {
+      throw new Error("No hay órdenes de trabajo parte disponibles con los criterios especificados.");
     }
-};
+  
+    return ordenes;
+  };
 
 /**
  * Actualizar una OrdenTrabajoParte
