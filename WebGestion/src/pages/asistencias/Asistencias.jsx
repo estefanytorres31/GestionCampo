@@ -1,7 +1,7 @@
-import useAsistencias from "../hooks/useAsistencias";
-import ListPage from "../components/ListPage";
+import useAsistencias from "../../hooks/asistencias/useAsistencias";
+import ListPage from "../../components/ListPage";
 import { BsSearch } from "react-icons/bs";
-import { formatId } from "../utils/formatId";
+import { formatId } from "../../utils/formatId";
 
 const asistenciasColumns = [
   { name: "ID", uuid: "id" },
@@ -33,7 +33,7 @@ const openGoogleMaps = (lat, lon) => {
   window.open(url, "_blank");
 };
 
-export const Asistencias = () => {
+const Asistencias = () => {
   return (
     <ListPage
       useFetchHook={useAsistencias}
@@ -62,3 +62,5 @@ export const Asistencias = () => {
     />
   );
 };
+
+export default Asistencias;

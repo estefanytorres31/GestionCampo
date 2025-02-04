@@ -1,4 +1,4 @@
-export const Button = ({
+const Button = ({
   tag: Tag = "button",
   children,
   className = "",
@@ -17,3 +17,5 @@ export const Button = ({
     </Tag>
   );
 };
+
+export default Button;

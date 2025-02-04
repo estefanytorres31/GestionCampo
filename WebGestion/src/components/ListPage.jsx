@@ -1,7 +1,8 @@
-import { useState } from "react";
+// ListPage.jsx
+import { useState, useEffect } from "react";
 import Pagination from "../components/Pagination";
 import Filters from "../components/Filters";
-import { Button } from "../components/Button";
+import Button from "../components/Button";
 import { VscFilePdf } from "react-icons/vsc";
 import { RiFileExcel2Fill } from "react-icons/ri";
 import * as xlsx from "node-xlsx";
@@ -17,6 +18,7 @@ const ListPage = ({
   title,
   render = {},
   createButton,
+  onRefetch, // Prop para exponer refetch
 }) => {
   const [filters, setFilters] = useState(
     filterFields.reduce((acc, field) => ({ ...acc, [field.key]: "" }), {})
@@ -24,12 +26,21 @@ const ListPage = ({
   const [page, setPage] = useState(1);
   const [pageSize] = useState(10);
 
-  const { data, loading, error, pagination } = useFetchHook(
+  // Se asume que el hook retorna { data, loading, error, pagination, refetch }
+  const { data, loading, error, pagination, refetch } = useFetchHook(
     filters,
     page,
     pageSize
   );
 
+  // Envía la función refetch al padre sin invocarla
+  useEffect(() => {
+    if (onRefetch && typeof refetch === "function") {
+      onRefetch(refetch);
+    }
+  }, [refetch, onRefetch]);
+
+  // ... resto de ListPage (exportToExcel, exportToPDF, render, etc.)
   const exportToExcel = () => {
     if (!data || data.length === 0) {
       alert("No hay datos para exportar.");
@@ -76,8 +87,7 @@ const ListPage = ({
   return (
     <>
       <section className="flex flex-col justify-between items-center gap-4 w-full">
-        <div className="flex gap-2 items-center justify-between w-full overflow-auto">
-          {/* Filtros de búsqueda */}
+        <div className="flex gap-2 items-center justify-between overflow-auto h-full z-11">
           {filterFields.length > 0 && (
             <Filters
               filters={filters}
@@ -85,9 +95,7 @@ const ListPage = ({
               filterFields={filterFields}
             />
           )}
-
-          {/* Botón de Crear y Exportar */}
-          <div className="flex gap-2 flex-col justify-end md:flex-row w-max-[100px] z-10">
+          <div className="flex gap-2 flex-col justify-end md:flex-row w-max-[100px] h-full">
             <Button className="flex gap-1" onClick={exportToPDF}>
               <VscFilePdf size={20} className="min-w-max" />
               PDF
@@ -96,7 +104,7 @@ const ListPage = ({
               <RiFileExcel2Fill size={20} className="min-w-max" />
               Excel
             </Button>
-            {createButton && createButton} {/* Renderiza el botón si existe */}
+            {createButton && createButton}
           </div>
         </div>
       </section>

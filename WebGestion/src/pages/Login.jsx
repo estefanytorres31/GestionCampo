@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { Button } from "@/components/Button";
+import Button from "../components/Button";
 import fondo from "@/assets/images/fondo.png";
 import logo from "@/assets/logo.svg";
 import { InputLabel } from "@/components/InputLabel";
@@ -9,7 +9,7 @@ import { useForm } from "@/hooks/useForm";
 import axiosInstance from "@/config/axiosConfig";
 import { FaUser, FaLock } from "react-icons/fa";
 
-export const Login = () => {
+const Login = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
   const [errorMessage, setErrorMessage] = useState("");
@@ -92,3 +92,5 @@ export const Login = () => {
     </div>
   );
 };
+
+export default Login;

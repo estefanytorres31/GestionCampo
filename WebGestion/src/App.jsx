@@ -5,11 +5,12 @@ import {
   Navigate,
 } from "react-router-dom";
 import { useAuth, AuthProvider } from "./context/AuthContext";
-import { Login } from "./pages/Login";
-import { PrivateLayout } from "./layouts/PrivateLayout";
-import { Asistencias } from "./pages/Asistencias";
-import Usuarios from "./pages/Usuarios";
-import { Permisos } from "./pages/permisos/Permisos";
+import Login from "./pages/Login";
+import PrivateLayout from "./layouts/PrivateLayout";
+import Asistencias from "./pages/asistencias/Asistencias";
+import Usuarios from "./pages/usuarios/Usuarios";
+import Permisos from "./pages/permisos/Permisos";
+import Roles from "./pages/roles/Roles";
 
 const PrivateRoute = ({ children }) => {
   const { isAuth } = useAuth();
@@ -56,7 +57,7 @@ const AppContent = () => {
           element={
             <PrivateRoute>
               <PrivateLayout>
-                Roles
+                <Roles />
               </PrivateLayout>
             </PrivateRoute>
           }

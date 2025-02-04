@@ -1,4 +1,4 @@
-import useFetchData from "./useFetchData";
+import useFetchData from "../useFetchData";
 
 const useAsistencias = (filters, page, pageSize) => {
   return useFetchData("/asistencia", filters, page, pageSize);

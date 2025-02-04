@@ -1,4 +1,4 @@
-import useFetchData from "./useFetchData";
+import useFetchData from "../useFetchData";
 
 const usePermisos = (filters, page, pageSize) => {
   return useFetchData("/permiso", filters, page, pageSize);
