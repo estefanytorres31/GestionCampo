@@ -1,13 +1,23 @@
 // src/pages/dashboard/Mapa.jsx
-import React from "react";
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import React, { useState, useEffect } from "react";
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  Popup,
+  GeoJSON,
+  useMap,
+} from "react-leaflet";
 import L from "leaflet";
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
-import useMapaData from "@/hooks/asistencias/useMapaData";
+import peruBoundaries from "../../assets/geoCostaPeru.json";
+import Table from "../../components/Table";
 
-// Configuración de los iconos de Leaflet
+import booleanPointInPolygon from "@turf/boolean-point-in-polygon";
+import { point, buffer } from "@turf/turf";
+
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: markerIcon2x,
@@ -15,16 +25,13 @@ L.Icon.Default.mergeOptions({
   shadowUrl: markerShadow,
 });
 
-// Función para agrupar registros que estén muy cercanos
 const agruparMarcadores = (markers, umbral = 0.0001) => {
   const grupos = [];
   markers.forEach((marker) => {
     const lat = parseFloat(marker.coordenadas_entrada.latitud);
     const lon = parseFloat(marker.coordenadas_entrada.longitud);
-    // Busca un grupo existente cuya posición esté dentro del umbral
     const grupoExistente = grupos.find(
-      (g) =>
-        Math.abs(g.lat - lat) < umbral && Math.abs(g.lon - lon) < umbral
+      (g) => Math.abs(g.lat - lat) < umbral && Math.abs(g.lon - lon) < umbral
     );
     if (grupoExistente) {
       grupoExistente.registros.push(marker);
@@ -39,13 +46,24 @@ const agruparMarcadores = (markers, umbral = 0.0001) => {
   return grupos;
 };
 
-const Mapa = () => {
-  const { data: asistencias, loading, error } = useMapaData();
+const MapController = ({ selectedPosition, zoom = 13 }) => {
+  const map = useMap();
 
-  if (loading) return <div>Cargando...</div>;
-  if (error) return <div>Error: {error}</div>;
+  useEffect(() => {
+    if (selectedPosition) {
+      map.flyTo([selectedPosition.lat, selectedPosition.lon], zoom, {
+        duration: 1.5,
+      });
+    }
+  }, [selectedPosition, map, zoom]);
 
-  // Filtramos las asistencias activas
+  return null;
+};
+
+const Mapa = ({ asistencias }) => {
+  const [selectedMarker, setSelectedMarker] = useState(null);
+
+  // Filtramos las asistencias activas (donde se tienen coordenadas de entrada y no se ha registrado salida)
   const markersData = asistencias.filter(
     (asistencia) =>
       asistencia.coordenadas_entrada &&
@@ -54,24 +72,92 @@ const Mapa = () => {
       !asistencia.coordenadas_salida
   );
 
-  // Agrupamos registros con coordenadas cercanas
+  // Agrupamos registros para los marcadores en el mapa (para evitar solapamientos)
   const grupos = agruparMarcadores(markersData);
 
-  // Centro del mapa: usamos el primero o [0,0] por defecto
+  // Centro del mapa: usamos el primer marcador o [0, 0] por defecto
   const defaultPosition =
     grupos.length > 0 ? [grupos[0].lat, grupos[0].lon] : [0, 0];
 
+  // Definimos las columnas para el componente Table, agregando la columna "Ubicación"
+  const columns = [
+    { name: "Nombre", uuid: "nombre_completo" },
+    { name: "Fecha", uuid: "fecha" },
+    { name: "Embarcación", uuid: "embarcacion" },
+    { name: "Ubicación", uuid: "ubicacion" },
+    { name: "Acción", uuid: "accion" },
+  ];
+
+  // Creamos un polígono a partir de la línea de la costa usando buffer.
+  // Ajusta el valor (por ejemplo, 1 km) según lo que consideres adecuado para determinar la zona costera.
+  const costaBuffer =
+    peruBoundaries.features && peruBoundaries.features.length > 0
+      ? buffer(peruBoundaries.features[0], 1, { units: "kilometers" })
+      : null;
+
+  // Función para evaluar la ubicación: si el punto se encuentra dentro del buffer de la costa o no.
+  const evaluarUbicacion = (row) => {
+    if (!costaBuffer) return "-";
+    const lat = parseFloat(row.coordenadas_entrada.latitud);
+    const lon = parseFloat(row.coordenadas_entrada.longitud);
+    const pt = point([lon, lat]);
+    const isInside = booleanPointInPolygon(pt, costaBuffer);
+    return isInside ? "Dentro de la costa" : "Fuera de la costa";
+  };
+
+  // Objeto de render para las columnas personalizadas en la tabla.
+  const render = {
+    ubicacion: (row) => evaluarUbicacion(row),
+    accion: (row) => {
+      const lat = parseFloat(row.coordenadas_entrada.latitud);
+      const lon = parseFloat(row.coordenadas_entrada.longitud);
+      return (
+        <button
+          className="bg-blue-500 text-white px-2 py-1 rounded"
+          onClick={() => setSelectedMarker({ lat, lon })}
+        >
+          Ir al marcador
+        </button>
+      );
+    },
+  };
+
   return (
     <div>
-      <h2>Mapa de Usuarios (Trabajadores Activos)</h2>
       <MapContainer
         center={defaultPosition}
-        zoom={13}
+        zoom={6} // Zoom inicial del mapa
         style={{ height: "500px", width: "100%" }}
       >
         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+
+        {/* Renderizamos el GeoJSON original de la línea de la costa (opcional) */}
+        <GeoJSON
+          data={peruBoundaries}
+          style={{
+            color: "red",
+            weight: 2,
+            fill: false,
+          }}
+        />
+
+        {/* Si deseas ver el polígono buffer, puedes renderizarlo también */}
+        {costaBuffer && (
+          <GeoJSON
+            data={costaBuffer}
+            style={{
+              color: "green",
+              weight: 1,
+              fillOpacity: 0.1,
+            }}
+          />
+        )}
+
+        {/* Componente que centra el mapa cuando se selecciona un marcador */}
+        <MapController selectedPosition={selectedMarker} zoom={18} />
+
+        {/* Renderizamos los marcadores agrupados */}
         {grupos.map((grupo, index) => {
-          // Si en el grupo hay más de un registro, se mostrará la cantidad
           const popupContenido =
             grupo.registros.length > 1 ? (
               <div>
@@ -93,15 +179,23 @@ const Mapa = () => {
               </div>
             );
           return (
-            <Marker
-              key={index}
-              position={[grupo.lat, grupo.lon]}
-            >
+            <Marker key={index} position={[grupo.lat, grupo.lon]}>
               <Popup>{popupContenido}</Popup>
             </Marker>
           );
         })}
       </MapContainer>
+
+      {/* Listado de asistentes usando el componente Table */}
+      <div className="overflow-auto mt-6">
+        <Table
+          columns={columns}
+          data={markersData}
+          render={render}
+          loading={false}
+          error={null}
+        />
+      </div>
     </div>
   );
 };

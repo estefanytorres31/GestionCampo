@@ -130,7 +130,7 @@ const SideBar = () => {
       {/* Fondo para vista mobile */}
       <div
         onClick={() => setIsOpen(false)}
-        className={`md:hidden fixed inset-0 max-h-screen z-[20] bg-black/50 ${
+        className={`md:hidden fixed inset-0 max-h-screen z-[9999] bg-black/50 ${
           isOpen ? "block" : "hidden"
         }`}
       ></div>
@@ -139,7 +139,7 @@ const SideBar = () => {
         variants={Sidebar_animation}
         initial={{ x: isTab ? -250 : 0 }}
         animate={isOpen ? "open" : "closed"}
-        className="bg-white text-gray z-[40] max-w-60 w-60 h-screen md:h-full overflow-hidden md:relative fixed"
+        className="bg-white text-gray z-[9999] max-w-60 w-60 h-screen md:h-full overflow-hidden md:relative fixed"
         style={{
           boxShadow: "6px 0px 24px 0px rgba(18, 96, 44, 0.08)",
           borderRight: "1px solid rgba(18, 85, 42, 0.12)",
