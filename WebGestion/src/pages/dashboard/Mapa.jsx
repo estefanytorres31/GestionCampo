@@ -18,6 +18,8 @@ import Table from "../../components/Table";
 import booleanPointInPolygon from "@turf/boolean-point-in-polygon";
 import { point, buffer } from "@turf/turf";
 import { formatFecha } from "@/utils/formatFecha";
+import Button from "@/components/Button";
+import { FaLocationCrosshairs } from "react-icons/fa6";
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -82,12 +84,12 @@ const Mapa = ({ asistencias }) => {
 
   // Definimos las columnas para el componente Table, agregando la columna "Ubicación"
   const columns = [
-    { name: "Nombre", uuid: "nombre_completo" },
-    { name: "Puerto", uuid: "puerto_actual" },
-    { name: "Embarcación", uuid: "embarcacion" },
-    { name: "Ubicación", uuid: "ubicacion" },
-    { name: "Fecha", uuid: "fecha_hora_entrada" },
-    { name: "Acción", uuid: "accion" },
+    { name: "👤 Nombre", uuid: "nombre_completo" },
+    { name: "📅 Fecha", uuid: "fecha_hora_entrada" },
+    { name: "⛵ Embarcación", uuid: "embarcacion" },
+    { name: "🌍 Ubicación", uuid: "ubicacion" },
+    { name: "📍 Puerto", uuid: "puerto_actual" },
+    { name: "⚙️ Acciones", uuid: "acciones" },
   ];
 
   // Creamos un polígono a partir de la línea de la costa usando buffer.
@@ -111,16 +113,16 @@ const Mapa = ({ asistencias }) => {
   const render = {
     ubicacion: (row) => evaluarUbicacion(row),
     fecha_hora_entrada: (row) => formatFecha(row.fecha_hora_entrada),
-    accion: (row) => {
+    acciones: (row) => {
       const lat = parseFloat(row.coordenadas_entrada.latitud);
       const lon = parseFloat(row.coordenadas_entrada.longitud);
       return (
-        <button
-          className="bg-blue-500 text-white px-2 py-1 rounded"
+        <Button
+          color="icon"
           onClick={() => setSelectedMarker({ lat, lon })}
         >
-          Ir al marcador
-        </button>
+          <FaLocationCrosshairs size={20} className="min-w-max" />
+        </Button>
       );
     },
   };

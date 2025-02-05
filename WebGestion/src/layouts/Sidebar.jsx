@@ -195,7 +195,11 @@ const SideBar = () => {
                         >
                           {/* Línea divisoria */}
                           <div className="border-b border-slate-300 my-2"></div>
-                          <ul className="pl-8 flex flex-col gap-2">
+                          <motion.ul
+                            initial={{ paddingLeft: isOpen ? "2rem" : "0rem" }}
+                            animate={{ paddingLeft: isOpen ? "2rem" : "0rem" }}
+                            transition={{ duration: 0.3 }}
+                            className="flex flex-col gap-2">
                             {element.subItems.map((sub) => (
                               <li key={sub.to}>
                                 <NavLink
@@ -213,7 +217,7 @@ const SideBar = () => {
                                 </NavLink>
                               </li>
                             ))}
-                          </ul>
+                          </motion.ul>
                         </motion.div>
                       )}
                     </AnimatePresence>
