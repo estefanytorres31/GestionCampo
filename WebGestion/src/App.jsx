@@ -15,6 +15,9 @@ import AssignPermissionsPage from "./pages/roles/AssignPermissionsForm";
 import "leaflet/dist/leaflet.css";
 import Dashboard from "./pages/dashboard/Dashboard";
 import AssignRolesForm from "./pages/usuarios/AssignRolesForm";
+import Puerto from "./pages/puerto/Puerto";
+import Embarcacion from "./pages/Embarcacion";
+import HistorialPuerto from "./pages/puerto/HistorialPuerto";
 
 const AppContent = () => {
   const { isAuth } = useAuth();
@@ -38,6 +41,36 @@ const AppContent = () => {
             <PrivateRoute>
               <PrivateLayout>
                 <Dashboard />
+              </PrivateLayout>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/puerto"
+          element={
+            <PrivateRoute>
+              <PrivateLayout>
+                <Puerto />
+              </PrivateLayout>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/historial-puertos"
+          element={
+            <PrivateRoute>
+              <PrivateLayout>
+                <HistorialPuerto />
+              </PrivateLayout>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/embarcacion"
+          element={
+            <PrivateRoute>
+              <PrivateLayout>
+                <Embarcacion />
               </PrivateLayout>
             </PrivateRoute>
           }
