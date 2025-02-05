@@ -1,15 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-    View,
-    Text,
-    TouchableOpacity,
-    StyleSheet,
-    SafeAreaView,
-    Animated,
-    ScrollView,
-    ActivityIndicator,
-    Dimensions
-} from "react-native";
+import { View,Text,TouchableOpacity,StyleSheet,SafeAreaView,Animated,ScrollView,ActivityIndicator,Dimensions} from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import useTipoTrabajoESP from "../../hooks/TipoTrabajoESP/useTipoTrabajoESP";
 
