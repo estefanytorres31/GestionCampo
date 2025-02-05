@@ -1,62 +1,70 @@
-// CreateUserModal.jsx
+// EditUserModal.jsx
 import React, { useState, useEffect } from "react";
 import Modal from "@/components/Modal";
 import { InputLabel } from "@/components/InputLabel";
 import Button from "@/components/Button";
-import usePostData from "@/hooks/usePostData"; // Asegúrate de que la ruta sea correcta
-import { MdAutoFixNormal, MdEdit } from "react-icons/md";
+import axiosInstance from "@/config/axiosConfig";
+import { MdEdit } from "react-icons/md";
 import { RiAiGenerate2 } from "react-icons/ri";
 
-const CreateUserModal = ({ isOpen, onClose, onSuccess }) => {
-  // Estados para cada campo del formulario
+const EditUserModal = ({ isOpen, onClose, onSuccess, user }) => {
+  // Estados para cada campo del formulario, inicializados en blanco
   const [nombreUsuario, setNombreUsuario] = useState("");
   const [nombreCompleto, setNombreCompleto] = useState("");
   const [email, setEmail] = useState("");
+  // Para el password dejamos el campo vacío, en caso de no editarlo se mantiene el anterior
   const [password, setPassword] = useState("");
   // Estado para almacenar los 2 dígitos aleatorios (generados una única vez)
   const [randomDigits, setRandomDigits] = useState("");
   // Estado para controlar si el input de nombre de usuario es editable o se autogenera
   const [isUsernameEditable, setIsUsernameEditable] = useState(false);
-
-  // Hook para enviar los datos a la API
-  const { postData, loading, error } = usePostData("/usuario");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   // Función para generar 2 dígitos aleatorios (entre 10 y 99)
   const generarDigitosRandom = () => {
     return Math.floor(Math.random() * 90 + 10).toString();
   };
 
-  // useEffect que autogenera el nombre de usuario a partir del nombre completo
-  // solo si el usuario no ha habilitado la edición manual.
+  // Cuando el modal se abre o el usuario cambia, se prellenan los campos con los datos existentes
+  useEffect(() => {
+    if (user) {
+      setNombreUsuario(user.nombre_usuario || "");
+      setNombreCompleto(user.nombre_completo || "");
+      setEmail(user.email || "");
+      setPassword("");
+      setRandomDigits("");
+      setIsUsernameEditable(false);
+    }
+  }, [user]);
+
+  // useEffect que autogenera el nombre de usuario a partir del nombre completo,
+  // solo si no se ha habilitado la edición manual.
   useEffect(() => {
     if (!nombreCompleto.trim()) {
-      // Si el nombre completo está vacío, limpia el nombre de usuario y los dígitos
       setNombreUsuario("");
       setRandomDigits("");
       return;
     }
 
-    // Si no se han generado los dígitos aleatorios, generarlos una sola vez.
     if (!randomDigits) {
       setRandomDigits(generarDigitosRandom());
     }
 
     if (!isUsernameEditable) {
-      // Divide el nombre completo en palabras (eliminando espacios extra)
       const palabras = nombreCompleto.trim().split(/\s+/);
       if (palabras.length === 0) {
         setNombreUsuario("");
         return;
       }
-      // Toma la primera palabra completa (en minúsculas)
+      // Toma la primera palabra completa en minúsculas
       let generado = palabras[0].toLowerCase();
-      // Por cada palabra adicional, concatena las primeras 3 letras (en minúsculas)
+      // Por cada palabra adicional, concatena las primeras 3 letras en minúsculas
       for (let i = 1; i < palabras.length; i++) {
         generado += palabras[i].substring(0, 3).toLowerCase();
       }
       // Agrega los 2 dígitos aleatorios
       generado += randomDigits;
-
       setNombreUsuario(generado);
     }
   }, [nombreCompleto, randomDigits, isUsernameEditable]);
@@ -64,11 +72,9 @@ const CreateUserModal = ({ isOpen, onClose, onSuccess }) => {
   // Función para alternar entre modo autogenerado y edición manual
   const toggleUsernameEditable = () => {
     setIsUsernameEditable((prev) => !prev);
-    // Si se desactiva el modo editable, se regenerará el nombre a partir del nombre completo
+    // Si se desactiva la edición manual, reiniciamos el campo para que se autogenere nuevamente
     if (isUsernameEditable) {
-      // Reiniciamos el campo para que se autogenere nuevamente
       setNombreUsuario("");
-      // Se generan nuevos dígitos aleatorios para evitar que se quede el anterior.
       setRandomDigits(generarDigitosRandom());
     }
   };
@@ -76,16 +82,23 @@ const CreateUserModal = ({ isOpen, onClose, onSuccess }) => {
   // Manejo del submit del formulario
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setError(null);
     try {
-      // Envía los datos a la API; "nombre_usuario" se toma del estado (ya sea autogenerado o editado)
-      const data = await postData({
+      // Se arma el payload; se incluye el password solo si se ingresa uno nuevo.
+      const payload = {
         nombre_usuario: nombreUsuario,
         nombre_completo: nombreCompleto,
         email,
-        contrasena_hash: password,
-      });
-      onSuccess(data); // Notifica al componente padre que la creación fue exitosa
+      };
+      if (password) {
+        payload.contrasena_hash = password;
+      }
+      // Petición PUT para actualizar el usuario
+      const response = await axiosInstance.put(`/usuario/${user.id}`, payload);
+      onSuccess(response.data); // Notifica el éxito al componente padre
       onClose(); // Cierra el modal
+
       // Reinicia los campos del formulario
       setNombreUsuario("");
       setNombreCompleto("");
@@ -94,7 +107,12 @@ const CreateUserModal = ({ isOpen, onClose, onSuccess }) => {
       setRandomDigits("");
       setIsUsernameEditable(false);
     } catch (err) {
-      console.error(err);
+      const message =
+        err.response?.data?.message || "Error al actualizar el usuario.";
+      setError(message);
+      console.error("Error al actualizar el usuario:", err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -102,7 +120,7 @@ const CreateUserModal = ({ isOpen, onClose, onSuccess }) => {
     <Modal isOpen={isOpen} onClose={onClose}>
       <Modal.Header>
         <h2 className="text-xl font-bold border-b border-[#1c2c4f]/20 py-3 text-[#1c2c4f]">
-          Crear Usuario
+          Editar Usuario
         </h2>
       </Modal.Header>
 
@@ -122,7 +140,7 @@ const CreateUserModal = ({ isOpen, onClose, onSuccess }) => {
               <Button
                 type="button"
                 onClick={toggleUsernameEditable}
-                className=" justify-end"
+                className="justify-end"
                 color="filter"
               >
                 {isUsernameEditable ? (
@@ -156,16 +174,15 @@ const CreateUserModal = ({ isOpen, onClose, onSuccess }) => {
             <InputLabel
               id="password"
               label="Contraseña"
-              placeholder="Contraseña"
+              placeholder="Dejar en blanco para mantener la contraseña actual"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               type="password"
-              required
             />
 
             <Modal.Footer>
               <Button type="submit" className="my-2" disabled={loading}>
-                {loading ? "Guardando..." : "Guardar"}
+                {loading ? "Guardando..." : "Guardar Cambios"}
               </Button>
             </Modal.Footer>
           </form>
@@ -175,4 +192,4 @@ const CreateUserModal = ({ isOpen, onClose, onSuccess }) => {
   );
 };
 
-export default CreateUserModal;
+export default EditUserModal;
