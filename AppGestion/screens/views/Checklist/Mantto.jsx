@@ -170,17 +170,20 @@ const SistemasPartes = ({ route, navigation }) => {
   }, []);
 
   const saveSelectedParts = useCallback(async () => {
-    const selectedPartsList = Object.entries(selectedParts)
-      .filter(([_, isSelected]) => isSelected)
-      .map(([id_orden_trabajo_parte]) => parseInt(id_orden_trabajo_parte));
+    const newlySelectedParts = Object.entries(selectedParts)
+      .filter(([id, isSelected]) => {
+        const parte = data.flatMap(s => s.partes).find(p => p.id_orden_trabajo_parte.toString() === id);
+        return isSelected && parte && parte.estado_parte !== "completado";
+      })
+      .map(([id]) => parseInt(id));
 
-    if (selectedPartsList.length === 0) {
-      Alert.alert("Advertencia", "Por favor seleccione al menos una parte para continuar.");
+    if (newlySelectedParts.length === 0) {
+      Alert.alert("Advertencia", "Por favor seleccione al menos una parte nueva para continuar.");
       return;
     }
 
     try {
-      await Promise.all(selectedPartsList.map(id_orden_trabajo_parte => 
+      await Promise.all(newlySelectedParts.map(id_orden_trabajo_parte => 
         actualizarOrdenTrabajoParte(
           id_orden_trabajo_parte, 
           "completado", 
@@ -194,7 +197,7 @@ const SistemasPartes = ({ route, navigation }) => {
         [{ 
           text: "OK",
           onPress: () => {
-            navigation.navigate('FormPreventivo', { selectedParts: selectedPartsList });
+            navigation.navigate('FormPreventivo', { selectedParts: newlySelectedParts });
           }
         }]
       );
