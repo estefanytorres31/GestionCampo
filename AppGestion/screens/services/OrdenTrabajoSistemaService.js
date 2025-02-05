@@ -12,3 +12,13 @@ export const createOrdenTrabajoSistema=async(id_orden_trabajo, id_embarcacion_si
     }
  
 }
+
+export const getOrdenTrabajoSistemaByOrdenTrabajo=async(id_orden_trabajo)=>{
+    try {
+        const response = await apiClient.get(`/ordenestrabajosistema/${id_orden_trabajo}/sistemas-partes`);
+        return response.data;
+    } catch (error) {
+        throw new Error(`Error al obtener la orden de trabajo sistema por id de orden de trabajo: ${error.message}`);
+    }
+ 
+}

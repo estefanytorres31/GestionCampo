@@ -1,13 +1,15 @@
 import React, { useState, useCallback, useEffect } from "react";
 import { ChevronDown, ChevronUp, CheckCircle, Circle, Save } from "lucide-react-native";
-import { View, Text, ScrollView, SafeAreaView, ActivityIndicator, StyleSheet, TouchableOpacity, Animated, Alert } from "react-native";
+import { View, Text, ScrollView, TextInput, SafeAreaView, ActivityIndicator, StyleSheet, TouchableOpacity, Animated, Alert } from "react-native";
 import useOrdenTrabajo from "../../hooks/OrdenTrabajo/useOrdenTrabajo";
 import useTipoTrabajoESP from "../../hooks/TipoTrabajoESP/useTipoTrabajoESP";
+import useOrdenTrabajoSistema from "../../hooks/OrdenTrabajoSistema/useOrdenTrabajoSistema";
 import useTipoTrabajo from "../../hooks/TipoTrabajo/useTipoTabajo";
 
 const CollapsibleSistema = ({ sistema, selectedParts, onTogglePart }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [animation] = useState(new Animated.Value(0));
+  const [comments, setComments] = useState({});
 
   const toggleExpand = useCallback(() => {
     const toValue = isExpanded ? 0 : 1;
@@ -19,6 +21,13 @@ const CollapsibleSistema = ({ sistema, selectedParts, onTogglePart }) => {
     }).start();
     setIsExpanded(!isExpanded);
   }, [isExpanded, animation]);
+
+  const handleCommentChange = (partId, text) => {
+    setComments((prev) => ({
+      ...prev,
+      [partId]: text,
+    }));
+  };
 
   const getProgress = useCallback(() => {
     if (!sistema.partes || sistema.partes.length === 0) return { count: 0, total: 0 };
@@ -72,25 +81,33 @@ const CollapsibleSistema = ({ sistema, selectedParts, onTogglePart }) => {
       {isExpanded && (
         <View style={styles.itemsContainer}>
           {sistema.partes && sistema.partes.length > 0 ? (
-            sistema.partes.map((parte) => (
-              <TouchableOpacity
-                key={parte.id_parte}
-                style={styles.item}
-                onPress={() => onTogglePart(parte.id_parte)}
-                activeOpacity={0.7}
-              >
-                {selectedParts[parte.id_parte] ? (
-                  <CheckCircle size={24} color="#6366f1" />
-                ) : (
-                  <Circle size={24} color="#d1d5db" />
-                )}
-                <Text style={[
-                  styles.itemText,
-                  selectedParts[parte.id_parte] && styles.checkedItemText
-                ]}>
-                  {parte.nombre_parte}
-                </Text>
-              </TouchableOpacity>
+        sistema.partes.map((parte) => (
+          <View key={parte.id_parte} style={styles.partContainer}>
+            <TouchableOpacity
+              style={styles.item}
+              onPress={() => onTogglePart(parte.id_parte)}
+              activeOpacity={0.7}
+            >
+              {selectedParts[parte.id_parte] ? (
+                <CheckCircle size={24} color="#6366f1" />
+              ) : (
+                <Circle size={24} color="#d1d5db" />
+              )}
+              <Text style={[
+                styles.itemText,
+                selectedParts[parte.id_parte] && styles.checkedItemText
+              ]}>
+                {parte.nombre_parte}
+              </Text>
+            </TouchableOpacity>
+            <TextInput
+              style={styles.commentInput}
+              placeholder="Agregar comentario..."
+              value={comments[parte.id_parte] || ""}
+              onChangeText={(text) => handleCommentChange(parte.id_parte, text)}
+            />
+          </View>
+
             ))
           ) : (
             <Text style={styles.emptyMessage}>No hay partes disponibles</Text>
@@ -103,7 +120,7 @@ const CollapsibleSistema = ({ sistema, selectedParts, onTogglePart }) => {
 
 const SistemasPartes = ({ route, navigation }) => {
   const { idOrden } = route.params;
-  const { fetchTiposTrabajosWithPartsESP } = useTipoTrabajoESP();
+  const {obtenerOrdenTrabajoSistemaByOrdenTrabajo}=useOrdenTrabajoSistema();
   const { obtenerOrdenTrabajo } = useOrdenTrabajo();
   const {getTipoTrabajoPorID}=useOrdenTrabajo();
   const [data, setData] = useState(null);
@@ -113,30 +130,24 @@ const SistemasPartes = ({ route, navigation }) => {
 
   useEffect(() => {
     let isMounted = true;
-
+  
     const fetchSistemasPartes = async () => {
       try {
-        const responseOrden = await obtenerOrdenTrabajo(idOrden);
-        if (!responseOrden) {
-          throw new Error("No se pudo obtener la orden de trabajo.");
+        const response = await obtenerOrdenTrabajoSistemaByOrdenTrabajo(idOrden);
+        console.log('Response:', response);
+        
+        // Check if response exists and has the expected structure
+        if (!response || !Array.isArray(response)) {
+          throw new Error("Formato de respuesta inválido");
         }
-
-        const { id_tipo_trabajo, id_embarcacion } = responseOrden;
-        if (!id_tipo_trabajo || !id_embarcacion) {
-          throw new Error("Datos de orden de trabajo incompletos.");
-        }
-
-        const response = await fetchTiposTrabajosWithPartsESP(id_tipo_trabajo, id_embarcacion);
-        if (!response || !response.data || !Array.isArray(response.data)) {
-          throw new Error("La respuesta no contiene datos válidos");
-        }
-
+        
         if (isMounted) {
-          setData(response.data);
+          setData(response);
         }
       } catch (error) {
         if (isMounted) {
           setError(error.message || "Error desconocido al cargar los datos.");
+          console.error('Error details:', error);
         }
       } finally {
         if (isMounted) {
@@ -144,22 +155,28 @@ const SistemasPartes = ({ route, navigation }) => {
         }
       }
     };
-
+  
     fetchSistemasPartes();
     return () => { isMounted = false; };
   }, [idOrden]);
 
-  const togglePart = useCallback((partId) => {
+  const togglePart = useCallback((sistemaId, partId) => {
     setSelectedParts(prev => ({
       ...prev,
-      [partId]: !prev[partId]
+      [sistemaId]: {
+        ...(prev[sistemaId] || {}),
+        [partId]: !(prev[sistemaId]?.[partId] || false)
+      }
     }));
   }, []);
 
   const saveSelectedParts = useCallback(() => {
-    const selectedPartsList = Object.entries(selectedParts)
-      .filter(([_, isSelected]) => isSelected)
-      .map(([partId]) => partId);
+    const selectedPartsList = Object.values(selectedParts).reduce((acc, sistemaParts) => {
+      const selectedPartsIds = Object.entries(sistemaParts)
+        .filter(([_, isSelected]) => isSelected)
+        .map(([partId]) => partId);
+      return [...acc, ...selectedPartsIds];
+    }, []);
 
     if (selectedPartsList.length === 0) {
       Alert.alert(
@@ -210,14 +227,21 @@ const SistemasPartes = ({ route, navigation }) => {
       <Text style={styles.title}>Sistemas y Partes</Text>
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
         <View style={styles.content}>
-          {data.map((sistema) => (
-            <CollapsibleSistema 
-              key={sistema.id_sistema} 
-              sistema={sistema}
-              selectedParts={selectedParts}
-              onTogglePart={togglePart}
-            />
-          ))}
+        {data.map((item) => (
+          <CollapsibleSistema 
+            key={item.sistema.id_sistema}
+            sistema={{
+              id_sistema: item.sistema.id_sistema,
+              nombre_sistema: item.sistema.nombre_sistema,
+              partes: item.partes.map(parte => ({
+                id_parte: parte.parte.id_parte,
+                nombre_parte: parte.parte.nombre_parte
+              }))
+            }}
+            selectedParts={selectedParts[item.sistema.id_sistema] || {}}
+            onTogglePart={(partId) => togglePart(item.sistema.id_sistema, partId)}
+          />
+        ))}
         </View>
       </ScrollView>
       <View style={styles.footer}>
@@ -366,6 +390,17 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "600",
     marginLeft: 12,
+  },
+  partContainer: {
+    marginBottom: 10,
+  },
+  commentInput: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 8,
+    padding: 8,
+    marginTop: 5,
+    backgroundColor: "#f8fafc",
   },
 });
 

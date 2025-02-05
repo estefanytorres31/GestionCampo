@@ -1,6 +1,6 @@
 import React, {useState} from "react";
 import OrdenTrabajoSistemaContext from "./OrdenTrabajoSistemaContext";
-import { createOrdenTrabajoSistema } from "../../services/OrdenTrabajoSistemaService";
+import { createOrdenTrabajoSistema,getOrdenTrabajoSistemaByOrdenTrabajo } from "../../services/OrdenTrabajoSistemaService";
 
 const OrdenTrabajoSistemaProvider = ({ children }) => {
     const [ordenTrabajoSistemas, setOrdenTrabajoSistemas] = React.useState([]);
@@ -20,8 +20,21 @@ const OrdenTrabajoSistemaProvider = ({ children }) => {
         setLoading(false);
       }
     };
+
+    const obtenerOrdenTrabajoSistemaByOrdenTrabajo=async(id_orden_trabajo)=>{
+        setLoading(true);
+        setError(null);
+        try{
+          const response = await getOrdenTrabajoSistemaByOrdenTrabajo(id_orden_trabajo);
+          setOrdenTrabajoSistemas(response.data);
+          return response.data;
+        }catch(err){
+          setError(err.message);
+          console.error("Error al obtener la orden de trabajo:", err);
+        }
+    }
     return (
-        <OrdenTrabajoSistemaContext.Provider value={{ guardarOrdenTrabajoSistema, loading, error }}>
+        <OrdenTrabajoSistemaContext.Provider value={{ guardarOrdenTrabajoSistema,obtenerOrdenTrabajoSistemaByOrdenTrabajo,ordenTrabajoSistemas, loading, error }}>
           {children}
         </OrdenTrabajoSistemaContext.Provider>
       );
