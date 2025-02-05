@@ -17,6 +17,7 @@ import Table from "../../components/Table";
 
 import booleanPointInPolygon from "@turf/boolean-point-in-polygon";
 import { point, buffer } from "@turf/turf";
+import { formatFecha } from "@/utils/formatFecha";
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -82,9 +83,10 @@ const Mapa = ({ asistencias }) => {
   // Definimos las columnas para el componente Table, agregando la columna "Ubicación"
   const columns = [
     { name: "Nombre", uuid: "nombre_completo" },
-    { name: "Fecha", uuid: "fecha" },
+    { name: "Puerto", uuid: "puerto_actual" },
     { name: "Embarcación", uuid: "embarcacion" },
     { name: "Ubicación", uuid: "ubicacion" },
+    { name: "Fecha", uuid: "fecha_hora_entrada" },
     { name: "Acción", uuid: "accion" },
   ];
 
@@ -108,6 +110,7 @@ const Mapa = ({ asistencias }) => {
   // Objeto de render para las columnas personalizadas en la tabla.
   const render = {
     ubicacion: (row) => evaluarUbicacion(row),
+    fecha_hora_entrada: (row) => formatFecha(row.fecha_hora_entrada),
     accion: (row) => {
       const lat = parseFloat(row.coordenadas_entrada.latitud);
       const lon = parseFloat(row.coordenadas_entrada.longitud);

@@ -166,7 +166,7 @@ model HistorialPuerto {
   embarcacion     Embarcacion @relation(fields: [embarcacion_id], references: [id_embarcacion], onDelete: NoAction, onUpdate: Cascade)
   puerto          Puerto      @relation(fields: [puerto_id], references: [id_puerto], onDelete: NoAction, onUpdate: Cascade)
 
-  @@unique([embarcacion_id, puerto_id, fecha_llegada], name: "historial_puertos_unique")
+  @@unique([embarcacion_id, puerto_id], name: "historial_puertos_unique")
   @@index([embarcacion_id], name: "idx_embarcacion")
   @@index([puerto_id], name: "idx_puerto")
   @@index([fecha_salida], name: "idx_fecha_salida")
