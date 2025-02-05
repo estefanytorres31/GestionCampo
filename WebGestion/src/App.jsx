@@ -11,6 +11,7 @@ import Asistencias from "./pages/asistencias/Asistencias";
 import Usuarios from "./pages/usuarios/Usuarios";
 import Permisos from "./pages/permisos/Permisos";
 import Roles from "./pages/roles/Roles";
+import AssignPermissionsPage from "./pages/roles/AssignPermissionsForm";
 
 const PrivateRoute = ({ children }) => {
   const { isAuth } = useAuth();
@@ -58,6 +59,16 @@ const AppContent = () => {
             <PrivateRoute>
               <PrivateLayout>
                 <Roles />
+              </PrivateLayout>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/roles/:roleId/asignar-permisos"
+          element={
+            <PrivateRoute>
+              <PrivateLayout>
+                <AssignPermissionsPage />
               </PrivateLayout>
             </PrivateRoute>
           }

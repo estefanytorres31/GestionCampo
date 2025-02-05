@@ -32,7 +32,7 @@ export const getPermisosByRol = async (req, res) => {
         const permisos = await RolesPermisoService.getPermisosByRol(rol_id);
 
         if (permisos.length === 0) {
-            return res.status(404).json({ message: "No hay permisos asignados a este rol.", data: [] });
+            return res.status(200).json({ message: "No hay permisos asignados a este rol.", data: [] });
         }
 
         res.status(200).json({ message: "Permisos obtenidos exitosamente.", data: permisos });
@@ -49,7 +49,7 @@ export const getRolesByPermiso = async (req, res) => {
         const roles = await RolesPermisoService.getRolesByPermiso(permiso_id);
 
         if (roles.length === 0) {
-            return res.status(404).json({ message: "No hay roles asignados a este permiso.", data: [] });
+            return res.status(200).json({ message: "No hay roles asignados a este permiso.", data: [] });
         }
 
         res.status(200).json({ message: "Roles obtenidos exitosamente.", data: roles });

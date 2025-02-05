@@ -3,8 +3,6 @@ import useUsuarios from "../../hooks/usuarios/useUsuarios";
 import Filters from "../../components/Filters";
 import Pagination from "../../components/Pagination";
 import Button from "../../components/Button";
-import { VscFilePdf } from "react-icons/vsc";
-import { RiFileExcel2Fill } from "react-icons/ri";
 import * as xlsx from "node-xlsx";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
@@ -12,7 +10,8 @@ import { saveAs } from "file-saver";
 import Table from "../../components/Table";
 import { BsSearch } from "react-icons/bs";
 import { formatId } from "../../utils/formatId";
-import { MdEdit } from "react-icons/md";
+import { MdEdit, MdDelete } from "react-icons/md";
+import { IoAdd } from "react-icons/io5";
 
 const Usuarios = () => {
   const [filters, setFilters] = useState({
@@ -109,15 +108,17 @@ const Usuarios = () => {
             ]}
           />
           <div className="flex gap-2 flex-col justify-end md:flex-row">
-            <Button className="flex gap-1" onClick={exportToPDF}>
-              <VscFilePdf size={20} className="min-w-max" />
-              PDF
+            <Button color="filter" onClick={exportToPDF}>
+              <MdEdit size={20} className="min-w-max" />
             </Button>
-            <Button className="flex gap-1" onClick={exportToExcel}>
-              <RiFileExcel2Fill size={20} className="min-w-max" />
-              Excel
+            <Button color="filter" onClick={exportToExcel}>
+              <MdDelete size={20} className="min-w-max" />
             </Button>
           </div>
+          <Button>
+            <IoAdd size={20} className="min-w-max" />
+            Crear Rol
+          </Button>
         </div>
       </section>
 

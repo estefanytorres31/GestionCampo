@@ -87,7 +87,7 @@ const ListPage = ({
   return (
     <>
       <section className="flex flex-col justify-between items-center gap-4 w-full">
-        <div className="flex gap-2 items-center justify-between overflow-auto h-full z-11">
+        <div className="flex gap-2 items-center justify-between w-full">
           {filterFields.length > 0 && (
             <Filters
               filters={filters}
@@ -95,14 +95,12 @@ const ListPage = ({
               filterFields={filterFields}
             />
           )}
-          <div className="flex gap-2 flex-col justify-end md:flex-row w-max-[100px] h-full">
-            <Button className="flex gap-1" onClick={exportToPDF}>
+          <div className="flex gap-2 justify-end md:flex-row w-max-[100px] h-full">
+            <Button color="filter" className="flex gap-1" onClick={exportToPDF}>
               <VscFilePdf size={20} className="min-w-max" />
-              PDF
             </Button>
-            <Button className="flex gap-1" onClick={exportToExcel}>
+            <Button color="filter" className="flex gap-1" onClick={exportToExcel}>
               <RiFileExcel2Fill size={20} className="min-w-max" />
-              Excel
             </Button>
             {createButton && createButton}
           </div>
