@@ -10,14 +10,24 @@ const asistenciasColumns = [
   { name: "🕰️ Entrada", uuid: "fecha_hora_entrada" },
   { name: "🚪 Salida", uuid: "fecha_hora_salida" },
   { name: "⛵ Embarcación", uuid: "embarcacion" },
-  { name: "🌍 Ubicación", uuid: "ubicacion" }, // Nueva columna
+  { name: "🌍 Ubicación", uuid: "ubicacion" },
   { name: "⏳ Horas Trabajadas", uuid: "horas_trabajo" },
 ];
 
 const asistenciasFilters = [
-  { key: "nombre_completo", type: "text", placeholder: "Buscar por nombre", icon: <BsSearch className="text-gray-400" /> },
+  {
+    key: "nombre_completo",
+    type: "text",
+    placeholder: "Buscar por nombre",
+    icon: <BsSearch className="text-gray-400" />,
+  },
   { key: "fecha", type: "date", placeholder: "Fecha de entrada" },
-  { key: "nombre_embarcacion", type: "text", placeholder: "Buscar por Embarcación", icon: <BsSearch className="text-gray-400" /> },
+  {
+    key: "nombre_embarcacion",
+    type: "text",
+    placeholder: "Buscar por Embarcación",
+    icon: <BsSearch className="text-gray-400" />,
+  },
 ];
 
 /** ✅ Formatea la fecha a HH:mm:ss */
@@ -42,22 +52,46 @@ const Asistencias = () => {
       title="Asistencias"
       render={{
         id: (row) => formatId(row.id),
+        nombre_completo: (row) => row.nombre_completo,
         fecha: (row) => row.fecha, // Ya en formato YYYY-MM-DD
         fecha_hora_entrada: (row) => formatFechaHora(row.fecha_hora_entrada),
         fecha_hora_salida: (row) => formatFechaHora(row.fecha_hora_salida),
-        horas_trabajo: (row) => row.horas_trabajo || "⏳ En proceso",
         embarcacion: (row) => row.embarcacion || "Sin embarcación",
-        ubicacion: (row) =>
-          row.latitud && row.longitud ? (
-            <button
-              className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-700 transition"
-              onClick={() => openGoogleMaps(row.latitud, row.longitud)}
-            >
-              📍 Ver mapa
-            </button>
-          ) : (
-            "No disponible"
-          ),
+        horas_trabajo: (row) => row.horas_trabajo || "⏳ En proceso",
+        ubicacion: (row) => (
+          <div className="flex flex-col gap-1">
+            {row.coordenadas_entrada ? (
+              <button
+                className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-700 transition"
+                onClick={() =>
+                  openGoogleMaps(
+                    row.coordenadas_entrada.latitud,
+                    row.coordenadas_entrada.longitud
+                  )
+                }
+              >
+                Entrada
+              </button>
+            ) : (
+              <span className="text-gray-500">Entrada no disponible</span>
+            )}
+            {row.coordenadas_salida ? (
+              <button
+                className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-700 transition"
+                onClick={() =>
+                  openGoogleMaps(
+                    row.coordenadas_salida.latitud,
+                    row.coordenadas_salida.longitud
+                  )
+                }
+              >
+                Salida
+              </button>
+            ) : (
+              <span className="text-gray-500">Salida no disponible</span>
+            )}
+          </div>
+        ),
       }}
     />
   );

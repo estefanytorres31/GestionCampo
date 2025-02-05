@@ -1,16 +1,17 @@
+// Roles.jsx
 import React, { useMemo, useState, useRef } from "react";
 import ListPage from "@/components/ListPage";
+import useRoles from "../../hooks/roles/useRoles";
+import { BsSearch } from "react-icons/bs";
+import { formatId } from "@/utils/formatId";
 import CreateRoleModal from "./CreateRoleModal";
 import EditRoleModal from "./EditRoleModal";
 import DeleteRoleModal from "./DeleteRoleModal";
 import Button from "@/components/Button";
 import RowActions from "@/components/RowActions";
-import useRoles from "../../hooks/roles/useRoles";
-import AssignPermissionsModal from "./AssignPermissionsModal";
-import { BsSearch } from "react-icons/bs";
-import { formatId } from "@/utils/formatId";
 import { IoAdd } from "react-icons/io5";
 import { MdAssignmentAdd } from "react-icons/md";
+import { useNavigate } from "react-router-dom";
 
 const rolesColumns = [
   { name: "ID", uuid: "id" },
@@ -36,19 +37,10 @@ const Roles = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [roleToEdit, setRoleToEdit] = useState(null);
   const [roleToDelete, setRoleToDelete] = useState(null);
-  const [isAssignPermissionsModalOpen, setIsAssignPermissionsModalOpen] =
-    useState(false);
-  const [roleToAssign, setRoleToAssign] = useState(null);
-
   const listPageRefetchRef = useRef(null);
-
   const [filters, setFilters] = useState({});
   const memoizedFilters = useMemo(() => filters, [filters]);
-
-  const handleAssignPermissions = (row) => {
-    setRoleToAssign(row);
-    setIsAssignPermissionsModalOpen(true);
-  };
+  const navigate = useNavigate();
 
   const handleSuccess = async (data) => {
     console.log("Operación exitosa", data);
@@ -61,11 +53,6 @@ const Roles = () => {
       } catch (error) {
         console.error("Error al refrescar la lista de roles:", error);
       }
-    } else {
-      console.warn(
-        "La función refetch no está disponible en el ref:",
-        listPageRefetchRef.current
-      );
     }
   };
 
@@ -77,6 +64,11 @@ const Roles = () => {
   const handleDelete = (row) => {
     setRoleToDelete(row);
     setIsDeleteModalOpen(true);
+  };
+
+  // Redirigir a la pantalla de asignación de permisos
+  const handleAssignPermissions = (row) => {
+    navigate(`/roles/${row.id}/asignar-permisos`);
   };
 
   return (
@@ -111,18 +103,6 @@ const Roles = () => {
         />
       )}
 
-      {roleToAssign && (
-        <AssignPermissionsModal
-          isOpen={isAssignPermissionsModalOpen}
-          onClose={() => {
-            setIsAssignPermissionsModalOpen(false);
-            setRoleToAssign(null);
-          }}
-          role={roleToAssign}
-          onSuccess={handleSuccess}
-        />
-      )}
-
       <ListPage
         useFetchHook={useRoles}
         columns={rolesColumns}
@@ -148,11 +128,7 @@ const Roles = () => {
               : "-",
           acciones: (row) => (
             <>
-              <RowActions
-                row={row}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-              />
+              <RowActions row={row} onEdit={handleEdit} onDelete={handleDelete} />
               <Button
                 onClick={() => handleAssignPermissions(row)}
                 color="secondary"

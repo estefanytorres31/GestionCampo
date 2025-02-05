@@ -9,7 +9,7 @@ import { MdMenu, MdKeyboardArrowDown } from "react-icons/md";
 import { RiGroup2Fill, RiShieldUserFill } from "react-icons/ri";
 import { IoLogOut } from "react-icons/io5";
 import { FaShip, FaUserFriends } from "react-icons/fa";
-import { FaList } from "react-icons/fa6";
+import { FaList, FaMapLocationDot } from "react-icons/fa6";
 
 import icono from "@/assets/logo.svg";
 import { useAuth } from "@/context/AuthContext";
@@ -81,6 +81,12 @@ const SideBar = () => {
 
   useEffect(() => {
     const elements = [
+      {
+        to: "/dashboard",
+        icon: <FaMapLocationDot size={20} className="min-w-max" />,
+        label: "Dashboard",
+        roles: ["admin"],
+      },
       {
         to: "/asistencias",
         icon: <FaShip size={20} className="min-w-max" />,
