@@ -7,6 +7,8 @@ import usePuerto from "../../hooks/Puerto/usePuerto";
 import useOrdenTrabajo from "../../hooks/OrdenTrabajo/useOrdenTrabajo";
 import useOrdenTrabajoUsuario from "../../hooks/OrdenTrabajoUsuario/useOrdenTrabajoUsuario";
 import useOrdenTrabajoSistema from "../../hooks/OrdenTrabajoSistema/useOrdenTrabajoSistema";
+import useOrdenTrabajoParte from "../../hooks/OrdenTrabajoParte/useOrdenTrabajoParte";
+import useTipoTrabajoESP from "../../hooks/TipoTrabajoESP/useTipoTrabajoESP"
 import { CommonActions } from '@react-navigation/native';
 
 const AsignarTrabajoScreen = ({route, navigation }) => {
@@ -23,6 +25,8 @@ const AsignarTrabajoScreen = ({route, navigation }) => {
   const { guardarOrdenTrabajo, loading, error } = useOrdenTrabajo(); 
   const { guardarOrdenTrabajoUsuario } = useOrdenTrabajoUsuario();
   const { guardarOrdenTrabajoSistema } = useOrdenTrabajoSistema();
+  const { agregarOrdenTrabajoParte } = useOrdenTrabajoParte();
+  const { parts, fetchPartsBySistema } = useTipoTrabajoESP();
 
   const [puertosOptions, setPuertosOptions] = useState([]);
 
@@ -52,17 +56,37 @@ const AsignarTrabajoScreen = ({route, navigation }) => {
 
   const createOrdenTrabajoSistemas = async (ordenTrabajoId) => {
     try {
-      const promises = sistemas.map(sistema => 
-        guardarOrdenTrabajoSistema(
+      for (let sistema of sistemas) {
+        // Guardamos la orden de trabajo por sistema
+        const ordenTrabajoSistema = await guardarOrdenTrabajoSistema(
           ordenTrabajoId,
           sistema.id_embarcacion_sistema
-        )
-      );
-      
-      await Promise.all(promises);
-      console.log('Órdenes de trabajo por sistema creadas exitosamente');
+        );
+  
+        // Obtener las partes del sistema
+        const partsResponse = await fetchPartsBySistema(
+          trabajo.id_tipo_trabajo, 
+          embarcacion.id_embarcacion, 
+          sistema.id_sistema
+        );
+  
+        // Ensure we're accessing the correct part of the response
+        const partes = partsResponse.data || partsResponse;
+        console.log(partes);
+  
+        // Guardar cada parte en orden_trabajo_parte
+        for (let parte of partes) {
+          await agregarOrdenTrabajoParte(
+            ordenTrabajoSistema.id_orden_trabajo_sistema, 
+            parte.id_parte
+          );
+        }
+      }
+  
+      console.log('Órdenes de trabajo por sistema y partes creadas exitosamente');
     } catch (error) {
-      throw new Error(`Error al crear órdenes de trabajo por sistema: ${error.message}`);
+      console.error('Detailed error:', error);
+      throw new Error(`Error al crear órdenes de trabajo por sistema y partes: ${error.message}`);
     }
   };
 
@@ -117,6 +141,7 @@ const AsignarTrabajoScreen = ({route, navigation }) => {
       }
     } catch (error) {
       alert("Error al guardar la orden de trabajo: " + error);
+      console.log(error);
     }
   };
 

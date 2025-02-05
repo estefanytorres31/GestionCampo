@@ -12,10 +12,12 @@ import OrdenTrabajoProvider from "./screens/context/OrdenTrabajo/OrdenTrabajoPro
 import OrdenTrabajoUsuarioProvider from "./screens/context/OrdenTrabajoUsuario/OrdenTrabajoUsuarioProvider.jsx";
 import TrabajoAsignadoProvider from "./screens/context/TrabajoAsignado/TrabajoAsignadoProvider.jsx";
 import OrdenTrabajoSistemaProvider from "./screens/context/OrdenTrabajoSistema/OrdenTrabajoSistemaProvider.jsx";
+import OrdenTrabajoParteProvider from "./screens/context/OrdenTrabajoParte/OrdenTrabajoParteProvider.jsx";
 
 export default function App() {
   return (
     <AuthProvider>
+    <OrdenTrabajoParteProvider>
     <OrdenTrabajoSistemaProvider>
       <TrabajoAsignadoProvider>
         <OrdenTrabajoUsuarioProvider>
@@ -39,6 +41,7 @@ export default function App() {
         </OrdenTrabajoUsuarioProvider>
       </TrabajoAsignadoProvider>
       </OrdenTrabajoSistemaProvider>
+      </OrdenTrabajoParteProvider>
     </AuthProvider>
   );
 }
