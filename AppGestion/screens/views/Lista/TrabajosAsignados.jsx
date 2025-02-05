@@ -18,7 +18,7 @@ const TrabajosAsignadosScreen = ({ navigation }) => {
     }, []);
 
     const handleTrabajoPress = (idOrden) => {
-        navigation.navigate("Inicio", { idOrden });
+        navigation.navigate("Mantto", { idOrden });
     };
 
     if (loading) {

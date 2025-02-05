@@ -196,11 +196,12 @@ export const getSistemasPorTipoTrabajoEmbarcacion = async (id_tipo_trabajo, id_e
         }
     });
 
-    // Extraer sistemas únicos con su clave primaria
+    // Extraer sistemas únicos con su clave primaria e incluir embarcacion_sistema
     const sistemasMap = {};
 
     relaciones.forEach(relacion => {
-        const sistema = relacion.embarcacion_sistema_parte.embarcacion_sistema.sistema;
+        const embarcacionSistema = relacion.embarcacion_sistema_parte.embarcacion_sistema;
+        const sistema = embarcacionSistema.sistema;
         const id_tt_esp = relacion.id_tipo_trabajo_embarcacion_sistema_parte;
 
         // Asegurarse de que cada sistema esté representado una sola vez
@@ -208,13 +209,15 @@ export const getSistemasPorTipoTrabajoEmbarcacion = async (id_tipo_trabajo, id_e
             sistemasMap[sistema.id_sistema] = {
                 id_tipo_trabajo_embarcacion_sistema_parte: id_tt_esp,
                 id_sistema: sistema.id_sistema,
-                nombre_sistema: sistema.nombre_sistema
+                nombre_sistema: sistema.nombre_sistema,
+                id_embarcacion_sistema: embarcacionSistema.id_embarcacion_sistema,
             };
         }
     });
 
     return Object.values(sistemasMap);
 };
+
 
 /**
  * Obtener Sistemas y Partes por Tipo de Trabajo y Embarcación

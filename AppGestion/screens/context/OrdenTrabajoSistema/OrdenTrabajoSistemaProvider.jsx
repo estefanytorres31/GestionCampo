@@ -7,11 +7,11 @@ const OrdenTrabajoSistemaProvider = ({ children }) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
-    const guardarOrdenTrabajoSistema = async (id_orden_trabajo, id_tipo_trabajo_embarcacion_sistema_parte) => {
+    const guardarOrdenTrabajoSistema = async (id_orden_trabajo, id_embarcacion_sistema) => {
       setLoading(true);
       setError(null);
       try {
-        const response = await createOrdenTrabajoSistema(id_orden_trabajo, id_tipo_trabajo_embarcacion_sistema_parte);
+        const response = await createOrdenTrabajoSistema(id_orden_trabajo, id_embarcacion_sistema);
         return response.data; 
       } catch (err) {
         setError(err.message);

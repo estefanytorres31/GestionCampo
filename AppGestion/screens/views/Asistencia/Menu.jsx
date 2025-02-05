@@ -52,6 +52,9 @@ const Menu = ({ route }) => {
         id_orden_trabajo: idOrden,
       });
       console.log(response);
+      if (response && !response.error) {
+        navigation.navigate("Inicio", { idOrden });
+      }
       if (response.error) {
         setError(response.error);
         return;

@@ -7,6 +7,9 @@ import usePuerto from "../../hooks/Puerto/usePuerto";
 import useOrdenTrabajo from "../../hooks/OrdenTrabajo/useOrdenTrabajo";
 import useOrdenTrabajoUsuario from "../../hooks/OrdenTrabajoUsuario/useOrdenTrabajoUsuario";
 import useOrdenTrabajoSistema from "../../hooks/OrdenTrabajoSistema/useOrdenTrabajoSistema";
+import useOrdenTrabajoParte from "../../hooks/OrdenTrabajoParte/useOrdenTrabajoParte";
+import useTipoTrabajoESP from "../../hooks/TipoTrabajoESP/useTipoTrabajoESP"
+import { CommonActions } from '@react-navigation/native';
 
 const AsignarTrabajoScreen = ({route, navigation }) => {
   const {sistemas,empresa,embarcacion,trabajo,codigoOT }=route.params;
@@ -22,6 +25,8 @@ const AsignarTrabajoScreen = ({route, navigation }) => {
   const { guardarOrdenTrabajo, loading, error } = useOrdenTrabajo(); 
   const { guardarOrdenTrabajoUsuario } = useOrdenTrabajoUsuario();
   const { guardarOrdenTrabajoSistema } = useOrdenTrabajoSistema();
+  const { agregarOrdenTrabajoParte } = useOrdenTrabajoParte();
+  const { parts, fetchPartsBySistema } = useTipoTrabajoESP();
 
   const [puertosOptions, setPuertosOptions] = useState([]);
 
@@ -51,17 +56,36 @@ const AsignarTrabajoScreen = ({route, navigation }) => {
 
   const createOrdenTrabajoSistemas = async (ordenTrabajoId) => {
     try {
-      const promises = sistemas.map(sistema => 
-        guardarOrdenTrabajoSistema(
+      for (let sistema of sistemas) {
+        // Guardamos la orden de trabajo por sistema
+        const ordenTrabajoSistema = await guardarOrdenTrabajoSistema(
           ordenTrabajoId,
-          sistema.id_tipo_trabajo_embarcacion_sistema_parte
-        )
-      );
-      
-      await Promise.all(promises);
-      console.log('Órdenes de trabajo por sistema creadas exitosamente');
+          sistema.id_embarcacion_sistema
+        );
+  
+        // Obtener las partes del sistema
+        const partsResponse = await fetchPartsBySistema(
+          trabajo.id_tipo_trabajo, 
+          embarcacion.id_embarcacion, 
+          sistema.id_sistema
+        );
+  
+        // Ensure we're accessing the correct part of the response
+        const partes = partsResponse.data || partsResponse;
+  
+        // Guardar cada parte en orden_trabajo_parte
+        for (let parte of partes) {
+          await agregarOrdenTrabajoParte(
+            ordenTrabajoSistema.id_orden_trabajo_sistema, 
+            parte.id_parte
+          );
+        }
+      }
+  
+      console.log('Órdenes de trabajo por sistema y partes creadas exitosamente');
     } catch (error) {
-      throw new Error(`Error al crear órdenes de trabajo por sistema: ${error.message}`);
+      console.error('Detailed error:', error);
+      throw new Error(`Error al crear órdenes de trabajo por sistema y partes: ${error.message}`);
     }
   };
 
@@ -81,20 +105,7 @@ const AsignarTrabajoScreen = ({route, navigation }) => {
         supervisor || null
       );
 
-      console.log({
-        trabajoId: trabajo.id_tipo_trabajo,
-        embarcacionId: embarcacion.id_embarcacion,
-        puerto,
-        codigoOT,
-        motorista: motorista || null,
-        supervisor: supervisor || null
-      });
-
       if (response) {
-        console.log(response.id_orden_trabajo)
-        console.log(tecnico.id)
-        console.log(ayudantes.map((a) => a.id))
-
         await createOrdenTrabajoSistemas(response.id_orden_trabajo);
 
         await guardarOrdenTrabajoUsuario(response.id_orden_trabajo, tecnico.id, "Responsable");
@@ -105,10 +116,18 @@ const AsignarTrabajoScreen = ({route, navigation }) => {
         }
   
         alert("Orden de trabajo y usuarios asociados guardados con éxito");
-        navigation.goBack();
+        navigation.dispatch(
+          CommonActions.reset({
+            index: 1,
+            routes: [
+              { name: 'InicioJefe' }
+            ],
+          })
+        );
       }
     } catch (error) {
       alert("Error al guardar la orden de trabajo: " + error);
+      console.log(error);
     }
   };
 
@@ -128,7 +147,7 @@ const AsignarTrabajoScreen = ({route, navigation }) => {
         {sistemas.length > 0 ? (
           sistemas.map((sistema, index) => (
             <Text key={index} style={styles.selectedText}>
-              • {sistema.nombre_sistema}
+              • {sistema.id_embarcacion_sistema}
             </Text>
           ))
         ) : (
@@ -160,10 +179,14 @@ const AsignarTrabajoScreen = ({route, navigation }) => {
         <TouchableOpacity style={styles.button} onPress={handleSeleccionarAyudantes}>
           <Text style={styles.buttonText}>Seleccionar Ayudantes</Text>
         </TouchableOpacity>
-        {ayudantes.length > 0 && (
-          <Text style={styles.selectedText}>
-            {ayudantes.length} ayudantes seleccionados
-          </Text>
+        {ayudantes.length > 0 ? (
+          ayudantes.map((ayudante, index) => (
+            <Text key={index} style={styles.selectedText}>
+              • {ayudante.nombre_completo}
+            </Text>
+          ))
+        ) : (
+          <Text style={styles.selectedText}>No hay ayudantes seleccionados</Text>
         )}
       </View>
 

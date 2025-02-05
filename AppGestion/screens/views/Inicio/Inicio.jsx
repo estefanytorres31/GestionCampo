@@ -16,8 +16,7 @@ import useAuth from "../../hooks/Auth/useAuth";
 const { width } = Dimensions.get("window");
 
 const Inicio = ({ route, navigation }) => {
-  const { logout } = useAuth();
-  const { idOrden } = route.params;
+  const { logout, role } = useAuth();
 
   useFocusEffect(
     React.useCallback(() => {
@@ -38,6 +37,8 @@ const Inicio = ({ route, navigation }) => {
     logout();
     navigation.navigate("Login");
   };
+
+  const showLogoutButton = role && !role.includes("Jefe");
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -60,9 +61,11 @@ const Inicio = ({ route, navigation }) => {
             <View style={styles.cardContainer}>
               <TouchableOpacity
                 style={styles.card}
-                onPress={() => navigation.navigate("QRScann", {
-                    idOrden
-                })}
+                onPress={() =>
+                  navigation.navigate("QRScann", {
+                    // idOrden
+                  })
+                }
                 activeOpacity={0.7}
               >
                 <View style={styles.cardContent}>
@@ -79,21 +82,43 @@ const Inicio = ({ route, navigation }) => {
                   </View>
                 </View>
               </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.card}
+                onPress={() => navigation.navigate("TrabajosAsignados")}
+                activeOpacity={0.7}
+              >
+                <View style={styles.cardContent}>
+                  <View style={styles.iconContainer}>
+                    <MaterialCommunityIcons
+                      name="clipboard-list"
+                      size={32}
+                      color="#1A2980"
+                    />
+                  </View>
+                  <View style={styles.cardTextContainer}>
+                    <Text style={styles.cardTitle}>Lista de OT</Text>
+                    <View style={styles.chevron} />
+                  </View>
+                </View>
+              </TouchableOpacity>
             </View>
 
-            <TouchableOpacity
-              style={styles.logoutButton}
-              onPress={handleLogout}
-              activeOpacity={0.8}
-            >
-              <MaterialCommunityIcons
-                name="logout"
-                size={24}
-                color="#fff"
-                style={styles.logoutIcon}
-              />
-              <Text style={styles.logoutText}>CERRAR SESIÓN</Text>
-            </TouchableOpacity>
+            {showLogoutButton && (
+              <TouchableOpacity
+                style={styles.logoutButton}
+                onPress={handleLogout}
+                activeOpacity={0.8}
+              >
+                <MaterialCommunityIcons
+                  name="logout"
+                  size={24}
+                  color="#fff"
+                  style={styles.logoutIcon}
+                />
+                <Text style={styles.logoutText}>CERRAR SESIÓN</Text>
+              </TouchableOpacity>
+            )}
           </View>
         </View>
       </LinearGradient>
