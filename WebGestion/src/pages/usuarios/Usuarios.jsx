@@ -12,8 +12,10 @@ import { BsSearch } from "react-icons/bs";
 import { formatId } from "../../utils/formatId";
 import { MdEdit, MdDelete } from "react-icons/md";
 import { IoAdd } from "react-icons/io5";
+import CreateUserModal from "./CreateUserModal";
 
 const Usuarios = () => {
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [filters, setFilters] = useState({
     nombre_usuario: "",
     nombre_completo: "",
@@ -79,8 +81,19 @@ const Usuarios = () => {
     alert(`Editar usuario: ${user.nombre_usuario}`);
   };
 
+  const handleSuccess = (data) => {
+    console.log("Usuario creado exitosamente", data);
+    // Aquí podrías llamar a alguna función para refrescar la lista de usuarios
+  };
+
   return (
     <>
+      <CreateUserModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onSuccess={handleSuccess}
+      />
+
       <section className="flex flex-col justify-between items-center gap-4 w-full">
         <div className="flex gap-2 items-center justify-between w-full overflow-auto">
           <Filters
@@ -115,9 +128,9 @@ const Usuarios = () => {
               <MdDelete size={20} className="min-w-max" />
             </Button>
           </div>
-          <Button>
+          <Button onClick={() => setIsCreateModalOpen(true)}>
             <IoAdd size={20} className="min-w-max" />
-            Crear Rol
+            Crear Usuario
           </Button>
         </div>
       </section>
