@@ -72,7 +72,6 @@ const AsignarTrabajoScreen = ({route, navigation }) => {
   
         // Ensure we're accessing the correct part of the response
         const partes = partsResponse.data || partsResponse;
-        console.log(partes);
   
         // Guardar cada parte en orden_trabajo_parte
         for (let parte of partes) {
@@ -106,20 +105,7 @@ const AsignarTrabajoScreen = ({route, navigation }) => {
         supervisor || null
       );
 
-      console.log({
-        trabajoId: trabajo.id_tipo_trabajo,
-        embarcacionId: embarcacion.id_embarcacion,
-        puerto,
-        codigoOT,
-        motorista: motorista || null,
-        supervisor: supervisor || null
-      });
-
       if (response) {
-        console.log(response.id_orden_trabajo)
-        console.log(tecnico.id)
-        console.log(ayudantes.map((a) => a.id))
-
         await createOrdenTrabajoSistemas(response.id_orden_trabajo);
 
         await guardarOrdenTrabajoUsuario(response.id_orden_trabajo, tecnico.id, "Responsable");
