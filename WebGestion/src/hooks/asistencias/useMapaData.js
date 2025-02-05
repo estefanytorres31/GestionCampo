@@ -1,4 +1,3 @@
-// src/hooks/useMapaData.js
 import { useEffect, useState } from "react";
 import axiosInstance from "@/config/axiosConfig";
 
