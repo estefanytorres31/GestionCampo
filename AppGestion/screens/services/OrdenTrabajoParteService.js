@@ -11,3 +11,15 @@ export const createOrdenTrabajoParte=async(id_orden_trabajo_sistema, id_parte) =
         throw new Error(error.response.data.message);
     }
 }
+
+export const updateOrdenTrabajoParte=async(id_orden_trabajo_parte, estado, comentario) =>{
+    try {
+        const response = await apiClient.put(`/ordenestrabajoparte/${id_orden_trabajo_parte}`, {
+            estado,
+            comentario
+        });
+        return response.data;
+    } catch (error) {
+        throw new Error(error.response.data.message);
+    }
+}

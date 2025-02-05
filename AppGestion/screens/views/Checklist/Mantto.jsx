@@ -1,15 +1,12 @@
 import React, { useState, useCallback, useEffect } from "react";
 import { ChevronDown, ChevronUp, CheckCircle, Circle, Save } from "lucide-react-native";
 import { View, Text, ScrollView, TextInput, SafeAreaView, ActivityIndicator, StyleSheet, TouchableOpacity, Animated, Alert } from "react-native";
-import useOrdenTrabajo from "../../hooks/OrdenTrabajo/useOrdenTrabajo";
-import useTipoTrabajoESP from "../../hooks/TipoTrabajoESP/useTipoTrabajoESP";
 import useOrdenTrabajoSistema from "../../hooks/OrdenTrabajoSistema/useOrdenTrabajoSistema";
-import useTipoTrabajo from "../../hooks/TipoTrabajo/useTipoTabajo";
+import useOrdenTrabajoParte from "../../hooks/OrdenTrabajoParte/useOrdenTrabajoParte";
 
-const CollapsibleSistema = ({ sistema, selectedParts, onTogglePart }) => {
+const CollapsibleSistema = ({ sistema, selectedParts, onTogglePart, comments, onCommentChange }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [animation] = useState(new Animated.Value(0));
-  const [comments, setComments] = useState({});
 
   const toggleExpand = useCallback(() => {
     const toValue = isExpanded ? 0 : 1;
@@ -22,16 +19,11 @@ const CollapsibleSistema = ({ sistema, selectedParts, onTogglePart }) => {
     setIsExpanded(!isExpanded);
   }, [isExpanded, animation]);
 
-  const handleCommentChange = (partId, text) => {
-    setComments((prev) => ({
-      ...prev,
-      [partId]: text,
-    }));
-  };
-
   const getProgress = useCallback(() => {
     if (!sistema.partes || sistema.partes.length === 0) return { count: 0, total: 0 };
-    const checkedCount = sistema.partes.filter(parte => selectedParts[parte.id_parte]).length;
+    const checkedCount = sistema.partes.filter(parte => 
+      selectedParts[parte.id_orden_trabajo_parte] || parte.estado_parte === "completado"
+    ).length;
     return { count: checkedCount, total: sistema.partes.length };
   }, [sistema.partes, selectedParts]);
 
@@ -49,31 +41,18 @@ const CollapsibleSistema = ({ sistema, selectedParts, onTogglePart }) => {
   };
 
   return (
-    <Animated.View 
-      style={[
-        styles.section,
-        {
-          transform: [{
-            scale: animation.interpolate({
-              inputRange: [0, 1],
-              outputRange: [1, 1.02]
-            })
-          }]
-        }
-      ]}
-    >
-      <TouchableOpacity 
-        style={styles.sectionHeader} 
-        onPress={toggleExpand}
-        activeOpacity={0.7}
-      >
+    <Animated.View style={[styles.section, {
+      transform: [{
+        scale: animation.interpolate({
+          inputRange: [0, 1],
+          outputRange: [1, 1.02]
+        })
+      }]
+    }]}>
+      <TouchableOpacity style={styles.sectionHeader} onPress={toggleExpand} activeOpacity={0.7}>
         <View style={styles.sectionHeaderContent}>
-          <Text style={styles.sectionTitle}>{sistema.nombre_sistema}</Text>
-          {isExpanded ? (
-            <ChevronUp size={24} color="#6366f1" />
-          ) : (
-            <ChevronDown size={24} color="#6366f1" />
-          )}
+          <Text style={styles.sectionTitle}>{sistema.sistema.nombre_sistema}</Text>
+          {isExpanded ? <ChevronUp size={24} color="#6366f1" /> : <ChevronDown size={24} color="#6366f1" />}
         </View>
         {renderProgressBar()}
       </TouchableOpacity>
@@ -81,33 +60,39 @@ const CollapsibleSistema = ({ sistema, selectedParts, onTogglePart }) => {
       {isExpanded && (
         <View style={styles.itemsContainer}>
           {sistema.partes && sistema.partes.length > 0 ? (
-        sistema.partes.map((parte) => (
-          <View key={parte.id_parte} style={styles.partContainer}>
-            <TouchableOpacity
-              style={styles.item}
-              onPress={() => onTogglePart(parte.id_parte)}
-              activeOpacity={0.7}
-            >
-              {selectedParts[parte.id_parte] ? (
-                <CheckCircle size={24} color="#6366f1" />
-              ) : (
-                <Circle size={24} color="#d1d5db" />
-              )}
-              <Text style={[
-                styles.itemText,
-                selectedParts[parte.id_parte] && styles.checkedItemText
-              ]}>
-                {parte.nombre_parte}
-              </Text>
-            </TouchableOpacity>
-            <TextInput
-              style={styles.commentInput}
-              placeholder="Agregar comentario..."
-              value={comments[parte.id_parte] || ""}
-              onChangeText={(text) => handleCommentChange(parte.id_parte, text)}
-            />
-          </View>
-
+            sistema.partes.map((parte) => (
+              <View key={parte.id_orden_trabajo_parte} style={styles.partContainer}>
+                <TouchableOpacity
+                  style={styles.item}
+                  onPress={() => parte.estado_parte !== "completado" && onTogglePart(parte.id_orden_trabajo_parte)}
+                  activeOpacity={parte.estado_parte === "completado" ? 1 : 0.7}
+                >
+                  {parte.estado_parte === "completado" ? (
+                    <CheckCircle size={24} color="#9CA3AF" />
+                  ) : selectedParts[parte.id_orden_trabajo_parte] ? (
+                    <CheckCircle size={24} color="#6366f1" />
+                  ) : (
+                    <Circle size={24} color="#d1d5db" />
+                  )}
+                  <Text style={[
+                    styles.itemText,
+                    parte.estado_parte === "completado" && styles.completedItemText,
+                    selectedParts[parte.id_orden_trabajo_parte] && styles.checkedItemText
+                  ]}>
+                    {parte.parte.nombre_parte}
+                  </Text>
+                </TouchableOpacity>
+                <TextInput
+                  style={[
+                    styles.commentInput,
+                    parte.estado_parte === "completado" && styles.disabledCommentInput
+                  ]}
+                  placeholder="Agregar comentario..."
+                  value={comments[parte.id_orden_trabajo_parte] || ""}
+                  onChangeText={(text) => onCommentChange(parte.id_orden_trabajo_parte, text)}
+                  editable={parte.estado_parte !== "completado"}
+                />
+              </View>
             ))
           ) : (
             <Text style={styles.emptyMessage}>No hay partes disponibles</Text>
@@ -120,13 +105,13 @@ const CollapsibleSistema = ({ sistema, selectedParts, onTogglePart }) => {
 
 const SistemasPartes = ({ route, navigation }) => {
   const { idOrden } = route.params;
-  const {obtenerOrdenTrabajoSistemaByOrdenTrabajo}=useOrdenTrabajoSistema();
-  const { obtenerOrdenTrabajo } = useOrdenTrabajo();
-  const {getTipoTrabajoPorID}=useOrdenTrabajo();
+  const { obtenerOrdenTrabajoSistemaByOrdenTrabajo } = useOrdenTrabajoSistema();
+  const { actualizarOrdenTrabajoParte } = useOrdenTrabajoParte();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedParts, setSelectedParts] = useState({});
+  const [comments, setComments] = useState({});
 
   useEffect(() => {
     let isMounted = true;
@@ -134,15 +119,25 @@ const SistemasPartes = ({ route, navigation }) => {
     const fetchSistemasPartes = async () => {
       try {
         const response = await obtenerOrdenTrabajoSistemaByOrdenTrabajo(idOrden);
-        console.log('Response:', response);
-        
-        // Check if response exists and has the expected structure
         if (!response || !Array.isArray(response)) {
           throw new Error("Formato de respuesta inválido");
         }
         
         if (isMounted) {
           setData(response);
+          // Initialize selectedParts and comments based on the fetched data
+          const initialSelectedParts = {};
+          const initialComments = {};
+          response.forEach(sistema => {
+            sistema.partes.forEach(parte => {
+              if (parte.estado_parte === "completado") {
+                initialSelectedParts[parte.id_orden_trabajo_parte] = true;
+                initialComments[parte.id_orden_trabajo_parte] = parte.comentario_parte || "";
+              }
+            });
+          });
+          setSelectedParts(initialSelectedParts);
+          setComments(initialComments);
         }
       } catch (error) {
         if (isMounted) {
@@ -160,43 +155,54 @@ const SistemasPartes = ({ route, navigation }) => {
     return () => { isMounted = false; };
   }, [idOrden]);
 
-  const togglePart = useCallback((sistemaId, partId) => {
+  const togglePart = useCallback((id_orden_trabajo_parte) => {
     setSelectedParts(prev => ({
       ...prev,
-      [sistemaId]: {
-        ...(prev[sistemaId] || {}),
-        [partId]: !(prev[sistemaId]?.[partId] || false)
-      }
+      [id_orden_trabajo_parte]: !prev[id_orden_trabajo_parte]
     }));
   }, []);
 
-  const saveSelectedParts = useCallback(() => {
-    const selectedPartsList = Object.values(selectedParts).reduce((acc, sistemaParts) => {
-      const selectedPartsIds = Object.entries(sistemaParts)
-        .filter(([_, isSelected]) => isSelected)
-        .map(([partId]) => partId);
-      return [...acc, ...selectedPartsIds];
-    }, []);
+  const handleCommentChange = useCallback((id_orden_trabajo_parte, text) => {
+    setComments(prev => ({
+      ...prev,
+      [id_orden_trabajo_parte]: text
+    }));
+  }, []);
+
+  const saveSelectedParts = useCallback(async () => {
+    const selectedPartsList = Object.entries(selectedParts)
+      .filter(([_, isSelected]) => isSelected)
+      .map(([id_orden_trabajo_parte]) => parseInt(id_orden_trabajo_parte));
 
     if (selectedPartsList.length === 0) {
-      Alert.alert(
-        "Advertencia",
-        "Por favor seleccione al menos una parte para continuar."
-      );
+      Alert.alert("Advertencia", "Por favor seleccione al menos una parte para continuar.");
       return;
     }
 
-    Alert.alert(
-      "Éxito",
-      "Partes seleccionadas guardadas correctamente",
-      [{ 
-        text: "OK",
-        onPress: () => {
-          navigation.navigate('FormPreventivo', { selectedParts: selectedPartsList });
-        }
-      }]
-    );
-  }, [selectedParts]);
+    try {
+      await Promise.all(selectedPartsList.map(id_orden_trabajo_parte => 
+        actualizarOrdenTrabajoParte(
+          id_orden_trabajo_parte, 
+          "completado", 
+          comments[id_orden_trabajo_parte] || ""
+        )
+      ));
+
+      Alert.alert(
+        "Éxito",
+        "Partes seleccionadas guardadas correctamente",
+        [{ 
+          text: "OK",
+          onPress: () => {
+            navigation.navigate('FormPreventivo', { selectedParts: selectedPartsList });
+          }
+        }]
+      );
+    } catch (error) {
+      Alert.alert("Error", "Hubo un problema al guardar las partes seleccionadas.");
+      console.error('Error saving parts:', error);
+    }
+  }, [selectedParts, comments, actualizarOrdenTrabajoParte, navigation]);
 
   if (loading) {
     return (
@@ -227,21 +233,16 @@ const SistemasPartes = ({ route, navigation }) => {
       <Text style={styles.title}>Sistemas y Partes</Text>
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
         <View style={styles.content}>
-        {data.map((item) => (
-          <CollapsibleSistema 
-            key={item.sistema.id_sistema}
-            sistema={{
-              id_sistema: item.sistema.id_sistema,
-              nombre_sistema: item.sistema.nombre_sistema,
-              partes: item.partes.map(parte => ({
-                id_parte: parte.parte.id_parte,
-                nombre_parte: parte.parte.nombre_parte
-              }))
-            }}
-            selectedParts={selectedParts[item.sistema.id_sistema] || {}}
-            onTogglePart={(partId) => togglePart(item.sistema.id_sistema, partId)}
-          />
-        ))}
+          {data.map((item) => (
+            <CollapsibleSistema 
+              key={item.id_orden_trabajo_sistema}
+              sistema={item}
+              selectedParts={selectedParts}
+              onTogglePart={togglePart}
+              comments={comments}
+              onCommentChange={handleCommentChange}
+            />
+          ))}
         </View>
       </ScrollView>
       <View style={styles.footer}>
@@ -256,6 +257,7 @@ const SistemasPartes = ({ route, navigation }) => {
       </View>
     </SafeAreaView>
   );
+
 };
 
 const styles = StyleSheet.create({
