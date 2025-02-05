@@ -3,10 +3,9 @@ import { useContext, useState, useEffect } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import LoginScreen from "./screens/views/Auth/Login";
-import Rol from "./screens/views/Auth/Roles"
 import Clientes from "./screens/views/client/Client";
 import EmbarcacionesScreen from "./screens/views/Embarcacion/Embarcacion";
-import Inicio from "./screens/views/Scan/Inicio";
+import Inicio from "./screens/views/Inicio/Inicio";
 import Trabajo from "./screens/views/TipoTrabajo/TipoTrabajo";
 import AsignarTrabajoScreen from "./screens/views/AsignarTrabajo/AsignarTrabajo";
 import SeleccionarAyudantesScreen from "./screens/views/AsignarTrabajo/SeleccionarAyudantes";
@@ -14,7 +13,7 @@ import QRScann from "./screens/views/Scan/QRscan";
 import SistemasScreen from "./screens/views/Sistemas/Sistemas";
 import Menu from "./screens/views/Asistencia/Menu";
 import SeleccionarTecnicoScreen from "./screens/views/AsignarTrabajo/SeleccionarTecnico";
-import AuthContext from "./screens/context/Auth/AuthContext";
+import ListaOTAsignado from "./screens/views/Lista/ListaTrabajoAsigJefe";
 import Mantto from "./screens/views/Checklist/Mantto";
 import Montaje from "./screens/views/Checklist/Montaje";
 import FormPreventivo from "./screens/views/Formularios/FormPreventivo";
@@ -24,7 +23,7 @@ import useAuth from "./screens/hooks/Auth/useAuth";
 import InicioJefe from "./screens/views/Inicio/InicioJefe"
 import { TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import TrabajosAsignadosScreen from "./screens/views/AsignarTrabajo/TrabajosAsignados";
+import TrabajosAsignadosScreen from "./screens/views/Lista/TrabajosAsignados";
 
 const Stack = createNativeStackNavigator();
 
@@ -38,6 +37,7 @@ export default function Navigation () {
             <Stack.Navigator initialRouteName="Login" >
                 <Stack.Screen name="Login" component={LoginScreen}  options={{ headerShown: false }} />
                 <Stack.Screen name="InicioJefe" component={InicioJefe} options={{ tittle:"Inicio",headerShown: false }} />
+                <Stack.Screen name="ListaOTAsignado" component={ListaOTAsignado} options={{ title: "Lista de OT" }} />
                 <Stack.Screen name="Clientes" component={Clientes} />
                 <Stack.Screen name="Embarcaciones" component={EmbarcacionesScreen} />
                 <Stack.Screen name="Trabajo" component={Trabajo} />

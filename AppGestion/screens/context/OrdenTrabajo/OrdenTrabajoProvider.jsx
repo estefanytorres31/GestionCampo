@@ -1,6 +1,6 @@
 import React, { createContext, useState, useContext } from "react";
 import OrdenTrabajoContext from "./OrdenTrabajoContext";
-import { createOrdenTrabajo, getOrdenTrabajoById } from "../../services/OrdenTrabajoService";
+import { createOrdenTrabajo, getOrdenTrabajoById, getAllTrabajosByJefeAsig } from "../../services/OrdenTrabajoService";
 
 const OrdenTrabajoProvider = ({ children }) => {
     const [loading, setLoading] = useState(false);
@@ -34,8 +34,22 @@ const OrdenTrabajoProvider = ({ children }) => {
       }
     }
 
+    const obtenerTrabajosPorJefeAsig = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await getAllTrabajosByJefeAsig();
+        return response.data;
+      } catch (err) {
+        setError(err.message);
+        console.error("Error al obtener los trabajos por jefe de asistencia:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
     return (
-        <OrdenTrabajoContext.Provider value={{ guardarOrdenTrabajo, obtenerOrdenTrabajo, loading, error }}>
+        <OrdenTrabajoContext.Provider value={{ guardarOrdenTrabajo, obtenerOrdenTrabajo,obtenerTrabajosPorJefeAsig, loading, error }}>
           {children}
         </OrdenTrabajoContext.Provider>
       );
