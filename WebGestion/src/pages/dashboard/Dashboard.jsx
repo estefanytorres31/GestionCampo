@@ -1,7 +1,10 @@
+import React from 'react'
+import Mapa from './Mapa'
+
 const Dashboard = () => {
   return (
     <div>
-      Dashboard
+      <Mapa />
     </div>
   )
 }

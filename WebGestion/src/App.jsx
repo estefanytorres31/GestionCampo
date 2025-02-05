@@ -12,6 +12,9 @@ import Usuarios from "./pages/usuarios/Usuarios";
 import Permisos from "./pages/permisos/Permisos";
 import Roles from "./pages/roles/Roles";
 import AssignPermissionsPage from "./pages/roles/AssignPermissionsForm";
+import 'leaflet/dist/leaflet.css';
+import Dashboard from "./pages/dashboard/Dashboard";
+import DashboardT from "./pages/dashboard/Mapa";
 
 const PrivateRoute = ({ children }) => {
   const { isAuth } = useAuth();
@@ -28,7 +31,7 @@ const AppContent = () => {
           element={
             <PrivateRoute>
               <PrivateLayout>
-                <Asistencias />
+                <Dashboard />
               </PrivateLayout>
             </PrivateRoute>
           }
