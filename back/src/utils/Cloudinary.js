@@ -25,32 +25,45 @@ cloudinary.config({
     }
 }
 
-export async function uploadComprobante(filePath) {
-  return await cloudinary.uploader.upload(filePath, {
-      folder: 'comprobantes'
-  });
+/**
+ * Subir foto a Cloudinary
+ * @param {string} filePath - Ruta local del archivo a subir
+ * @returns {Promise<object>} - Información de la imagen subida
+ */
+export async function uploadFotos(filePath) {
+  try {
+      const result = await cloudinary.uploader.upload(filePath, {
+          folder: 'fotos',
+          transformation: [
+              { quality: 'auto:best' },
+              { fetch_format: 'auto' }
+          ]
+      });
+      return result;
+  } catch (error) {
+      console.error('Error en uploadFotos:', error);
+      throw new Error("Error al subir la foto a Cloudinary");
+  }
 }
 
-export async function deleteImage(secure_url) {
-    const urlParts = secure_url.split('/');
-    const fileNameWithExtension = urlParts[urlParts.length - 1];
-    const public_id = `prueba/${fileNameWithExtension.split('.')[0]}`;
-    
-    return await cloudinary.uploader.destroy(public_id);
-}
-          
+/**
+ * Eliminar imagen de Cloudinary
+ * @param {string} secureUrl - URL segura de la imagen en Cloudinary
+ * @returns {Promise<object>} - Resultado de la eliminación
+ */
+export async function deleteImage(secureUrl) {
+  try {
+      // Extraer el public_id correcto
+      const urlParts = new URL(secureUrl).pathname.split('/');
+      const fileNameWithExtension = urlParts[urlParts.length - 1];  // Obtener "nombre.extension"
+      const folderName = urlParts[urlParts.length - 2]; // Obtener "fotos" o la carpeta usada
+      const publicId = `${folderName}/${fileNameWithExtension.split('.')[0]}`;
 
-  export const uploadDocument = (filePath, originalName) => {
-    const public_id = path.parse(originalName).name;
-  const extension = path.parse(originalName).ext;
-  return new Promise((resolve, reject) => {
-    cloudinary.uploader.upload(filePath, { resource_type: "raw", public_id: `${public_id}${extension}`,folder:'prueba2' }, (error, result) => {
-      if (error) {
-        reject(error);
-      } else {
-        resolve(result);
-      }
-    });
-  });
-};
+      const result = await cloudinary.uploader.destroy(publicId);
+      return result;
+  } catch (error) {
+      console.error('Error en deleteImage:', error);
+      throw new Error("Error al eliminar la imagen en Cloudinary");
+  }
+}
 

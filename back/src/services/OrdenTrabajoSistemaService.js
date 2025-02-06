@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { getUTCTime } from "../utils/Time.js";
+import { deleteImage, uploadFotos } from "../utils/Cloudinary.js";
 
 const prisma = new PrismaClient();
 
@@ -313,7 +314,7 @@ export const updateOrdenTrabajoSistema = async (id, data) => {
 
   // Preparar los datos a actualizar
   const updateData = {
-    ...(avance !== undefined && { avance }),
+    ...(avance !== undefined && { avance: parseInt(avance) }), 
     ...(materiales !== undefined && { materiales }),
     ...(proximo_abordaje !== undefined && { proximo_abordaje }),
     ...(observaciones !== undefined && { observaciones }),
