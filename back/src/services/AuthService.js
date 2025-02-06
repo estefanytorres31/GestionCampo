@@ -18,7 +18,6 @@ export const login = async (nombreUsuario, contrasena_hash) => {
       }
       
   });
-  console.log(usuario.usuario_roles);
 
   if (!usuario) {
     throw new Error("Usuario no encontrado");
