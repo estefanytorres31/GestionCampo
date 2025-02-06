@@ -12,27 +12,65 @@ import Usuarios from "./pages/usuarios/Usuarios";
 import Permisos from "./pages/permisos/Permisos";
 import Roles from "./pages/roles/Roles";
 import AssignPermissionsPage from "./pages/roles/AssignPermissionsForm";
-import 'leaflet/dist/leaflet.css';
+import "leaflet/dist/leaflet.css";
 import Dashboard from "./pages/dashboard/Dashboard";
-import DashboardT from "./pages/dashboard/Mapa";
 import AssignRolesForm from "./pages/usuarios/AssignRolesForm";
-
-const PrivateRoute = ({ children }) => {
-  const { isAuth } = useAuth();
-  return isAuth ? children : <Navigate to="/login" />;
-};
+import Puerto from "./pages/puerto/Puerto";
+import Embarcacion from "./pages/Embarcacion";
+import HistorialPuerto from "./pages/puerto/HistorialPuerto";
 
 const AppContent = () => {
+  const { isAuth } = useAuth();
+  const RootRedirect = () => {
+    return isAuth ? <Navigate to="/dashboard" /> : <Navigate to="/login" />;
+  };
+
+  const PrivateRoute = ({ children }) => {
+    return isAuth ? children : <Navigate to="/login" />;
+  };
   return (
     <>
       <Routes>
-        <Route path="/login" element={<Login />} />
+        <Route
+          path="/login"
+          element={isAuth ? <Navigate to="/dashboard" /> : <Login />}
+        />
         <Route
           path="/dashboard"
           element={
             <PrivateRoute>
               <PrivateLayout>
                 <Dashboard />
+              </PrivateLayout>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/puerto"
+          element={
+            <PrivateRoute>
+              <PrivateLayout>
+                <Puerto />
+              </PrivateLayout>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/historial-puertos"
+          element={
+            <PrivateRoute>
+              <PrivateLayout>
+                <HistorialPuerto />
+              </PrivateLayout>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/embarcacion"
+          element={
+            <PrivateRoute>
+              <PrivateLayout>
+                <Embarcacion />
               </PrivateLayout>
             </PrivateRoute>
           }
@@ -97,7 +135,7 @@ const AppContent = () => {
             </PrivateRoute>
           }
         />
-        <Route path="/" element={<Navigate to="/login" />} />
+        <Route path="/" element={<RootRedirect />} />
         <Route path="*" element={<div>Página no encontrada</div>} />
       </Routes>
     </>

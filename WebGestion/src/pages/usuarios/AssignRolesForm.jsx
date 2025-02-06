@@ -5,10 +5,12 @@ import { MdClose } from "react-icons/md";
 import Button from "@/components/Button";
 import axiosInstance from "@/config/axiosConfig";
 import useFetchData from "@/hooks/useFetchData";
+import { useAuth } from "@/context/AuthContext";
 
 const AssignRolesForm = ({ onSuccess, onCancel }) => {
   const { userId } = useParams();
   const navigate = useNavigate();
+  const { refreshUsuario } = useAuth();
 
   const handleCancel = () => {
     if (onCancel) {
@@ -105,8 +107,8 @@ const AssignRolesForm = ({ onSuccess, onCancel }) => {
       setSelectedRoles(selectedRoles.filter((r) => r.id !== role.id));
     }
   };
+  
 
-  // Al enviar el formulario se determinan los roles a asignar y los a remover
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -156,6 +158,18 @@ const AssignRolesForm = ({ onSuccess, onCancel }) => {
       );
 
       if (refetchAssigned) await refetchAssigned();
+
+      // Actualizar localStorage con la nueva lista de roles.
+      // Se asume que al loguearse se guardó el usuario en localStorage con la clave "usuario"
+      const storedUser = localStorage.getItem("usuario");
+
+      if (storedUser) {
+        const userData = JSON.parse(storedUser);
+        userData.roles = selectedRoles.map((role) => role.nombre);
+        localStorage.setItem("usuario", JSON.stringify(userData));
+        // Actualiza el estado del contexto
+        refreshUsuario();
+      }
       if (onSuccess) onSuccess();
     } catch (err) {
       console.error(err);
@@ -194,13 +208,18 @@ const AssignRolesForm = ({ onSuccess, onCancel }) => {
               <div
                 key={role.id}
                 className="flex items-center p-2 border rounded hover:bg-gray-50 cursor-pointer"
-                onClick={() => toggleRole({ id: role.id, nombre: role.nombre_rol })}
+                onClick={() =>
+                  toggleRole({ id: role.id, nombre: role.nombre_rol })
+                }
               >
                 <input
                   type="checkbox"
                   checked={!!selectedRoles.find((r) => r.id === role.id)}
                   onChange={(e) =>
-                    handleCheckboxChange(e, { id: role.id, nombre: role.nombre_rol })
+                    handleCheckboxChange(e, {
+                      id: role.id,
+                      nombre: role.nombre_rol,
+                    })
                   }
                   className="mr-2"
                 />

@@ -51,8 +51,18 @@ export const AuthProvider = ({ children }) => {
     setIsAuth(false);
   };
 
+  const refreshUsuario = () => {
+    const storedUser = localStorage.getItem("usuario");
+    try {
+      setUsuario(storedUser ? JSON.parse(storedUser) : null);
+    } catch (error) {
+      console.error("Error al refrescar usuario:", error);
+      setUsuario(null);
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ isAuth, usuario, login, logout }}>
+    <AuthContext.Provider value={{ isAuth, usuario, login, logout, refreshUsuario }}>
       {children}
     </AuthContext.Provider>
   );

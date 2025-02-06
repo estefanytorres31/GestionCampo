@@ -10,6 +10,7 @@ const asistenciasColumns = [
   { name: "🕰️ Entrada", uuid: "fecha_hora_entrada" },
   { name: "🚪 Salida", uuid: "fecha_hora_salida" },
   { name: "⛵ Embarcación", uuid: "embarcacion" },
+  { name: "📍 Puerto", uuid: "puerto_actual" },
   { name: "🌍 Ubicación", uuid: "ubicacion" },
   { name: "⏳ Horas Trabajadas", uuid: "horas_trabajo" },
 ];
