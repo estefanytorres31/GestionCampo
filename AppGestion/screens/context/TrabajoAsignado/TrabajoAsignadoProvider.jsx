@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
 import TrabajoAsignadoContext from "./TrabajoAsignadoContext";
 import apiClient from "../../API/apiClient";
+import useAuth from "../../hooks/Auth/useAuth";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const TrabajoAsignadoProvider = ({ children }) => {
+    const {isAuth}=useAuth();
     const [trabajos, setTrabajos] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -93,8 +95,10 @@ const TrabajoAsignadoProvider = ({ children }) => {
 
     // Ejecutar la carga de trabajos al montar el provider
     useEffect(() => {
-        fetchTrabajosAsignados();
-    }, []);
+        if (isAuth) {
+            fetchTrabajosAsignados();
+        }
+    }, [isAuth]);
 
     return (
         <TrabajoAsignadoContext.Provider value={{ trabajos, loading, error, fetchTrabajosAsignados }}>
