@@ -39,6 +39,33 @@ export const getAllOrdenesTrabajo = async (req, res) => {
   }
 };
 
+export const getAllOrdenesTrabajoWeb = async (req, res) => {
+  try {
+    const filters = {
+      id_tipo_trabajo: req.query.id_tipo_trabajo || undefined,
+      id_embarcacion: req.query.id_embarcacion || undefined,
+      id_puerto: req.query.id_puerto,
+      id_jefe_asigna: req.query.id_jefe_asigna || undefined,
+      codigo: req.query.codigo || undefined,
+      estados: req.query.estados || undefined,
+    };
+
+    const page = parseInt(req.query.page) || 1;
+    const pageSize = parseInt(req.query.pageSize) || 10;
+
+    const result = await OrdenTrabajoService.getAllOrdenesTrabajoWeb(
+      filters, page, pageSize
+    );
+
+    result.length === 0 && (result.message = "No hay registros de órdenes de trabajo.")
+
+
+    res.status(200).json(result);
+  } catch (error) {
+      res.status(500).json({ message: error.message });
+  }
+};
+
 /**
  * Obtener una Orden de Trabajo por ID
  */

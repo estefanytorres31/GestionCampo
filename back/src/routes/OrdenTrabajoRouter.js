@@ -6,6 +6,7 @@ import {
   asignarTrabajoAEmbarcacion,
   desactivarOrdenTrabajo,
   getAllOrdenesTrabajo,
+  getAllOrdenesTrabajoWeb,
   getOrdenTrabajoById,
 } from "../controllers/OrdenTrabajoController.js";
 
@@ -16,6 +17,8 @@ ordenTrabajoRouter.post("/", asignarTrabajoAEmbarcacion);
 
 // 📌 Obtener todas las Ordenes de Trabajo Activas con filtrado y paginación
 ordenTrabajoRouter.get("/", getAllOrdenesTrabajo);
+
+ordenTrabajoRouter.get("/web", getAllOrdenesTrabajoWeb);
 
 // 📌 Obtener una Orden de Trabajo Activa por ID
 ordenTrabajoRouter.get("/:id_orden_trabajo", getOrdenTrabajoById);

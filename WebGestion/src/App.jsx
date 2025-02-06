@@ -18,6 +18,7 @@ import AssignRolesForm from "./pages/usuarios/AssignRolesForm";
 import Puerto from "./pages/puerto/Puerto";
 import Embarcacion from "./pages/Embarcacion";
 import HistorialPuerto from "./pages/puerto/HistorialPuerto";
+import TrabajosAsignados from "./pages/trabajosasignados/TrabajosAsignados";
 
 const AppContent = () => {
   const { isAuth } = useAuth();
@@ -81,6 +82,16 @@ const AppContent = () => {
             <PrivateRoute>
               <PrivateLayout>
                 <Asistencias />
+              </PrivateLayout>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/trabajos-asignados"
+          element={
+            <PrivateRoute>
+              <PrivateLayout>
+                <TrabajosAsignados />
               </PrivateLayout>
             </PrivateRoute>
           }

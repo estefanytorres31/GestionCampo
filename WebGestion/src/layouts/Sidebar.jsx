@@ -18,7 +18,7 @@ import { FaUserFriends } from "react-icons/fa";
 import { FaMapLocationDot } from "react-icons/fa6";
 import { BiSolidShip } from "react-icons/bi";
 import { LuShipWheel } from "react-icons/lu";
-
+import { HiClipboardList } from "react-icons/hi";
 
 import icono from "@/assets/logo.svg";
 import { useAuth } from "@/context/AuthContext";
@@ -105,60 +105,66 @@ const SideBar = () => {
         label: "Asistencias",
         roles: ["admin"],
       },
+      // {
+      //   // Ítem contenedor para subitems
+      //   icon: <MdAssignment size={20} className="min-w-max" />,
+      //   label: "Asignaciones",
+      //   roles: ["admin"],
+      //   subItems: [
+      //     {
+      //       to: "/asignaciones",
+      //       icon: <GiCargoShip size={20} className="min-w-max" />,
+      //       label: "Asignaciones",
+      //       roles: ["admin"],
+      //     },
+      //     {
+      //       to: "/puertos",
+      //       icon: <GiHarborDock size={20} className="min-w-max" />,
+      //       label: "Puerto",
+      //       roles: ["admin"],
+      //     },
+      //     {
+      //       to: "/historial-puertos",
+      //       label: "Historial de Puertos",
+      //       icon: <LuShipWheel size={18} className="min-w-max" />,
+      //     },
+      //   ],
+      // },
+      // {
+      //   // Ítem contenedor para subitems
+      //   icon: <BiSolidShip size={20} className="min-w-max" />,
+      //   label: "Embarcacion",
+      //   roles: ["admin"],
+      //   subItems: [
+      //     {
+      //       to: "/embarcacion",
+      //       icon: <GiCargoShip size={20} className="min-w-max" />,
+      //       label: "Embarcación",
+      //       roles: ["admin"],
+      //     },
+      //     {
+      //       to: "/puerto",
+      //       icon: <GiHarborDock size={20} className="min-w-max" />,
+      //       label: "Puerto",
+      //       roles: ["admin"],
+      //     },
+      //     {
+      //       to: "/historial-puertos",
+      //       label: "Historial de Puertos",
+      //       icon: <LuShipWheel size={18} className="min-w-max" />,
+      //     },
+      //   ],
+      // },
+      // {
+      //   to: "/sistema",
+      //   icon: <FontAwesomeIcon icon={faGear} style={{ fontSize: "17px" }} />,
+      //   label: "Sistema",
+      //   roles: ["admin"],
+      // },
       {
-        // Ítem contenedor para subitems
-        icon: <MdAssignment size={20} className="min-w-max" />,
-        label: "Asignaciones",
-        roles: ["admin"],
-        subItems: [
-          {
-            to: "/asignaciones",
-            icon: <GiCargoShip size={20} className="min-w-max" />,
-            label: "Asignaciones",
-            roles: ["admin"],
-          },
-          {
-            to: "/",
-            icon: <GiHarborDock size={20} className="min-w-max" />,
-            label: "Puerto",
-            roles: ["admin"],
-          },
-          {
-            to: "/historial-puertos",
-            label: "Historial de Puertos",
-            icon: <LuShipWheel size={18} className="min-w-max" />,
-          },
-        ],
-      },
-      {
-        // Ítem contenedor para subitems
-        icon: <BiSolidShip size={20} className="min-w-max" />,
-        label: "Embarcacion",
-        roles: ["admin"],
-        subItems: [
-          {
-            to: "/embarcacion",
-            icon: <GiCargoShip size={20} className="min-w-max" />,
-            label: "Embarcación",
-            roles: ["admin"],
-          },
-          {
-            to: "/puerto",
-            icon: <GiHarborDock size={20} className="min-w-max" />,
-            label: "Puerto",
-            roles: ["admin"],
-          },
-          {
-            to: "/historial-puertos",
-            label: "Historial de Puertos",
-            icon: <LuShipWheel size={18} className="min-w-max" />,
-          },
-        ],
-      },
-      {
-        to: "/sistema",
-        icon: <FontAwesomeIcon icon={faGear} style={{ fontSize: "17px" }} />,
-        label: "Sistema",
+        to: "/trabajos-asignados",
+        icon: <HiClipboardList size={20} className="min-w-max" />,
+        label: "Trabajos Asignados",
         roles: ["admin"],
       },
       {
@@ -346,7 +352,7 @@ const SideBar = () => {
                   exit={{ opacity: 0, scale: 0.8, x: 10 }}
                   transition={{ duration: 0.2 }}
                 >
-                  <TbViewportNarrow size={25} />
+                  <TbViewportNarrow size={20} />
                 </motion.div>
               ) : (
                 <motion.div
@@ -357,7 +363,7 @@ const SideBar = () => {
                   exit={{ opacity: 0, scale: 0.8, x: -10 }}
                   transition={{ duration: 0.2 }}
                 >
-                  <TbViewportWide size={25} />
+                  <TbViewportWide size={20} />
                 </motion.div>
               )}
             </AnimatePresence>

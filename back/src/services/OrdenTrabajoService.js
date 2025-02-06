@@ -139,6 +139,76 @@ export const getAllOrdenesTrabajo = async (query) => {
   return ordenesTrabajo;
 };
 
+export const getAllOrdenesTrabajoWeb = async (
+  filters,
+  page = 1,
+  pageSize = 10
+) => {
+  const {
+    id_tipo_trabajo,
+    id_embarcacion,
+    id_puerto,
+    id_jefe_asigna,
+    codigo,
+    estados,
+  } = filters;
+
+  const whereClause = {
+    estado: { not: "inactivo" }, // Por defecto, excluye las órdenes inactivas
+    ...(estados && { estado: { in: estados.split(",") } }), // Filtrar por múltiples estados
+    ...(id_tipo_trabajo && { id_tipo_trabajo: parseInt(id_tipo_trabajo) }),
+    ...(id_embarcacion && { id_embarcacion: parseInt(id_embarcacion) }),
+    ...(id_puerto && { id_puerto: parseInt(id_puerto) }),
+    ...(id_jefe_asigna && { id_jefe_asigna: parseInt(id_jefe_asigna) }),
+    ...(codigo && { codigo }),
+  };
+const skip = (page - 1) * pageSize;
+  // Obtener las órdenes filtradas incluyendo los datos de los modelos relacionados
+  const [ordenTrabajo, total] = await Promise.all([
+    prisma.ordenTrabajo.findMany({
+      where: whereClause,
+      orderBy: { fecha_asignacion: "desc" },
+      skip,
+      take: pageSize,
+      include: {
+        // Incluye los datos de la embarcación, pero solo el campo "nombre"
+        embarcacion: {
+          select: {
+            nombre: true,
+          },
+        },
+        // Incluye los datos del puerto, seleccionando solo el "nombre"
+        puerto: {
+          select: {
+            nombre: true,
+          },
+        },
+        // Incluye los datos del jefe que asigna, puedes elegir los campos que necesites
+        jefe_asigna: {
+          select: {
+            nombre_usuario: true,
+            nombre_completo: true, // si también necesitas el nombre completo
+          },
+        },
+        // Opcional: Si deseas también el nombre del tipo de trabajo
+        tipo_trabajo: {
+          select: {
+            nombre_trabajo: true,
+          },
+        },
+      },
+    }),
+    prisma.ordenTrabajo.count({where:whereClause})
+  ]);
+
+  return {
+    total,
+    page,
+    pageSize,
+    totalPages: Math.ceil(total / pageSize),
+    data: ordenTrabajo,
+  };
+};
 
 /**
  * Obtener una Orden de Trabajo por ID
