@@ -202,13 +202,14 @@ const SistemasPartes = ({ route, navigation }) => {
         return isSelected && parte && parte.estado_parte !== "completado";
       })
       .map(([id]) => parseInt(id));
-
+  
     if (newlySelectedParts.length === 0) {
       Alert.alert("Advertencia", "Por favor seleccione al menos una parte nueva para continuar.");
       return;
     }
-
+  
     try {
+      // Update all newly selected parts
       await Promise.all(newlySelectedParts.map(id_orden_trabajo_parte => 
         actualizarOrdenTrabajoParte(
           id_orden_trabajo_parte, 
@@ -216,30 +217,41 @@ const SistemasPartes = ({ route, navigation }) => {
           comments[id_orden_trabajo_parte] || null
         )
       ));
-
-          const sistemasAfectados = new Set(
-        newlySelectedParts.map(partId => {
-          const sistema = data.find(s => 
-            s.partes.some(p => p.id_orden_trabajo_parte === partId)
-          );
-          return sistema?.id_orden_trabajo_sistema;
-        })
-      );
-
+  
+      // Check each system's completion status
+      const sistemasEstados = data.map(sistema => {
+        const sistemaPartes = sistema.partes.map(parte => ({
+          ...parte,
+          isSelected: selectedParts[parte.id_orden_trabajo_parte] || parte.estado_parte === "completado"
+        }));
+        
+        return {
+          id_orden_trabajo_sistema: sistema.id_orden_trabajo_sistema,
+          allCompleted: sistemaPartes.every(parte => parte.isSelected)
+        };
+      });
+  
+      // Update systems status
       await Promise.all(
-        Array.from(sistemasAfectados).map(sistemaId => 
-          actualizarOrdenTrabajoSistema(sistemaId, "en_progreso")
+        sistemasEstados.map(({ id_orden_trabajo_sistema, allCompleted }) => 
+          actualizarOrdenTrabajoSistema(
+            id_orden_trabajo_sistema, 
+            allCompleted ? "completado" : "en_progreso"
+          )
         )
       );
-    
-
-        // Update the orden_trabajo state
-      const resp=await actualizarOrdenTrabajo(idOrden, "en_progreso")
-      console.log(resp)
-
+  
+      // Check if all systems are completed
+      const allSystemsCompleted = sistemasEstados.every(sistema => sistema.allCompleted);
+  
+      // Update work order status
+      const newOrdenTrabajoStatus = allSystemsCompleted ? "completado" : "en_progreso";
+      const resp = await actualizarOrdenTrabajo(idOrden, newOrdenTrabajoStatus);
+      console.log(resp);
+  
       Alert.alert(
         "Éxito",
-        "Partes seleccionadas guardadas correctamente",
+        `Partes guardadas correctamente${allSystemsCompleted ? ' y orden de trabajo completada' : ''}`,
         [{ 
           text: "OK",
           onPress: () => {
@@ -251,7 +263,7 @@ const SistemasPartes = ({ route, navigation }) => {
       Alert.alert("Error", "Hubo un problema al guardar las partes seleccionadas.");
       console.error('Error saving parts:', error);
     }
-  }, [selectedParts, comments, actualizarOrdenTrabajoParte, navigation]);
+  }, [selectedParts, comments, data, actualizarOrdenTrabajoParte, actualizarOrdenTrabajoSistema, actualizarOrdenTrabajo, navigation]);
 
   if (loading) {
     return (
