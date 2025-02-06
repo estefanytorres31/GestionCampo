@@ -9,7 +9,7 @@ const CreatePermissionModal = ({ isOpen, onClose, onSuccess }) => {
   // Estados para almacenar los valores de los campos
   const [nombre, setNombre] = useState("");
   const [descripcion, setDescripcion] = useState("");
-  
+
   // Usamos el hook usePostData con el endpoint de permisos
   const { postData, loading, error } = usePostData("/permiso");
 
@@ -34,7 +34,13 @@ const CreatePermissionModal = ({ isOpen, onClose, onSuccess }) => {
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <Modal.Header>
-        <h2 className="text-xl font-bold border-b border-[#1c2c4f]/20 py-3 text-[#1c2c4f]">
+        <h2
+          className="text-xl font-bold py-3"
+          style={{
+            borderBottom: "1px solid var(--border-color)",
+            color: "var(--primary-text)",
+          }}
+        >
           Crear Permiso
         </h2>
       </Modal.Header>

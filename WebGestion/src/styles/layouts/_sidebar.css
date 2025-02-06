@@ -1,3 +1,26 @@
 .link {
   @apply p-2.5 flex gap-6 items-center md:cursor-pointer cursor-default duration-300 font-medium whitespace-nowrap;
 }
+
+/* Ejemplo de clases reutilizables */
+.link {
+  padding: 0.625rem;
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  font-weight: 500;
+  white-space: nowrap;
+  color: var(--primary-text);
+}
+
+.link:hover {
+  background-color: var(--hover-bg);
+}
+
+.link-active {
+  background-color: var(--active-bg);
+  border-color: var(--border-color);
+  color: var(--active-text);
+}

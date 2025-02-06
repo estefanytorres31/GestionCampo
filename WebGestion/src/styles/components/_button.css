@@ -1,3 +1,4 @@
+/* Estilos base para botones */
 .button {
   @apply px-4 py-3 rounded-xl h-11 shadow-md flex items-center justify-center active:scale-95 focus:outline-none transition duration-300 transform;
   font-family: var(--text-sm-semibold-font-family);
@@ -7,26 +8,72 @@
   line-height: var(--text-sm-semibold-line-height);
 }
 
-.button-green {
-  @apply bg-green-900 text-white hover:bg-green-800 active:bg-green-700;
-}
-
+/* Botón “default” usando variables específicas para botones */
 .button-default {
-  @apply bg-[#0D1E4C] text-white rounded-xl h-11 shadow-md text-sm font-semibold flex items-center justify-center active:scale-95 focus:outline-none transition-transform duration-300 hover:bg-blue-950 active:bg-[#0D1E4C]/90 ;
+  @apply text-sm font-semibold;
+  background-color: var(--button-bg);
+  color: var(--button-text);
+  border: none;
+  transition: background-color 0.3s;
 }
 
+.button-default:hover {
+  background-color: var(--button-hover-bg);
+}
+
+.button-default:active {
+  background-color: var(--button-active-bg);
+}
+
+/* Variante de botón "hover" (usando variables generales de fondo y texto) */
 .button-hover {
-  @apply bg-gray-100 text-[#0D1E4C] hover:bg-gray-200 active:bg-gray-300 shadow-none;
+  @apply rounded-xl h-11 shadow-md text-sm font-semibold flex items-center justify-center;
+  background-color: var(--secondary-bg);
+  color: var(--primary-text);
+  transition: background-color 0.3s;
 }
 
+.button-hover:hover {
+  background-color: var(--hover-bg);
+}
+
+.button-hover:active {
+  background-color: var(--active-bg);
+}
+
+/* Botón para reportes, con borde */
 .button-report {
-  @apply bg-white text-[#0D1E4C] border border-[#0D1E4C] hover:border-blue-700 active:border-blue-700 hover:text-blue-800 active:text-blue-700;
+  @apply rounded-xl h-11 shadow-md text-sm font-semibold flex items-center justify-center;
+  background-color: transparent;
+  color: var(--primary-text);
+  border: 1px solid var(--primary-text);
+  transition: border-color 0.3s, color 0.3s;
 }
 
-.button-icon, .button-filter {
-  @apply w-11 select-none;
+.button-report:hover {
+  border-color: var(--active-text);
+  color: var(--active-text);
 }
 
+.button-report:active {
+  border-color: var(--active-bg);
+  color: var(--active-bg);
+}
+
+/* Botones de icono y filtro */
+.button-icon,
 .button-filter {
-  @apply bg-[#0D1E4C] text-white
+  @apply w-11 select-none flex items-center justify-center;
+}
+
+/* Botón de filtro usando variables específicas para botones */
+.button-filter {
+  @apply rounded-xl h-11 shadow-md text-sm font-semibold;
+  background-color: var(--button-bg);
+  color: var(--button-text);
+  transition: background-color 0.3s;
+}
+
+.button-filter:hover {
+  background-color: var(--button-hover-bg);
 }
