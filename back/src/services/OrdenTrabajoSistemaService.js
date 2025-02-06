@@ -1,6 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { getUTCTime } from "../utils/Time.js";
-import { deleteImage, uploadFotos } from "../utils/Cloudinary.js";
+import { deleteImage } from "../utils/Cloudinary.js";
 
 const prisma = new PrismaClient();
 
@@ -312,20 +312,82 @@ export const updateOrdenTrabajoSistema = async (id, data) => {
 
   const fechaActualizacion = getUTCTime(new Date().toISOString());
 
-  // Preparar los datos a actualizar
-  const updateData = {
-    ...(avance !== undefined && { avance: parseInt(avance) }), 
-    ...(materiales !== undefined && { materiales }),
-    ...(proximo_abordaje !== undefined && { proximo_abordaje }),
-    ...(observaciones !== undefined && { observaciones }),
-    actualizado_en: fechaActualizacion,
-  };
+  // Iniciar una transacción para asegurar la integridad de los datos
+  return await prisma.$transaction(async (prisma) => {
+    // 1. Primero obtenemos las fotos actuales para eliminarlas de Cloudinary
+    const fotosActuales = await prisma.ordenTrabajoSistemaFoto.findMany({
+      where: { id_orden_trabajo_sistema: parseInt(id) }
+    });
 
-  let ordenActualizada;
-  try {
-    ordenActualizada = await prisma.ordenTrabajoSistema.update({
+    // 2. Eliminar las fotos existentes de Cloudinary y la base de datos
+    if (fotosActuales.length > 0) {
+      // Eliminar de Cloudinary
+      for (const foto of fotosActuales) {
+        try {
+          await deleteImage(foto.url);
+        } catch (error) {
+          console.error('Error eliminando imagen de Cloudinary:', error);
+          // Continuamos aunque falle la eliminación en Cloudinary
+        }
+      }
+
+      // Eliminar registros de la base de datos
+      await prisma.ordenTrabajoSistemaFoto.deleteMany({
+        where: { id_orden_trabajo_sistema: parseInt(id) }
+      });
+    }
+
+    // 3. Actualizar los datos básicos de la orden
+    const updateData = {
+      ...(avance !== undefined && { avance: parseInt(avance) }), 
+      ...(materiales !== undefined && { materiales }),
+      ...(proximo_abordaje !== undefined && { proximo_abordaje }),
+      ...(observaciones !== undefined && { observaciones }),
+      actualizado_en: fechaActualizacion,
+    };
+
+    // 4. Actualizar la orden
+    let ordenActualizada = await prisma.ordenTrabajoSistema.update({
       where: { id_orden_trabajo_sistema: parseInt(id) },
       data: updateData,
+    });
+
+    // 5. Actualizar o crear detalle si aplica
+    if (fallas || causas || solucion || pendiente) {
+      await prisma.ordenTrabajoSistemaDetalle.upsert({
+        where: { id_orden_trabajo_sistema: ordenActualizada.id_orden_trabajo_sistema },
+        update: {
+          ...(fallas !== undefined && { fallas }),
+          ...(causas !== undefined && { causas }),
+          ...(solucion !== undefined && { solucion }),
+          ...(pendiente !== undefined && { pendiente }),
+          actualizado_en: fechaActualizacion,
+        },
+        create: {
+          id_orden_trabajo_sistema: ordenActualizada.id_orden_trabajo_sistema,
+          fallas: fallas || null,
+          causas: causas || null,
+          solucion: solucion || null,
+          pendiente: pendiente || null,
+          creado_en: fechaActualizacion,
+        }
+      });
+    }
+
+    // 6. Agregar las nuevas fotos si existen
+    if (fotos && fotos.length > 0) {
+      await prisma.ordenTrabajoSistemaFoto.createMany({
+        data: fotos.map((url) => ({
+          id_orden_trabajo_sistema: ordenActualizada.id_orden_trabajo_sistema,
+          url,
+          creado_en: fechaActualizacion,
+        })),
+      });
+    }
+
+    // 7. Obtener la orden actualizada con todas las relaciones y las nuevas fotos
+    ordenActualizada = await prisma.ordenTrabajoSistema.findUnique({
+      where: { id_orden_trabajo_sistema: parseInt(id) },
       include: { 
         fotos: true,
         detalle: true,
@@ -345,49 +407,9 @@ export const updateOrdenTrabajoSistema = async (id, data) => {
         }
       },
     });
-  } catch (error) {
-    if (error.code === 'P2025') { // Registro no encontrado
-      throw new Error(`La orden de trabajo con ID ${id} no existe o está inactiva.`);
-    } else {
-      throw error;
-    }
-  }
 
-  // Actualizar o crear detalle si aplica
-  if (fallas || causas || solucion || pendiente) {
-    await prisma.ordenTrabajoSistemaDetalle.upsert({
-      where: { id_orden_trabajo_sistema: ordenActualizada.id_orden_trabajo_sistema },
-      update: {
-        ...(fallas !== undefined && { fallas }),
-        ...(causas !== undefined && { causas }),
-        ...(solucion !== undefined && { solucion }),
-        ...(pendiente !== undefined && { pendiente }),
-        actualizado_en: fechaActualizacion,
-      },
-      create: {
-        id_orden_trabajo_sistema: ordenActualizada.id_orden_trabajo_sistema,
-        fallas: fallas || null,
-        causas: causas || null,
-        solucion: solucion || null,
-        pendiente: pendiente || null,
-        creado_en: fechaActualizacion,
-      }
-    });
-  }
-
-  // Manejar fotos adicionales
-  if (fotos && fotos.length > 0) {
-    await prisma.ordenTrabajoSistemaFoto.createMany({
-      data: fotos.map((url) => ({
-        id_orden_trabajo_sistema: ordenActualizada.id_orden_trabajo_sistema,
-        url,
-        creado_en: fechaActualizacion,
-      })),
-    });0
-    
-  }
-
-  return ordenActualizada;
+    return ordenActualizada;
+  });
 };
 
 /**

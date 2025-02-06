@@ -1,4 +1,6 @@
 import * as OrdenTrabajoSistemaService from "../services/OrdenTrabajoSistemaService.js";
+import { uploadFotos } from "../utils/Cloudinary.js";
+import fs from "fs"
 
 /**
  * Crear una OrdenTrabajoSistema
@@ -65,10 +67,74 @@ export const getOrdenTrabajoSistemaById = async (req, res) => {
 export const updateOrdenTrabajoSistema = async (req, res) => {
   const { id } = req.params;
   try {
-    const orden = await OrdenTrabajoSistemaService.updateOrdenTrabajoSistema(id, req.body);
-    res.status(200).json({ message: "Orden de trabajo actualizada exitosamente.", data: orden });
+    let nuevasFotos = [];
+    
+    // Manejar archivos de imagen
+    if (req.files) {
+      // Si es un solo archivo
+      if (req.files.imagen) {
+        const uploadResult = await uploadFotos(req.files.imagen.tempFilePath);
+        nuevasFotos.push(uploadResult.secure_url);
+      }
+      
+      // Si son múltiples archivos
+      if (req.files.imagenes) {
+        const imagenes = Array.isArray(req.files.imagenes) 
+          ? req.files.imagenes 
+          : [req.files.imagenes];
+        
+        for (const imagen of imagenes) {
+          const uploadResult = await uploadFotos(imagen.tempFilePath);
+          nuevasFotos.push(uploadResult.secure_url);
+        }
+      }
+    }
+
+    // Preparar body con las fotos
+    const bodyConFotos = {
+      ...req.body,
+      fotos: nuevasFotos
+    };
+
+    const orden = await OrdenTrabajoSistemaService.updateOrdenTrabajoSistema(id, bodyConFotos);
+
+    // Limpiar archivos temporales
+    if (req.files) {
+      if (req.files.imagen) {
+        fs.unlinkSync(req.files.imagen.tempFilePath);
+      }
+      if (req.files.imagenes) {
+        const imagenes = Array.isArray(req.files.imagenes) 
+          ? req.files.imagenes 
+          : [req.files.imagenes];
+        imagenes.forEach(imagen => fs.unlinkSync(imagen.tempFilePath));
+      }
+    }
+
+    res.status(200).json({ 
+      message: "Orden de trabajo actualizada exitosamente.", 
+      data: orden,
+    });
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    console.error('Error en updateOrdenTrabajoSistema:', error);
+    
+    // Limpiar archivos temporales en caso de error
+    if (req.files) {
+      if (req.files.imagen) {
+        fs.unlinkSync(req.files.imagen.tempFilePath);
+      }
+      if (req.files.imagenes) {
+        const imagenes = Array.isArray(req.files.imagenes) 
+          ? req.files.imagenes 
+          : [req.files.imagenes];
+        imagenes.forEach(imagen => fs.unlinkSync(imagen.tempFilePath));
+      }
+    }
+
+    res.status(400).json({ 
+      message: error.message,
+      error: error.stack // Agregado para debug
+    });
   }
 };
 
