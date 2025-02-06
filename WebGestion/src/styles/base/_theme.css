@@ -47,8 +47,8 @@
   --input-focus-border: #e0e0e0;
 
   /* Variables específicas para la tabla */
-  --table-header-bg: #1e1e1e;
-  --table-header-text: #e0e0e0;
+  --table-header-bg: #e0e0e0;
+  --table-header-text: #121212;
   --table-row-hover-bg: #2c2c2c;
 
   /* Variables específicas para botones en dark */
@@ -78,7 +78,7 @@
 
   /* Variables específicas para la tabla */
   --table-header-bg: #374151;
-  --table-header-text: #f3f4f6;
+  --table-header-text: #1f2937;
   --table-row-hover-bg: #2d3748;
 
   /* Variables específicas para botones en darkblue */
@@ -88,4 +88,242 @@
   --button-active-bg: #08143d;     /* Fondo aún más oscuro al hacer click */
 }
 
+/* Ayu Dark Theme */
+[data-theme="ayu-dark"] {
+  /* Variables generales */
+  --primary-bg: #0A0E14;
+  --secondary-bg: #1A1F29;
+  --primary-text: #B3B1AD;
+  --border-color: #2D3640;
+  --hover-bg: #151A1E;
+  --active-bg: rgba(255, 203, 107, 0.2);
+  --active-text: #FFB454;
 
+  /* Input en ayu dark */
+  --input-bg: #0A0E14;
+  --input-text: #B3B1AD;
+  --input-border: #2D3640;
+  --input-hover-border: #FFB454;
+  --input-focus-border: #FFB454;
+
+  /* Variables específicas para la tabla */
+  --table-header-bg: #1A1F29;
+  --table-header-text: #B3B1AD;
+  --table-row-hover-bg: #11151C;
+
+  /* Variables específicas para botones */
+  --button-bg: #FFB454;
+  --button-text: #0A0E14;
+  --button-hover-bg: #FFC16B;
+  --button-active-bg: #F5AA4B;
+}
+
+/* Ayu Light Theme */
+[data-theme="ayu-light"] {
+  /* Variables generales */
+  --primary-bg: #FAFAFA;
+  --secondary-bg: #F3F4F5;
+  --primary-text: #5C6773;
+  --border-color: #D9DBDC;
+  --hover-bg: #F0F0F0;
+  --active-bg: rgba(255, 106, 0, 0.2);
+  --active-text: #FF6A00;
+
+  /* Input en ayu light */
+  --input-bg: #FAFAFA;
+  --input-text: #5C6773;
+  --input-border: #D9DBDC;
+  --input-hover-border: #FF6A00;
+  --input-focus-border: #FF6A00;
+
+  /* Variables específicas para la tabla */
+  --table-header-bg: #F3F4F5;
+  --table-header-text: #5C6773;
+  --table-row-hover-bg: #F5F5F5;
+
+  /* Variables específicas para botones */
+  --button-bg: #FF6A00;
+  --button-text: #FAFAFA;
+  --button-hover-bg: #FF7B1A;
+  --button-active-bg: #F56500;
+}
+
+/* Dracula Theme */
+[data-theme="dracula"] {
+  /* Variables generales */
+  --primary-bg: #282a36;
+  --secondary-bg: #44475a;
+  --primary-text: #f8f8f2;
+  --border-color: #6272a4;
+  --hover-bg: #383a59;
+  --active-bg: rgba(255, 121, 198, 0.2);
+  --active-text: #ff79c6;
+
+  /* Input en dracula */
+  --input-bg: #282a36;
+  --input-text: #f8f8f2;
+  --input-border: #6272a4;
+  --input-hover-border: #ff79c6;
+  --input-focus-border: #ff79c6;
+
+  /* Variables específicas para la tabla */
+  --table-header-bg: #44475a;
+  --table-header-text: #f8f8f2;
+  --table-row-hover-bg: #383a59;
+
+  /* Variables específicas para botones */
+  --button-bg: #ff79c6;
+  --button-text: #282a36;
+  --button-hover-bg: #ff92d0;
+  --button-active-bg: #ff61bc;
+}
+
+/* Monokai Theme */
+[data-theme="monokai"] {
+  /* Variables generales */
+  --primary-bg: #272822;
+  --secondary-bg: #3e3d32;
+  --primary-text: #f8f8f2;
+  --border-color: #75715e;
+  --hover-bg: #3e3d32;
+  --active-bg: rgba(102, 217, 239, 0.2);
+  --active-text: #66d9ef;
+
+  /* Input en monokai */
+  --input-bg: #272822;
+  --input-text: #f8f8f2;
+  --input-border: #75715e;
+  --input-hover-border: #66d9ef;
+  --input-focus-border: #66d9ef;
+
+  /* Variables específicas para la tabla */
+  --table-header-bg: #3e3d32;
+  --table-header-text: #f8f8f2;
+  --table-row-hover-bg: #35342a;
+
+  /* Variables específicas para botones */
+  --button-bg: #66d9ef;
+  --button-text: #272822;
+  --button-hover-bg: #7de2f7;
+  --button-active-bg: #4fd0e7;
+}
+
+/* Night Owl Light Theme */
+[data-theme="night-owl-light"] {
+  /* Variables generales */
+  --primary-bg: #ffffff;
+  --secondary-bg: #f8f9fb;
+  --primary-text: #403f53;
+  --border-color: #d6deeb;
+  --hover-bg: #f0f0f0;
+  --active-bg: rgba(64, 195, 181, 0.2);
+  --active-text: #40c3b5;
+
+  /* Input en night owl light */
+  --input-bg: #ffffff;
+  --input-text: #403f53;
+  --input-border: #d6deeb;
+  --input-hover-border: #40c3b5;
+  --input-focus-border: #40c3b5;
+
+  /* Variables específicas para la tabla */
+  --table-header-bg: #f8f9fb;
+  --table-header-text: #403f53;
+  --table-row-hover-bg: #f0f0f0;
+
+  /* Variables específicas para botones */
+  --button-bg: #40c3b5;
+  --button-text: #ffffff;
+  --button-hover-bg: #4ddccf;
+  --button-active-bg: #33b5a7;
+}
+
+/* Night Owl Dark Theme */
+[data-theme="night-owl-dark"] {
+  /* Variables generales */
+  --primary-bg: #011627;
+  --secondary-bg: #0b2942;
+  --primary-text: #d6deeb;
+  --border-color: #1d3b53;
+  --hover-bg: #0b2942;
+  --active-bg: rgba(199, 146, 234, 0.2);
+  --active-text: #c792ea;
+
+  /* Input en night owl dark */
+  --input-bg: #011627;
+  --input-text: #d6deeb;
+  --input-border: #1d3b53;
+  --input-hover-border: #c792ea;
+  --input-focus-border: #c792ea;
+
+  /* Variables específicas para la tabla */
+  --table-header-bg: #0b2942;
+  --table-header-text: #d6deeb;
+  --table-row-hover-bg: #0e3350;
+
+  /* Variables específicas para botones */
+  --button-bg: #c792ea;
+  --button-text: #011627;
+  --button-hover-bg: #d3a6ef;
+  --button-active-bg: #bc7ee5;
+}
+
+/* Solarized Light Theme */
+[data-theme="solarized-light"] {
+  /* Variables generales */
+  --primary-bg: #fdf6e3;
+  --secondary-bg: #eee8d5;
+  --primary-text: #586e75;
+  --border-color: #93a1a1;
+  --hover-bg: #eee8d5;
+  --active-bg: rgba(181, 137, 0, 0.2);
+  --active-text: #b58900;
+
+  /* Input en solarized light */
+  --input-bg: #fdf6e3;
+  --input-text: #586e75;
+  --input-border: #93a1a1;
+  --input-hover-border: #b58900;
+  --input-focus-border: #b58900;
+
+  /* Variables específicas para la tabla */
+  --table-header-bg: #eee8d5;
+  --table-header-text: #586e75;
+  --table-row-hover-bg: #f7f0dd;
+
+  /* Variables específicas para botones */
+  --button-bg: #b58900;
+  --button-text: #fdf6e3;
+  --button-hover-bg: #c69500;
+  --button-active-bg: #a47d00;
+}
+
+/* Solarized Dark Theme */
+[data-theme="solarized-dark"] {
+  /* Variables generales */
+  --primary-bg: #002b36;
+  --secondary-bg: #073642;
+  --primary-text: #93a1a1;
+  --border-color: #586e75;
+  --hover-bg: #073642;
+  --active-bg: rgba(42, 161, 152, 0.2);
+  --active-text: #2aa198;
+
+  /* Input en solarized dark */
+  --input-bg: #002b36;
+  --input-text: #93a1a1;
+  --input-border: #586e75;
+  --input-hover-border: #2aa198;
+  --input-focus-border: #2aa198;
+
+  /* Variables específicas para la tabla */
+  --table-header-bg: #073642;
+  --table-header-text: #93a1a1;
+  --table-row-hover-bg: #00232c;
+
+  /* Variables específicas para botones */
+  --button-bg: #2aa198;
+  --button-text: #002b36;
+  --button-hover-bg: #30b3a9;
+  --button-active-bg: #248f87;
+}

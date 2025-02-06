@@ -42,7 +42,7 @@ const Usuarios = () => {
     email: "",
   });
   const [page, setPage] = useState(1);
-  const [pageSize] = useState(10);
+  const [pageSize] = useState(3);
   const navigate = useNavigate();
 
   const {

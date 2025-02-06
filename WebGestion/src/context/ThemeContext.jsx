@@ -5,6 +5,14 @@ export const themes = {
   light: "light",
   dark: "dark",
   darkblue:"darkblue",
+  ayuDark: "ayu-dark",
+  ayuLight: "ayu-light",
+  dracula: "dracula",
+  monokai: "monokai",
+  nightOwlLight: "night-owl-light",
+  nightOwlDark: "night-owl-dark",
+  solarizedLight: "solarized-light",
+  solarizedDark: "solarized-dark",
 };
 
 const ThemeContext = createContext();
