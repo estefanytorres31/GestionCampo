@@ -7,20 +7,25 @@ import { useMediaQuery } from "react-responsive";
 import { TbViewportWide } from "react-icons/tb";
 import { TbViewportNarrow } from "react-icons/tb";
 import { GiCargoShip, GiHarborDock } from "react-icons/gi";
-import { MdMenu, MdKeyboardArrowDown } from "react-icons/md";
+import { MdMenu, MdKeyboardArrowDown, MdAssignment } from "react-icons/md";
 import {
   RiGroup2Fill,
   RiShieldUserFill,
   RiUserLocationFill,
 } from "react-icons/ri";
 import { IoLogOut } from "react-icons/io5";
-import { FaShip, FaUserFriends } from "react-icons/fa";
+import { FaUserFriends } from "react-icons/fa";
 import { FaMapLocationDot } from "react-icons/fa6";
 import { BiSolidShip } from "react-icons/bi";
+import { LuShipWheel } from "react-icons/lu";
+
 
 import icono from "@/assets/logo.svg";
 import { useAuth } from "@/context/AuthContext";
 import roleMapper from "@/utils/roleMapper";
+
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faGear } from "@fortawesome/free-solid-svg-icons";
 
 // Variantes para la animación del submenú
 const subMenuVariants = {
@@ -102,6 +107,31 @@ const SideBar = () => {
       },
       {
         // Ítem contenedor para subitems
+        icon: <MdAssignment size={20} className="min-w-max" />,
+        label: "Asignaciones",
+        roles: ["admin"],
+        subItems: [
+          {
+            to: "/asignaciones",
+            icon: <GiCargoShip size={20} className="min-w-max" />,
+            label: "Asignaciones",
+            roles: ["admin"],
+          },
+          {
+            to: "/",
+            icon: <GiHarborDock size={20} className="min-w-max" />,
+            label: "Puerto",
+            roles: ["admin"],
+          },
+          {
+            to: "/historial-puertos",
+            label: "Historial de Puertos",
+            icon: <LuShipWheel size={18} className="min-w-max" />,
+          },
+        ],
+      },
+      {
+        // Ítem contenedor para subitems
         icon: <BiSolidShip size={20} className="min-w-max" />,
         label: "Embarcacion",
         roles: ["admin"],
@@ -121,9 +151,15 @@ const SideBar = () => {
           {
             to: "/historial-puertos",
             label: "Historial de Puertos",
-            icon: <RiGroup2Fill size={18} className="min-w-max" />,
+            icon: <LuShipWheel size={18} className="min-w-max" />,
           },
         ],
+      },
+      {
+        to: "/sistema",
+        icon: <FontAwesomeIcon icon={faGear} style={{ fontSize: "17px" }} />,
+        label: "Sistema",
+        roles: ["admin"],
       },
       {
         // Ítem contenedor para subitems

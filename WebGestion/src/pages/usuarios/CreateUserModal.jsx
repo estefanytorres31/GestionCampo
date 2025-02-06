@@ -110,7 +110,7 @@ const CreateUserModal = ({ isOpen, onClose, onSuccess }) => {
         <div className="flex flex-col gap-4">
           {error && <div className="text-red-500">{error}</div>}
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-            <div className="flex items-end gap-2 justify-end">
+            <div className="flex items-end gap-2 justify-between w-full">
               <InputLabel
                 id="nombreUsuario"
                 label="Nombre de Usuario"
