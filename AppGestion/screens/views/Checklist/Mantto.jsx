@@ -3,6 +3,7 @@ import { ChevronDown, ChevronUp, CheckCircle, Circle, Save } from "lucide-react-
 import { View, Text, ScrollView, TextInput, SafeAreaView, ActivityIndicator, StyleSheet, TouchableOpacity, Animated, Alert } from "react-native";
 import useOrdenTrabajoSistema from "../../hooks/OrdenTrabajoSistema/useOrdenTrabajoSistema";
 import useOrdenTrabajoParte from "../../hooks/OrdenTrabajoParte/useOrdenTrabajoParte";
+import useOrdenTrabajo from "../../hooks/OrdenTrabajo/useOrdenTrabajo";
 
 const CollapsibleSistema = ({ sistema, selectedParts, onTogglePart, comments, onCommentChange, onSaveSystem }) => {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -129,8 +130,9 @@ const CollapsibleSistema = ({ sistema, selectedParts, onTogglePart, comments, on
 
 const SistemasPartes = ({ route, navigation }) => {
   const { idOrden } = route.params;
-  const { obtenerOrdenTrabajoSistemaByOrdenTrabajo } = useOrdenTrabajoSistema();
+  const { obtenerOrdenTrabajoSistemaByOrdenTrabajo, actualizarOrdenTrabajoSistema } = useOrdenTrabajoSistema();
   const { actualizarOrdenTrabajoParte } = useOrdenTrabajoParte();
+  const {actualizarOrdenTrabajo}=useOrdenTrabajo();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -211,9 +213,29 @@ const SistemasPartes = ({ route, navigation }) => {
         actualizarOrdenTrabajoParte(
           id_orden_trabajo_parte, 
           "completado", 
-          comments[id_orden_trabajo_parte] || ""
+          comments[id_orden_trabajo_parte] || null
         )
       ));
+
+          const sistemasAfectados = new Set(
+        newlySelectedParts.map(partId => {
+          const sistema = data.find(s => 
+            s.partes.some(p => p.id_orden_trabajo_parte === partId)
+          );
+          return sistema?.id_orden_trabajo_sistema;
+        })
+      );
+
+      await Promise.all(
+        Array.from(sistemasAfectados).map(sistemaId => 
+          actualizarOrdenTrabajoSistema(sistemaId, "en_progreso")
+        )
+      );
+    
+
+        // Update the orden_trabajo state
+      const resp=await actualizarOrdenTrabajo(idOrden, "en_progreso")
+      console.log(resp)
 
       Alert.alert(
         "Éxito",

@@ -23,6 +23,11 @@ export const getOrdenTrabajoSistemaByOrdenTrabajo=async(id_orden_trabajo)=>{
  
 }
 
-export const updateOrdenTrabajoSistema=async(id_orden_trabajo_sistema,)=>{
-
+export const updateEstadoOrdenTrabajoSistema=async(id_orden_trabajo_sistema,estado)=>{
+    try {
+        const response = await apiClient.put(`/ordenestrabajosistema/${id_orden_trabajo_sistema}/estado`, {estado});
+        return response.data;
+    } catch (error) {
+        throw new Error(`Error al actualizar el estado de la orden de trabajo sistema: ${error.message}`);
+    }
 }

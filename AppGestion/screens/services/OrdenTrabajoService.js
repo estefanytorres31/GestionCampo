@@ -42,9 +42,10 @@ export const getAllTrabajosByJefeAsig=async()=>{
 }
 
 
-export const updateOrdenTrabajo=async(id_orden_trabajo, data)=>{
+export const updateOrdenTrabajo=async(id_orden_trabajo, estado)=>{
     try {
-        const response = await apiClient.put(`/ordentrabajo/${id_orden_trabajo}`, data);
+        const response = await apiClient.put(`/ordenestrabajo/${id_orden_trabajo}`, {estado});
+        console.log(id_orden_trabajo,'Estado',estado)
         return response.data;
     } catch (error) {
         throw new Error(`Error al actualizar la orden de trabajo: ${error.message}`);
