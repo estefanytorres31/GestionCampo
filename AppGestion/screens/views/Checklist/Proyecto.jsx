@@ -6,38 +6,41 @@ import { useNavigation } from "@react-navigation/native"
 const checklistData = [
   {
     id: 1,
-    title: "TRANSMISIÓN SATELITAL",
+    title: "Transmisión Satelital",
     items: [
-      { id: "1.1", text: "Revisión de CPU" },
-      { id: "1.2", text: "Antena satelital" },
-      { id: "1.3", text: "Cable de antena" },
-      { id: "1.4", text: "Revisión de PLC" },
-      { id: "1.5", text: "Revisión de módulos" },
-      { id: "1.6", text: "Revisión de cableado: Verificar estado de cables, conectores y terminales" },
-      { id: "1.7", text: "Revisión de aislador galvanico" },
-      { id: "1.8", text: "Verificar operatividad del repetidor" },
-      { id: "1.9", text: "Prueba del sistema, simulación de faena de pesca" },
+      { id: "1.1", text: "Coordinaciones" },
+      { id: "1.2", text: "Soldadura" },
+      { id: "1.3", text: "Cableado" },
+      { id: "1.4", text: "Instalación de equipos" },
+      { id: "1.5", text: "Programación y configuración" },
+      { id: "1.6", text: "Prueba de funcionamiento" }
     ],
     hasNote: true
   },
   {
     id: 2,
     title: "Control de Combustible MP",
+    sections: [
+      {
+        subtitle: "TALLER",
         items: [
-          { id: "2.1", text: "Verificar kit de flujómetros" },
-          { id: "2.2", text: "Revisión interna de los flujómetros" },
-          { id: "2.3", text: "Revisión de los sensores (Pulsos, Temperatura, RPM y Horómetro)" },
-          { id: "2.4", text: "Verificar estado de los cables" },
-          { id: "2.5", text: "Revisión de PLC" },
-          { id: "2.6", text: "Revisión de módulos" },
-          { id: "2.7", text: "Revisión de HMI" },
-          { id: "2.8", text: "Revisión de aislador galvanico" },
-          { id: "2.9", text: "Revisión de interfaces de RPM y % de Paso" },
-          { id: "2.10", text: "Prueba de funcionamiento con motor puesto en marcha" },
-          { id: "2.11", text: "Verificar envío de datos" },
-    
+          { id: "3.1", text: "Armado de tablero" }
         ],
         hasNote: true
+      },
+      {
+        subtitle: "CAMPO",
+        items: [
+          { id: "3.2", text: "Coordinaciones" },
+          { id: "3.3", text: "Soldadura" },
+          { id: "3.4", text: "Cableado" },
+          { id: "3.5", text: "Instalación de equipos y componentes" },
+          { id: "3.6", text: "Programación y configuración" },
+          { id: "3.7", text: "Prueba de funcionamiento" }
+        ],
+        hasNote: true
+      }
+    ]
   },
   {
     id: 3,

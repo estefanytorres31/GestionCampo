@@ -85,7 +85,7 @@ const MaintenanceForm = () => {
         {/*<Text style={styles.title}>Llena el formulario</Text>*/}
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Observaciones</Text>
+          <Text style={styles.sectionTitle}>Observaciones / Recomendaciones</Text>
           <TextInput
             style={styles.input}
             value={formData.Observaciones}
