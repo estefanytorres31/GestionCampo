@@ -19,7 +19,7 @@ export const getOrdenTrabajoUsuarioByUserId=async()=>{
     const userId = await AsyncStorage.getItem('userId');
     const userIdInt = parseInt(userId, 10);
     try{
-        const response = await apiClient.get(`/ordenestrabajousuario/usuario/${userIdInt}`);
+        const response = await apiClient.get(`/ordenestrabajousuario?id_usuario=${userIdInt}`);
         return response.data;
     }catch(error){
         console.error('Error obteniendo la orden de trabajo del usuario:', error);

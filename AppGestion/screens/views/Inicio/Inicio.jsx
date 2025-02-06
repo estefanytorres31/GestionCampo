@@ -1,4 +1,4 @@
-import React from "react";
+import React,{useState,  useEffect} from "react";
 import {
   SafeAreaView,
   View,
@@ -12,11 +12,30 @@ import { useFocusEffect } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import useAuth from "../../hooks/Auth/useAuth";
+import useOrdenTrabajoUsuario from "../../hooks/OrdenTrabajoUsuario/useOrdenTrabajoUsuario";
 
 const { width } = Dimensions.get("window");
 
 const Inicio = ({ route, navigation }) => {
   const { logout, role } = useAuth();
+  const { getOrdenTrabajoUsuarioByUsuario } = useOrdenTrabajoUsuario();
+  const [isResponsable, setIsResponsable] = useState(false);
+
+  useEffect(() => {
+    checkUserRole();
+  }, []);
+
+  const checkUserRole = async () => {
+    try {
+      const response = await getOrdenTrabajoUsuarioByUsuario();
+      const hasResponsableRole = response.some(
+        assignment => assignment.rol_en_orden === "Responsable"
+      );
+      setIsResponsable(hasResponsableRole);
+    } catch (error) {
+      console.error("Error checking user role:", error);
+    }
+  };
 
   useFocusEffect(
     React.useCallback(() => {
@@ -83,25 +102,27 @@ const Inicio = ({ route, navigation }) => {
                 </View>
               </TouchableOpacity>
 
-              <TouchableOpacity
-                style={styles.card}
-                onPress={() => navigation.navigate("TrabajosAsignados")}
-                activeOpacity={0.7}
-              >
-                <View style={styles.cardContent}>
-                  <View style={styles.iconContainer}>
-                    <MaterialCommunityIcons
-                      name="clipboard-list"
-                      size={32}
-                      color="#1A2980"
-                    />
+              {isResponsable && (
+                <TouchableOpacity
+                  style={styles.card}
+                  onPress={() => navigation.navigate("TrabajosAsignados")}
+                  activeOpacity={0.7}
+                >
+                  <View style={styles.cardContent}>
+                    <View style={styles.iconContainer}>
+                      <MaterialCommunityIcons
+                        name="clipboard-list"
+                        size={32}
+                        color="#1A2980"
+                      />
+                    </View>
+                    <View style={styles.cardTextContainer}>
+                      <Text style={styles.cardTitle}>Lista de OT</Text>
+                      <View style={styles.chevron} />
+                    </View>
                   </View>
-                  <View style={styles.cardTextContainer}>
-                    <Text style={styles.cardTitle}>Lista de OT</Text>
-                    <View style={styles.chevron} />
-                  </View>
-                </View>
-              </TouchableOpacity>
+                </TouchableOpacity>
+              )}
             </View>
 
             {showLogoutButton && (
