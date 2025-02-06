@@ -6,7 +6,6 @@ export const AuthProvider = ({ children }) => {
   const [isAuth, setIsAuth] = useState(() => {
     const token = localStorage.getItem("token");
     const expiration = localStorage.getItem("tokenExpiration");
-
     return token && expiration && new Date().getTime() < new Date(expiration).getTime();
   });
 
@@ -26,18 +25,23 @@ export const AuthProvider = ({ children }) => {
       localStorage.removeItem("token");
       localStorage.removeItem("tokenExpiration");
       localStorage.removeItem("usuario");
+      localStorage.removeItem("theme"); // Removemos el tema también
       setUsuario(null);
     }
   }, [isAuth]);
 
   const login = (data) => {
-    const { token, expiracion, userId, nombreUsuario, roles } = data;
+    // Se espera que data incluya: token, expiracion, userId, nombreUsuario, roles y theme
+    const { token, expiracion, userId, nombreUsuario, roles, theme } = data;
+    const usuarioData = { userId, nombreUsuario, roles, theme };
 
-    const usuarioData = { userId, nombreUsuario, roles };
-    
     localStorage.setItem("token", token);
     localStorage.setItem("tokenExpiration", expiracion);
     localStorage.setItem("usuario", JSON.stringify(usuarioData));
+    if (theme) {
+      console.log("tema", theme)
+      localStorage.setItem("theme", theme);
+    }
 
     setUsuario(usuarioData);
     setIsAuth(true);
@@ -47,6 +51,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem("token");
     localStorage.removeItem("tokenExpiration");
     localStorage.removeItem("usuario");
+    localStorage.removeItem("theme");
     setUsuario(null);
     setIsAuth(false);
   };

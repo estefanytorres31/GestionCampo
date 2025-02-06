@@ -6,24 +6,22 @@ import { getPeruTime, getUTCTime } from "../utils/Time.js";
 const prisma = new PrismaClient();
 
 export const login = async (nombreUsuario, contrasena_hash) => {
+  // Buscar el usuario por nombre_usuario y obtener sus roles activos
   const usuario = await prisma.usuario.findUnique({
     where: { nombre_usuario: nombreUsuario },
     include: {
-        usuario_roles: {
-          where: { estado: true },
-          include: {
-            rol: true
-          }
-        }
-      }
-      
+      usuario_roles: {
+        where: { estado: true },
+        include: { rol: true },
+      },
+    },
   });
-  console.log(usuario.usuario_roles);
 
   if (!usuario) {
     throw new Error("Usuario no encontrado");
   }
 
+  // Verificar la contraseña
   const valido = bcrypt.compareSync(contrasena_hash, usuario.contrasena_hash);
   if (!valido) {
     throw new Error("Contraseña incorrecta");
@@ -32,10 +30,23 @@ export const login = async (nombreUsuario, contrasena_hash) => {
   // Obtener los nombres de los roles
   const roles = usuario.usuario_roles.map((ur) => ur.rol.nombre_rol);
 
+  // Buscar la configuración de tema para el usuario
+  const userThemeRecord = await prisma.usuarioConfiguracion.findFirst({
+    where: {
+      usuarioId: usuario.id,
+      configuracion: { nombre: "theme" },
+      estado: true,
+    },
+    select: { valor: true },
+  });
+
+  const userTheme = userThemeRecord ? userThemeRecord.valor : "light";
+
+  // Preparar el payload y generar el token
   const payload = {
     userId: usuario.id,
     nombreUsuario: usuario.nombre_usuario,
-    roles, // Agregar los roles al payload
+    roles,
   };
 
   const token = createToken(payload);
@@ -49,6 +60,7 @@ export const login = async (nombreUsuario, contrasena_hash) => {
     userId: usuario.id,
     nombreUsuario: usuario.nombre_usuario,
     roles,
+    theme: userTheme, // Se agrega el tema configurado o "light" por defecto
   };
 };
 

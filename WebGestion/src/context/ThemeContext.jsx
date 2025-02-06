@@ -29,9 +29,10 @@ export const themes = {
 const ThemeContext = createContext();
 
 export const ThemeProvider = ({ children }) => {
-  // El tema seleccionado (puede ser "system")
-  const [selectedTheme, setSelectedTheme] = useState(themes.light);
-  // Tema efectivo que se aplicará globalmente (si selectedTheme es "system", será light o dark según el sistema)
+  // Intentamos leer el tema seleccionado del localStorage; si no existe, usamos el tema light
+  const storedTheme = localStorage.getItem("selectedTheme");
+  const [selectedTheme, setSelectedTheme] = useState(storedTheme || themes.light);
+  // Tema efectivo que se aplicará globalmente: si el seleccionado es "system", se calculará según la preferencia del sistema
   const [effectiveTheme, setEffectiveTheme] = useState(themes.light);
 
   const updateEffectiveTheme = useCallback(() => {
@@ -57,12 +58,15 @@ export const ThemeProvider = ({ children }) => {
 
   useEffect(() => {
     // Se remueven todas las clases de tema y se añade la del effectiveTheme
-    Object.values(themes).forEach((t) =>
-      document.documentElement.classList.remove(t)
-    );
+    Object.values(themes).forEach((t) => document.documentElement.classList.remove(t));
     document.documentElement.classList.add(effectiveTheme);
     document.documentElement.setAttribute("data-theme", effectiveTheme);
   }, [effectiveTheme]);
+
+  // Cada vez que se actualice selectedTheme, lo guardamos en localStorage
+  useEffect(() => {
+    localStorage.setItem("theme", selectedTheme);
+  }, [selectedTheme]);
 
   const toggleTheme = () => {
     const themeValues = Object.values(themes);

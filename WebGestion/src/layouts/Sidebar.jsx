@@ -310,7 +310,7 @@ const SideBar = () => {
               className="link border p-4 cursor-pointer flex items-center justify-between"
               style={{ borderColor: "var(--border-color)" }}
             >
-              <span className="flex gap-6 items-center">
+              <span className="flex gap-6 items-center pl-2.5">
                 <IoLogOut size={20} />
                 Cerrar sesión
               </span>

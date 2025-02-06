@@ -19,6 +19,7 @@ import Puerto from "./pages/puerto/Puerto";
 import Embarcacion from "./pages/Embarcacion";
 import HistorialPuerto from "./pages/puerto/HistorialPuerto";
 import TrabajosAsignados from "./pages/trabajosasignados/TrabajosAsignados";
+import Configuración from "./pages/configuracion/Configuración";
 
 const AppContent = () => {
   const { isAuth } = useAuth();
@@ -42,6 +43,16 @@ const AppContent = () => {
             <PrivateRoute>
               <PrivateLayout>
                 <Dashboard />
+              </PrivateLayout>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/configuracion/temas"
+          element={
+            <PrivateRoute>
+              <PrivateLayout>
+                <Configuración />
               </PrivateLayout>
             </PrivateRoute>
           }

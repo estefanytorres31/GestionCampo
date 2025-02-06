@@ -20,7 +20,7 @@ enum EstadoOrdenTrabajo {
   en_progreso
   completado
   cancelado
-  inactivo  // Representa el estado 0 (inactivo)
+  inactivo
 }
 
 enum TipoAsistencia {
@@ -92,10 +92,41 @@ model Usuario {
   orden_trabajo_usuario    OrdenTrabajoUsuario[]
   tarea_realizada          TareaRealizada[]
   asistencia               Asistencia[]
-  comentario_tarea         ComentarioTarea[]        @relation("UsuarioComentario") // Relación nombrada para evitar ambigüedades
+  comentario_tarea         ComentarioTarea[]        @relation("UsuarioComentario")
+  usuarioConfiguraciones UsuarioConfiguracion[]
 
   @@map("usuarios")
 }
+
+model Configuracion {
+  id                     Int                      @id @default(autoincrement())
+  nombre                 String                   @unique
+  descripcion            String?
+  defaultValue           String
+  estado                 Boolean                  @default(true)
+  creado_en              DateTime                 @default(now()) @map("creado_en")
+  actualizado_en         DateTime                 @updatedAt @map("actualizado_en")
+  usuarioConfiguraciones UsuarioConfiguracion[]
+  
+  @@map("configuraciones")
+}
+
+model UsuarioConfiguracion {
+  id                Int       @id @default(autoincrement())
+  usuarioId         Int
+  configuracionId   Int
+  valor             String
+  estado            Boolean   @default(true)
+  creado_en         DateTime  @default(now()) @map("creado_en")
+  actualizado_en    DateTime  @updatedAt @map("actualizado_en")
+  
+  usuario           Usuario   @relation(fields: [usuarioId], references: [id])
+  configuracion     Configuracion @relation(fields: [configuracionId], references: [id])
+  
+  @@unique([usuarioId, configuracionId])
+  @@map("usuario_configuraciones")
+}
+
 
 model UsuarioRol {
   id          Int      @id @default(autoincrement())

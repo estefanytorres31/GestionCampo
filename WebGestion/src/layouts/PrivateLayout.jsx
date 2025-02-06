@@ -29,6 +29,8 @@ const PrivateLayout = ({ children }) => {
       "/usuarios": "Gestión de Usuarios",
       "/roles": "Gestión de Roles",
       "/permisos": "Gestión de Permisos",
+      "/configuracion": "Configuración",
+      "/trabajos-asignados": "Gestión de Trabajos Asignados",
     };
     return titles[location.pathname] || "Gestión de Campo";
   }, [location.pathname]);

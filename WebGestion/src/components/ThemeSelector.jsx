@@ -1,12 +1,14 @@
-// ThemeSelector.jsx
 import React, { useState } from "react";
 import { useTheme, themes } from "@/context/ThemeContext";
+import { useAuth } from "@/context/AuthContext";
+import useThemeUser from "@/hooks/configuracion/useThemeUser";
 
-// Función para concatenar clases condicionalmente
+// Función auxiliar para concatenar clases condicionalmente
 function cn(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
+// Componente de vista previa de tema
 const ThemePreview = ({ themeId, isSelected }) => {
   return (
     <div
@@ -61,28 +63,51 @@ const availableThemes = [
 ];
 
 export default function ThemeSelector() {
-  // Aquí usamos el "theme" efectivo y setSpecificTheme para cambiarlo
-  const { theme, setSpecificTheme } = useTheme();
-  const [selectedTheme, setSelectedTheme] = useState(theme);
+  // Extraemos del ThemeContext el tema actual y la función para establecer un tema específico.
+  // También extraemos el usuario para obtener su ID.
+  const { selectedTheme, setSpecificTheme } = useTheme();
+  const { usuario } = useAuth();
+  const { updateTheme, loading, error } = useThemeUser();
+  const [localSelectedTheme, setLocalSelectedTheme] = useState(selectedTheme);
 
-  const handleThemeChange = (newTheme) => {
-    setSelectedTheme(newTheme);
+  const handleThemeChange = async (newTheme) => {
+    setLocalSelectedTheme(newTheme);
+    // Actualizamos el ThemeContext
     setSpecificTheme(newTheme);
+    // Actualizamos el localStorage con el nuevo tema
+    localStorage.setItem("theme", newTheme);
+
+    // Extraemos el ID del usuario desde el contexto Auth
+    const usuario_id = usuario ? usuario.userId : null;
+    if (!usuario_id) return; // Si no hay usuario, no se envía la configuración
+
+    try {
+      // Enviamos la configuración usando los campos que espera el backend:
+      // { usuarioId, configuracion: "theme", valor: newTheme }
+      await updateTheme({
+        usuarioId: usuario_id,
+        configuracion: "theme",
+        valor: newTheme,
+      });
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   return (
     <div className="w-full max-w-5xl mx-auto p-6">
       <h2 className="text-2xl font-bold mb-6">Selecciona un Tema</h2>
+      {error && <p className="text-red-500">{error}</p>}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
         {availableThemes.map((t) => (
           <label key={t.id} className="relative space-y-2 cursor-pointer block">
-            <ThemePreview themeId={t.id} isSelected={selectedTheme === t.id} />
+            <ThemePreview themeId={t.id} isSelected={localSelectedTheme === t.id} />
             <div className="flex items-center space-x-2 mt-2">
               <input
                 type="radio"
                 name="theme"
                 value={t.id}
-                checked={selectedTheme === t.id}
+                checked={localSelectedTheme === t.id}
                 onChange={() => handleThemeChange(t.id)}
                 className="form-radio h-4 w-4 text-blue-600"
               />
@@ -91,6 +116,7 @@ export default function ThemeSelector() {
           </label>
         ))}
       </div>
+      {loading && <p className="mt-4">Guardando configuración...</p>}
     </div>
   );
 }

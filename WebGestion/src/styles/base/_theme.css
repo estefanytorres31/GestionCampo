@@ -59,9 +59,6 @@
   --button-active-bg: #b3b3b3; /* Fondo aún más oscuro al hacer click */
 }
 
-/* Vista previa para la opción "system": 
-   Se usa la clase .preview con data-theme="system", 
-   y se usa una media query para reflejar la preferencia del sistema. */
    .preview[data-theme="system"] {
     /* Por defecto, se asume light */
     --primary-bg: #ffffff;

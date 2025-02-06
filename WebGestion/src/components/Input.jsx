@@ -11,7 +11,7 @@ export const Input = forwardRef(
     ref
   ) => {
     return (
-      <div className="relative flex items-center justify-start w-full">
+      <div className="relative flex justify-start w-full">
         {/* Ícono a la izquierda */}
         {iconLeft && (
           <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
