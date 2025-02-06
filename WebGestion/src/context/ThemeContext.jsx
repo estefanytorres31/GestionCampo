@@ -1,7 +1,8 @@
 // ThemeContext.jsx
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 
 export const themes = {
+  system: "system", // Opción que sincroniza con el sistema operativo
   light: "light",
   dark: "dark",
   darkblue: "darkblue",
@@ -28,35 +29,58 @@ export const themes = {
 const ThemeContext = createContext();
 
 export const ThemeProvider = ({ children }) => {
-  const [theme, setTheme] = useState(themes.light);
+  // El tema seleccionado (puede ser "system")
+  const [selectedTheme, setSelectedTheme] = useState(themes.light);
+  // Tema efectivo que se aplicará globalmente (si selectedTheme es "system", será light o dark según el sistema)
+  const [effectiveTheme, setEffectiveTheme] = useState(themes.light);
+
+  const updateEffectiveTheme = useCallback(() => {
+    if (selectedTheme === themes.system && window.matchMedia) {
+      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      setEffectiveTheme(prefersDark ? themes.dark : themes.light);
+    } else {
+      setEffectiveTheme(selectedTheme);
+    }
+  }, [selectedTheme]);
 
   useEffect(() => {
-    // Remover todas las clases de tema y añadir la del tema actual
+    updateEffectiveTheme();
+
+    let mediaQuery;
+    if (selectedTheme === themes.system && window.matchMedia) {
+      mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+      const handler = () => updateEffectiveTheme();
+      mediaQuery.addEventListener("change", handler);
+      return () => mediaQuery.removeEventListener("change", handler);
+    }
+  }, [selectedTheme, updateEffectiveTheme]);
+
+  useEffect(() => {
+    // Se remueven todas las clases de tema y se añade la del effectiveTheme
     Object.values(themes).forEach((t) =>
       document.documentElement.classList.remove(t)
     );
-    document.documentElement.classList.add(theme);
-    document.documentElement.setAttribute("data-theme", theme);
-  }, [theme]);
+    document.documentElement.classList.add(effectiveTheme);
+    document.documentElement.setAttribute("data-theme", effectiveTheme);
+  }, [effectiveTheme]);
 
-  // Función para alternar cíclicamente entre los temas disponibles
   const toggleTheme = () => {
     const themeValues = Object.values(themes);
-    const currentIndex = themeValues.indexOf(theme);
+    const currentIndex = themeValues.indexOf(selectedTheme);
     const nextIndex = (currentIndex + 1) % themeValues.length;
-    setTheme(themeValues[nextIndex]);
+    setSelectedTheme(themeValues[nextIndex]);
   };
 
-  // Función para establecer un tema específico
   const setSpecificTheme = (newTheme) => {
-    // Opcional: puedes verificar que newTheme esté dentro de los temas permitidos.
     if (Object.values(themes).includes(newTheme)) {
-      setTheme(newTheme);
+      setSelectedTheme(newTheme);
     }
   };
 
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme, setSpecificTheme }}>
+    <ThemeContext.Provider
+      value={{ theme: effectiveTheme, toggleTheme, setSpecificTheme, selectedTheme }}
+    >
       {children}
     </ThemeContext.Provider>
   );

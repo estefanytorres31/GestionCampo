@@ -7,28 +7,27 @@ function cn(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
-// Componente que muestra la vista previa de un tema
 const ThemePreview = ({ themeId, isSelected }) => {
   return (
     <div
       data-theme={themeId}
       className={cn(
-        "w-full h-32 rounded-lg border-2 overflow-hidden transition-all",
+        "preview w-full h-32 rounded-lg border-2 overflow-hidden transition-all",
         isSelected ? "border-blue-500 ring-2 ring-blue-500" : "border-gray-300"
       )}
     >
-      <div className="w-full h-full p-3" style={{ backgroundColor: "var(--primary-bg)" }}>
+      <div className="w-full h-full p-3" style={{ background: "var(--primary-bg)" }}>
         <div className="flex items-center gap-1 mb-3">
-          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: "var(--active-bg)" }} />
-          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: "var(--hover-bg)" }} />
-          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: "var(--border-color)" }} />
+          <div className="w-2 h-2 rounded-full" style={{ background: "var(--active-bg)" }} />
+          <div className="w-2 h-2 rounded-full" style={{ background: "var(--hover-bg)" }} />
+          <div className="w-2 h-2 rounded-full" style={{ background: "var(--border-color)" }} />
         </div>
         <div className="space-y-2">
-          <div className="h-2 w-3/4 rounded" style={{ backgroundColor: "var(--secondary-bg)" }} />
-          <div className="h-2 w-1/2 rounded" style={{ backgroundColor: "var(--border-color)" }} />
+          <div className="h-2 w-3/4 rounded" style={{ background: "var(--secondary-bg)" }} />
+          <div className="h-2 w-1/2 rounded" style={{ background: "var(--border-color)" }} />
           <div className="flex items-center gap-2 mt-4">
-            <div className="h-6 w-16 rounded" style={{ backgroundColor: "var(--active-bg)" }} />
-            <div className="h-4 w-4 rounded-full" style={{ backgroundColor: "var(--primary-text)" }} />
+            <div className="h-6 w-16 rounded" style={{ background: "var(--active-bg)" }} />
+            <div className="h-4 w-4 rounded-full" style={{ background: "var(--primary-text)" }} />
           </div>
         </div>
       </div>
@@ -37,6 +36,7 @@ const ThemePreview = ({ themeId, isSelected }) => {
 };
 
 const availableThemes = [
+  { id: themes.system, label: "System" },
   { id: themes.light, label: "Light" },
   { id: themes.dark, label: "Dark" },
   { id: themes.darkblue, label: "Dark Blue" },
@@ -58,10 +58,10 @@ const availableThemes = [
   { id: themes.nordic, label: "Nordic" },
   { id: themes.retroWave, label: "Retro Wave" },
   { id: themes.mint, label: "Mint" },
-  // ... y así sucesivamente
 ];
 
 export default function ThemeSelector() {
+  // Aquí usamos el "theme" efectivo y setSpecificTheme para cambiarlo
   const { theme, setSpecificTheme } = useTheme();
   const [selectedTheme, setSelectedTheme] = useState(theme);
 

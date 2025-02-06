@@ -59,6 +59,33 @@
   --button-active-bg: #b3b3b3; /* Fondo aún más oscuro al hacer click */
 }
 
+/* Vista previa para la opción "system": 
+   Se usa la clase .preview con data-theme="system", 
+   y se usa una media query para reflejar la preferencia del sistema. */
+   .preview[data-theme="system"] {
+    /* Por defecto, se asume light */
+    --primary-bg: #ffffff;
+    --secondary-bg: #f7f7f7;
+    --primary-text: #0d1e4c;
+    --border-color: #d1d5db;
+    --hover-bg: #f0f4ff;
+    --active-bg: #bfdbfe;
+    --active-text: #1e3a8a;
+  }
+  
+  @media (prefers-color-scheme: dark) {
+    .preview[data-theme="system"] {
+      --primary-bg: #121212;
+      --secondary-bg: #1e1e1e;
+      --primary-text: #e0e0e0;
+      --border-color: #444444;
+      --hover-bg: #2a2a2a;
+      --active-bg: #333333;
+      --active-text: #ffffff;
+    }
+  }
+  
+
 /* Tema darkblue */
 [data-theme="darkblue"] {
   /* Variables generales */

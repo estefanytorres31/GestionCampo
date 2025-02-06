@@ -28,9 +28,6 @@ import roleMapper from "@/utils/roleMapper";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGear } from "@fortawesome/free-solid-svg-icons";
 
-// Importamos el ThemeContext
-import { useTheme } from "@/context/ThemeContext";
-
 // Variantes para la animación del submenú
 const subMenuVariants = {
   closed: {
@@ -50,9 +47,6 @@ const SideBar = () => {
   const { pathname } = useLocation();
   const [link, setLink] = useState([]);
   const [openMenus, setOpenMenus] = useState({});
-
-  // Usamos el contexto global para el tema
-  const { theme, toggleTheme } = useTheme();
 
   // Estado para el sidebar responsive
   const isTab = useMediaQuery({ query: "(max-width: 768px)" });
@@ -308,17 +302,6 @@ const SideBar = () => {
               }
             })}
           </ul>
-
-          {/* Botón para alternar tema */}
-          <div className="flex justify-center my-3">
-            <button
-              onClick={toggleTheme}
-              className="py-1 px-3 rounded-md border text-sm"
-              style={{ borderColor: "var(--border-color)" }}
-            >
-              Cambiar Tema ({theme})
-            </button>
-          </div>
 
           {/* Footer */}
           <div className="flex-1 text-sm z-50 max-h-48 my-auto whitespace-pre w-full font-medium">
