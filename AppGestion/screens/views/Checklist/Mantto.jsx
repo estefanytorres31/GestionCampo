@@ -381,17 +381,6 @@ const styles = StyleSheet.create({
     color: "#94a3b8",
     textAlign: "center",
   },
-  footer: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: "#f8fafc",
-    paddingVertical: 16,
-    paddingHorizontal: 24,
-    borderTopWidth: 1,
-    borderTopColor: "#e2e8f0",
-  },
   saveButton: {
     backgroundColor: "#6366f1",
     flexDirection: "row",

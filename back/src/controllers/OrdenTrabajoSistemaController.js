@@ -89,3 +89,14 @@ export const deleteOrdenTrabajoSistema = async (req, res) => {
     }
   }
 };
+
+export const updateEstadoOrdenTrabajoSistema=async(req, res)=>{
+  const { id } = req.params;
+  const { estado } = req.body;
+  try{
+    const orden = await OrdenTrabajoSistemaService.updateEstadoOrdenTrabajoSistema(id, estado);
+    res.status(200).json({ message: `Estado de orden de trabajo sistema actualizado exitosamente.`, data: orden });
+  }catch(err){
+    res.status(400).json({ message: err.message });
+  }
+}

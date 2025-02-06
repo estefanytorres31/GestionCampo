@@ -406,3 +406,36 @@ export const deleteOrdenTrabajoSistema = async (id) => {
     data: { estado: "inactivo" },
   });
 };
+
+/**
+ * Actualizar el estado de una OrdenTrabajoSistema
+ */
+export const updateEstadoOrdenTrabajoSistema = async (id, nuevoEstado) => {
+  if (!id || !nuevoEstado) {
+    throw new Error("El ID y el nuevo estado son obligatorios.");
+  }
+
+  const orden = await prisma.ordenTrabajoSistema.findUnique({
+    where: { id_orden_trabajo_sistema: parseInt(id) }
+  });
+
+  if (!orden) {
+    throw new Error(`No se encontró la Orden de Trabajo con ID ${id}.`);
+  }
+
+  if (orden.estado === nuevoEstado) {
+    throw new Error(`La Orden de Trabajo ya está en estado '${nuevoEstado}'.`);
+  }
+
+  const fechaActual = getUTCTime(new Date().toISOString());
+
+  const ordenActualizada = await prisma.ordenTrabajoSistema.update({
+    where: { id_orden_trabajo_sistema: parseInt(id) },
+    data: {
+      estado: nuevoEstado,
+      actualizado_en: fechaActual
+    }
+  });
+
+  return ordenActualizada;
+};
