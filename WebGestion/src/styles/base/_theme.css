@@ -1,5 +1,6 @@
 /* Tema por defecto: light (con variables de botón definidas) */
-:root {
+:root,
+[data-theme="light"] {
   /* Variables generales */
   --primary-bg: #ffffff;
   --secondary-bg: #f7f7f7; /* Fondo suave, ligeramente grisáceo */
@@ -22,10 +23,10 @@
   --table-row-hover-bg: #f9fafb;
 
   /* Variables específicas para botones en light */
-  --button-bg: #0d1e4c;           /* Fondo oscuro para el botón */
-  --button-text: #ffffff;         /* Texto en blanco */
-  --button-hover-bg: #0a1630;      /* Fondo un poco más oscuro en hover */
-  --button-active-bg: #09122b;     /* Fondo aún más oscuro al hacer click */
+  --button-bg: #0d1e4c; /* Fondo oscuro para el botón */
+  --button-text: #ffffff; /* Texto en blanco */
+  --button-hover-bg: #0a1630; /* Fondo un poco más oscuro en hover */
+  --button-active-bg: #09122b; /* Fondo aún más oscuro al hacer click */
 }
 
 /* Tema dark */
@@ -52,10 +53,10 @@
   --table-row-hover-bg: #2c2c2c;
 
   /* Variables específicas para botones en dark */
-  --button-bg: #e0e0e0;           /* Fondo claro para contraste */
-  --button-text: #121212;         /* Texto oscuro */
-  --button-hover-bg: #cccccc;      /* Fondo ligeramente más oscuro en hover */
-  --button-active-bg: #b3b3b3;     /* Fondo aún más oscuro al hacer click */
+  --button-bg: #e0e0e0; /* Fondo claro para contraste */
+  --button-text: #121212; /* Texto oscuro */
+  --button-hover-bg: #cccccc; /* Fondo ligeramente más oscuro en hover */
+  --button-active-bg: #b3b3b3; /* Fondo aún más oscuro al hacer click */
 }
 
 /* Tema darkblue */
@@ -82,70 +83,70 @@
   --table-row-hover-bg: #2d3748;
 
   /* Variables específicas para botones en darkblue */
-  --button-bg: #0d1e4c;           /* Fondo azul oscuro para el botón */
-  --button-text: #ffffff;         /* Texto en blanco */
-  --button-hover-bg: #0a1e44;      /* Fondo un poco más oscuro en hover */
-  --button-active-bg: #08143d;     /* Fondo aún más oscuro al hacer click */
+  --button-bg: #0d1e4c; /* Fondo azul oscuro para el botón */
+  --button-text: #ffffff; /* Texto en blanco */
+  --button-hover-bg: #0a1e44; /* Fondo un poco más oscuro en hover */
+  --button-active-bg: #08143d; /* Fondo aún más oscuro al hacer click */
 }
 
 /* Ayu Dark Theme */
 [data-theme="ayu-dark"] {
   /* Variables generales */
-  --primary-bg: #0A0E14;
-  --secondary-bg: #1A1F29;
-  --primary-text: #B3B1AD;
-  --border-color: #2D3640;
-  --hover-bg: #151A1E;
+  --primary-bg: #0a0e14;
+  --secondary-bg: #1a1f29;
+  --primary-text: #b3b1ad;
+  --border-color: #2d3640;
+  --hover-bg: #151a1e;
   --active-bg: rgba(255, 203, 107, 0.2);
-  --active-text: #FFB454;
+  --active-text: #ffb454;
 
   /* Input en ayu dark */
-  --input-bg: #0A0E14;
-  --input-text: #B3B1AD;
-  --input-border: #2D3640;
-  --input-hover-border: #FFB454;
-  --input-focus-border: #FFB454;
+  --input-bg: #0a0e14;
+  --input-text: #b3b1ad;
+  --input-border: #2d3640;
+  --input-hover-border: #ffb454;
+  --input-focus-border: #ffb454;
 
   /* Variables específicas para la tabla */
-  --table-header-bg: #1A1F29;
-  --table-header-text: #B3B1AD;
-  --table-row-hover-bg: #11151C;
+  --table-header-bg: #1a1f29;
+  --table-header-text: #b3b1ad;
+  --table-row-hover-bg: #11151c;
 
   /* Variables específicas para botones */
-  --button-bg: #FFB454;
-  --button-text: #0A0E14;
-  --button-hover-bg: #FFC16B;
-  --button-active-bg: #F5AA4B;
+  --button-bg: #ffb454;
+  --button-text: #0a0e14;
+  --button-hover-bg: #ffc16b;
+  --button-active-bg: #f5aa4b;
 }
 
 /* Ayu Light Theme */
 [data-theme="ayu-light"] {
   /* Variables generales */
-  --primary-bg: #FAFAFA;
-  --secondary-bg: #F3F4F5;
-  --primary-text: #5C6773;
-  --border-color: #D9DBDC;
-  --hover-bg: #F0F0F0;
+  --primary-bg: #fafafa;
+  --secondary-bg: #f3f4f5;
+  --primary-text: #5c6773;
+  --border-color: #d9dbdc;
+  --hover-bg: #f0f0f0;
   --active-bg: rgba(255, 106, 0, 0.2);
-  --active-text: #FF6A00;
+  --active-text: #ff6a00;
 
   /* Input en ayu light */
-  --input-bg: #FAFAFA;
-  --input-text: #5C6773;
-  --input-border: #D9DBDC;
-  --input-hover-border: #FF6A00;
-  --input-focus-border: #FF6A00;
+  --input-bg: #fafafa;
+  --input-text: #5c6773;
+  --input-border: #d9dbdc;
+  --input-hover-border: #ff6a00;
+  --input-focus-border: #ff6a00;
 
   /* Variables específicas para la tabla */
-  --table-header-bg: #F3F4F5;
-  --table-header-text: #5C6773;
-  --table-row-hover-bg: #F5F5F5;
+  --table-header-bg: #f3f4f5;
+  --table-header-text: #5c6773;
+  --table-row-hover-bg: #f5f5f5;
 
   /* Variables específicas para botones */
-  --button-bg: #FF6A00;
-  --button-text: #FAFAFA;
-  --button-hover-bg: #FF7B1A;
-  --button-active-bg: #F56500;
+  --button-bg: #ff6a00;
+  --button-text: #fafafa;
+  --button-hover-bg: #ff7b1a;
+  --button-active-bg: #f56500;
 }
 
 /* Dracula Theme */
@@ -331,31 +332,31 @@
 /* Nord Theme */
 [data-theme="nord"] {
   /* Variables generales */
-  --primary-bg: #2E3440;
-  --secondary-bg: #3B4252;
-  --primary-text: #D8DEE9;
-  --border-color: #4C566A;
-  --hover-bg: #434C5E;
-  --active-bg: #4C566A;
-  --active-text: #ECEFF4;
+  --primary-bg: #2e3440;
+  --secondary-bg: #3b4252;
+  --primary-text: #d8dee9;
+  --border-color: #4c566a;
+  --hover-bg: #434c5e;
+  --active-bg: #4c566a;
+  --active-text: #eceff4;
 
   /* Variables específicas para el input */
-  --input-bg: #2E3440;
-  --input-text: #D8DEE9;
-  --input-border: #4C566A;
-  --input-hover-border: #81A1C1;
-  --input-focus-border: #81A1C1;
+  --input-bg: #2e3440;
+  --input-text: #d8dee9;
+  --input-border: #4c566a;
+  --input-hover-border: #81a1c1;
+  --input-focus-border: #81a1c1;
 
   /* Variables específicas para la tabla */
-  --table-header-bg: #3B4252;
-  --table-header-text: #D8DEE9;
-  --table-row-hover-bg: #434C5E;
+  --table-header-bg: #3b4252;
+  --table-header-text: #d8dee9;
+  --table-row-hover-bg: #434c5e;
 
   /* Variables específicas para botones */
-  --button-bg: #81A1C1;
-  --button-text: #2E3440;
-  --button-hover-bg: #5E81AC;
-  --button-active-bg: #4C566A;
+  --button-bg: #81a1c1;
+  --button-text: #2e3440;
+  --button-hover-bg: #5e81ac;
+  --button-active-bg: #4c566a;
 }
 
 /* Cobalt Theme */
@@ -391,13 +392,29 @@
 /* Neon Purple Theme */
 [data-theme="neon-purple"] {
   /* Variables generales */
-  --primary-bg: linear-gradient(135deg, #1b0033, #3a0076); /* Fondo principal con degradado oscuro y morado */
-  --secondary-bg: linear-gradient(135deg, #130022, #2c0053); /* Fondo secundario con tonos similares */
-  --primary-text: #e0e0ff;   /* Texto claro con toque neon */
-  --border-color: #7f00ff;   /* Borde en morado neón */
-  --hover-bg: linear-gradient(135deg, #14003d, #360084);  /* Fondo en hover, ligeramente más brillante */
-  --active-bg: linear-gradient(135deg, #0f002d, #30006b); /* Fondo en estado activo, un degradado más intenso */
-  --active-text: #ff66ff;    /* Acento neón para textos activos */
+  --primary-bg: linear-gradient(
+    135deg,
+    #1b0033,
+    #3a0076
+  ); /* Fondo principal con degradado oscuro y morado */
+  --secondary-bg: linear-gradient(
+    135deg,
+    #130022,
+    #2c0053
+  ); /* Fondo secundario con tonos similares */
+  --primary-text: #e0e0ff; /* Texto claro con toque neon */
+  --border-color: #7f00ff; /* Borde en morado neón */
+  --hover-bg: linear-gradient(
+    135deg,
+    #14003d,
+    #360084
+  ); /* Fondo en hover, ligeramente más brillante */
+  --active-bg: linear-gradient(
+    135deg,
+    #0f002d,
+    #30006b
+  ); /* Fondo en estado activo, un degradado más intenso */
+  --active-text: #ff66ff; /* Acento neón para textos activos */
 
   /* Variables específicas para el input */
   --input-bg: linear-gradient(135deg, #1b0033, #3a0076);
@@ -416,4 +433,214 @@
   --button-text: #1b0033;
   --button-hover-bg: #a500ff;
   --button-active-bg: #9400e0;
+}
+
+/* Cyberpunk Theme */
+[data-theme="cyberpunk"] {
+  /* Variables generales */
+  --primary-bg: #0d0221;
+  --secondary-bg: #1a0b2e;
+  --primary-text: #00ff9f;
+  --border-color: #ff2a6d;
+  --hover-bg: #1a1147;
+  --active-bg: rgba(255, 42, 109, 0.2);
+  --active-text: #05d9e8;
+
+  /* Input */
+  --input-bg: #0d0221;
+  --input-text: #00ff9f;
+  --input-border: #ff2a6d;
+  --input-hover-border: #05d9e8;
+  --input-focus-border: #05d9e8;
+
+  /* Tabla */
+  --table-header-bg: #1a0b2e;
+  --table-header-text: #00ff9f;
+  --table-row-hover-bg: #1a1147;
+
+  /* Botones */
+  --button-bg: #ff2a6d;
+  --button-text: #0d0221;
+  --button-hover-bg: #ff478b;
+  --button-active-bg: #ff0055;
+}
+
+/* Forest Theme */
+[data-theme="forest"] {
+  /* Variables generales */
+  --primary-bg: #1b2d1c;
+  --secondary-bg: #2c432d;
+  --primary-text: #c9e4ca;
+  --border-color: #68a357;
+  --hover-bg: #243c25;
+  --active-bg: rgba(104, 163, 87, 0.2);
+  --active-text: #90cf7c;
+
+  /* Input */
+  --input-bg: #1b2d1c;
+  --input-text: #c9e4ca;
+  --input-border: #68a357;
+  --input-hover-border: #90cf7c;
+  --input-focus-border: #90cf7c;
+
+  /* Tabla */
+  --table-header-bg: #2c432d;
+  --table-header-text: #c9e4ca;
+  --table-row-hover-bg: #243c25;
+
+  /* Botones */
+  --button-bg: #68a357;
+  --button-text: #1b2d1c;
+  --button-hover-bg: #7ab569;
+  --button-active-bg: #5c9149;
+}
+
+/* Ocean Theme */
+[data-theme="ocean"] {
+  /* Variables generales */
+  --primary-bg: #0a192f;
+  --secondary-bg: #112240;
+  --primary-text: #8892b0;
+  --border-color: #64ffda;
+  --hover-bg: #0d1b2a;
+  --active-bg: rgba(100, 255, 218, 0.2);
+  --active-text: #64ffda;
+
+  /* Input */
+  --input-bg: #0a192f;
+  --input-text: #8892b0;
+  --input-border: #64ffda;
+  --input-hover-border: #64ffda;
+  --input-focus-border: #64ffda;
+
+  /* Tabla */
+  --table-header-bg: #112240;
+  --table-header-text: #8892b0;
+  --table-row-hover-bg: #0d1b2a;
+
+  /* Botones */
+  --button-bg: #64ffda;
+  --button-text: #0a192f;
+  --button-hover-bg: #7affdf;
+  --button-active-bg: #4dffcf;
+}
+
+/* Sunset Theme */
+[data-theme="sunset"] {
+  /* Variables generales */
+  --primary-bg: #2d1b2d;
+  --secondary-bg: #432c43;
+  --primary-text: #ffd6d6;
+  --border-color: #ff7e5f;
+  --hover-bg: #3c243c;
+  --active-bg: rgba(255, 126, 95, 0.2);
+  --active-text: #feb47b;
+
+  /* Input */
+  --input-bg: #2d1b2d;
+  --input-text: #ffd6d6;
+  --input-border: #ff7e5f;
+  --input-hover-border: #feb47b;
+  --input-focus-border: #feb47b;
+
+  /* Tabla */
+  --table-header-bg: #432c43;
+  --table-header-text: #ffd6d6;
+  --table-row-hover-bg: #3c243c;
+
+  /* Botones */
+  --button-bg: #ff7e5f;
+  --button-text: #2d1b2d;
+  --button-hover-bg: #ff9579;
+  --button-active-bg: #ff6745;
+}
+
+/* Nordic Theme */
+[data-theme="nordic"] {
+  /* Variables generales */
+  --primary-bg: #2e3440;
+  --secondary-bg: #3b4252;
+  --primary-text: #d8dee9;
+  --border-color: #81a1c1;
+  --hover-bg: #434c5e;
+  --active-bg: rgba(136, 192, 208, 0.2);
+  --active-text: #88c0d0;
+
+  /* Input */
+  --input-bg: #2e3440;
+  --input-text: #d8dee9;
+  --input-border: #81a1c1;
+  --input-hover-border: #88c0d0;
+  --input-focus-border: #88c0d0;
+
+  /* Tabla */
+  --table-header-bg: #3b4252;
+  --table-header-text: #d8dee9;
+  --table-row-hover-bg: #434c5e;
+
+  /* Botones */
+  --button-bg: #81a1c1;
+  --button-text: #2e3440;
+  --button-hover-bg: #8dabc7;
+  --button-active-bg: #7596b8;
+}
+
+/* Retro Wave Theme */
+[data-theme="retro-wave"] {
+  /* Variables generales */
+  --primary-bg: #1a1a2e;
+  --secondary-bg: #16213e;
+  --primary-text: #e94560;
+  --border-color: #533483;
+  --hover-bg: #0f3460;
+  --active-bg: rgba(233, 69, 96, 0.2);
+  --active-text: #ff2e63;
+
+  /* Input */
+  --input-bg: #1a1a2e;
+  --input-text: #e94560;
+  --input-border: #533483;
+  --input-hover-border: #ff2e63;
+  --input-focus-border: #ff2e63;
+
+  /* Tabla */
+  --table-header-bg: #16213e;
+  --table-header-text: #e94560;
+  --table-row-hover-bg: #0f3460;
+
+  /* Botones */
+  --button-bg: #533483;
+  --button-text: #e94560;
+  --button-hover-bg: #6b44a9;
+  --button-active-bg: #472c70;
+}
+
+/* Mint Theme */
+[data-theme="mint"] {
+  /* Variables generales */
+  --primary-bg: #f0fff4;
+  --secondary-bg: #e6ffee;
+  --primary-text: #2d3748;
+  --border-color: #48bb78;
+  --hover-bg: #e6ffee;
+  --active-bg: rgba(72, 187, 120, 0.2);
+  --active-text: #38a169;
+
+  /* Input */
+  --input-bg: #f0fff4;
+  --input-text: #2d3748;
+  --input-border: #48bb78;
+  --input-hover-border: #38a169;
+  --input-focus-border: #38a169;
+
+  /* Tabla */
+  --table-header-bg: #e6ffee;
+  --table-header-text: #2d3748;
+  --table-row-hover-bg: #dcfce7;
+
+  /* Botones */
+  --button-bg: #48bb78;
+  --button-text: #f0fff4;
+  --button-hover-bg: #52c782;
+  --button-active-bg: #3eaf6e;
 }

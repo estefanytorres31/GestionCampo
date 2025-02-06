@@ -4,7 +4,7 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 export const themes = {
   light: "light",
   dark: "dark",
-  darkblue:"darkblue",
+  darkblue: "darkblue",
   ayuDark: "ayu-dark",
   ayuLight: "ayu-light",
   dracula: "dracula",
@@ -16,6 +16,13 @@ export const themes = {
   nord: "nord",
   cobalt: "cobalt",
   neonPurple: "neon-purple",
+  cyberpunk: "cyberpunk",
+  forest: "forest",
+  ocean: "ocean",
+  sunset: "sunset",
+  nordic: "nordic",
+  retroWave: "retro-wave",
+  mint: "mint",
 };
 
 const ThemeContext = createContext();
@@ -40,8 +47,16 @@ export const ThemeProvider = ({ children }) => {
     setTheme(themeValues[nextIndex]);
   };
 
+  // Función para establecer un tema específico
+  const setSpecificTheme = (newTheme) => {
+    // Opcional: puedes verificar que newTheme esté dentro de los temas permitidos.
+    if (Object.values(themes).includes(newTheme)) {
+      setTheme(newTheme);
+    }
+  };
+
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme, setTheme }}>
+    <ThemeContext.Provider value={{ theme, toggleTheme, setSpecificTheme }}>
       {children}
     </ThemeContext.Provider>
   );
