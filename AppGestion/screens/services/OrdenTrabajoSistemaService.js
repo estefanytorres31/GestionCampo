@@ -22,3 +22,7 @@ export const getOrdenTrabajoSistemaByOrdenTrabajo=async(id_orden_trabajo)=>{
     }
  
 }
+
+export const updateOrdenTrabajoSistema=async(id_orden_trabajo_sistema,)=>{
+
+}

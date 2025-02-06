@@ -4,7 +4,7 @@ import { View, Text, ScrollView, TextInput, SafeAreaView, ActivityIndicator, Sty
 import useOrdenTrabajoSistema from "../../hooks/OrdenTrabajoSistema/useOrdenTrabajoSistema";
 import useOrdenTrabajoParte from "../../hooks/OrdenTrabajoParte/useOrdenTrabajoParte";
 
-const CollapsibleSistema = ({ sistema, selectedParts, onTogglePart, comments, onCommentChange }) => {
+const CollapsibleSistema = ({ sistema, selectedParts, onTogglePart, comments, onCommentChange, onSaveSystem }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [animation] = useState(new Animated.Value(0));
 
@@ -38,6 +38,22 @@ const CollapsibleSistema = ({ sistema, selectedParts, onTogglePart, comments, on
         <Text style={styles.progressText}>{`${count}/${total}`}</Text>
       </View>
     );
+  };
+
+  const handleSaveSystem = () => {
+    const selectedPartsForSystem = sistema.partes
+      .filter(parte => selectedParts[parte.id_orden_trabajo_parte] && parte.estado_parte !== "completado")
+      .map(parte => ({
+        id: parte.id_orden_trabajo_parte,
+        comment: comments[parte.id_orden_trabajo_parte] || ""
+      }));
+
+    if (selectedPartsForSystem.length === 0) {
+      Alert.alert("Advertencia", "Por favor seleccione al menos una parte nueva para este sistema.");
+      return;
+    }
+
+    onSaveSystem(sistema.id_orden_trabajo_sistema, selectedPartsForSystem);
   };
 
   return (
@@ -97,6 +113,14 @@ const CollapsibleSistema = ({ sistema, selectedParts, onTogglePart, comments, on
           ) : (
             <Text style={styles.emptyMessage}>No hay partes disponibles</Text>
           )}
+          <TouchableOpacity 
+            style={styles.saveButton} 
+            onPress={handleSaveSystem}
+            activeOpacity={0.8}
+          >
+            <Save size={24} color="#ffffff" />
+            <Text style={styles.saveButtonText}>Guardar Sistema</Text>
+          </TouchableOpacity>
         </View>
       )}
     </Animated.View>
@@ -244,20 +268,11 @@ const SistemasPartes = ({ route, navigation }) => {
               onTogglePart={togglePart}
               comments={comments}
               onCommentChange={handleCommentChange}
+              onSaveSystem={saveSelectedParts}
             />
           ))}
         </View>
       </ScrollView>
-      <View style={styles.footer}>
-        <TouchableOpacity 
-          style={styles.saveButton} 
-          onPress={saveSelectedParts}
-          activeOpacity={0.8}
-        >
-          <Save size={24} color="#ffffff" />
-          <Text style={styles.saveButtonText}>Guardar Selección</Text>
-        </TouchableOpacity>
-      </View>
     </SafeAreaView>
   );
 
