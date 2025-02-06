@@ -28,13 +28,28 @@ import TrabajosAsignadosScreen from "./screens/views/Lista/TrabajosAsignados";
 const Stack = createNativeStackNavigator();
 
 export default function Navigation () {
-    const { user, role, isAuth, loading } = useAuth()
-    const [isAdmin, setIsAdmin] = useState(false);
+    const { user, role, isAuth, loading, checkAuth } = useAuth()
+    const [initialRoute, setInitialRoute] = useState("Login")
 
+    useEffect(() => {
+        const getAuth = async () => {
+          const isTokenValid = await checkAuth()
+          if (isTokenValid) {
+            if (role?.includes("Jefe")) {
+              setInitialRoute("InicioJefe")
+            } else if (role?.includes("Técnico")) {
+              setInitialRoute("Inicio")
+            } else if (role?.includes("Administrador")) {
+              setInitialRoute("Clientes")
+            }
+          }
+        }
+        getAuth()
+      }, [])
 
     return (
         <NavigationContainer >
-            <Stack.Navigator initialRouteName="Login" >
+            <Stack.Navigator initialRouteName={initialRoute}>
                 <Stack.Screen name="Login" component={LoginScreen}  options={{ headerShown: false }} />
                 <Stack.Screen name="InicioJefe" component={InicioJefe} options={{ tittle:"Inicio",headerShown: false }} />
                 <Stack.Screen name="ListaOTAsignado" component={ListaOTAsignado} options={{ title: "Lista de OT" }} />
