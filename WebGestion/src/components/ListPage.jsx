@@ -26,39 +26,32 @@ const ListPage = ({
   const [page, setPage] = useState(1);
   const [pageSize] = useState(10);
 
-  // Se asume que el hook retorna { data, loading, error, pagination, refetch }
   const { data, loading, error, pagination, refetch } = useFetchHook(
     filters,
     page,
     pageSize
   );
 
-  // Envía la función refetch al padre sin invocarla
   useEffect(() => {
     if (onRefetch && typeof refetch === "function") {
       onRefetch(refetch);
     }
   }, [refetch, onRefetch]);
 
-  // ... resto de ListPage (exportToExcel, exportToPDF, render, etc.)
   const exportToExcel = () => {
     if (!data || data.length === 0) {
       alert("No hay datos para exportar.");
       return;
     }
-
     const header = columns.map((col) => col.name);
     const body = data.map((row) =>
       columns.map((col) => row[col.uuid] || "N/A")
     );
-
     const sheetData = [header, ...body];
     const buffer = xlsx.build([{ name: title, data: sheetData }]);
-
     const blob = new Blob([buffer], {
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     });
-
     saveAs(blob, `${title}.xlsx`);
   };
 
@@ -67,20 +60,16 @@ const ListPage = ({
       alert("No hay datos para exportar.");
       return;
     }
-
     const doc = new jsPDF();
     doc.text(`Reporte de ${title}`, 14, 10);
-
     const tableData = data.map((row) =>
       columns.map((col) => row[col.uuid] || "N/A")
     );
-
     doc.autoTable({
       head: [columns.map((col) => col.name)],
       body: tableData,
       startY: 20,
     });
-
     doc.save(`${title}.pdf`);
   };
 
@@ -95,7 +84,7 @@ const ListPage = ({
               filterFields={filterFields}
             />
           )}
-          <div className="flex gap-2 justify-end md:flex-row w-max-[100px] h-full">
+          <div className="flex gap-2 justify-end md:flex-row">
             <Button color="filter" className="flex gap-1" onClick={exportToPDF}>
               <VscFilePdf size={20} className="min-w-max" />
             </Button>

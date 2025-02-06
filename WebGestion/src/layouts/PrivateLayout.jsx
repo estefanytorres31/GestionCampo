@@ -7,7 +7,7 @@ import { useEffect, useMemo } from "react";
 
 const PrivateLayout = ({ children }) => {
   const { isAuth, logout } = useAuth();
-  const location = useLocation(); // 🔹 Obtener la ruta actual
+  const location = useLocation(); // Obtener la ruta actual
 
   const tokenExpiration = localStorage.getItem("tokenExpiration");
   const timeLeft = tokenExpiration
@@ -21,7 +21,7 @@ const PrivateLayout = ({ children }) => {
     }
   });
 
-  // 🔹 Definir títulos según la ruta
+  // Definir títulos según la ruta
   const pageTitle = useMemo(() => {
     const titles = {
       "/dashboard": "Panel de Control",
@@ -33,19 +33,27 @@ const PrivateLayout = ({ children }) => {
     return titles[location.pathname] || "Gestión de Campo";
   }, [location.pathname]);
 
-  // 🔹 Actualizar el title del <head>
+  // Actualizar el title del <head>
   useEffect(() => {
     document.title = `${pageTitle} - Gestión de Campo`;
   }, [pageTitle]);
 
   return (
-    <div className="flex h-screen bg-slate-100">
+    // Contenedor externo usa el color secundario
+    <div
+      className="flex h-screen"
+      style={{
+        backgroundColor: "var(--secondary-bg)",
+        color: "var(--primary-text)",
+      }}
+    >
       <SideBar />
       <main className="flex flex-col flex-1 overflow-auto md:pl-0 w-full h-full">
         <Header title={pageTitle} />
-        {/* Header dinámico */}
-        {/* Main content */}
-        <div className="h-full flex flex-col justify-start gap-4 overflow-auto relative m-5">
+        {/* Contenedor principal (ListLayout) usa el color primario */}
+        <div
+          className="h-full flex flex-col justify-start gap-4 overflow-auto relative m-5 rounded-2xl"
+        >
           {children}
         </div>
       </main>

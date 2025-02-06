@@ -1,28 +1,39 @@
+// Header.jsx
 import React from "react";
 import { useAuth } from "@/context/AuthContext";
 
 const Header = ({ title }) => {
-  const { usuario, logout } = useAuth();
+  const { usuario } = useAuth();
 
   return (
-    <header className="header-layout bg-white flex items-center justify-between z-5 p-4 relative">
+    <header
+      className="header-layout p-4 flex items-center justify-between"
+      style={{
+        backgroundColor: "var(--primary-bg)",
+        color: "var(--primary-text)",
+        borderBottom: "1px solid var(--border-color)",
+      }}
+    >
       {/* Título */}
-      <section className="flex justify-start items-center flex-1">
-        <h1 className="text-left text-2xl font-bold text-gray-800">{title}</h1>
+      <section className="flex flex-1 items-center justify-start">
+        <h1 className="text-2xl font-bold" style={{ color: "var(--primary-text)" }}>
+          {title}
+        </h1>
       </section>
 
       {/* Perfil del usuario autenticado */}
-      <section className="flex items-center gap-4 relative">
+      <section className="flex items-center gap-4">
         {usuario ? (
-          <>
-            <div className="flex flex-col text-right">
-              <span className="font-semibold text-gray-700">{usuario.nombreUsuario}</span>
-              <span className="text-sm text-gray-500">{usuario.roles.join(", ")}</span>
-            </div>
-
-          </>
+          <div className="flex flex-col text-right">
+            <span className="font-semibold" style={{ color: "var(--primary-text)" }}>
+              {usuario.nombreUsuario}
+            </span>
+            <span className="text-sm" style={{ color: "var(--border-color)" }}>
+              {usuario.roles.join(", ")}
+            </span>
+          </div>
         ) : (
-          <span className="text-gray-500">No autenticado</span>
+          <span style={{ color: "var(--border-color)" }}>No autenticado</span>
         )}
       </section>
     </header>
