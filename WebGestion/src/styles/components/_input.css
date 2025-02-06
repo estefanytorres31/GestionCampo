@@ -1,7 +1,7 @@
 @layer components {
   .input {
     @apply rounded-xl border border-solid outline-none px-4 py-3 h-[2.75rem] transition-colors duration-300 ease-in-out;
-    background-color: var(--input-bg);
+    background: var(--input-bg);
     color: var(--input-text);
     border-color: var(--input-border);
     font-family: var(--text-lg-medium-font-family);

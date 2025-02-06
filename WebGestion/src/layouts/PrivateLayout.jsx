@@ -43,7 +43,7 @@ const PrivateLayout = ({ children }) => {
     <div
       className="flex h-screen"
       style={{
-        backgroundColor: "var(--secondary-bg)",
+        background: "var(--secondary-bg)",
         color: "var(--primary-text)",
       }}
     >

@@ -85,18 +85,18 @@ tbody {
 table {
   table-layout: auto;
   min-width: 100%;
-  background-color: var(--primary-bg);
+  background: var(--primary-bg);
 }
 
 /* Estilos para el encabezado de tabla */
 thead {
   color: var(--table-header-text);
-  background-color: var(--table-header-bg);
+  background: var(--table-header-bg);
   text-align: left;
   text-transform: capitalize;
 }
 
 /* Aplica el color de hover usando la variable definida */
 .table tbody tr:hover {
-  background-color: var(--table-row-hover-bg);
+  background: var(--table-row-hover-bg);
 }

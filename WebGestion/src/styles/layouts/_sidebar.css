@@ -16,11 +16,11 @@
 }
 
 .link:hover {
-  background-color: var(--hover-bg);
+  background: var(--hover-bg);
 }
 
 .link-active {
-  background-color: var(--active-bg);
+  background: var(--active-bg);
   border-color: var(--border-color);
   color: var(--active-text);
 }

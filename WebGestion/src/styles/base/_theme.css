@@ -327,3 +327,93 @@
   --button-hover-bg: #30b3a9;
   --button-active-bg: #248f87;
 }
+
+/* Nord Theme */
+[data-theme="nord"] {
+  /* Variables generales */
+  --primary-bg: #2E3440;
+  --secondary-bg: #3B4252;
+  --primary-text: #D8DEE9;
+  --border-color: #4C566A;
+  --hover-bg: #434C5E;
+  --active-bg: #4C566A;
+  --active-text: #ECEFF4;
+
+  /* Variables específicas para el input */
+  --input-bg: #2E3440;
+  --input-text: #D8DEE9;
+  --input-border: #4C566A;
+  --input-hover-border: #81A1C1;
+  --input-focus-border: #81A1C1;
+
+  /* Variables específicas para la tabla */
+  --table-header-bg: #3B4252;
+  --table-header-text: #D8DEE9;
+  --table-row-hover-bg: #434C5E;
+
+  /* Variables específicas para botones */
+  --button-bg: #81A1C1;
+  --button-text: #2E3440;
+  --button-hover-bg: #5E81AC;
+  --button-active-bg: #4C566A;
+}
+
+/* Cobalt Theme */
+[data-theme="cobalt"] {
+  /* Variables generales */
+  --primary-bg: #002240;
+  --secondary-bg: #00335a;
+  --primary-text: #ffffff;
+  --border-color: #004b8d;
+  --hover-bg: #003b70;
+  --active-bg: #002c52;
+  --active-text: #ffffff;
+
+  /* Variables específicas para el input */
+  --input-bg: #002240;
+  --input-text: #ffffff;
+  --input-border: #004b8d;
+  --input-hover-border: #005fc8;
+  --input-focus-border: #005fc8;
+
+  /* Variables específicas para la tabla */
+  --table-header-bg: #00335a;
+  --table-header-text: #ffffff;
+  --table-row-hover-bg: #003b70;
+
+  /* Variables específicas para botones */
+  --button-bg: #005fc8;
+  --button-text: #002240;
+  --button-hover-bg: #004bb5;
+  --button-active-bg: #003f93;
+}
+
+/* Neon Purple Theme */
+[data-theme="neon-purple"] {
+  /* Variables generales */
+  --primary-bg: linear-gradient(135deg, #1b0033, #3a0076); /* Fondo principal con degradado oscuro y morado */
+  --secondary-bg: linear-gradient(135deg, #130022, #2c0053); /* Fondo secundario con tonos similares */
+  --primary-text: #e0e0ff;   /* Texto claro con toque neon */
+  --border-color: #7f00ff;   /* Borde en morado neón */
+  --hover-bg: linear-gradient(135deg, #14003d, #360084);  /* Fondo en hover, ligeramente más brillante */
+  --active-bg: linear-gradient(135deg, #0f002d, #30006b); /* Fondo en estado activo, un degradado más intenso */
+  --active-text: #ff66ff;    /* Acento neón para textos activos */
+
+  /* Variables específicas para el input */
+  --input-bg: linear-gradient(135deg, #1b0033, #3a0076);
+  --input-text: #e0e0ff;
+  --input-border: #7f00ff;
+  --input-hover-border: #ff66ff;
+  --input-focus-border: #ff66ff;
+
+  /* Variables específicas para la tabla */
+  --table-header-bg: #2c0053;
+  --table-header-text: #e0e0ff;
+  --table-row-hover-bg: linear-gradient(135deg, #14003d, #360084);
+
+  /* Variables específicas para botones */
+  --button-bg: #7f00ff;
+  --button-text: #1b0033;
+  --button-hover-bg: #a500ff;
+  --button-active-bg: #9400e0;
+}

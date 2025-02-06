@@ -9,7 +9,7 @@ const Header = ({ title }) => {
     <header
       className="header-layout p-4 flex items-center justify-between"
       style={{
-        backgroundColor: "var(--primary-bg)",
+        background: "var(--primary-bg)",
         color: "var(--primary-text)",
         borderBottom: "1px solid var(--border-color)",
       }}

@@ -13,6 +13,9 @@ export const themes = {
   nightOwlDark: "night-owl-dark",
   solarizedLight: "solarized-light",
   solarizedDark: "solarized-dark",
+  nord: "nord",
+  cobalt: "cobalt",
+  neonPurple: "neon-purple",
 };
 
 const ThemeContext = createContext();
