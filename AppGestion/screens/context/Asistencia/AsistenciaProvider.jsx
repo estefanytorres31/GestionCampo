@@ -6,11 +6,13 @@ import { createAsistencia, getAsistenciasByOrden } from "../../services/Asistenc
 const AsistenciaProvider = ({ children }) => {
     const [lastAttendance, setLastAttendance] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [hasEntrada, setHasEntrada] = useState(false);
+    const [hasSalida, setHasSalida] = useState(false);
 
     // Cargar asistencias previas
-    const loadLastAttendance = async (idOrden) => {
+    const loadLastAttendance = async (id_embarcacion) => {
         try {
-            const asistencias = await getAsistenciasByOrden(idOrden);
+            const asistencias = await getAsistenciasByOrden(id_embarcacion);
             if (asistencias.length > 0) {
                 const lastEntry = asistencias[asistencias.length - 1]; // Último registro
                 setLastAttendance(lastEntry);

@@ -25,8 +25,8 @@ const Menu = ({ route }) => {
 
   // Cargar la última asistencia al montar la pantalla
   useEffect(() => {
-    if (idOrden) {
-      loadLastAttendance(idOrden);
+    if (parsedQrData.id) {
+      loadLastAttendance(parsedQrData.id);
     }
   }, [idOrden]);
 
@@ -38,12 +38,20 @@ const Menu = ({ route }) => {
         setError("Se requiere permiso para acceder a la ubicación");
         return;
       }
-
+  
       let location = await Location.getCurrentPositionAsync({
         accuracy: Location.Accuracy.High,
       });
       setLocation(location);
-
+  
+      // Validar que la salida sea con la misma embarcación que la entrada
+      if (tipo === "salida" && lastAttendance?.tipo === "entrada") {
+        if (lastAttendance.id_embarcacion !== parsedQrData.id) {
+          setError("Debes registrar la salida con la misma embarcación con la que marcaste la entrada.");
+          return;
+        }
+      }
+  
       const response = await registerAttendance({
         id_embarcacion: parsedQrData.id,
         tipo,
@@ -51,6 +59,7 @@ const Menu = ({ route }) => {
         longitud: location.coords.longitude.toString(),
         id_orden_trabajo: idOrden,
       });
+  
       console.log(response);
       if (response && !response.error) {
         navigation.navigate("Inicio", { idOrden });
@@ -63,6 +72,7 @@ const Menu = ({ route }) => {
       setError(err.message || "Error al obtener la ubicación");
     }
   };
+  
 
   if (!parsedQrData) {
     return (
