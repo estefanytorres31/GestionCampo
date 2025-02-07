@@ -149,10 +149,13 @@ const Menu = ({ route }) => {
           <TouchableOpacity
             style={[styles.attendanceButton, { backgroundColor: "#4CAF50" }]}
             onPress={() => handleAttendance("entrada")}
-            disabled={loading}
+            disabled={loadingLocation}
           >
-            {loading ? (
-              <ActivityIndicator color="#FFF" />
+            {loadingLocation ? (
+              <>
+                <ActivityIndicator color="#FFF" />
+                <Text style={styles.buttonText}>Registrando...</Text>
+              </>
             ) : (
               <>
                 <Icon
