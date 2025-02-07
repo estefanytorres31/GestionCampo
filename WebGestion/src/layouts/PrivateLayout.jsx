@@ -3,12 +3,12 @@ import useTimer from "@/hooks/useTimer";
 import SideBar from "./Sidebar";
 import Header from "./Header";
 import { useLocation } from "react-router-dom";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 const PrivateLayout = ({ children }) => {
   const { isAuth, logout } = useAuth();
   const location = useLocation(); // Obtener la ruta actual
-
+  const [layoutOffset, setLayoutOffset] = useState(false);
   const tokenExpiration = localStorage.getItem("tokenExpiration");
   const timeLeft = tokenExpiration
     ? Math.max(0, Math.floor((Number(tokenExpiration) - Date.now()) / 1000))
@@ -31,7 +31,12 @@ const PrivateLayout = ({ children }) => {
       "/permisos": "Gestión de Permisos",
       "/configuracion": "Configuración",
       "/trabajos-asignados": "Gestión de Trabajos Asignados",
+      "/trabajos-asignados/:id_orden_trabajo/detalle-codigo":
+        "Detalle del Código",
     };
+
+    location.pathname.includes("detalle-codigo") && setLayoutOffset(true);
+
     return titles[location.pathname] || "Gestión de Campo";
   }, [location.pathname]);
 
@@ -53,11 +58,13 @@ const PrivateLayout = ({ children }) => {
       <main className="flex flex-col flex-1 overflow-auto md:pl-0 w-full h-full">
         <Header title={pageTitle} />
         {/* Contenedor principal (ListLayout) usa el color primario */}
-        <div
-          className="h-full flex flex-col justify-start gap-4 overflow-auto relative m-5 rounded-2xl"
-        >
-          {children}
-        </div>
+        {!layoutOffset ? (
+          <div className="h-full flex flex-col justify-start gap-4 overflow-auto relative m-5 rounded-2xl">
+            {children}
+          </div>
+        ) : (
+          <>{children}</>
+        )}
       </main>
     </div>
   );

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import Button from "../components/Button";
-import fondo from "@/assets/images/fondo.png";
+import fondo from "@/assets/images/fondo2.jpg";
 import logo from "@/assets/logo.svg";
 import { InputLabel } from "../components/InputLabel";
 import { useForm } from "../hooks/useForm";

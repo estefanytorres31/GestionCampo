@@ -19,6 +19,22 @@
   src: url("../fonts/Inter-SemiBold.woff2") format("woff2");
 }
 
+@font-face {
+  font-family: "JetBrains Mono";
+  font-weight: 400;
+  src: url("../fonts/JetBrainsMono-Regular.woff2") format("woff2");
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  font-weight: 500;
+  src: url("../fonts/JetBrainsMono-Medium.woff2") format("woff2");
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  font-weight: 600;
+  src: url("../fonts/JetBrainsMono-SemiBold.woff2") format("woff2");
+}
+
 /* Text s */
 .text-s {
   font-family: var(--text-s-font-family);
@@ -188,4 +204,53 @@
 
 .colores-texto-negativo {
   color: var(--colores-texto-negativo, #f0fdf3);
+}
+
+/* EStilos con JetBrains Mono */
+
+.h1-jetbrains {
+  font-family: "JetBrains Mono", monospace;
+  font-weight: 600; /* SemiBold */
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  line-height: 1.2;
+}
+
+.h2-jetbrains {
+  font-family: "JetBrains Mono", monospace;
+  font-weight: 600; /* SemiBold */
+  font-size: 2rem;
+  margin-bottom: 0.875rem;
+  line-height: 1.3;
+}
+
+.h3-jetbrains {
+  font-family: "JetBrains Mono", monospace;
+  font-weight: 500; /* Medium */
+  font-size: 1.75rem;
+  margin-bottom: 0.75rem;
+  line-height: 1.3;
+}
+
+/* Estilos para párrafos y textos generales */
+.p-jetbrains
+.span-jetbrains
+.li-jetbrains {
+  font-family: "JetBrains Mono", monospace;
+  font-weight: 400; /* Regular */
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+/* Clases utilitarias para controlar el peso de la fuente */
+.text-regular-jetbrains {
+  font-weight: 400;
+}
+
+.text-medium-jetbrains {
+  font-weight: 500;
+}
+
+.text-semibold-jetbrains {
+  font-weight: 600;
 }

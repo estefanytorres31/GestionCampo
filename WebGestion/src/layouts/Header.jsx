@@ -2,12 +2,18 @@ import { useEffect, useRef } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useLocation, useNavigate } from "react-router-dom";
 import UserAvatar from "@/components/UserAvatar";
+import { MdKeyboardArrowLeft } from "react-icons/md";
 
 const Header = ({ title }) => {
   const { usuario } = useAuth();
   const navigate = useNavigate();
   const perfilCheckboxRef = useRef(null);
   const location = useLocation();
+
+  // Función para regresar a la ruta anterior
+  const handleBack = () => {
+    navigate(-1);
+  };
 
   const handleConfigClick = () => {
     if (perfilCheckboxRef.current) {
@@ -22,6 +28,9 @@ const Header = ({ title }) => {
     }
   }, [location.pathname]);
 
+  // Si la ruta actual incluye "detalle-codigo", se mostrará el botón de retroceder
+  const showBackButton = location.pathname.includes("detalle-codigo");
+
   return (
     <header
       className="header-layout px-4"
@@ -32,6 +41,15 @@ const Header = ({ title }) => {
       }}
     >
       <section className="flex flex-1 items-center justify-start">
+        {showBackButton && (
+          <button
+            onClick={handleBack}
+            className=""
+            style={{ color: "var(--primary-text)"  }}
+          >
+            <MdKeyboardArrowLeft size={30} className="min-w-max" />
+          </button>
+        )}
         <h1
           className="text-2xl font-bold"
           style={{ color: "var(--primary-text)" }}

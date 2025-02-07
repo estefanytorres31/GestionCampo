@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useRef } from "react";
 import ListPage from "@/components/ListPage";
 import useTrabajosAsignados from "@/hooks/trabajosAsignados/useTrabajosAsignados";
 import UserAvatarRowTooltip from "@/components/UserAvatarWithTooltip";
@@ -18,12 +18,11 @@ const trabajosColumns = [
 
 // Opcional: Si deseas agregar filtros, puedes definirlos aquí.
 const trabajosFilters = [
-  // Ejemplo: filtrar por estado
+  // Ejemplo: filtrar por algún campo
   // {
   //   key: "codigo",
   //   type: "text",
-  //   placeholder: "Filtrar por codigo",
-  //   // icon: <IconComponent />, // si tienes un ícono
+  //   placeholder: "Filtrar por código",
   // },
 ];
 
@@ -35,9 +34,8 @@ const TrabajosAsignados = () => {
   const listPageRefetchRef = useRef(null);
 
   const onDetailCode = (data) => {
-    console.log("onDetailCode", data);
     navigate(`/trabajos-asignados/${data.id_orden_trabajo}/detalle-codigo`, data);
-  }
+  };
 
   const render = {
     id_orden_trabajo: (row) => formatId(row.id_orden_trabajo),
@@ -47,30 +45,23 @@ const TrabajosAsignados = () => {
       </button>
     ),
     fecha_asignacion: (row) => formatFecha(row.fecha_asignacion),
-    orden_trabajo_usuario: (row) =>
-      row.orden_trabajo_usuario &&
-      row.orden_trabajo_usuario.find(
-        (u) => u.rol_en_orden === "Responsable"
-      ) ? (
+    orden_trabajo_usuario: (row) => {
+      const responsable =
+        row.orden_trabajo_usuario &&
+        row.orden_trabajo_usuario.find((u) => u.rol_en_orden === "Responsable");
+      return responsable ? (
         <UserAvatarRowTooltip
-          user={
-            row.orden_trabajo_usuario.find(
-              (u) => u.rol_en_orden === "Responsable"
-            ).usuario
-          }
+          user={responsable.usuario}
           size={40}
           tooltipSize={60}
         />
       ) : (
         "Sin responsable"
-      ),
+      );
+    },
     jefe_asigna: (row) =>
       row.jefe_asigna ? (
-        <UserAvatarRowTooltip
-          user={row.jefe_asigna}
-          size={40}
-          tooltipSize={60}
-        />
+        <UserAvatarRowTooltip user={row.jefe_asigna} size={40} tooltipSize={60} />
       ) : (
         "-"
       ),
