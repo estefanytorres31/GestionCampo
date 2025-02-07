@@ -29,62 +29,10 @@ const MaintenanceForm = ({route, navigation}) => {
   const [observations, setObservations]=useState('');
   const [nextVisitItems, setNextVisitItems]=useState('');
   const [progress, setProgress]=useState(0);
-  const [images, setImages]=useState([]);
+  const [image, setImages]=useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const {actualizarOrdenTrabajoSistemaCompleta}=useOrdenTrabajoSistema();
 
-  const pickImage = async (useCamera = false) => {
-    try {
-      let result;
-      if (useCamera) {
-        const { status } = await ImagePicker.requestCameraPermissionsAsync();
-        if (status !== 'granted') {
-          Alert.alert('Se requiere permiso para usar la cámara');
-          return;
-        }
-        result = await ImagePicker.launchCameraAsync({
-          allowsEditing: true,
-          quality: 1,
-        });
-
-        if(!result.canceled){
-          const {uri, type}=result.assets[0];
-          const name=uri.split('/').pop();
-
-        }
-        setImages({uri, type:type || 'image/jpeg', name});
-
-
-      } else {
-        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-        if (status !== 'granted') {
-          Alert.alert('Se requiere permiso para acceder a la galería');
-          return;
-        }
-        result = await ImagePicker.launchImageLibraryAsync({
-          mediaTypes: ImagePicker.MediaType,
-          allowsEditing: true,
-          quality: 1,
-        });
-      }
-
-      if (!result.canceled) {
-        setFormData(prev => ({
-          ...prev,
-          images: [...prev.images, result.assets[0].uri]
-        }));
-      }
-    } catch (error) {
-      Alert.alert('Error', 'No se pudo cargar la imagen');
-    }
-  };
-
-  const removeImage = (index) => {
-    setFormData(prev => ({
-      ...prev,
-      images: prev.images.filter((_, i) => i !== index)
-    }));
-  };  
 
   const buildFormData = (newOTS, imageUri)=>{
     const formData=new FormData();
@@ -114,6 +62,69 @@ const MaintenanceForm = ({route, navigation}) => {
     return formData
   }
 
+  const pickImage = async (useCamera = false) => {
+    try {
+      let result;
+      if (useCamera) {
+        const { status } = await ImagePicker.requestCameraPermissionsAsync();
+        if (status !== 'granted') {
+          Alert.alert('Se requiere permiso para usar la cámara');
+          return;
+        }
+        result = await ImagePicker.launchCameraAsync({
+          allowsEditing: true,
+          quality: 1,
+        });
+
+        if(!result.canceled){
+          const {uri}=result.assets[0];
+          const name=uri.split('/').pop();
+          setImages({uri, type:'image/jpeg', name});
+          if(errors.image){
+            setError(prev=>({...prev, image:null}))
+          }
+        }
+
+
+      } else {
+        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (status !== 'granted') {
+          Alert.alert('Se requiere permiso para acceder a la galería');
+          return;
+        }
+        result = await ImagePicker.launchImageLibraryAsync({
+          mediaTypes: ImagePicker.MediaType,
+          allowsEditing: true,
+          quality: 1,
+        });
+        if(!result.canceled){
+          const {uri, type}=result.assets[0];
+          const name=uri.split('/').pop();
+          setImages({uri, type:type || 'image/jpeg', name});
+          if(errors.image){
+            setError(prev=>({...prev, image:null}))
+          }
+        }
+      }
+
+      if (!result.canceled) {
+        setFormData(prev => ({
+          ...prev,
+          images: [...prev.images, result.assets[0].uri]
+        }));
+      }
+    } catch (error) {
+      Alert.alert('Error', 'No se pudo cargar la imagen');
+    }
+  };
+
+  const removeImage = (index) => {
+    setFormData(prev => ({
+      ...prev,
+      images: prev.images.filter((_, i) => i !== index)
+    }));
+  };  
+
   const handleSave = async () => {
     if (!formData.material.trim()) {
       Alert.alert("Error", "Por favor ingrese el material")
@@ -139,6 +150,10 @@ const MaintenanceForm = ({route, navigation}) => {
         proximo_abordaje: formData.nextVisitItems,
         avance: progress,
       }
+
+      const formDataToSEnd=buildFormData(newOTS, image?.uri)
+
+
 
       console.log("Response:", response)
 
