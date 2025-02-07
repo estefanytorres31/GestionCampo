@@ -2,15 +2,17 @@ import React, { useState, useEffect, useRef } from "react";
 import ListPage from "@/components/ListPage";
 import useTrabajosAsignados from "@/hooks/trabajosAsignados/useTrabajosAsignados";
 import UserAvatarRowTooltip from "@/components/UserAvatarWithTooltip";
+import { formatFecha } from "@/utils/formatFecha";
+import { formatId } from "@/utils/formatId";
+import { useNavigate } from "react-router-dom";
 
 // Define las columnas para la tabla de Trabajos Asignados
 const trabajosColumns = [
   { name: "ID", uuid: "id_orden_trabajo" },
   { name: "Código", uuid: "codigo" },
+  { name: "Fecha", uuid: "fecha_asignacion" },
   { name: "Asignado por", uuid: "jefe_asigna" },
-  { name: "Tipo de Trabajo", uuid: "tipo_trabajo" },
-  { name: "Embarcación", uuid: "embarcacion" },
-  { name: "Puerto", uuid: "puerto" },
+  { name: "Responsable", uuid: "orden_trabajo_usuario" },
   { name: "Estado", uuid: "estado" },
 ];
 
@@ -26,29 +28,49 @@ const trabajosFilters = [
 ];
 
 const TrabajosAsignados = () => {
+  const navigate = useNavigate();
   const [filters, setFilters] = useState(
     trabajosFilters.reduce((acc, field) => ({ ...acc, [field.key]: "" }), {})
   );
   const listPageRefetchRef = useRef(null);
 
+  const onDetailCode = (data) => {
+    console.log("onDetailCode", data);
+    navigate(`/trabajos-asignados/${data.id_orden_trabajo}/detalle-codigo`, data);
+  }
+
   const render = {
-    embarcacion: (row) =>
-      row.embarcacion && row.embarcacion.nombre ? row.embarcacion.nombre : "-",
-    puerto: (row) =>
-      row.puerto && row.puerto.nombre ? row.puerto.nombre : "-",
-    tipo_trabajo: (row) =>
-      row.tipo_trabajo && row.tipo_trabajo.nombre_trabajo
-        ? row.tipo_trabajo.nombre_trabajo
-        : "-",
+    id_orden_trabajo: (row) => formatId(row.id_orden_trabajo),
+    codigo: (row) => (
+      <button className="underline" onClick={() => onDetailCode(row)}>
+        {row.codigo ? row.codigo : "Sin código"}
+      </button>
+    ),
+    fecha_asignacion: (row) => formatFecha(row.fecha_asignacion),
+    orden_trabajo_usuario: (row) =>
+      row.orden_trabajo_usuario &&
+      row.orden_trabajo_usuario.find(
+        (u) => u.rol_en_orden === "Responsable"
+      ) ? (
+        <UserAvatarRowTooltip
+          user={
+            row.orden_trabajo_usuario.find(
+              (u) => u.rol_en_orden === "Responsable"
+            ).usuario
+          }
+          size={40}
+          tooltipSize={60}
+        />
+      ) : (
+        "Sin responsable"
+      ),
     jefe_asigna: (row) =>
       row.jefe_asigna ? (
-        <div className="flex items-center gap-2 w-full justify-center">
-          <UserAvatarRowTooltip
-            user={row.jefe_asigna}
-            size={40}
-            tooltipSize={60}
-          />
-        </div>
+        <UserAvatarRowTooltip
+          user={row.jefe_asigna}
+          size={40}
+          tooltipSize={60}
+        />
       ) : (
         "-"
       ),

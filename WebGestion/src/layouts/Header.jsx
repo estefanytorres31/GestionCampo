@@ -1,12 +1,13 @@
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import UserAvatar from "@/components/UserAvatar";
 
 const Header = ({ title }) => {
   const { usuario } = useAuth();
   const navigate = useNavigate();
   const perfilCheckboxRef = useRef(null);
+  const location = useLocation();
 
   const handleConfigClick = () => {
     if (perfilCheckboxRef.current) {
@@ -14,6 +15,12 @@ const Header = ({ title }) => {
     }
     navigate("/configuracion/temas");
   };
+
+  useEffect(() => {
+    if (perfilCheckboxRef.current) {
+      perfilCheckboxRef.current.checked = false;
+    }
+  }, [location.pathname]);
 
   return (
     <header
@@ -25,13 +32,21 @@ const Header = ({ title }) => {
       }}
     >
       <section className="flex flex-1 items-center justify-start">
-        <h1 className="text-2xl font-bold" style={{ color: "var(--primary-text)" }}>
+        <h1
+          className="text-2xl font-bold"
+          style={{ color: "var(--primary-text)" }}
+        >
           {title}
         </h1>
       </section>
       <section className="flex items-center gap-4">
         <section className="perfil-content relative">
-          <input type="checkbox" id="perfil-checkbox" className="hidden" ref={perfilCheckboxRef} />
+          <input
+            type="checkbox"
+            id="perfil-checkbox"
+            className="hidden"
+            ref={perfilCheckboxRef}
+          />
           <label htmlFor="perfil-checkbox" className="cursor-pointer">
             <UserAvatar user={usuario} size={40} />
           </label>

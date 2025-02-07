@@ -145,6 +145,7 @@ export const getAllOrdenesTrabajoWeb = async (
   pageSize = 10
 ) => {
   const {
+    id_orden_trabajo,
     id_tipo_trabajo,
     id_embarcacion,
     id_puerto,
@@ -155,6 +156,7 @@ export const getAllOrdenesTrabajoWeb = async (
 
   const whereClause = {
     estado: { not: "inactivo" }, // Por defecto, excluye las órdenes inactivas
+    ...(id_orden_trabajo && { id_orden_trabajo: parseInt(id_orden_trabajo) }),
     ...(estados && { estado: { in: estados.split(",") } }), // Filtrar por múltiples estados
     ...(id_tipo_trabajo && { id_tipo_trabajo: parseInt(id_tipo_trabajo) }),
     ...(id_embarcacion && { id_embarcacion: parseInt(id_embarcacion) }),
@@ -162,8 +164,10 @@ export const getAllOrdenesTrabajoWeb = async (
     ...(id_jefe_asigna && { id_jefe_asigna: parseInt(id_jefe_asigna) }),
     ...(codigo && { codigo }),
   };
-const skip = (page - 1) * pageSize;
-  // Obtener las órdenes filtradas incluyendo los datos de los modelos relacionados
+
+  const skip = (page - 1) * pageSize;
+
+  // Obtener las órdenes filtradas, incluyendo los datos de los modelos relacionados
   const [ordenTrabajo, total] = await Promise.all([
     prisma.ordenTrabajo.findMany({
       where: whereClause,
@@ -171,19 +175,19 @@ const skip = (page - 1) * pageSize;
       skip,
       take: pageSize,
       include: {
-        // Incluye los datos de la embarcación, pero solo el campo "nombre"
+        // Datos de la embarcación (solo el nombre)
         embarcacion: {
           select: {
             nombre: true,
           },
         },
-        // Incluye los datos del puerto, seleccionando solo el "nombre"
+        // Datos del puerto (solo el nombre)
         puerto: {
           select: {
             nombre: true,
           },
         },
-        // Incluye los datos del jefe que asigna, puedes elegir los campos que necesites
+        // Datos del jefe que asigna
         jefe_asigna: {
           select: {
             nombre_usuario: true,
@@ -192,15 +196,32 @@ const skip = (page - 1) * pageSize;
             email: true,
           },
         },
-        // Opcional: Si deseas también el nombre del tipo de trabajo
+        // Nombre del tipo de trabajo
         tipo_trabajo: {
           select: {
             nombre_trabajo: true,
           },
         },
+        // Información de los usuarios relacionados en orden_trabajo_usuario
+        orden_trabajo_usuario: {
+          select: {
+            rol_en_orden: true,       // Rol en la orden
+            observaciones: true,      // Observaciones
+            estado: true,             // Estado del registro
+            // Información adicional del usuario relacionado
+            usuario: {
+              select: {
+                id: true,
+                nombre_usuario: true,
+                nombre_completo: true,
+                email: true,
+              },
+            },
+          },
+        },
       },
     }),
-    prisma.ordenTrabajo.count({where:whereClause})
+    prisma.ordenTrabajo.count({ where: whereClause }),
   ]);
 
   return {

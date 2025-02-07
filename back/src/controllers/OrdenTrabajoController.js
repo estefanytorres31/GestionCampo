@@ -42,6 +42,7 @@ export const getAllOrdenesTrabajo = async (req, res) => {
 export const getAllOrdenesTrabajoWeb = async (req, res) => {
   try {
     const filters = {
+      id_orden_trabajo: req.query.id_orden_trabajo || undefined,
       id_tipo_trabajo: req.query.id_tipo_trabajo || undefined,
       id_embarcacion: req.query.id_embarcacion || undefined,
       id_puerto: req.query.id_puerto,

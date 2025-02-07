@@ -20,6 +20,7 @@ import Embarcacion from "./pages/Embarcacion";
 import HistorialPuerto from "./pages/puerto/HistorialPuerto";
 import TrabajosAsignados from "./pages/trabajosasignados/TrabajosAsignados";
 import Configuración from "./pages/configuracion/Configuración";
+import CodigoDetalle from "./pages/trabajosasignados/CodigoDetalle";
 
 const AppContent = () => {
   const { isAuth } = useAuth();
@@ -103,6 +104,16 @@ const AppContent = () => {
             <PrivateRoute>
               <PrivateLayout>
                 <TrabajosAsignados />
+              </PrivateLayout>
+            </PrivateRoute>
+          }
+        />
+        <Route 
+          path="/trabajos-asignados/:id_orden_trabajo/detalle-codigo"
+          element={
+            <PrivateRoute>
+              <PrivateLayout>
+                <CodigoDetalle />
               </PrivateLayout>
             </PrivateRoute>
           }
