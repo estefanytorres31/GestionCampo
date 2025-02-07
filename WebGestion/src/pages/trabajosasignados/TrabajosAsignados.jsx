@@ -5,8 +5,13 @@ import UserAvatarRowTooltip from "@/components/UserAvatarWithTooltip";
 import { formatFecha } from "@/utils/formatFecha";
 import { formatId } from "@/utils/formatId";
 import { useNavigate } from "react-router-dom";
+import { VscFilePdf } from "react-icons/vsc";
+import { RiFileExcel2Fill } from "react-icons/ri";
+import * as xlsx from "node-xlsx";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
+import { saveAs } from "file-saver";
 
-// Define las columnas para la tabla de Trabajos Asignados
 const trabajosColumns = [
   { name: "ID", uuid: "id_orden_trabajo" },
   { name: "Código", uuid: "codigo" },
@@ -16,31 +21,28 @@ const trabajosColumns = [
   { name: "Estado", uuid: "estado" },
 ];
 
-// Opcional: Si deseas agregar filtros, puedes definirlos aquí.
 const trabajosFilters = [
-  // Ejemplo: filtrar por algún campo
-  // {
-  //   key: "codigo",
-  //   type: "text",
-  //   placeholder: "Filtrar por código",
-  // },
+  // Aquí se pueden agregar filtros si es necesario
 ];
 
 const TrabajosAsignados = () => {
   const navigate = useNavigate();
-  const [filters, setFilters] = useState(
-    trabajosFilters.reduce((acc, field) => ({ ...acc, [field.key]: "" }), {})
-  );
   const listPageRefetchRef = useRef(null);
 
   const onDetailCode = (data) => {
-    navigate(`/trabajos-asignados/${data.id_orden_trabajo}/detalle-codigo`, data);
+    navigate(
+      `/trabajos-asignados/${data.id_orden_trabajo}/detalle-codigo`,
+      data
+    );
   };
 
   const render = {
     id_orden_trabajo: (row) => formatId(row.id_orden_trabajo),
     codigo: (row) => (
-      <button className="underline" onClick={() => onDetailCode(row)}>
+      <button
+        className="transition-colors duration-300 hover:underline hover:text-[var(--button-hover-bg)]"
+        onClick={() => onDetailCode(row)}
+      >
         {row.codigo ? row.codigo : "Sin código"}
       </button>
     ),
@@ -48,23 +50,57 @@ const TrabajosAsignados = () => {
     orden_trabajo_usuario: (row) => {
       const responsable =
         row.orden_trabajo_usuario &&
-        row.orden_trabajo_usuario.find((u) => u.rol_en_orden === "Responsable");
-      return responsable ? (
+        row.orden_trabajo_usuario.find(
+          (u) => u.rol_en_orden === "Responsable"
+        );
+      return responsable
+        ? responsable.usuario.nombre_completo
+        : "Sin responsable";
+    },
+    jefe_asigna: (row) =>
+      row.jefe_asigna ? (
         <UserAvatarRowTooltip
-          user={responsable.usuario}
+          user={row.jefe_asigna}
           size={40}
           tooltipSize={60}
         />
       ) : (
-        "Sin responsable"
-      );
-    },
-    jefe_asigna: (row) =>
-      row.jefe_asigna ? (
-        <UserAvatarRowTooltip user={row.jefe_asigna} size={40} tooltipSize={60} />
-      ) : (
         "-"
       ),
+  };
+
+  // Función personalizada para exportar a Excel evitando [object Object] en "Responsable"
+  const customExportToExcel = (data, columns, title) => {
+    if (!data || data.length === 0) {
+      alert("No hay datos para exportar.");
+      return;
+    }
+    const header = trabajosColumns.map((col) => col.name);
+    const body = data.map((row) =>
+      trabajosColumns.map((col) => {
+        if (col.uuid === "orden_trabajo_usuario") {
+          const responsable =
+            row.orden_trabajo_usuario &&
+            row.orden_trabajo_usuario.find(
+              (u) => u.rol_en_orden === "Responsable"
+            );
+          return responsable
+            ? responsable.usuario.nombre_completo
+            : "Sin responsable";
+        }
+        if (typeof row[col.uuid] === "object" && row[col.uuid] !== null) {
+          return row[col.uuid].nombre_completo || JSON.stringify(row[col.uuid]);
+        }
+        return row[col.uuid] || "N/A";
+      })
+    );
+    const sheetData = [header, ...body];
+    const buffer = xlsx.build([{ name: title, data: sheetData }]);
+    const blob = new Blob([buffer], {
+      type:
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+    saveAs(blob, `${title}.xlsx`);
   };
 
   return (
@@ -80,6 +116,10 @@ const TrabajosAsignados = () => {
         }
       }}
       render={render}
+      onExportExcel={customExportToExcel}
+      // Si deseas, puedes pasar también una función personalizada para PDF:
+      // onExportPDF={customExportToPDF}
+      showExportButtons={true}
     />
   );
 };

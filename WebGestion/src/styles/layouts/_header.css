@@ -8,7 +8,7 @@
   }
 
   .perfil-content {
-    @apply inline-block relative;
+    @apply inline-block relative z-[999];
   }
 
   .perfil-menu {

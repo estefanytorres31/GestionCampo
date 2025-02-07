@@ -229,7 +229,7 @@ const SideBar = () => {
                 return (
                   <li key={element.label}>
                     <div
-                      className={`link justify-between ${
+                      className={`link text-medium-jetbrains justify-between ${
                         isActive ? "link-active" : ""
                       }`}
                       onClick={() =>
@@ -241,7 +241,7 @@ const SideBar = () => {
                     >
                       <div className="flex items-center gap-6">
                         {element.icon}
-                        <span>{element.label}</span>
+                        <span className="span-jetbrains">{element.label}</span>
                       </div>
                       <MdKeyboardArrowDown
                         size={20}
@@ -273,7 +273,7 @@ const SideBar = () => {
                           >
                             {element.subItems.map((sub) => (
                               <li key={sub.to}>
-                                <NavLink to={sub.to} className="link">
+                                <NavLink to={sub.to} className="link text-medium-jetbrains">
                                   {sub.icon}
                                   <span>{sub.label}</span>
                                 </NavLink>
@@ -291,7 +291,7 @@ const SideBar = () => {
                     <NavLink
                       to={element.to}
                       className={({ isActive }) =>
-                        `link ${isActive ? "link-active" : ""}`
+                        `link text-medium-jetbrains ${isActive ? "link-active" : ""}`
                       }
                     >
                       {element.icon}

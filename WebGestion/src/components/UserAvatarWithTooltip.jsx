@@ -9,7 +9,7 @@ const UserAvatarRowTooltip = ({ user, size = 40, tooltipSize = 60 }) => {
   const handleMouseEnter = () => {
     // Si hay un timer pendiente, se limpia
     if (timerRef.current) clearTimeout(timerRef.current);
-    // Se espera 500ms para mostrar el tooltip
+    // Se espera 700ms para mostrar el tooltip
     timerRef.current = setTimeout(() => {
       setShowTooltip(true);
     }, 500);
@@ -35,9 +35,16 @@ const UserAvatarRowTooltip = ({ user, size = 40, tooltipSize = 60 }) => {
             onMouseEnter={() => setShowTooltip(true)}
             onMouseLeave={handleMouseLeave}
             initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.3 }}
+            animate={{
+              opacity: 1,
+              y: 0,
+              transition: { duration: 0.3 }
+            }}
+            exit={{
+              opacity: 0,
+              y: -10,
+              transition: { delay: 0.5, duration: 0.3 }
+            }}
             className="absolute z-10 p-3 rounded-lg shadow-lg"
             style={{
               top: "100%", // Posiciona el tooltip justo debajo del avatar
@@ -45,8 +52,8 @@ const UserAvatarRowTooltip = ({ user, size = 40, tooltipSize = 60 }) => {
               transform: "translateX(-50%)",
               marginTop: "0.5rem",
               background: "var(--secondary-bg)", // Usa el color de fondo definido en la paleta
-              color: "var(--primary-text)",             // Usa el color de texto definido en la paleta
-              border: "1px solid var(--border-color)",   // Agrega un borde con el color definido
+              color: "var(--primary-text)",         // Usa el color de texto definido en la paleta
+              border: "1px solid var(--border-color)"// Agrega un borde con el color definido
             }}
           >
             <div className="flex items-center gap-2">

@@ -10,3 +10,6 @@
 @import './styles/base/_theme.css';
 @import './styles/base/_typography.css';
 
+.react-flow__panel .react-flow__attribution .bottom .right {
+    display: none;
+}

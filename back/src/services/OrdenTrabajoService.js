@@ -179,6 +179,12 @@ export const getAllOrdenesTrabajoWeb = async (
         embarcacion: {
           select: {
             nombre: true,
+            // nombre de empresa
+            empresa: {
+              select: {
+                nombre: true,
+              },
+            },
           },
         },
         // Datos del puerto (solo el nombre)

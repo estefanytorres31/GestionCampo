@@ -232,6 +232,14 @@
   line-height: 1.3;
 }
 
+.h4-jetbrains {
+  font-family: "JetBrains Mono", monospace;
+  font-weight: 500; /* Medium */
+  font-size: 1.5rem;
+  margin-bottom: 0.75rem;
+  line-height: 1.3;
+}
+
 /* Estilos para párrafos y textos generales */
 .p-jetbrains
 .span-jetbrains

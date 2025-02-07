@@ -35,7 +35,7 @@ const PrivateLayout = ({ children }) => {
         "Detalle del Código",
     };
 
-    location.pathname.includes("detalle-codigo") && setLayoutOffset(true);
+    location.pathname.includes("detalle-codigo") ? setLayoutOffset(true) : setLayoutOffset(false);
 
     return titles[location.pathname] || "Gestión de Campo";
   }, [location.pathname]);

@@ -34,7 +34,7 @@ thead {
   line-height: var(--text-xs-medium-line-height, 18px);
   text-align: left;
   text-transform: capitalize;
-  cursor: pointer;
+  cursor: default;
 }
 
 tbody {
@@ -44,6 +44,7 @@ tbody {
   font-weight: var(--text-sm-medium-font-weight, 500);
   line-height: var(--text-sm-medium-line-height, 20px);
   text-align: left;
+  cursor: default;
 }
 
 /* tr {

@@ -41,21 +41,22 @@ const Header = ({ title }) => {
       }}
     >
       <section className="flex flex-1 items-center justify-start">
-        {showBackButton && (
+        {showBackButton ? (
           <button
             onClick={handleBack}
-            className=""
-            style={{ color: "var(--primary-text)"  }}
+            className="flex flex-row items-center gap-2 text-[var(--primary-text)] hover:text-[var(--button-hover-bg)]/50 transition-colors duration-300 cursor-pointer"
           >
             <MdKeyboardArrowLeft size={30} className="min-w-max" />
+            <h1 className="text-2xl font-bold">{title}</h1>
           </button>
+        ) : (
+          <h1
+            className="text-2xl font-bold cursor-default"
+            style={{ color: "var(--primary-text)" }}
+          >
+            {title}
+          </h1>
         )}
-        <h1
-          className="text-2xl font-bold"
-          style={{ color: "var(--primary-text)" }}
-        >
-          {title}
-        </h1>
       </section>
       <section className="flex items-center gap-4">
         <section className="perfil-content relative">

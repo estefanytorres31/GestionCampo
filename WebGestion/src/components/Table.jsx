@@ -25,15 +25,20 @@ const Table = ({ columns, data, render = {}, loading, error }) => {
         {loading ? (
           <tr>
             <td colSpan={columns.length} className="text-center p-6 h-32">
-              <div className="flex justify-center items-center">
+              <div className="flex h-full w-full justify-center items-center">
                 <div className="w-6 h-6 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                <span className="ml-3 text-gray-500">Cargando datos...</span>
+                <span className="span-jetbrains ml-3 text-[--primary-text]">
+                  Cargando datos...
+                </span>
               </div>
             </td>
           </tr>
         ) : error ? (
           <tr>
-            <td colSpan={columns.length} className="text-center p-4 text-red-500">
+            <td
+              colSpan={columns.length}
+              className="text-center p-4 text-red-500"
+            >
               Error: {error}
             </td>
           </tr>
@@ -41,10 +46,13 @@ const Table = ({ columns, data, render = {}, loading, error }) => {
           data.map((row, rowIndex) => (
             <tr
               key={row.id || rowIndex}
-              className="transition"  /* Se mantiene la transición */
+              className="transition" /* Se mantiene la transición */
             >
               {columns.map(({ uuid }) => (
-                <td key={`${row.id || rowIndex}-${uuid}`} className={`p-2 ${uuid}`}>
+                <td
+                  key={`${row.id || rowIndex}-${uuid}`}
+                  className={`p-2 ${uuid}`}
+                >
                   {render[uuid]
                     ? render[uuid](row)
                     : row[uuid] !== undefined

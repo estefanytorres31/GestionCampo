@@ -1,7 +1,7 @@
 const UserAvatar = ({
   user,
   size = 40,
-  bgColor = "var(--active-bg)",
+  bgColor = "var(--button-bg)",
   textColor = "var(--primary-bg)",
 }) => {
   // Si no hay usuario, se retorna null (o un placeholder si lo prefieres)
@@ -21,8 +21,8 @@ const UserAvatar = ({
   const initials = getUserInitials(user);
 
   return (
-    <div
-      className="flex items-center justify-center rounded-full font-bold uppercase cursor-default select-none"
+    <h1
+      className="flex items-center justify-center rounded-full font-bold uppercase cursor-pointer select-none"
       style={{
         width: size,
         height: size,
@@ -31,7 +31,7 @@ const UserAvatar = ({
       }}
     >
       {initials}
-    </div>
+    </h1>
   );
 };
 
