@@ -1,9 +1,11 @@
 @import "tailwindcss";
-@import "./styles/components/_table.css";
 @import "./styles/components/_button.css";
+@import "./styles/components/_modal.css";
 @import "./styles/components/_input.css";
+@import "./styles/components/_table.css";
 @import "./styles/layouts/_sidebar.css";
 @import "./styles/layouts/_content.css";
 @import "./styles/layouts/_header.css";
 @import './styles/base/_reset.css';
 @import './styles/base/_typography.css';
+

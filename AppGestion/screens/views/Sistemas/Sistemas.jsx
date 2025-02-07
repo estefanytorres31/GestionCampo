@@ -1,15 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-    View,
-    Text,
-    TouchableOpacity,
-    StyleSheet,
-    SafeAreaView,
-    Animated,
-    ScrollView,
-    ActivityIndicator,
-    Dimensions
-} from "react-native";
+import { View,Text,TouchableOpacity,StyleSheet,SafeAreaView,Animated,ScrollView,ActivityIndicator,Dimensions} from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import useTipoTrabajoESP from "../../hooks/TipoTrabajoESP/useTipoTrabajoESP";
 
@@ -72,13 +62,17 @@ const SistemasScreen = ({ route, navigation }) => {
 
     const generarCodigoOT = (empresa, embarcacion, trabajo) => {
         const fecha = new Date();
-        const dia = String(fecha.getDate()).padStart(2, '0');
-        const mes = String(fecha.getMonth() + 1).padStart(2, '0'); // Los meses van de 0 a 11
-        const año = fecha.getFullYear();
+        const utcOffset = fecha.getTimezoneOffset() * 60000; // Offset in milliseconds
+        const peruOffset = -5 * 3600000; // Offset for Peru in milliseconds (-5 hours)
     
-        const horas = String(fecha.getHours()).padStart(2, '0');
-        const minutos = String(fecha.getMinutes()).padStart(2, '0');
-        const segundos = String(fecha.getSeconds()).padStart(2, '0');
+        const fechaPeru = new Date(fecha.getTime() + utcOffset + peruOffset);
+        const dia = String(fechaPeru.getDate()).padStart(2, '0');
+        const mes = String(fechaPeru.getMonth() + 1).padStart(2, '0');
+        const año = fechaPeru.getFullYear();
+    
+        const horas = String(fechaPeru.getHours()).padStart(2, '0');
+        const minutos = String(fechaPeru.getMinutes()).padStart(2, '0');
+        const segundos = String(fechaPeru.getSeconds()).padStart(2, '0');
     
         const codigoEmpresa = empresa.nombre.slice(0, 4).toUpperCase();
     

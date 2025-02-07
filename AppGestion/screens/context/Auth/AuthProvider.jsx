@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import AuthContext from './AuthContext';
 import { login } from '../../services/AuthService';
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -10,6 +10,41 @@ const AuthProvider = ({ children }) => {
     const [role, setRole] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+
+        const checkAuth = async () => {
+            setLoading(true);
+            try {
+                const token = await AsyncStorage.getItem('token');
+                console.log('token', token);
+                const userId = await AsyncStorage.getItem('userId');
+                const roles = await AsyncStorage.getItem('roles');
+
+                if (token && userId) {
+                    // Aquí podrías hacer una llamada al backend para verificar si el token sigue siendo válido
+                    const userData = await getUserById(userId);
+                    console.log(userData.data);
+
+                    if (userData) {
+                        setUser(userData.data);
+                        setRole(JSON.parse(roles));
+                        setIsAuth(true);
+                    } else {
+                        await AsyncStorage.clear();
+                        setIsAuth(false);
+                    }
+                }
+            } catch (error) {
+                console.error('Error verificando la sesión:', error);
+                await AsyncStorage.clear();
+                setIsAuth(false);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        useEffect(() => {
+            checkAuth();
+        }, []);
 
     const loginAccess = async (username, password) => {
         setLoading(true);
@@ -93,6 +128,7 @@ const AuthProvider = ({ children }) => {
             setUser,
             setRole,
             setLoading,
+            checkAuth,
             loading,
             error
         }}>

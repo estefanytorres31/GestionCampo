@@ -1,0 +1,27 @@
+.react-modal-overlay {
+    @apply fixed top-0 left-0 w-full h-full bg-black/50 z-9999 flex items-center justify-center;
+  }
+  
+  .react-modal-wrapper {
+    @apply bg-white border border-gray-300 rounded-[20px] shadow-lg min-w-max p-5 pt-2 flex flex-col gap-4;
+  }
+  
+  .react-modal-content {
+    @apply relative flex flex-col gap-4;
+  }
+  
+  .react-modal-header,
+  .react-modal-body,
+  .react-modal-footer {
+    @apply flex flex-col gap-4;
+  }
+  
+  .react-modal-header {
+    @apply flex justify-between items-start;
+    /* border-bottom: 1px solid #dedede; */
+  }
+  
+  .react-modal-footer {
+    @apply flex items-center justify-end;
+    /* border-top: 1px solid #dedede; */
+  }

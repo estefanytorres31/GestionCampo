@@ -120,16 +120,6 @@ const MaintenanceForm = () => {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Abordaje</Text>
-          <TextInput
-            style={styles.input}
-            value={formData.boarding}
-            onChangeText={(text) => setFormData(prev => ({ ...prev, boarding: text }))}
-            placeholder="Detalles del abordaje"
-          />
-        </View>
-
-        <View style={styles.section}>
           <Text style={styles.sectionTitle}>Imágenes</Text>
           <View style={styles.imageButtonsContainer}>
             <TouchableOpacity 

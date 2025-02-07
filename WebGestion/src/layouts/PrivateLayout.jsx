@@ -5,7 +5,7 @@ import Header from "./Header";
 import { useLocation } from "react-router-dom";
 import { useEffect, useMemo } from "react";
 
-export const PrivateLayout = ({ children }) => {
+const PrivateLayout = ({ children }) => {
   const { isAuth, logout } = useAuth();
   const location = useLocation(); // 🔹 Obtener la ruta actual
 
@@ -52,3 +52,5 @@ export const PrivateLayout = ({ children }) => {
     </div>
   );
 };
+
+export default PrivateLayout;

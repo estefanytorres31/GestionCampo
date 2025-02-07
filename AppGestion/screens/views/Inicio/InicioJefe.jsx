@@ -15,7 +15,7 @@ const JefeScreen = ({ navigation }) => {
 
   return (
     <LinearGradient 
-      colors={["#549fcb", "#cfe3ea","#0a4472"]} 
+      colors={["#549fcb", "#cfe3ea", "#0a4472"]} 
       style={styles.container}
     >
       <View style={styles.overlay}>
@@ -50,6 +50,36 @@ const JefeScreen = ({ navigation }) => {
             >
               <Ionicons name="qr-code-outline" size={24} color="white" />
               <Text style={styles.buttonText}>Escanear QR</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+
+          {/* Nuevo botón para "Lista de OT Asignados" */}
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => navigation.navigate("ListaOTAsignado")}
+            activeOpacity={0.7}
+          >
+            <LinearGradient
+              colors={["#8e44ad", "#9b59b6"]}
+              style={styles.buttonGradient}
+            >
+              <Ionicons name="clipboard" size={24} color="white" />
+              <Text style={styles.buttonText}>Lista de OT Asignados</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+
+          {/* Nuevo botón para "Mis OT" */}
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => navigation.navigate("TrabajosAsignados")}
+            activeOpacity={0.7}
+          >
+            <LinearGradient
+              colors={["#27ae60", "#2ecc71"]}
+              style={styles.buttonGradient}
+            >
+              <Ionicons name="clipboard" size={24} color="white" />
+              <Text style={styles.buttonText}>Mis OT</Text>
             </LinearGradient>
           </TouchableOpacity>
         </View>

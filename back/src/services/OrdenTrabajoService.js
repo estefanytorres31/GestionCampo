@@ -93,7 +93,7 @@ export const actualizarOrdenTrabajo = async (id_orden_trabajo, data) => {
   }
 
   const ordenExistente = await prisma.ordenTrabajo.findUnique({
-    where: { id_orden_trabajo },
+    where: { id_orden_trabajo:parseInt(id_orden_trabajo) },
   });
 
   if (!ordenExistente || ordenExistente.estado === "inactivo") {
@@ -103,7 +103,7 @@ export const actualizarOrdenTrabajo = async (id_orden_trabajo, data) => {
   const fechaActualizacion = getUTCTime(new Date().toISOString());
 
   return await prisma.ordenTrabajo.update({
-    where: { id_orden_trabajo },
+    where: { id_orden_trabajo:parseInt(id_orden_trabajo) },
     data: {
       ...data,
       actualizado_en: fechaActualizacion,

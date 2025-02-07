@@ -1,11 +1,11 @@
 import React, { useState, useCallback, useEffect } from "react";
 import { ChevronDown, ChevronUp, CheckCircle, Circle, Save } from "lucide-react-native";
-import { View, Text, ScrollView, SafeAreaView, ActivityIndicator, StyleSheet, TouchableOpacity, Animated, Alert } from "react-native";
+import { View, Text, ScrollView, TextInput, SafeAreaView, ActivityIndicator, StyleSheet, TouchableOpacity, Animated, Alert } from "react-native";
+import useOrdenTrabajoSistema from "../../hooks/OrdenTrabajoSistema/useOrdenTrabajoSistema";
+import useOrdenTrabajoParte from "../../hooks/OrdenTrabajoParte/useOrdenTrabajoParte";
 import useOrdenTrabajo from "../../hooks/OrdenTrabajo/useOrdenTrabajo";
-import useTipoTrabajoESP from "../../hooks/TipoTrabajoESP/useTipoTrabajoESP";
-import useTipoTrabajo from "../../hooks/TipoTrabajo/useTipoTabajo";
 
-const CollapsibleSistema = ({ sistema, selectedParts, onTogglePart }) => {
+const CollapsibleSistema = ({ sistema, selectedParts, onTogglePart, comments, onCommentChange, onSaveSystem }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [animation] = useState(new Animated.Value(0));
 
@@ -22,7 +22,9 @@ const CollapsibleSistema = ({ sistema, selectedParts, onTogglePart }) => {
 
   const getProgress = useCallback(() => {
     if (!sistema.partes || sistema.partes.length === 0) return { count: 0, total: 0 };
-    const checkedCount = sistema.partes.filter(parte => selectedParts[parte.id_parte]).length;
+    const checkedCount = sistema.partes.filter(parte => 
+      selectedParts[parte.id_orden_trabajo_parte] || parte.estado_parte === "completado"
+    ).length;
     return { count: checkedCount, total: sistema.partes.length };
   }, [sistema.partes, selectedParts]);
 
@@ -39,32 +41,35 @@ const CollapsibleSistema = ({ sistema, selectedParts, onTogglePart }) => {
     );
   };
 
+  const handleSaveSystem = () => {
+    const selectedPartsForSystem = sistema.partes
+      .filter(parte => selectedParts[parte.id_orden_trabajo_parte] && parte.estado_parte !== "completado")
+      .map(parte => ({
+        id: parte.id_orden_trabajo_parte,
+        comment: comments[parte.id_orden_trabajo_parte] || ""
+      }));
+
+    if (selectedPartsForSystem.length === 0) {
+      Alert.alert("Advertencia", "Por favor seleccione al menos una parte nueva para este sistema.");
+      return;
+    }
+
+    onSaveSystem(sistema.id_orden_trabajo_sistema, selectedPartsForSystem);
+  };
+
   return (
-    <Animated.View 
-      style={[
-        styles.section,
-        {
-          transform: [{
-            scale: animation.interpolate({
-              inputRange: [0, 1],
-              outputRange: [1, 1.02]
-            })
-          }]
-        }
-      ]}
-    >
-      <TouchableOpacity 
-        style={styles.sectionHeader} 
-        onPress={toggleExpand}
-        activeOpacity={0.7}
-      >
+    <Animated.View style={[styles.section, {
+      transform: [{
+        scale: animation.interpolate({
+          inputRange: [0, 1],
+          outputRange: [1, 1.02]
+        })
+      }]
+    }]}>
+      <TouchableOpacity style={styles.sectionHeader} onPress={toggleExpand} activeOpacity={0.7}>
         <View style={styles.sectionHeaderContent}>
-          <Text style={styles.sectionTitle}>{sistema.nombre_sistema}</Text>
-          {isExpanded ? (
-            <ChevronUp size={24} color="#6366f1" />
-          ) : (
-            <ChevronDown size={24} color="#6366f1" />
-          )}
+          <Text style={styles.sectionTitle}>{sistema.sistema.nombre_sistema}</Text>
+          {isExpanded ? <ChevronUp size={24} color="#6366f1" /> : <ChevronDown size={24} color="#6366f1" />}
         </View>
         {renderProgressBar()}
       </TouchableOpacity>
@@ -73,28 +78,50 @@ const CollapsibleSistema = ({ sistema, selectedParts, onTogglePart }) => {
         <View style={styles.itemsContainer}>
           {sistema.partes && sistema.partes.length > 0 ? (
             sistema.partes.map((parte) => (
-              <TouchableOpacity
-                key={parte.id_parte}
-                style={styles.item}
-                onPress={() => onTogglePart(parte.id_parte)}
-                activeOpacity={0.7}
-              >
-                {selectedParts[parte.id_parte] ? (
-                  <CheckCircle size={24} color="#6366f1" />
-                ) : (
-                  <Circle size={24} color="#d1d5db" />
-                )}
-                <Text style={[
-                  styles.itemText,
-                  selectedParts[parte.id_parte] && styles.checkedItemText
-                ]}>
-                  {parte.nombre_parte}
-                </Text>
-              </TouchableOpacity>
+              <View key={parte.id_orden_trabajo_parte} style={styles.partContainer}>
+                <TouchableOpacity
+                  style={styles.item}
+                  onPress={() => parte.estado_parte !== "completado" && onTogglePart(parte.id_orden_trabajo_parte)}
+                  activeOpacity={parte.estado_parte === "completado" ? 1 : 0.7}
+                >
+                  {parte.estado_parte === "completado" ? (
+                    <CheckCircle size={24} color="#9CA3AF" />
+                  ) : selectedParts[parte.id_orden_trabajo_parte] ? (
+                    <CheckCircle size={24} color="#6366f1" />
+                  ) : (
+                    <Circle size={24} color="#d1d5db" />
+                  )}
+                  <Text style={[
+                    styles.itemText,
+                    parte.estado_parte === "completado" && styles.completedItemText,
+                    selectedParts[parte.id_orden_trabajo_parte] && styles.checkedItemText
+                  ]}>
+                    {parte.parte.nombre_parte}
+                  </Text>
+                </TouchableOpacity>
+                <TextInput
+                  style={[
+                    styles.commentInput,
+                    parte.estado_parte === "completado" && styles.disabledCommentInput
+                  ]}
+                  placeholder="Agregar comentario..."
+                  value={comments[parte.id_orden_trabajo_parte] || ""}
+                  onChangeText={(text) => onCommentChange(parte.id_orden_trabajo_parte, text)}
+                  editable={parte.estado_parte !== "completado"}
+                />
+              </View>
             ))
           ) : (
             <Text style={styles.emptyMessage}>No hay partes disponibles</Text>
           )}
+          <TouchableOpacity 
+            style={styles.saveButton} 
+            onPress={handleSaveSystem}
+            activeOpacity={0.8}
+          >
+            <Save size={24} color="#ffffff" />
+            <Text style={styles.saveButtonText}>Guardar Sistema</Text>
+          </TouchableOpacity>
         </View>
       )}
     </Animated.View>
@@ -103,40 +130,45 @@ const CollapsibleSistema = ({ sistema, selectedParts, onTogglePart }) => {
 
 const SistemasPartes = ({ route, navigation }) => {
   const { idOrden } = route.params;
-  const { fetchTiposTrabajosWithPartsESP } = useTipoTrabajoESP();
-  const { obtenerOrdenTrabajo } = useOrdenTrabajo();
-  const {getTipoTrabajoPorID}=useOrdenTrabajo();
+  const { obtenerOrdenTrabajoSistemaByOrdenTrabajo, actualizarOrdenTrabajoSistema } = useOrdenTrabajoSistema();
+  const { actualizarOrdenTrabajoParte } = useOrdenTrabajoParte();
+  const {actualizarOrdenTrabajo}=useOrdenTrabajo();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedParts, setSelectedParts] = useState({});
+  const [comments, setComments] = useState({});
 
   useEffect(() => {
     let isMounted = true;
-
+  
     const fetchSistemasPartes = async () => {
       try {
-        const responseOrden = await obtenerOrdenTrabajo(idOrden);
-        if (!responseOrden) {
-          throw new Error("No se pudo obtener la orden de trabajo.");
+        const response = await obtenerOrdenTrabajoSistemaByOrdenTrabajo(idOrden);
+        if (!response || !Array.isArray(response)) {
+          throw new Error("Formato de respuesta inválido");
         }
-
-        const { id_tipo_trabajo, id_embarcacion } = responseOrden;
-        if (!id_tipo_trabajo || !id_embarcacion) {
-          throw new Error("Datos de orden de trabajo incompletos.");
-        }
-
-        const response = await fetchTiposTrabajosWithPartsESP(id_tipo_trabajo, id_embarcacion);
-        if (!response || !response.data || !Array.isArray(response.data)) {
-          throw new Error("La respuesta no contiene datos válidos");
-        }
-
+        
         if (isMounted) {
-          setData(response.data);
+          setData(response);
+          // Initialize selectedParts and comments based on the fetched data
+          const initialSelectedParts = {};
+          const initialComments = {};
+          response.forEach(sistema => {
+            sistema.partes.forEach(parte => {
+              if (parte.estado_parte === "completado") {
+                initialSelectedParts[parte.id_orden_trabajo_parte] = true;
+                initialComments[parte.id_orden_trabajo_parte] = parte.comentario_parte || "";
+              }
+            });
+          });
+          setSelectedParts(initialSelectedParts);
+          setComments(initialComments);
         }
       } catch (error) {
         if (isMounted) {
           setError(error.message || "Error desconocido al cargar los datos.");
+          console.error('Error details:', error);
         }
       } finally {
         if (isMounted) {
@@ -144,42 +176,94 @@ const SistemasPartes = ({ route, navigation }) => {
         }
       }
     };
-
+  
     fetchSistemasPartes();
     return () => { isMounted = false; };
   }, [idOrden]);
 
-  const togglePart = useCallback((partId) => {
+  const togglePart = useCallback((id_orden_trabajo_parte) => {
     setSelectedParts(prev => ({
       ...prev,
-      [partId]: !prev[partId]
+      [id_orden_trabajo_parte]: !prev[id_orden_trabajo_parte]
     }));
   }, []);
 
-  const saveSelectedParts = useCallback(() => {
-    const selectedPartsList = Object.entries(selectedParts)
-      .filter(([_, isSelected]) => isSelected)
-      .map(([partId]) => partId);
+  const handleCommentChange = useCallback((id_orden_trabajo_parte, text) => {
+    setComments(prev => ({
+      ...prev,
+      [id_orden_trabajo_parte]: text
+    }));
+  }, []);
 
-    if (selectedPartsList.length === 0) {
-      Alert.alert(
-        "Advertencia",
-        "Por favor seleccione al menos una parte para continuar."
-      );
+  const saveSelectedParts = useCallback(async () => {
+    const newlySelectedParts = Object.entries(selectedParts)
+      .filter(([id, isSelected]) => {
+        const parte = data.flatMap(s => s.partes).find(p => p.id_orden_trabajo_parte.toString() === id);
+        return isSelected && parte && parte.estado_parte !== "completado";
+      })
+      .map(([id]) => parseInt(id));
+  
+    if (newlySelectedParts.length === 0) {
+      Alert.alert("Advertencia", "Por favor seleccione al menos una parte nueva para continuar.");
       return;
     }
-
-    Alert.alert(
-      "Éxito",
-      "Partes seleccionadas guardadas correctamente",
-      [{ 
-        text: "OK",
-        onPress: () => {
-          navigation.navigate('FormPreventivo', { selectedParts: selectedPartsList });
-        }
-      }]
-    );
-  }, [selectedParts]);
+  
+    try {
+      // Update all newly selected parts
+      await Promise.all(newlySelectedParts.map(id_orden_trabajo_parte => 
+        actualizarOrdenTrabajoParte(
+          id_orden_trabajo_parte, 
+          "completado", 
+          comments[id_orden_trabajo_parte] || null
+        )
+      ));
+  
+      // Check each system's completion status
+      const sistemasEstados = data.map(sistema => {
+        const sistemaPartes = sistema.partes.map(parte => ({
+          ...parte,
+          isSelected: selectedParts[parte.id_orden_trabajo_parte] || parte.estado_parte === "completado"
+        }));
+        
+        return {
+          id_orden_trabajo_sistema: sistema.id_orden_trabajo_sistema,
+          allCompleted: sistemaPartes.every(parte => parte.isSelected)
+        };
+      });
+  
+      // Update systems status
+      await Promise.all(
+        sistemasEstados.map(({ id_orden_trabajo_sistema, allCompleted }) => 
+          actualizarOrdenTrabajoSistema(
+            id_orden_trabajo_sistema, 
+            allCompleted ? "completado" : "en_progreso"
+          )
+        )
+      );
+  
+      // Check if all systems are completed
+      const allSystemsCompleted = sistemasEstados.every(sistema => sistema.allCompleted);
+  
+      // Update work order status
+      const newOrdenTrabajoStatus = allSystemsCompleted ? "completado" : "en_progreso";
+      const resp = await actualizarOrdenTrabajo(idOrden, newOrdenTrabajoStatus);
+      console.log(resp);
+  
+      Alert.alert(
+        "Éxito",
+        `Partes guardadas correctamente${allSystemsCompleted ? ' y orden de trabajo completada' : ''}`,
+        [{ 
+          text: "OK",
+          onPress: () => {
+            navigation.navigate('FormPreventivo', { selectedParts: newlySelectedParts });
+          }
+        }]
+      );
+    } catch (error) {
+      Alert.alert("Error", "Hubo un problema al guardar las partes seleccionadas.");
+      console.error('Error saving parts:', error);
+    }
+  }, [selectedParts, comments, data, actualizarOrdenTrabajoParte, actualizarOrdenTrabajoSistema, actualizarOrdenTrabajo, navigation]);
 
   if (loading) {
     return (
@@ -210,28 +294,22 @@ const SistemasPartes = ({ route, navigation }) => {
       <Text style={styles.title}>Sistemas y Partes</Text>
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
         <View style={styles.content}>
-          {data.map((sistema) => (
+          {data.map((item) => (
             <CollapsibleSistema 
-              key={sistema.id_sistema} 
-              sistema={sistema}
+              key={item.id_orden_trabajo_sistema}
+              sistema={item}
               selectedParts={selectedParts}
               onTogglePart={togglePart}
+              comments={comments}
+              onCommentChange={handleCommentChange}
+              onSaveSystem={saveSelectedParts}
             />
           ))}
         </View>
       </ScrollView>
-      <View style={styles.footer}>
-        <TouchableOpacity 
-          style={styles.saveButton} 
-          onPress={saveSelectedParts}
-          activeOpacity={0.8}
-        >
-          <Save size={24} color="#ffffff" />
-          <Text style={styles.saveButtonText}>Guardar Selección</Text>
-        </TouchableOpacity>
-      </View>
     </SafeAreaView>
   );
+
 };
 
 const styles = StyleSheet.create({
@@ -337,17 +415,6 @@ const styles = StyleSheet.create({
     color: "#94a3b8",
     textAlign: "center",
   },
-  footer: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: "#f8fafc",
-    paddingVertical: 16,
-    paddingHorizontal: 24,
-    borderTopWidth: 1,
-    borderTopColor: "#e2e8f0",
-  },
   saveButton: {
     backgroundColor: "#6366f1",
     flexDirection: "row",
@@ -366,6 +433,17 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "600",
     marginLeft: 12,
+  },
+  partContainer: {
+    marginBottom: 10,
+  },
+  commentInput: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 8,
+    padding: 8,
+    marginTop: 5,
+    backgroundColor: "#f8fafc",
   },
 });
 

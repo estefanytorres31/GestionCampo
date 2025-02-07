@@ -29,3 +29,26 @@ export const getOrdenTrabajoById=async(id_orden_trabajo)=>{
         throw new Error(`Error al obtener la orden de trabajo: ${error.message}`);
     }
 }
+
+export const getAllTrabajosByJefeAsig=async()=>{
+    try {
+        const userId = await AsyncStorage.getItem('userId');
+        const userIdInt = parseInt(userId, 10);
+        const response = await apiClient.get(`/ordenestrabajo?id_jefe_asigna=${userIdInt}`);
+        return response.data;
+    } catch (error) {
+        throw new Error(`Error al obtener las ordenes de trabajo: ${error.message}`);
+    }
+}
+
+
+export const updateOrdenTrabajo=async(id_orden_trabajo, estado)=>{
+    try {
+        const response = await apiClient.put(`/ordenestrabajo/${id_orden_trabajo}`, {estado});
+        console.log(id_orden_trabajo,'Estado',estado)
+        return response.data;
+    } catch (error) {
+        throw new Error(`Error al actualizar la orden de trabajo: ${error.message}`);
+    }
+
+}

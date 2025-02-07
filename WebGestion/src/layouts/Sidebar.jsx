@@ -1,19 +1,31 @@
 import React, { useEffect, useState } from "react";
-import { NavLink, useLocation } from "react-router-dom";
+import { Link, NavLink, useLocation } from "react-router-dom";
 
 import { AnimatePresence, motion } from "framer-motion";
 import { useMediaQuery } from "react-responsive";
 
-import { IoIosArrowBack } from "react-icons/io";
-import { MdMenu, MdKeyboardArrowDown } from "react-icons/md";
-import { RiGroup2Fill, RiShieldUserFill } from "react-icons/ri";
+import { TbViewportWide } from "react-icons/tb";
+import { TbViewportNarrow } from "react-icons/tb";
+import { GiCargoShip, GiHarborDock } from "react-icons/gi";
+import { MdMenu, MdKeyboardArrowDown, MdAssignment } from "react-icons/md";
+import {
+  RiGroup2Fill,
+  RiShieldUserFill,
+  RiUserLocationFill,
+} from "react-icons/ri";
 import { IoLogOut } from "react-icons/io5";
-import { FaShip, FaUserFriends } from "react-icons/fa";
-import { FaList } from "react-icons/fa6";
+import { FaUserFriends } from "react-icons/fa";
+import { FaMapLocationDot } from "react-icons/fa6";
+import { BiSolidShip } from "react-icons/bi";
+import { LuShipWheel } from "react-icons/lu";
+
 
 import icono from "@/assets/logo.svg";
 import { useAuth } from "@/context/AuthContext";
 import roleMapper from "@/utils/roleMapper";
+
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faGear } from "@fortawesome/free-solid-svg-icons";
 
 // Variantes para la animación del submenú
 const subMenuVariants = {
@@ -82,9 +94,71 @@ const SideBar = () => {
   useEffect(() => {
     const elements = [
       {
+        to: "/dashboard",
+        icon: <FaMapLocationDot size={20} className="min-w-max" />,
+        label: "Dashboard",
+        roles: ["admin"],
+      },
+      {
         to: "/asistencias",
-        icon: <FaShip size={20} className="min-w-max" />,
+        icon: <RiUserLocationFill size={20} className="min-w-max" />,
         label: "Asistencias",
+        roles: ["admin"],
+      },
+      {
+        // Ítem contenedor para subitems
+        icon: <MdAssignment size={20} className="min-w-max" />,
+        label: "Asignaciones",
+        roles: ["admin"],
+        subItems: [
+          {
+            to: "/asignaciones",
+            icon: <GiCargoShip size={20} className="min-w-max" />,
+            label: "Asignaciones",
+            roles: ["admin"],
+          },
+          {
+            to: "/",
+            icon: <GiHarborDock size={20} className="min-w-max" />,
+            label: "Puerto",
+            roles: ["admin"],
+          },
+          {
+            to: "/historial-puertos",
+            label: "Historial de Puertos",
+            icon: <LuShipWheel size={18} className="min-w-max" />,
+          },
+        ],
+      },
+      {
+        // Ítem contenedor para subitems
+        icon: <BiSolidShip size={20} className="min-w-max" />,
+        label: "Embarcacion",
+        roles: ["admin"],
+        subItems: [
+          {
+            to: "/embarcacion",
+            icon: <GiCargoShip size={20} className="min-w-max" />,
+            label: "Embarcación",
+            roles: ["admin"],
+          },
+          {
+            to: "/puerto",
+            icon: <GiHarborDock size={20} className="min-w-max" />,
+            label: "Puerto",
+            roles: ["admin"],
+          },
+          {
+            to: "/historial-puertos",
+            label: "Historial de Puertos",
+            icon: <LuShipWheel size={18} className="min-w-max" />,
+          },
+        ],
+      },
+      {
+        to: "/sistema",
+        icon: <FontAwesomeIcon icon={faGear} style={{ fontSize: "17px" }} />,
+        label: "Sistema",
         roles: ["admin"],
       },
       {
@@ -124,7 +198,7 @@ const SideBar = () => {
       {/* Fondo para vista mobile */}
       <div
         onClick={() => setIsOpen(false)}
-        className={`md:hidden fixed inset-0 max-h-screen z-[20] bg-black/50 ${
+        className={`md:hidden fixed inset-0 max-h-screen z-[9999] bg-black/50 ${
           isOpen ? "block" : "hidden"
         }`}
       ></div>
@@ -133,18 +207,21 @@ const SideBar = () => {
         variants={Sidebar_animation}
         initial={{ x: isTab ? -250 : 0 }}
         animate={isOpen ? "open" : "closed"}
-        className="bg-white text-gray z-[40] max-w-60 w-60 h-screen md:h-full overflow-hidden md:relative fixed"
+        className="bg-white text-gray z-[9999] max-w-60 w-60 h-screen md:h-full overflow-hidden md:relative fixed"
         style={{
           boxShadow: "6px 0px 24px 0px rgba(18, 96, 44, 0.08)",
           borderRight: "1px solid rgba(18, 85, 42, 0.12)",
         }}
       >
         {/* Logo con línea divisoria */}
-        <div className="flex flex-col mx-3 border-b py-3 border-slate-300 cursor-pointer">
+        <Link
+          to="/dashboard"
+          className="flex flex-col mx-3 border-b py-3 border-slate-300 cursor-pointer"
+        >
           <div className="flex items-center gap-3">
             <img src={icono} alt="Logo" className="max-w-full" />
           </div>
-        </div>
+        </Link>
 
         {/* Menú principal */}
         <nav className="flex flex-col h-full">
@@ -167,7 +244,7 @@ const SideBar = () => {
                         }))
                       }
                     >
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-6">
                         {element.icon}
                         <span className="text-sm-medium">{element.label}</span>
                       </div>
@@ -189,7 +266,12 @@ const SideBar = () => {
                         >
                           {/* Línea divisoria */}
                           <div className="border-b border-slate-300 my-2"></div>
-                          <ul className="pl-8 flex flex-col gap-2">
+                          <motion.ul
+                            initial={{ paddingLeft: isOpen ? "2rem" : "0rem" }}
+                            animate={{ paddingLeft: isOpen ? "2rem" : "0rem" }}
+                            transition={{ duration: 0.3 }}
+                            className="flex flex-col gap-2"
+                          >
                             {element.subItems.map((sub) => (
                               <li key={sub.to}>
                                 <NavLink
@@ -207,7 +289,7 @@ const SideBar = () => {
                                 </NavLink>
                               </li>
                             ))}
-                          </ul>
+                          </motion.ul>
                         </motion.div>
                       )}
                     </AnimatePresence>
@@ -249,14 +331,37 @@ const SideBar = () => {
 
         {/* Botón para ocultar menú (solo en desktop) */}
         <motion.div
-          animate={
-            isOpen ? { x: 0, y: 0, rotate: 0 } : { x: -10, y: 0, rotate: 180 }
-          }
-          transition={{ duration: 0 }}
           onClick={() => setIsOpen(!isOpen)}
           className="absolute w-fit h-fit z-50 right-2 bottom-5 cursor-pointer md:block hidden"
         >
-          <IoIosArrowBack size={25} />
+          {/* Contenedor con tamaño fijo y posición relativa */}
+          <div className="relative w-8 h-8">
+            <AnimatePresence mode="wait">
+              {isOpen ? (
+                <motion.div
+                  key="open"
+                  className="absolute inset-0"
+                  initial={{ opacity: 0, scale: 0.8, x: -10 }}
+                  animate={{ opacity: 1, scale: 1, x: 0 }}
+                  exit={{ opacity: 0, scale: 0.8, x: 10 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <TbViewportNarrow size={25} />
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="closed"
+                  className="absolute inset-0"
+                  initial={{ opacity: 0, scale: 0.8, x: 10 }}
+                  animate={{ opacity: 1, scale: 1, x: 0 }}
+                  exit={{ opacity: 0, scale: 0.8, x: -10 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <TbViewportWide size={25} />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </motion.div>
       </motion.div>
 
