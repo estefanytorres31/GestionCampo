@@ -41,7 +41,7 @@ const JefeScreen = ({ navigation }) => {
 
           <TouchableOpacity
             style={styles.button}
-            onPress={() => navigation.navigate("Inicio")}
+            onPress={() => navigation.navigate("QRScann")}
             activeOpacity={0.7}
           >
             <LinearGradient

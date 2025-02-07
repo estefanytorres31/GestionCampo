@@ -3,6 +3,7 @@ import {
   View,
   Text,
   TouchableOpacity,
+  Alert,
   StyleSheet,
   ActivityIndicator,
 } from "react-native";
@@ -10,13 +11,17 @@ import QRCode from "react-native-qrcode-svg";
 import { useNavigation } from "@react-navigation/native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import * as Location from "expo-location";
+import { CommonActions } from '@react-navigation/native';
 import useAsistencia from "../../hooks/Asistencia/useAsistencia";
+import useAuth from "../../hooks/Auth/useAuth";
 
 const Menu = ({ route }) => {
   const qrData = route?.params?.qrData || "";
+  const {role}=useAuth();
   const navigation = useNavigation();
   const [location, setLocation] = useState(null);
   const [error, setError] = useState(null);
+  const [loadingLocation, setLoadingLocation] = useState(false);
 
   const { registerAttendance, lastAttendance, loading, getUltimoAsistencia } =
     useAsistencia();
@@ -28,14 +33,17 @@ const Menu = ({ route }) => {
       getUltimoAsistencia();
     }
   }, []);
+  
 
   const handleAttendance = async (tipo) => {
     setError(null);
+    setLoadingLocation(true);
   
     try {
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
         setError("Se requiere permiso para acceder a la ubicación");
+        setLoadingLocation(false);
         return;
       }
   
@@ -50,6 +58,7 @@ const Menu = ({ route }) => {
           "Error",
           "No puedes registrar salida en una embarcación diferente a la de tu última entrada."
         );
+        setLoadingLocation(false);
         return;
       }
   
@@ -63,7 +72,22 @@ const Menu = ({ route }) => {
   
       console.log(response);
       if (response && !response.error) {
-        navigation.navigate("Inicio");
+        Alert.alert(
+          "Registro de Asistencia Exitoso",
+          `Has ${tipo === "entrada"? "entrado" : "salido"} con éxito.`,
+          [
+            { text: "OK", onPress: () => 
+              navigation.dispatch(
+                CommonActions.reset({
+                  index: 1,
+                  routes: [
+                    { name: role.includes("Jefe") ? "InicioJefe" : "Inicio" },
+                  ],
+                })
+              ),
+            },
+          ]
+        )
       }
       if (response.error) {
         setError(response.error);
@@ -71,6 +95,9 @@ const Menu = ({ route }) => {
       }
     } catch (err) {
       setError(err.message || "Error al obtener la ubicación");
+    }
+    finally{
+      setLoadingLocation(false);
     }
   };
   
@@ -88,8 +115,10 @@ const Menu = ({ route }) => {
   // 🔍 Determinar qué botón mostrar
   const showEntrada = !lastAttendance || lastAttendance.tipo === "salida";
   const showSalida = lastAttendance && lastAttendance.tipo === "entrada" && lastAttendance.id_embarcacion === parsedQrData.id;
+  const showWarning = lastAttendance && 
+  lastAttendance.tipo === "entrada" && 
+  lastAttendance.id_embarcacion !== parsedQrData.id;
   
-
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -107,6 +136,15 @@ const Menu = ({ route }) => {
       </View>
 
       <View style={styles.attendanceContainer}>
+      {showWarning && (
+        <View style={styles.warningContainer}>
+          <Icon name="alert" size={24} color="#FF9800" />
+          <Text style={styles.warningText}>
+            Ya registraste entrada en la embarcación {lastAttendance.embarcacion?.nombre}. 
+            Debes registrar salida en esa embarcación antes de cambiar.
+          </Text>
+        </View>
+      )}
         {showEntrada && (
           <TouchableOpacity
             style={[styles.attendanceButton, { backgroundColor: "#4CAF50" }]}
@@ -136,10 +174,13 @@ const Menu = ({ route }) => {
               { backgroundColor: "#f44336", marginTop: 16 },
             ]}
             onPress={() => handleAttendance("salida")}
-            disabled={loading}
+            disabled={loadingLocation}
           >
-            {loading ? (
-              <ActivityIndicator color="#FFF" />
+            {loadingLocation ? (
+              <>
+                <ActivityIndicator color="#FFF" />
+                <Text style={styles.buttonText}>Registrando...</Text>
+              </>
             ) : (
               <>
                 <Icon
@@ -271,6 +312,23 @@ const styles = StyleSheet.create({
     color: "#f44336",
     fontSize: 16,
   },
+    warningContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFF3E0',
+    padding: 15,
+    borderRadius: 10,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: '#FFE0B2'
+  },
+  warningText: {
+    marginLeft: 10,
+    fontSize: 16,
+    color: '#F57C00',
+    flex: 1,
+    flexWrap: 'wrap'
+  }
 });
 
 export default Menu;

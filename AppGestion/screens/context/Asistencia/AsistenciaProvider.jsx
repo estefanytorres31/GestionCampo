@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import AsistenciaContext from "./AsistenciaContext";
-import { Alert } from "react-native";
 import { createAsistencia, getUltimoAsistenciaByUser } from "../../services/AsistenciaService";
 
 const AsistenciaProvider = ({ children }) => {
@@ -15,10 +14,8 @@ const AsistenciaProvider = ({ children }) => {
             setLastAttendance(response.data);
             return response.data
         } catch (error) {
-            Alert.alert(
-                "Error",
-                error.message || "No se pudo obtener la última asistencia"
-            );
+            console.error("Error al obtener la última asistencia:", error);
+            return null;
         } finally {
             setLoading(false);
         }
@@ -42,17 +39,8 @@ const AsistenciaProvider = ({ children }) => {
                 timestamp: new Date().toISOString(),
             });
 
-            Alert.alert(
-                "Éxito",
-                `Se registró correctamente la ${params.tipo === 'entrada' ? 'entrada' : 'salida'}`
-            );
-
             return response.data;
         } catch (error) {
-            Alert.alert(
-                "Error",
-                error.message || "No se pudo registrar la asistencia"
-            );
             throw error;
         } finally {
             setLoading(false);
