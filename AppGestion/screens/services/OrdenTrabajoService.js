@@ -5,7 +5,7 @@ export const createOrdenTrabajo=async(id_tipo_trabajo, id_embarcacion, id_puerto
     const userId = await AsyncStorage.getItem('userId');
     const userIdInt = parseInt(userId, 10);
     try {
-        const response = await apiClient.post(`/ordentrabajo`, {
+        const response = await apiClient.post(`/ordenestrabajo`, {
             id_tipo_trabajo,
             id_embarcacion,
             id_puerto,
@@ -23,7 +23,7 @@ export const createOrdenTrabajo=async(id_tipo_trabajo, id_embarcacion, id_puerto
 
 export const getOrdenTrabajoById=async(id_orden_trabajo)=>{
     try {
-        const response = await apiClient.get(`/ordentrabajo/${id_orden_trabajo}`);
+        const response = await apiClient.get(`/ordenestrabajo/${id_orden_trabajo}`);
         return response.data;
     } catch (error) {
         throw new Error(`Error al obtener la orden de trabajo: ${error.message}`);

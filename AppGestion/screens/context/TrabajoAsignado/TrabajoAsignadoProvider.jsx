@@ -39,7 +39,7 @@ const TrabajoAsignadoProvider = ({ children }) => {
             // 🔍 Obtener detalles de cada orden de trabajo
             const ordenesPromises = ordenesIds.map(async (id) => {
                 try {
-                    const response = await apiClient.get(`/ordentrabajo/${id}`);
+                    const response = await apiClient.get(`/ordenestrabajo/${id}`);
                     return response.data.data;
                 } catch (error) {
                     console.error(`Error obteniendo orden de trabajo con ID ${id}:`, error.response?.data || error.message);

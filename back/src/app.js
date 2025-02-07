@@ -62,7 +62,7 @@ app.use("/api/parte", parteRouter);
 app.use("/api/asistencia", asistenciaRouter);
 app.use("/api/sistemaparte", sistemaParteRouter);
 app.use("/api/embarcacionsistemaparte", embarcacionSistemaParteRouter);
-app.use("/api/ordentrabajo", ordenTrabajoRouter);
+//app.use("/api/ordentrabajo", ordenTrabajoRouter);
 app.use("/api/tipotrabajoesp", tipoTrabajoESPRouter);
 app.use("/api/asistencia", asistenciaRouter);
 
