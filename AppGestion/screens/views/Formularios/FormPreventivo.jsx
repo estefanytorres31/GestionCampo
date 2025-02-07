@@ -14,18 +14,20 @@ import {
 import { Camera, Image as ImageIcon, Plus, Save, Percent } from 'lucide-react-native';
 import * as ImagePicker from 'expo-image-picker';
 import Slider from '@react-native-community/slider';
+import useOrdenTrabajoSistema from "../../hooks/OrdenTrabajoSistema/useOrdenTrabajoSistema";
 
-const MaintenanceForm = () => {
+const MaintenanceForm = ({route, navigation}) => {
+  const {id_orden_trabajo_sistema}=route.params;
   const [formData, setFormData] = useState({
     material: '',
     observations: '',
     nextVisitItems: '',
-    boarding: '',
     progress: 0,
     images: []
   });
 
   const [showProgress, setShowProgress] = useState(false);
+  const {actualizarOrdenTrabajoSistemaCompleta}=useOrdenTrabajoSistema();
 
   const pickImage = async (useCamera = false) => {
     try {
@@ -37,8 +39,8 @@ const MaintenanceForm = () => {
           return;
         }
         result = await ImagePicker.launchCameraAsync({
-          mediaTypes: ImagePicker.MediaTypeOptions.Images,
-          quality: 0.8,
+          allowsEditing: true,
+          quality: 1,
         });
       } else {
         const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -47,8 +49,9 @@ const MaintenanceForm = () => {
           return;
         }
         result = await ImagePicker.launchImageLibraryAsync({
-          mediaTypes: ImagePicker.MediaTypeOptions.Images,
-          quality: 0.8,
+          mediaTypes: ImagePicker.MediaType,
+          allowsEditing: true,
+          quality: 1,
         });
       }
 
@@ -76,8 +79,22 @@ const MaintenanceForm = () => {
       return;
     }
     
-    // Aquí iría la lógica para guardar los datos
-    Alert.alert('Éxito', 'Datos guardados correctamente');
+    if (!formData.observations.trim()) {
+      Alert.alert('Error', 'Por favor ingrese las observaciones');
+      return;
+    }
+    
+    if (!formData.nextVisitItems.trim()) {
+      Alert.alert('Error', 'Por favor ingrese los materiales para la próxima visita');
+      return;
+    }
+
+    
+
+
+
+    
+
   };
 
   return (

@@ -1,6 +1,6 @@
 import React, {useState} from "react";
 import OrdenTrabajoSistemaContext from "./OrdenTrabajoSistemaContext";
-import { createOrdenTrabajoSistema,getOrdenTrabajoSistemaByOrdenTrabajo,updateEstadoOrdenTrabajoSistema } from "../../services/OrdenTrabajoSistemaService";
+import { createOrdenTrabajoSistema,getOrdenTrabajoSistemaByOrdenTrabajo,updateEstadoOrdenTrabajoSistema, updateOrdenTrabajoSistema } from "../../services/OrdenTrabajoSistemaService";
 
 const OrdenTrabajoSistemaProvider = ({ children }) => {
     const [ordenTrabajoSistemas, setOrdenTrabajoSistemas] = React.useState([]);
@@ -49,9 +49,24 @@ const OrdenTrabajoSistemaProvider = ({ children }) => {
       }
     }
 
+    const actualizarOrdenTrabajoSistemaCompleta=async(id_orden_trabajo_sistema, data)=>{
+      setLoading(true);
+      setError(null);
+      try{
+        const response=await updateOrdenTrabajoSistema(id_orden_trabajo_sistema, data);
+        setLoading(false);
+        return response.data;  
+      }catch(err){
+        setError(err.message);
+        console.error("Error al actualizar la orden de trabajo:", err);
+      }finally{
+        setLoading(false);
+      }
+    }
+
     
     return (
-        <OrdenTrabajoSistemaContext.Provider value={{ guardarOrdenTrabajoSistema,obtenerOrdenTrabajoSistemaByOrdenTrabajo, actualizarOrdenTrabajoSistema, ordenTrabajoSistemas, loading, error }}>
+        <OrdenTrabajoSistemaContext.Provider value={{ actualizarOrdenTrabajoSistemaCompleta, guardarOrdenTrabajoSistema,obtenerOrdenTrabajoSistemaByOrdenTrabajo, actualizarOrdenTrabajoSistema, ordenTrabajoSistemas, loading, error }}>
           {children}
         </OrdenTrabajoSistemaContext.Provider>
       );

@@ -269,7 +269,7 @@ const SistemasPartes = ({ route, navigation }) => {
         [{ 
           text: "OK",
           onPress: () => {
-            navigation.navigate(destino, { selectedParts: newlySelectedParts });
+            navigation.navigate(destino, { selectedParts: newlySelectedParts, id_orden_trabajo_sistema: data[0].id_orden_trabajo_sistema });
           }
         }]
       );
