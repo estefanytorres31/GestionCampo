@@ -38,12 +38,12 @@ export const createAsistencia = async (id_embarcacion, tipo, latitud, longitud, 
     }
 };
 
-export const getAsistenciasByOrden = async (id_embarcacion) => {
+export const getUltimoAsistenciaByUser = async () => {
     try {
         const userId = await AsyncStorage.getItem("userId");
         const userIdInt = parseInt(userId, 10);
 
-        const response = await apiClient.get(`/asistencia?id_usuario=${userIdInt}&id_embarcacion=${id_embarcacion}`);
+        const response = await apiClient.get(`/asistencia/usuario/${userIdInt}`);
         return response.data;
     } catch (error) {
         console.error("Error obteniendo asistencias:", error.response?.data || error.message);

@@ -14,24 +14,24 @@ import useAsistencia from "../../hooks/Asistencia/useAsistencia";
 
 const Menu = ({ route }) => {
   const qrData = route?.params?.qrData || "";
-  const idOrden = route?.params?.idOrden || null;
   const navigation = useNavigation();
   const [location, setLocation] = useState(null);
   const [error, setError] = useState(null);
 
-  const { registerAttendance, lastAttendance, loading, loadLastAttendance } =
+  const { registerAttendance, lastAttendance, loading, getUltimoAsistencia } =
     useAsistencia();
   const parsedQrData = qrData ? JSON.parse(qrData) : null;
 
   // Cargar la última asistencia al montar la pantalla
   useEffect(() => {
     if (parsedQrData.id) {
-      loadLastAttendance(parsedQrData.id);
+      getUltimoAsistencia();
     }
-  }, [idOrden]);
+  }, []);
 
   const handleAttendance = async (tipo) => {
     setError(null);
+  
     try {
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
@@ -44,12 +44,13 @@ const Menu = ({ route }) => {
       });
       setLocation(location);
   
-      // Validar que la salida sea con la misma embarcación que la entrada
-      if (tipo === "salida" && lastAttendance?.tipo === "entrada") {
-        if (lastAttendance.id_embarcacion !== parsedQrData.id) {
-          setError("Debes registrar la salida con la misma embarcación con la que marcaste la entrada.");
-          return;
-        }
+      // 🚨 Verificar si la embarcación es la misma al intentar registrar salida
+      if (tipo === "salida" && lastAttendance?.id_embarcacion !== parsedQrData.id) {
+        Alert.alert(
+          "Error",
+          "No puedes registrar salida en una embarcación diferente a la de tu última entrada."
+        );
+        return;
       }
   
       const response = await registerAttendance({
@@ -57,12 +58,12 @@ const Menu = ({ route }) => {
         tipo,
         latitud: location.coords.latitude.toString(),
         longitud: location.coords.longitude.toString(),
-        id_orden_trabajo: idOrden,
+        id_orden_trabajo: null,
       });
   
       console.log(response);
       if (response && !response.error) {
-        navigation.navigate("Inicio", { idOrden });
+        navigation.navigate("Inicio");
       }
       if (response.error) {
         setError(response.error);
@@ -86,7 +87,8 @@ const Menu = ({ route }) => {
 
   // 🔍 Determinar qué botón mostrar
   const showEntrada = !lastAttendance || lastAttendance.tipo === "salida";
-  const showSalida = lastAttendance && lastAttendance.tipo === "entrada";
+  const showSalida = lastAttendance && lastAttendance.tipo === "entrada" && lastAttendance.id_embarcacion === parsedQrData.id;
+  
 
   return (
     <View style={styles.container}>

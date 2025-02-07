@@ -109,3 +109,14 @@ export const eliminarAsistencia = async (req, res) => {
         res.status(400).json({ message: error.message });
     }
 };
+
+
+export const getLastAsistenciaByUsusario=async (req, res) => {
+    const { id_usuario } = req.params;
+    try {
+        const lastAsistencia = await AsistenciaService.obtenerUltimaAsistencia(id_usuario);
+        res.status(200).json({ message: "Última asistencia obtenida exitosamente.", data: lastAsistencia });
+    } catch (error) {
+        res.status(404).json({ message: error.message });
+    }
+}

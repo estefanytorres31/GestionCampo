@@ -143,6 +143,7 @@ const SistemasPartes = ({ route, navigation }) => {
     try {
       setLoading(true)
       const response = await obtenerOrdenTrabajoSistemaByOrdenTrabajo(idOrden)
+      console.log(response)
       if (!response || !Array.isArray(response)) {
         throw new Error("Formato de respuesta inválido")
       }

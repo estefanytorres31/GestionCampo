@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import AsistenciaContext from "./AsistenciaContext";
 import { Alert } from "react-native";
-import { createAsistencia, getAsistenciasByOrden } from "../../services/AsistenciaService";
+import { createAsistencia, getUltimoAsistenciaByUser } from "../../services/AsistenciaService";
 
 const AsistenciaProvider = ({ children }) => {
     const [lastAttendance, setLastAttendance] = useState(null);
@@ -9,20 +9,20 @@ const AsistenciaProvider = ({ children }) => {
     const [hasEntrada, setHasEntrada] = useState(false);
     const [hasSalida, setHasSalida] = useState(false);
 
-    // Cargar asistencias previas
-    const loadLastAttendance = async (id_embarcacion) => {
+    const getUltimoAsistencia=async()=>{
         try {
-            const asistencias = await getAsistenciasByOrden(id_embarcacion);
-            if (asistencias.length > 0) {
-                const lastEntry = asistencias[asistencias.length - 1]; // Último registro
-                setLastAttendance(lastEntry);
-            } else {
-                setLastAttendance(null);
-            }
+            const response = await getUltimoAsistenciaByUser();
+            setLastAttendance(response.data);
+            return response.data
         } catch (error) {
-            console.error("Error cargando la última asistencia:", error);
+            Alert.alert(
+                "Error",
+                error.message || "No se pudo obtener la última asistencia"
+            );
+        } finally {
+            setLoading(false);
         }
-    };
+    }
 
     // Registrar asistencia
     const registerAttendance = async (params) => {
@@ -60,7 +60,7 @@ const AsistenciaProvider = ({ children }) => {
     };
 
     return (
-        <AsistenciaContext.Provider value={{ lastAttendance, loading, registerAttendance, loadLastAttendance }}>
+        <AsistenciaContext.Provider value={{ lastAttendance, loading, registerAttendance, getUltimoAsistencia }}>
             {children}
         </AsistenciaContext.Provider>
     );
