@@ -121,6 +121,7 @@ const checklistData = [
   }
 ]
 
+
 const MaintenanceChecklist = () => {
   const navigation = useNavigation()
   const [expandedSections, setExpandedSections] = useState({})
