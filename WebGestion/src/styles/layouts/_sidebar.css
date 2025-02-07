@@ -1,28 +1,26 @@
-@layer base {
-    body {
-      background: #0D1E4C;
-    }
-  
-    h1 {
-      /* @apply text-xl font-medium; */
-    }
-  }
-  
-  .link {
-    @apply p-2.5 flex gap-6 items-center md:cursor-pointer cursor-default duration-300 font-medium whitespace-nowrap;
-    color: #0D1E4C;
-  }
-  
-  .link:hover {
-    background-color: #f0f4ff;
-  }
-  
-  .link-active > img {
-    color: #1e3a8a;
-  }
-  
-  .link-active {
-    @apply bg-blue-900/5 border-[#1e3a8a];
-    color: #1e3a8a;
-  }
-  
+.link {
+  @apply p-2.5 flex gap-6 items-center md:cursor-pointer cursor-default duration-300 font-medium whitespace-nowrap;
+}
+
+/* Ejemplo de clases reutilizables */
+.link {
+  padding: 0.625rem;
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  font-weight: 500;
+  white-space: nowrap;
+  color: var(--primary-text);
+}
+
+.link:hover {
+  background: var(--hover-bg);
+}
+
+.link-active {
+  background: var(--active-bg);
+  border-color: var(--border-color);
+  color: var(--active-text);
+}

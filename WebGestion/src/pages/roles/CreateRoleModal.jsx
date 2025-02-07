@@ -22,7 +22,6 @@ const CreateRoleModal = ({ isOpen, onClose, onSuccess }) => {
       setNombreRol(""); // Reinicia el formulario
       setDescripcion("");
     } catch (err) {
-      // El error se maneja en el hook, pero aquí podrías realizar acciones adicionales si lo requieres
       console.error(err);
     }
   };
@@ -30,7 +29,13 @@ const CreateRoleModal = ({ isOpen, onClose, onSuccess }) => {
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <Modal.Header>
-        <h2 className="text-xl font-bold border-b border-[#1c2c4f]/20 py-3 text-[#1c2c4f]">
+        <h2
+          className="text-xl font-bold py-3"
+          style={{
+            borderBottom: "1px solid var(--border-color)",
+            color: "var(--primary-text)"
+          }}
+        >
           Crear Rol
         </h2>
       </Modal.Header>

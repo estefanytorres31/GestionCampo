@@ -1,4 +1,3 @@
-// AssignRolesForm.jsx
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { MdClose } from "react-icons/md";
@@ -20,7 +19,7 @@ const AssignRolesForm = ({ onSuccess, onCancel }) => {
     }
   };
 
-  // Estado para el usuario (para mostrar información, por ejemplo, el nombre de usuario)
+  // Estado para el usuario y manejo de errores
   const [user, setUser] = useState(null);
   const [userError, setUserError] = useState("");
 
@@ -54,27 +53,26 @@ const AssignRolesForm = ({ onSuccess, onCancel }) => {
     refetch: refetchAssigned,
   } = useFetchData(`/usuariorol/usuario/${userId}`, {}, 1, 100);
 
-  // Si el error indica que el usuario no tiene roles asignados, lo tratamos como sin error
+  // Si el error indica que el usuario no tiene roles asignados, se ignora
   const errorAssigned =
     errorAssignedRaw &&
     errorAssignedRaw.toLowerCase().includes("no tiene roles asignados")
       ? null
       : errorAssignedRaw;
 
-  // Estados locales para manejar los roles asignados y la selección actual
+  // Estados locales para roles asignados y selección actual
   const [assignedRoles, setAssignedRoles] = useState([]);
   const [selectedRoles, setSelectedRoles] = useState([]);
   const [loading, setLoading] = useState(false);
   const [localError, setLocalError] = useState("");
 
-  // Transformar la data asignada para obtener un array de objetos { id, nombre }
+  // Transformar la data asignada en un array de objetos { id, nombre }
   useEffect(() => {
     if (assignedData && Array.isArray(assignedData)) {
       if (errorAssigned) {
         setAssignedRoles([]);
         setSelectedRoles([]);
       } else {
-        // Se asume que cada rol tiene al menos: id y nombre_rol
         const assigned = assignedData.map((role) => ({
           id: role.id,
           nombre: role.nombre_rol,
@@ -97,7 +95,7 @@ const AssignRolesForm = ({ onSuccess, onCancel }) => {
     }
   };
 
-  // Manejo del cambio en el checkbox
+  // Manejo del checkbox
   const handleCheckboxChange = (e, role) => {
     if (e.target.checked) {
       if (!selectedRoles.find((r) => r.id === role.id)) {
@@ -107,7 +105,6 @@ const AssignRolesForm = ({ onSuccess, onCancel }) => {
       setSelectedRoles(selectedRoles.filter((r) => r.id !== role.id));
     }
   };
-  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -132,7 +129,6 @@ const AssignRolesForm = ({ onSuccess, onCancel }) => {
               rol_id: role.id,
             });
           } catch (err) {
-            // Ignorar error si el rol ya está asignado
             if (
               err.response &&
               err.response.data &&
@@ -159,15 +155,12 @@ const AssignRolesForm = ({ onSuccess, onCancel }) => {
 
       if (refetchAssigned) await refetchAssigned();
 
-      // Actualizar localStorage con la nueva lista de roles.
-      // Se asume que al loguearse se guardó el usuario en localStorage con la clave "usuario"
+      // Actualizar el usuario en localStorage y el contexto
       const storedUser = localStorage.getItem("usuario");
-
       if (storedUser) {
         const userData = JSON.parse(storedUser);
         userData.roles = selectedRoles.map((role) => role.nombre);
         localStorage.setItem("usuario", JSON.stringify(userData));
-        // Actualiza el estado del contexto
         refreshUsuario();
       }
       if (onSuccess) onSuccess();
@@ -179,35 +172,41 @@ const AssignRolesForm = ({ onSuccess, onCancel }) => {
     }
   };
 
-  if (userError) {
-    return <p className="text-red-500">{userError}</p>;
-  }
-  if (!user) {
-    return <p>Cargando datos del usuario...</p>;
-  }
-  if (loadingAvailable || loadingAssigned) {
-    return <p>Cargando roles...</p>;
-  }
-  // Solo mostramos error crítico de roles disponibles. El error de roles asignados se ignora si es por "no tiene roles asignados"
-  if (errorAvailable) {
-    return <p className="text-red-500">Error al obtener datos.</p>;
-  }
+  if (userError) return <p className="text-red-500">{userError}</p>;
+  if (!user) return <p>Cargando datos del usuario...</p>;
+  if (loadingAvailable || loadingAssigned) return <p>Cargando roles...</p>;
+  if (errorAvailable) return <p className="text-red-500">Error al obtener datos.</p>;
 
   return (
-    <div className="max-w-3xl mx-auto p-6 bg-white shadow-md rounded-md">
-      <h2 className="text-2xl font-bold mb-4">
+    <div
+      className="max-w-3xl mx-auto p-6 shadow-md rounded-md"
+      style={{
+        backgroundColor: "var(--primary-bg)",
+        border: "1px solid var(--border-color)",
+        color: "var(--primary-text)",
+      }}
+    >
+      <h2
+        className="text-2xl font-bold mb-4"
+        style={{ color: "var(--primary-text)" }}
+      >
         Asignar Roles al Usuario: {user.nombre_usuario}
       </h2>
       {localError && <p className="text-red-500 mb-4">{localError}</p>}
       <form onSubmit={handleSubmit}>
         {/* Sección de roles disponibles */}
         <div className="mb-6">
-          <h3 className="text-xl font-semibold mb-2">Roles Disponibles</h3>
+          <h3
+            className="text-xl font-semibold mb-2"
+            style={{ color: "var(--primary-text)" }}
+          >
+            Roles Disponibles
+          </h3>
           <div className="grid grid-cols-2 gap-2">
             {availableRoles.map((role) => (
               <div
                 key={role.id}
-                className="flex items-center p-2 border rounded hover:bg-gray-50 cursor-pointer"
+                className="flex items-center p-2 border rounded cursor-pointer role-card"
                 onClick={() =>
                   toggleRole({ id: role.id, nombre: role.nombre_rol })
                 }
@@ -223,7 +222,9 @@ const AssignRolesForm = ({ onSuccess, onCancel }) => {
                   }
                   className="mr-2"
                 />
-                <span>{role.nombre_rol}</span>
+                <span style={{ color: "var(--primary-text)" }}>
+                  {role.nombre_rol}
+                </span>
               </div>
             ))}
           </div>
@@ -231,7 +232,12 @@ const AssignRolesForm = ({ onSuccess, onCancel }) => {
 
         {/* Sección de roles seleccionados (chips) */}
         <div className="mb-6">
-          <h3 className="text-xl font-semibold mb-2">Roles Seleccionados</h3>
+          <h3
+            className="text-xl font-semibold mb-2"
+            style={{ color: "var(--primary-text)" }}
+          >
+            Roles Seleccionados
+          </h3>
           {selectedRoles.length > 0 ? (
             <div className="flex flex-wrap gap-2">
               {selectedRoles.map((role) => (

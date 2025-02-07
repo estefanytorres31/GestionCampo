@@ -12,13 +12,13 @@ import RowActions from "@/components/RowActions";
 import { IoAdd } from "react-icons/io5";
 import { MdAssignmentAdd } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
+import TooltipList from "@/components/TooltipList";
 
 const rolesColumns = [
   { name: "ID", uuid: "id" },
   { name: "🔑 Nombre", uuid: "nombre_rol" },
   { name: "📝 Descripción", uuid: "descripcion" },
   { name: "📜 Permisos", uuid: "permisos" },
-  { name: "⏳ Estado", uuid: "estado" },
   { name: "⚙️ Acciones", uuid: "acciones" },
 ];
 
@@ -43,7 +43,6 @@ const Roles = () => {
   const navigate = useNavigate();
 
   const handleSuccess = async (data) => {
-    console.log("Operación exitosa", data);
     if (
       listPageRefetchRef.current &&
       typeof listPageRefetchRef.current === "function"
@@ -121,14 +120,22 @@ const Roles = () => {
         }}
         render={{
           id: (row) => formatId(row.id),
-          estado: (row) => (row.estado ? "🟢 Activo" : "🔴 Inactivo"),
-          permisos: (row) =>
-            row.roles_permisos && row.roles_permisos.length > 0
-              ? row.roles_permisos.join(", ")
-              : "-",
+          permisos: (row) => (
+            <TooltipList
+              items={row.roles_permisos}
+              defaultText="Sin permisos"
+              countMode={true}
+              labelSingular="permiso"
+              labelPlural="permisos"
+            />
+          ),
           acciones: (row) => (
             <>
-              <RowActions row={row} onEdit={handleEdit} onDelete={handleDelete} />
+              <RowActions
+                row={row}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+              />
               <Button
                 onClick={() => handleAssignPermissions(row)}
                 color="secondary"

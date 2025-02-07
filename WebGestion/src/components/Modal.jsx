@@ -31,7 +31,6 @@ const Modal = ({ children, isOpen, onClose, closeOverlayClick = true }) => {
       previousActiveElement.current = document.activeElement;
       modalRef.current?.focus();
     }
-
     return () => {
       document.removeEventListener("keydown", handleEscape);
       document.removeEventListener("mousedown", handleMouseDown);
