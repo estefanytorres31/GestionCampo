@@ -139,47 +139,36 @@ const SistemasPartes = ({ route, navigation }) => {
   const [selectedParts, setSelectedParts] = useState({});
   const [comments, setComments] = useState({});
 
-  useEffect(() => {
-    let isMounted = true;
-  
-    const fetchSistemasPartes = async () => {
-      try {
-        const response = await obtenerOrdenTrabajoSistemaByOrdenTrabajo(idOrden);
-        if (!response || !Array.isArray(response)) {
-          throw new Error("Formato de respuesta inválido");
-        }
-        
-        if (isMounted) {
-          setData(response);
-          // Initialize selectedParts and comments based on the fetched data
-          const initialSelectedParts = {};
-          const initialComments = {};
-          response.forEach(sistema => {
-            sistema.partes.forEach(parte => {
-              if (parte.estado_parte === "completado") {
-                initialSelectedParts[parte.id_orden_trabajo_parte] = true;
-                initialComments[parte.id_orden_trabajo_parte] = parte.comentario_parte || "";
-              }
-            });
-          });
-          setSelectedParts(initialSelectedParts);
-          setComments(initialComments);
-        }
-      } catch (error) {
-        if (isMounted) {
-          setError(error.message || "Error desconocido al cargar los datos.");
-          console.error('Error details:', error);
-        }
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
+  const fetchSistemasPartes = useCallback(async () => {
+    try {
+      setLoading(true)
+      const response = await obtenerOrdenTrabajoSistemaByOrdenTrabajo(idOrden)
+      if (!response || !Array.isArray(response)) {
+        throw new Error("Formato de respuesta inválido")
       }
-    };
-  
-    fetchSistemasPartes();
-    return () => { isMounted = false; };
-  }, [idOrden]);
+
+      setData(response)
+      const initialSelectedParts = {}
+      const initialComments = {}
+      response.forEach((sistema) => {
+        sistema.partes.forEach((parte) => {
+          initialSelectedParts[parte.id_orden_trabajo_parte] = parte.estado_parte === "completado"
+          initialComments[parte.id_orden_trabajo_parte] = parte.comentario_parte || ""
+        })
+      })
+      setSelectedParts(initialSelectedParts)
+      setComments(initialComments)
+    } catch (error) {
+      setError(error.message || "Error desconocido al cargar los datos.")
+      console.error("Error details:", error)
+    } finally {
+      setLoading(false)
+    }
+  }, [idOrden])
+
+  useEffect(() => {
+    fetchSistemasPartes()
+  }, [fetchSistemasPartes])
 
   const togglePart = useCallback((id_orden_trabajo_parte) => {
     setSelectedParts(prev => ({
@@ -219,17 +208,17 @@ const SistemasPartes = ({ route, navigation }) => {
       ));
   
       // Check each system's completion status
-      const sistemasEstados = data.map(sistema => {
-        const sistemaPartes = sistema.partes.map(parte => ({
+      const sistemasEstados = data.map((sistema) => {
+        const sistemaPartes = sistema.partes.map((parte) => ({
           ...parte,
-          isSelected: selectedParts[parte.id_orden_trabajo_parte] || parte.estado_parte === "completado"
-        }));
-        
+          isSelected: selectedParts[parte.id_orden_trabajo_parte] || parte.estado_parte === "completado",
+        }))
+
         return {
           id_orden_trabajo_sistema: sistema.id_orden_trabajo_sistema,
-          allCompleted: sistemaPartes.every(parte => parte.isSelected)
-        };
-      });
+          allCompleted: sistemaPartes.every((parte) => parte.isSelected),
+        }
+      })
   
       // Update systems status
       await Promise.all(
@@ -242,13 +231,14 @@ const SistemasPartes = ({ route, navigation }) => {
       );
   
       // Check if all systems are completed
-      const allSystemsCompleted = sistemasEstados.every(sistema => sistema.allCompleted);
-  
+      const allSystemsCompleted = sistemasEstados.every((sistema) => sistema.allCompleted)
+
       // Update work order status
-      const newOrdenTrabajoStatus = allSystemsCompleted ? "completado" : "en_progreso";
-      const resp = await actualizarOrdenTrabajo(idOrden, newOrdenTrabajoStatus);
-      console.log(resp);
-  
+      const newOrdenTrabajoStatus = allSystemsCompleted ? "completado" : "en_progreso"
+      await actualizarOrdenTrabajo(idOrden, newOrdenTrabajoStatus)
+
+      // Refresh the data after saving
+      await fetchSistemasPartes()
       Alert.alert(
         "Éxito",
         `Partes guardadas correctamente${allSystemsCompleted ? ' y orden de trabajo completada' : ''}`,

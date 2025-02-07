@@ -446,10 +446,6 @@ export const updateEstadoOrdenTrabajoSistema = async (id, nuevoEstado) => {
     throw new Error(`No se encontró la Orden de Trabajo con ID ${id}.`);
   }
 
-  if (orden.estado === nuevoEstado) {
-    throw new Error(`La Orden de Trabajo ya está en estado '${nuevoEstado}'.`);
-  }
-
   const fechaActual = getUTCTime(new Date().toISOString());
 
   const ordenActualizada = await prisma.ordenTrabajoSistema.update({
