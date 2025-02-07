@@ -87,7 +87,6 @@ const Mapa = ({ asistencias }) => {
     { name: "👤 Nombre", uuid: "nombre_completo" },
     { name: "📅 Fecha", uuid: "fecha_hora_entrada" },
     { name: "⛵ Embarcación", uuid: "embarcacion" },
-    { name: "🌍 Ubicación", uuid: "ubicacion" },
     { name: "📍 Puerto", uuid: "puerto_actual" },
     { name: "⚙️ Acciones", uuid: "acciones" },
   ];
@@ -100,18 +99,10 @@ const Mapa = ({ asistencias }) => {
       : null;
 
   // Función para evaluar la ubicación: si el punto se encuentra dentro del buffer de la costa o no.
-  const evaluarUbicacion = (row) => {
-    if (!costaBuffer) return "-";
-    const lat = parseFloat(row.coordenadas_entrada.latitud);
-    const lon = parseFloat(row.coordenadas_entrada.longitud);
-    const pt = point([lon, lat]);
-    const isInside = booleanPointInPolygon(pt, costaBuffer);
-    return isInside ? "Dentro de la costa" : "Fuera de la costa";
-  };
+
 
   // Objeto de render para las columnas personalizadas en la tabla.
   const render = {
-    ubicacion: (row) => evaluarUbicacion(row),
     fecha_hora_entrada: (row) => formatFecha(row.fecha_hora_entrada),
     acciones: (row) => {
       const lat = parseFloat(row.coordenadas_entrada.latitud);
@@ -128,7 +119,13 @@ const Mapa = ({ asistencias }) => {
   };
 
   return (
-    <div>
+    <div className="list-layout"
+      style={{
+        background: "var(--primary-bg)",
+        color: "var(--primary-text)",
+        border: "1px solid var(--border-color)",
+      }}
+    >
       <MapContainer
         center={defaultPosition}
         zoom={6} // Zoom inicial del mapa
@@ -192,7 +189,7 @@ const Mapa = ({ asistencias }) => {
       </MapContainer>
 
       {/* Listado de asistentes usando el componente Table */}
-      <div className="overflow-auto mt-6">
+      <div className="overflow-auto">
         <Table
           columns={columns}
           data={markersData}

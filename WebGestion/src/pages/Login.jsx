@@ -28,7 +28,6 @@ const Login = () => {
     "neon-purple",
     "dracula",
     "monokai",
-    // agrega aquí los nombres de los temas que ya definen un degradado en su variable --primary-bg
   ]);
 
   // Define el estilo de fondo condicional
@@ -45,9 +44,9 @@ const Login = () => {
     try {
       const response = await axiosInstance.post("/auth/login", { usuario: usuarioInput, contrasena });
       if (response.status === 200) {
-        const { token, expiracion, userId, nombreUsuario, roles, theme } = response.data;
+        const { token, expiracion, userId, nombreUsuario, nombreCompleto, roles, theme } = response.data;
         // Llama al contexto de login
-        login({ token, expiracion, userId, nombreUsuario, roles, theme });
+        login({ token, expiracion, userId, nombreUsuario, nombreCompleto, roles, theme });
         // Redirige al dashboard
         navigate("/dashboard");
       }

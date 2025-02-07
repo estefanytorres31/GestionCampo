@@ -1,8 +1,11 @@
-import { createContext, useContext, useState, useEffect } from "react";
+// AuthContext.jsx
+import React, { createContext, useContext, useState, useEffect } from "react";
+import { useTheme } from "@/context/ThemeContext"; // Asegúrate de que ThemeProvider envuelva a AuthProvider
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
+  const { setSpecificTheme } = useTheme(); // Extraemos la función para actualizar el tema
   const [isAuth, setIsAuth] = useState(() => {
     const token = localStorage.getItem("token");
     const expiration = localStorage.getItem("tokenExpiration");
@@ -21,37 +24,37 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     if (!isAuth) {
-      // Limpia el almacenamiento si no está autenticado
       localStorage.removeItem("token");
       localStorage.removeItem("tokenExpiration");
       localStorage.removeItem("usuario");
-      localStorage.removeItem("theme"); // Removemos el tema también
+      // Opcionalmente, se puede remover el tema
+      // localStorage.removeItem("theme");
       setUsuario(null);
     }
   }, [isAuth]);
 
   const login = (data) => {
-    // Se espera que data incluya: token, expiracion, userId, nombreUsuario, roles y theme
-    const { token, expiracion, userId, nombreUsuario, roles, theme } = data;
-    const usuarioData = { userId, nombreUsuario, roles, theme };
+    const { token, expiracion, userId, nombreUsuario, nombreCompleto, roles, theme } = data;
+    const usuarioData = { userId, nombreUsuario, nombreCompleto, roles, theme };
 
     localStorage.setItem("token", token);
     localStorage.setItem("tokenExpiration", expiracion);
     localStorage.setItem("usuario", JSON.stringify(usuarioData));
-    if (theme) {
-      console.log("tema", theme)
-      localStorage.setItem("theme", theme);
-    }
+    // Guardamos el tema recibido en localStorage
+    if (theme) localStorage.setItem("theme", theme);
 
     setUsuario(usuarioData);
     setIsAuth(true);
+    // Actualizamos el ThemeContext con el tema del usuario
+    if (theme) setSpecificTheme(theme);
   };
 
   const logout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("tokenExpiration");
     localStorage.removeItem("usuario");
-    localStorage.removeItem("theme");
+    // Opcionalmente, se puede limpiar el tema o dejarlo para el siguiente usuario
+    // localStorage.removeItem("theme");
     setUsuario(null);
     setIsAuth(false);
   };

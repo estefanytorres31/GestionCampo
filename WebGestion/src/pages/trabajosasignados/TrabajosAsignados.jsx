@@ -1,17 +1,17 @@
 import React, { useState, useEffect, useRef } from "react";
 import ListPage from "@/components/ListPage";
-import useTrabajosAsignados from "@/hooks/trabajosAsignados/useTrabajosAsignados"; // Ajusta la ruta
-import Button from "@/components/Button";
-import { useNavigate } from "react-router-dom";
+import useTrabajosAsignados from "@/hooks/trabajosAsignados/useTrabajosAsignados";
+import UserAvatarRowTooltip from "@/components/UserAvatarWithTooltip";
 
 // Define las columnas para la tabla de Trabajos Asignados
 const trabajosColumns = [
   { name: "ID", uuid: "id_orden_trabajo" },
+  { name: "Código", uuid: "codigo" },
+  { name: "Asignado por", uuid: "jefe_asigna" },
+  { name: "Tipo de Trabajo", uuid: "tipo_trabajo" },
   { name: "Embarcación", uuid: "embarcacion" },
   { name: "Puerto", uuid: "puerto" },
-  { name: "Tipo de Trabajo", uuid: "tipo_trabajo" },
   { name: "Estado", uuid: "estado" },
-  { name: "Código", uuid: "codigo" },
 ];
 
 // Opcional: Si deseas agregar filtros, puedes definirlos aquí.
@@ -40,6 +40,18 @@ const TrabajosAsignados = () => {
       row.tipo_trabajo && row.tipo_trabajo.nombre_trabajo
         ? row.tipo_trabajo.nombre_trabajo
         : "-",
+    jefe_asigna: (row) =>
+      row.jefe_asigna ? (
+        <div className="flex items-center gap-2 w-full justify-center">
+          <UserAvatarRowTooltip
+            user={row.jefe_asigna}
+            size={40}
+            tooltipSize={60}
+          />
+        </div>
+      ) : (
+        "-"
+      ),
   };
 
   return (

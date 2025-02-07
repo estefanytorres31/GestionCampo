@@ -1,4 +1,3 @@
-// ThemeContext.jsx
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 
 export const themes = {
@@ -29,16 +28,16 @@ export const themes = {
 const ThemeContext = createContext();
 
 export const ThemeProvider = ({ children }) => {
-  // Intentamos leer el tema seleccionado del localStorage; si no existe, usamos el tema light
-  const storedTheme = localStorage.getItem("selectedTheme");
-  const [selectedTheme, setSelectedTheme] = useState(storedTheme || themes.light);
-  // Tema efectivo que se aplicará globalmente: si el seleccionado es "system", se calculará según la preferencia del sistema
-  const [effectiveTheme, setEffectiveTheme] = useState(themes.light);
+  // Leer el tema almacenado en localStorage (con clave "theme"), si existe; sino, usar el tema light.
+  const storedTheme = localStorage.getItem("theme");
+  const [selectedTheme, setSelectedTheme] = useState(storedTheme || themes.system);
+  // Tema efectivo que se aplicará globalmente: si el seleccionado es "system", se calculará según la preferencia del sistema.
+  const [effectiveTheme, setEffectiveTheme] = useState(storedTheme || themes.system);
 
   const updateEffectiveTheme = useCallback(() => {
     if (selectedTheme === themes.system && window.matchMedia) {
       const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-      setEffectiveTheme(prefersDark ? themes.dark : themes.light);
+      setEffectiveTheme(prefersDark ? themes.dark : themes.system);
     } else {
       setEffectiveTheme(selectedTheme);
     }
@@ -63,7 +62,7 @@ export const ThemeProvider = ({ children }) => {
     document.documentElement.setAttribute("data-theme", effectiveTheme);
   }, [effectiveTheme]);
 
-  // Cada vez que se actualice selectedTheme, lo guardamos en localStorage
+  // Guardar el tema seleccionado en localStorage cada vez que cambie
   useEffect(() => {
     localStorage.setItem("theme", selectedTheme);
   }, [selectedTheme]);
@@ -82,9 +81,7 @@ export const ThemeProvider = ({ children }) => {
   };
 
   return (
-    <ThemeContext.Provider
-      value={{ theme: effectiveTheme, toggleTheme, setSpecificTheme, selectedTheme }}
-    >
+    <ThemeContext.Provider value={{ theme: effectiveTheme, toggleTheme, setSpecificTheme, selectedTheme }}>
       {children}
     </ThemeContext.Provider>
   );

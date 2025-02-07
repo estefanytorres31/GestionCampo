@@ -16,7 +16,6 @@ const permisosColumns = [
   { name: "ID", uuid: "id" },
   { name: "🔑 Nombre", uuid: "nombre" },
   { name: "📝 Descripción", uuid: "descripcion" },
-  { name: "⏳ Estado", uuid: "estado" },
   { name: "⚙️ Acciones", uuid: "acciones" },
 ];
 
@@ -43,7 +42,6 @@ const Permisos = () => {
 
   // Función para refrescar la lista tras una operación exitosa
   const handleSuccess = async (data) => {
-    console.log("Operación exitosa", data);
     if (
       listPageRefetchRef.current &&
       typeof listPageRefetchRef.current === "function"
@@ -121,7 +119,6 @@ const Permisos = () => {
         }}
         render={{
           id: (row) => formatId(row.id),
-          estado: (row) => (row.estado ? "🟢 Activo" : "🔴 Inactivo"),
           acciones: (row) => (
             <RowActions row={row} onEdit={handleEdit} onDelete={handleDelete} />
           ),

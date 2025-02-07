@@ -321,31 +321,31 @@ const SideBar = () => {
         {/* Botón para ocultar menú (solo en desktop) */}
         <motion.div
           onClick={() => setIsOpen(!isOpen)}
-          className="absolute w-fit h-fit z-50 right-2 bottom-5 cursor-pointer md:block hidden"
+          className="absolute w-fit h-fit z-99 right-2 bottom-5 cursor-pointer md:block hidden rounded-full transition-shadow duration-500 hover:shadow-[0_0_0_2px_rgba(255,255,255,0.1)]"
         >
-          <div className="relative w-8 h-8">
+          <div className="relative w-8 h-8 flex items-center justify-center">
             <AnimatePresence mode="wait">
               {isOpen ? (
                 <motion.div
                   key="open"
-                  className="absolute inset-0"
+                  className="absolute inset-0 flex items-center justify-center"
                   initial={{ opacity: 0, scale: 0.8, x: -10 }}
                   animate={{ opacity: 1, scale: 1, x: 0 }}
                   exit={{ opacity: 0, scale: 0.8, x: 10 }}
                   transition={{ duration: 0.2 }}
                 >
-                  <TbViewportNarrow size={20} />
+                  <TbViewportNarrow size={20} className="min-w-max" />
                 </motion.div>
               ) : (
                 <motion.div
                   key="closed"
-                  className="absolute inset-0"
+                  className="absolute inset-0 flex items-center justify-center"
                   initial={{ opacity: 0, scale: 0.8, x: 10 }}
                   animate={{ opacity: 1, scale: 1, x: 0 }}
                   exit={{ opacity: 0, scale: 0.8, x: -10 }}
                   transition={{ duration: 0.2 }}
                 >
-                  <TbViewportWide size={20} />
+                  <TbViewportWide size={20} className="min-w-max" />
                 </motion.div>
               )}
             </AnimatePresence>

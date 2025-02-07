@@ -1,6 +1,7 @@
 /* _content.css */
 .list-layout {
-  @apply h-full flex flex-col justify-start gap-4 overflow-auto rounded-2xl;
-  background-color: var(--primary-bg);
+  @apply h-full flex flex-col justify-start overflow-auto rounded-2xl border-2;
+  background: var(--primary-bg);
+  border-color: var(--border-color);
   /* Puedes agregar más estilos usando las variables si es necesario */
 }

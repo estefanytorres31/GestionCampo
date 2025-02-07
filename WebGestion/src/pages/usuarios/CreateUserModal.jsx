@@ -156,6 +156,7 @@ const CreateUserModal = ({ isOpen, onClose, onSuccess }) => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               type="email"
+              autoComplete="new-email"
               required
             />
 
@@ -166,6 +167,7 @@ const CreateUserModal = ({ isOpen, onClose, onSuccess }) => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               type="password"
+              autoComplete="new-password"
               required
             />
 

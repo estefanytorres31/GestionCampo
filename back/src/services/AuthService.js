@@ -59,6 +59,7 @@ export const login = async (nombreUsuario, contrasena_hash) => {
     expiracion: expirationPeru.toISOString(),
     userId: usuario.id,
     nombreUsuario: usuario.nombre_usuario,
+    nombreCompleto: usuario.nombre_completo,
     roles,
     theme: userTheme, // Se agrega el tema configurado o "light" por defecto
   };

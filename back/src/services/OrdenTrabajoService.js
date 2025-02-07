@@ -187,7 +187,9 @@ const skip = (page - 1) * pageSize;
         jefe_asigna: {
           select: {
             nombre_usuario: true,
-            nombre_completo: true, // si también necesitas el nombre completo
+            nombre_completo: true,
+            id: true,
+            email: true,
           },
         },
         // Opcional: Si deseas también el nombre del tipo de trabajo

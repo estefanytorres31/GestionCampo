@@ -1,6 +1,6 @@
 /* Estilos base para botones */
 .button {
-  @apply px-4 py-3 rounded-xl h-11 shadow-md flex items-center justify-center active:scale-95 focus:outline-none transition duration-300 transform;
+  @apply px-4 py-3 rounded-xl cursor-pointer h-11 shadow-md flex items-center justify-center active:scale-95 focus:outline-none transition duration-300 transform;
   font-family: var(--text-sm-semibold-font-family);
   font-size: var(--text-sm-semibold-font-size);
   font-style: var(--text-sm-semibold-font-style);
