@@ -53,7 +53,14 @@ const OrdenTrabajoSistemaProvider = ({ children }) => {
       setLoading(true);
       setError(null);
       try{
-        const response=await updateOrdenTrabajoSistema(id_orden_trabajo_sistema, data);
+        const formattedData = {
+          materiales: data.materiales || null,
+          observaciones: data.observaciones || null,
+          proximo_abordaje: data.proximo_abordaje || null,
+          avance: data.avance || 0,
+          imagenes: data.imagenes || []
+        };
+        const response=await updateOrdenTrabajoSistema(id_orden_trabajo_sistema, formattedData);
         setLoading(false);
         return response.data;  
       }catch(err){
