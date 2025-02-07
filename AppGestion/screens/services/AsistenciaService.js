@@ -43,7 +43,7 @@ export const getAsistenciasByOrden = async (idOrden) => {
         const userId = await AsyncStorage.getItem("userId");
         const userIdInt = parseInt(userId, 10);
 
-        const response = await apiClient.get(`/asistencia?id_orden_trabajo=${idOrden}`);
+        const response = await apiClient.get(`/asistencia?id_usuario=${idOrden}`);
         return response.data;
     } catch (error) {
         console.error("Error obteniendo asistencias:", error.response?.data || error.message);

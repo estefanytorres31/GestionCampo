@@ -14,7 +14,8 @@ const asistenciaRouter = Router();
 asistenciaRouter.post("/", crearAsistencia);
 
 // 📌 Obtener Asistencias con filtros (?id_usuario= , ?id_embarcacion= , ?id_orden_trabajo= )
-// asistenciaRouter.get("/", obtenerAsistencias);
+asistenciaRouter.get("/lista", obtenerAsistencias);
+
 asistenciaRouter.get("/", getAsistenciasController);
 
 // 📌 Obtener una asistencia por su ID
