@@ -14,19 +14,27 @@ import {
 import { Camera, Image as ImageIcon, Plus, Save, Percent } from 'lucide-react-native';
 import * as ImagePicker from 'expo-image-picker';
 import Slider from '@react-native-community/slider';
+import { CommonActions } from '@react-navigation/native';
+import useOrdenTrabajoSistema from '../../hooks/OrdenTrabajoSistema/useOrdenTrabajoSistema';
+import useAuth from "../../hooks/Auth/useAuth";
 
-const MaintenanceForm = () => {
+const MaintenanceForm = ({route, navigation}) => {
+  const {id_orden_trabajo_sistema}=route.params;
   const [formData, setFormData] = useState({
     falla: '',
     causas: '',
     solucion: '',
+    observaciones: '', 
     prox: '',
-    materiales: '',
+    pendiente:'',
+    material: '',
     progress: 0,
     images: []
   });
 
   const [showProgress, setShowProgress] = useState(false);
+  const {role}=useAuth();
+  const {actualizarOrdenTrabajoSistemaCompleta}=useOrdenTrabajoSistema();
 
   const pickImage = async (useCamera = false) => {
     try {
@@ -38,8 +46,8 @@ const MaintenanceForm = () => {
           return;
         }
         result = await ImagePicker.launchCameraAsync({
-          mediaTypes: ImagePicker.MediaTypeOptions.Images,
-          quality: 0.8,
+          allowsEditing: true,
+          quality: 1,
         });
       } else {
         const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -48,8 +56,9 @@ const MaintenanceForm = () => {
           return;
         }
         result = await ImagePicker.launchImageLibraryAsync({
-          mediaTypes: ImagePicker.MediaTypeOptions.Images,
-          quality: 0.8,
+          mediaTypes: ImagePicker.MediaType,
+          allowsEditing: true,
+          quality: 1,
         });
       }
 
@@ -71,14 +80,64 @@ const MaintenanceForm = () => {
     }));
   };
 
-  const handleSave = () => {
+  const handleSave = async() => {
     if (!formData.material.trim()) {
       Alert.alert('Error', 'Por favor llene el formulario');
       return;
     }
     
-    // Aquí iría la lógica para guardar los datos
-    Alert.alert('Éxito', 'Datos guardados correctamente');
+    try{
+      const formDataToSend=new FormData();
+
+      formDataToSend.append('fallas', formData.falla);
+      formDataToSend.append('causas', formData.causas);
+      formDataToSend.append('solucion', formData.solucion);
+      formDataToSend.append('proximo_abordaje', formData.prox);
+      formDataToSend.append('pendiente', formData.pendiente);
+      formDataToSend.append('observaciones', formData.observaciones);
+      formDataToSend.append('materiales', formData.material);
+      formDataToSend.append('avance', formData.progress);
+      
+        for (let i = 0; i < formData.images.length; i++) {
+            const uri = formData.images[i];
+            const fileName = uri.split('/').pop();
+            
+            // Create blob of the image
+            const imageFile = {
+                uri: Platform.OS === 'ios' ? uri.replace('file://', '') : uri,
+                type: 'image/jpeg',
+                name: fileName || `image${i}.jpg`,
+            };
+            
+            formDataToSend.append('imagenes', imageFile);
+        }
+      
+      setShowProgress(true);
+      const result = await actualizarOrdenTrabajoSistemaCompleta(
+        id_orden_trabajo_sistema,
+        formDataToSend
+     );
+      console.log('Response:', result);
+
+        Alert.alert(
+            'Éxito',
+            'Los datos se han guardado correctamente',
+            [{ text: 'OK', onPress: () => 
+              navigation.dispatch(
+                CommonActions.reset({
+                  index: 1,
+                  routes: [
+                    { name: role.includes("Jefe") ? "InicioJefe" : "Inicio" },
+                  ],
+                })
+              ),
+            }]
+        );
+      
+
+    }catch(error) {
+
+    }
   };
 
   return (
@@ -159,8 +218,8 @@ const MaintenanceForm = () => {
           <Text style={styles.sectionTitle}>Agregar materiales</Text>
           <TextInput
             style={styles.input}
-            value={formData.materiales}
-            onChangeText={(text) => setFormData(prev => ({ ...prev, materiales: text }))}
+            value={formData.material}
+            onChangeText={(text) => setFormData(prev => ({ ...prev, material: text }))}
             placeholder="Ingrese los materiales"
           />
         </View>

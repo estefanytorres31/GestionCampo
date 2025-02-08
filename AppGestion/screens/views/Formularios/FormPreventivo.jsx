@@ -14,10 +14,13 @@ import {
 import { Camera, Image as ImageIcon, Plus, Save, Percent } from 'lucide-react-native';
 import * as ImagePicker from 'expo-image-picker';
 import Slider from '@react-native-community/slider';
+import { CommonActions } from '@react-navigation/native';
 import useOrdenTrabajoSistema from "../../hooks/OrdenTrabajoSistema/useOrdenTrabajoSistema";
+import useAuth from "../../hooks/Auth/useAuth";
 
 const MaintenanceForm = ({route, navigation}) => {
   const {id_orden_trabajo_sistema}=route.params;
+  const {role}=useAuth();
   const [formData, setFormData] = useState({
     material: '',
     observations: '',
@@ -126,7 +129,16 @@ const MaintenanceForm = ({route, navigation}) => {
         Alert.alert(
             'Éxito',
             'Los datos se han guardado correctamente',
-            [{ text: 'OK', onPress: () => navigation.goBack() }]
+            [{ text: 'OK', onPress: () => 
+              navigation.dispatch(
+                CommonActions.reset({
+                  index: 1,
+                  routes: [
+                    { name: role.includes("Jefe") ? "InicioJefe" : "Inicio" },
+                  ],
+                })
+              ),
+          }]
         );
 
     } catch (error) {
