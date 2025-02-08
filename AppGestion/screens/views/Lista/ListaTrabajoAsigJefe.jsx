@@ -146,6 +146,7 @@ const OrdenesTrabajoScreen = ({ navigation }) => {
 
     const handleDetailsPress = (item) => {
         navigation.navigate('DetallesOrdenTrabajo', { ordenTrabajo: item });
+
     };
 
     const renderHeader = () => (
