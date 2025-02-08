@@ -5,10 +5,15 @@ import {
     TouchableOpacity, 
     StyleSheet, 
     ScrollView, 
-    ActivityIndicator 
+    ActivityIndicator,
+    Dimensions,
+    Animated 
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import useTrabajoAsignado from "../../hooks/TrabajoAsignado/useTrabajoAsignado";
+import { LinearGradient } from 'expo-linear-gradient';
+
+const { width } = Dimensions.get('window');
 
 const TrabajosAsignadosScreen = ({ navigation }) => {
     const { trabajos, loading, error, fetchTrabajosAsignados } = useTrabajoAsignado();
@@ -24,7 +29,7 @@ const TrabajosAsignadosScreen = ({ navigation }) => {
     if (loading) {
         return (
             <View style={styles.centered}>
-                <ActivityIndicator size="large" color="#2E7D32" />
+                <ActivityIndicator size="large" color="#3B82F6" />
                 <Text style={styles.loadingText}>Cargando trabajos...</Text>
             </View>
         );
@@ -33,9 +38,18 @@ const TrabajosAsignadosScreen = ({ navigation }) => {
     if (error) {
         return (
             <View style={styles.centered}>
+                <MaterialCommunityIcons name="alert-circle" size={50} color="#EF4444" />
                 <Text style={styles.errorText}>{error}</Text>
-                <TouchableOpacity style={styles.retryButton} onPress={fetchTrabajosAsignados}>
-                    <Text style={styles.retryText}>Reintentar</Text>
+                <TouchableOpacity 
+                    style={styles.retryButton}
+                    onPress={fetchTrabajosAsignados}
+                >
+                    <LinearGradient
+                        colors={['#3B82F6', '#2563EB']}
+                        style={styles.gradientButton}
+                    >
+                        <Text style={styles.retryText}>Reintentar</Text>
+                    </LinearGradient>
                 </TouchableOpacity>
             </View>
         );
@@ -43,23 +57,37 @@ const TrabajosAsignadosScreen = ({ navigation }) => {
 
     return (
         <ScrollView style={styles.container}>
-            <View style={styles.header}>
-                <MaterialCommunityIcons name="clipboard-list" size={40} color="#2E7D32" />
-                <Text style={styles.headerTitle}>Trabajos Asignados</Text>
-                <Text style={styles.headerSubtitle}>Seleccione un trabajo</Text>
-            </View>
+            <LinearGradient
+                colors={['#3B82F6', '#2563EB']}
+                style={styles.headerGradient}
+            >
+                <View style={styles.header}>
+                    <MaterialCommunityIcons name="clipboard-list" size={50} color="#fff" />
+                    <Text style={styles.headerTitle}>Trabajos Asignados</Text>
+                    <Text style={styles.headerSubtitle}>Seleccione un trabajo para comenzar</Text>
+                </View>
+            </LinearGradient>
 
             <View style={styles.buttonsContainer}>
-                {trabajos.map((trabajo) => (
+                {trabajos.map((trabajo, index) => (
                     <TouchableOpacity
                         key={trabajo.id_orden_trabajo}
-                        style={styles.button}
+                        style={[styles.card, { marginTop: index === 0 ? -50 : 0 }]}
                         onPress={() => handleTrabajoPress(trabajo.id_orden_trabajo)}
                     >
-                        <View style={styles.buttonContent}>
-                            <MaterialCommunityIcons name="wrench" size={32} color="#fff" />
-                            <Text style={styles.buttonText}>{trabajo.nombre_trabajo}</Text>
-                            <MaterialCommunityIcons name="chevron-right" size={24} color="#ffffff80" />
+                        <View style={styles.cardContent}>
+                            <View style={styles.iconContainer}>
+                                <MaterialCommunityIcons name="wrench" size={32} color="#3B82F6" />
+                            </View>
+                            <View style={styles.textContainer}>
+                                <Text style={styles.cardTitle}>{trabajo.nombre_trabajo}</Text>
+                                <Text style={styles.cardSubtitle}>Toque para ver detalles</Text>
+                            </View>
+                            <MaterialCommunityIcons 
+                                name="chevron-right" 
+                                size={24} 
+                                color="#3B82F6" 
+                            />
                         </View>
                     </TouchableOpacity>
                 ))}
@@ -71,67 +99,100 @@ const TrabajosAsignadosScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#F5F6F8",
+        backgroundColor: '#F3F4F6',
+    },
+    headerGradient: {
+        paddingTop: 60,
+        paddingBottom: 80,
+        borderBottomLeftRadius: 30,
+        borderBottomRightRadius: 30,
     },
     header: {
         alignItems: "center",
-        marginVertical: 20,
     },
     headerTitle: {
-        fontSize: 24,
+        fontSize: 28,
         fontWeight: "bold",
-        color: "#2E7D32",
+        color: "#fff",
+        marginTop: 15,
     },
     headerSubtitle: {
         fontSize: 16,
-        color: "#555",
+        color: "#fff",
+        opacity: 0.9,
         marginTop: 5,
     },
     buttonsContainer: {
-        paddingHorizontal: 16,
+        paddingHorizontal: 20,
+        paddingBottom: 20,
     },
-    button: {
-        backgroundColor: "#2E7D32",
+    card: {
+        backgroundColor: "#fff",
         marginVertical: 8,
-        padding: 15,
-        borderRadius: 10,
-        flexDirection: "row",
-        alignItems: "center",
+        borderRadius: 15,
+        elevation: 4,
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.1,
+        shadowRadius: 3.84,
     },
-    buttonContent: {
+    cardContent: {
         flexDirection: "row",
         alignItems: "center",
+        padding: 20,
+    },
+    iconContainer: {
+        backgroundColor: '#EBF5FF',
+        padding: 12,
+        borderRadius: 12,
+    },
+    textContainer: {
         flex: 1,
-        justifyContent: "space-between",
+        marginLeft: 15,
     },
-    buttonText: {
+    cardTitle: {
         fontSize: 18,
         fontWeight: "600",
-        color: "#fff",
+        color: "#1F2937",
+    },
+    cardSubtitle: {
+        fontSize: 14,
+        color: "#6B7280",
+        marginTop: 2,
     },
     centered: {
         flex: 1,
         justifyContent: "center",
         alignItems: "center",
+        padding: 20,
     },
     loadingText: {
         fontSize: 18,
-        marginTop: 10,
-        color: "#555",
+        marginTop: 15,
+        color: "#6B7280",
     },
     errorText: {
         fontSize: 16,
-        color: "red",
+        color: "#EF4444",
+        marginTop: 10,
+        textAlign: 'center',
     },
     retryButton: {
-        marginTop: 10,
-        padding: 10,
-        backgroundColor: "#2E7D32",
-        borderRadius: 5,
+        marginTop: 20,
+        overflow: 'hidden',
+        borderRadius: 10,
+    },
+    gradientButton: {
+        paddingVertical: 12,
+        paddingHorizontal: 24,
     },
     retryText: {
         color: "#fff",
-        fontWeight: "bold",
+        fontWeight: "600",
+        fontSize: 16,
     },
 });
 
