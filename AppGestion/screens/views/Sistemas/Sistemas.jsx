@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View,Text,TouchableOpacity,StyleSheet,SafeAreaView,Animated,ScrollView,ActivityIndicator,Dimensions} from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView, Animated, ScrollView, ActivityIndicator, Dimensions } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import useTipoTrabajoESP from "../../hooks/TipoTrabajoESP/useTipoTrabajoESP";
 
@@ -18,6 +18,7 @@ const SistemasScreen = ({ route, navigation }) => {
     
     const fadeAnim = React.useRef(new Animated.Value(0)).current;
     const scaleAnim = React.useRef(new Animated.Value(0.95)).current;
+    
 
     useEffect(() => {
         // Iniciar animaciones
@@ -221,15 +222,17 @@ const SistemasScreen = ({ route, navigation }) => {
                     <Text style={styles.headerTitle}>
                         {embarcacion.nombre} - {trabajo.nombre_trabajo}
                     </Text>
-                    <Text style={styles.selectionText}>
-                        Seleccionados: {selectedSistemas.size}
-                    </Text>
+                    <View style={styles.badge}>
+                        <Text style={styles.selectionText}>
+                            {selectedSistemas.size} seleccionados
+                        </Text>
+                    </View>
                 </View>
 
                 {renderContent()}
 
                 {tipoTrabajosESP && tipoTrabajosESP.length > 0 && (
-                    <View style={styles.bottomContainer}>
+                    <Animated.View style={styles.bottomContainer}>
                         <TouchableOpacity
                             style={[
                                 styles.guardarButton,
@@ -238,11 +241,17 @@ const SistemasScreen = ({ route, navigation }) => {
                             onPress={handleGuardarSeleccion}
                             disabled={selectedSistemas.size === 0}
                         >
+                            <MaterialCommunityIcons 
+                                name="content-save-outline" 
+                                size={24} 
+                                color="#fff" 
+                                style={styles.buttonIcon}
+                            />
                             <Text style={styles.guardarButtonText}>
                                 Guardar Selección ({selectedSistemas.size})
                             </Text>
                         </TouchableOpacity>
-                    </View>
+                    </Animated.View>
                 )}
             </Animated.View>
         </SafeAreaView>
@@ -252,71 +261,99 @@ const SistemasScreen = ({ route, navigation }) => {
 const styles = StyleSheet.create({
     safeArea: {
         flex: 1,
-        backgroundColor: "#F5F6F8",
+        backgroundColor: "#F0F4F8",
     },
     container: {
         flex: 1,
     },
     header: {
-        padding: 20,
+        padding: 24,
+        backgroundColor: '#fff',
+        borderBottomLeftRadius: 30,
+        borderBottomRightRadius: 30,
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 4,
+        },
+        shadowOpacity: 0.1,
+        shadowRadius: 12,
+        elevation: 5,
         alignItems: "center",
     },
     headerTitle: {
-        fontSize: 18,
+        fontSize: 24,
         fontWeight: "800",
-        color: "#2E7D32",
-        marginBottom: 5,
-    },
-    headerSubtitle: {
-        fontSize: 16,
-        color: "#666",
+        color: "#1B5E20",
+        marginBottom: 12,
         textAlign: "center",
+    },
+    badge: {
+        backgroundColor: "#E8F5E9",
+        paddingHorizontal: 16,
+        paddingVertical: 8,
+        borderRadius: 20,
+    },
+    selectionText: {
+        fontSize: 14,
+        color: "#2E7D32",
+        fontWeight: "600",
     },
     scrollView: {
         flex: 1,
     },
     scrollContent: {
-        padding: 16,
+        padding: 20,
     },
     sistemaCard: {
         backgroundColor: "#FFF",
-        borderRadius: 12,
-        marginBottom: 12,
-        elevation: 3,
+        borderRadius: 20,
+        marginBottom: 16,
+        elevation: 4,
         shadowColor: "#000",
         shadowOffset: {
             width: 0,
-            height: 2,
+            height: 3,
         },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
+        shadowOpacity: 0.15,
+        shadowRadius: 8,
+        transform: [{ scale: 1 }],
     },
     sistemaContent: {
         flexDirection: "row",
         alignItems: "center",
-        padding: 16,
+        padding: 20,
     },
     iconContainer: {
-        width: 50,
-        height: 50,
-        borderRadius: 25,
+        width: 60,
+        height: 60,
+        borderRadius: 30,
         backgroundColor: "#E8F5E9",
         justifyContent: "center",
         alignItems: "center",
-        marginRight: 16,
+        marginRight: 20,
+        shadowColor: "#2E7D32",
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 2,
     },
     sistemaInfo: {
         flex: 1,
     },
     sistemaNombre: {
-        fontSize: 18,
+        fontSize: 20,
         fontWeight: "700",
-        color: "#2E7D32",
-        marginBottom: 4,
+        color: "#1B5E20",
+        marginBottom: 8,
     },
     sistemaDescripcion: {
-        fontSize: 14,
-        color: "#666",
+        fontSize: 15,
+        color: "#546E7A",
+        lineHeight: 20,
     },
     centered: {
         flex: 1,
@@ -325,47 +362,67 @@ const styles = StyleSheet.create({
         padding: 20,
     },
     emptyText: {
-        fontSize: 16,
-        color: "#666",
+        fontSize: 18,
+        color: "#546E7A",
         textAlign: "center",
+        lineHeight: 24,
     },
     sistemaCardSelected: {
         backgroundColor: "#E8F5E9",
         borderColor: "#2E7D32",
-        borderWidth: 1,
+        borderWidth: 2,
+        transform: [{ scale: 1.02 }],
     },
     checkboxContainer: {
-        marginRight: 10,
+        marginRight: 16,
     },
     bottomContainer: {
-        padding: 16,
+        padding: 20,
         backgroundColor: "#fff",
-        borderTopWidth: 1,
-        borderTopColor: "#e0e0e0",
+        borderTopLeftRadius: 30,
+        borderTopRightRadius: 30,
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: -4,
+        },
+        shadowOpacity: 0.1,
+        shadowRadius: 12,
+        elevation: 8,
     },
     guardarButton: {
         backgroundColor: "#2E7D32",
-        padding: 16,
-        borderRadius: 12,
+        padding: 18,
+        borderRadius: 16,
+        flexDirection: "row",
         alignItems: "center",
+        justifyContent: "center",
+        shadowColor: "#2E7D32",
+        shadowOffset: {
+            width: 0,
+            height: 4,
+        },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+        elevation: 6,
+    },
+    buttonIcon: {
+        marginRight: 12,
     },
     guardarButtonDisabled: {
-        backgroundColor: "#ccc",
+        backgroundColor: "#B0BEC5",
+        shadowOpacity: 0.1,
     },
     guardarButtonText: {
         color: "#fff",
-        fontSize: 16,
+        fontSize: 18,
         fontWeight: "700",
     },
-    selectionText: {
-        fontSize: 14,
-        color: "black",
-        marginTop: 5,
-    },
     loadingText: {
-        marginTop: 10,
-        color: "#666",
-        fontSize: 16,
+        marginTop: 12,
+        color: "#546E7A",
+        fontSize: 18,
+        fontWeight: "500",
     },
 });
 

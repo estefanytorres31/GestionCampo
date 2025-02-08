@@ -96,7 +96,7 @@ const Inicio = ({ route, navigation }) => {
                     />
                   </View>
                   <View style={styles.cardTextContainer}>
-                    <Text style={styles.cardTitle}>Escanear QR</Text>
+                    <Text style={styles.cardTitle}>Embarcación</Text>
                     <View style={styles.chevron} />
                   </View>
                 </View>
