@@ -25,42 +25,9 @@ const MaintenanceForm = ({route, navigation}) => {
     progress: 0,
     images: []
   });
-  const [material, setMaterial]=useState('');
-  const [observations, setObservations]=useState('');
-  const [nextVisitItems, setNextVisitItems]=useState('');
-  const [progress, setProgress]=useState(0);
-  const [image, setImages]=useState([]);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const [showProgress, setShowProgress] = useState(false);
   const {actualizarOrdenTrabajoSistemaCompleta}=useOrdenTrabajoSistema();
-
-
-  const buildFormData = (newOTS, imageUri)=>{
-    const formData=new FormData();
-    const fields={
-      materiales: newOTS.materiales,
-      observaciones: newOTS.observaciones,
-      proximo_abordaje: newOTS.proximo_abordaje,
-      avance: newOTS.avance.toString(),
-    };
-
-    Object.keys(fields).forEach(key => {
-      if(fields[key]) {
-        formData.append(key, fields[key])
-      }
-    })
-
-    if(imageUri) {
-      const uriParts=imageUri.split('.');
-      const fileType=uriParts[uriParts.length-1]
-      formData.append("imagenes", {
-        uri: imageUri,
-        name: `photo.${fileType}`,
-        type: `image/${fileType}`,
-      })
-    }
-
-    return formData
-  }
 
   const pickImage = async (useCamera = false) => {
     try {
@@ -75,17 +42,6 @@ const MaintenanceForm = ({route, navigation}) => {
           allowsEditing: true,
           quality: 1,
         });
-
-        if(!result.canceled){
-          const {uri}=result.assets[0];
-          const name=uri.split('/').pop();
-          setImages({uri, type:'image/jpeg', name});
-          if(errors.image){
-            setError(prev=>({...prev, image:null}))
-          }
-        }
-
-
       } else {
         const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
         if (status !== 'granted') {
@@ -97,14 +53,6 @@ const MaintenanceForm = ({route, navigation}) => {
           allowsEditing: true,
           quality: 1,
         });
-        if(!result.canceled){
-          const {uri, type}=result.assets[0];
-          const name=uri.split('/').pop();
-          setImages({uri, type:type || 'image/jpeg', name});
-          if(errors.image){
-            setError(prev=>({...prev, image:null}))
-          }
-        }
       }
 
       if (!result.canceled) {
@@ -123,55 +71,72 @@ const MaintenanceForm = ({route, navigation}) => {
       ...prev,
       images: prev.images.filter((_, i) => i !== index)
     }));
-  };  
+  };
 
   const handleSave = async () => {
+    // Form validation remains the same
     if (!formData.material.trim()) {
-      Alert.alert("Error", "Por favor ingrese el material")
-      return
+        Alert.alert('Error', 'Por favor ingrese el material');
+        return;
     }
-
+    
     if (!formData.observations.trim()) {
-      Alert.alert("Error", "Por favor ingrese las observaciones")
-      return
+        Alert.alert('Error', 'Por favor ingrese las observaciones');
+        return;
     }
-
+    
     if (!formData.nextVisitItems.trim()) {
-      Alert.alert("Error", "Por favor ingrese los materiales para la próxima visita")
-      return
+        Alert.alert('Error', 'Por favor ingrese los materiales para la próxima visita');
+        return;
     }
 
     try {
-      setIsSubmitting(true)
+        const formDataToSend = new FormData();
+        
+        // Add text fields
+        formDataToSend.append('materiales', formData.material);
+        formDataToSend.append('observaciones', formData.observations);
+        formDataToSend.append('proximo_abordaje', formData.nextVisitItems);
+        formDataToSend.append('avance', Math.round(formData.progress).toString());
 
-      const newOTS={
-        materiales: formData.material,
-        observaciones: formData.observations,
-        proximo_abordaje: formData.nextVisitItems,
-        avance: progress,
-      }
+        // Add images
+        for (let i = 0; i < formData.images.length; i++) {
+            const uri = formData.images[i];
+            const fileName = uri.split('/').pop();
+            
+            // Create blob of the image
+            const imageFile = {
+                uri: Platform.OS === 'ios' ? uri.replace('file://', '') : uri,
+                type: 'image/jpeg',
+                name: fileName || `image${i}.jpg`,
+            };
+            
+            formDataToSend.append('imagenes', imageFile);
+        }
 
-      const formDataToSEnd=buildFormData(newOTS, image?.uri)
+        console.log('Sending FormData:', formDataToSend);
+        
+        const result = await actualizarOrdenTrabajoSistemaCompleta(
+            id_orden_trabajo_sistema,
+            formDataToSend
+        );
 
+        console.log('Response:', result);
 
+        Alert.alert(
+            'Éxito',
+            'Los datos se han guardado correctamente',
+            [{ text: 'OK', onPress: () => navigation.goBack() }]
+        );
 
-      console.log("Response:", response)
-
-      Alert.alert("Éxito", "Los datos se han guardado correctamente", [
-        {
-          text: "OK",
-          onPress: () => navigation.goBack(),
-        },
-      ])
     } catch (error) {
-      Alert.alert('Error', 'No se pudo actualizar la orden de trabajo');
-    } finally {
-      setIsSubmitting(false);
-
+        console.error('Error saving form:', error);
+        Alert.alert(
+            'Error',
+            'No se pudieron guardar los datos. Por favor intente nuevamente.'
+        );
     }
-  };
-  
-
+};
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -269,17 +234,11 @@ const MaintenanceForm = ({route, navigation}) => {
         </View>
 
         <TouchableOpacity 
-          style={[
-            styles.saveButton,
-            isSubmitting && styles.saveButtonDisabled
-          ]}
+          style={styles.saveButton}
           onPress={handleSave}
-          disabled={isSubmitting}
         >
           <Save size={24} color="#ffffff" />
-          <Text style={styles.saveButtonText}>
-            {isSubmitting ? 'Guardando...' : 'Guardar'}
-          </Text>
+          <Text style={styles.saveButtonText}>Guardar</Text>
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
@@ -417,11 +376,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginLeft: 12,
   },
-
-  saveButtonDisabled: {
-    backgroundColor: '#a5b4fc',
-    opacity: 0.7
-  }
 });
 
 export default MaintenanceForm;

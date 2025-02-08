@@ -32,17 +32,22 @@ export const updateEstadoOrdenTrabajoSistema=async(id_orden_trabajo_sistema,esta
     }
 }
 
-export const updateOrdenTrabajoSistema = async (id_orden_trabajo_sistema, data) => {
+export const updateOrdenTrabajoSistema = async(id_orden_trabajo_sistema, data)=>{
     try {
-      const config = {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      }
-      const response = await apiClient.put(`/ordenestrabajosistema/${id_orden_trabajo_sistema}`, data, config)
-      console.log("Back: ", response.data)
-      return response.data
+        const config = {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            }
+        };
+        // Pass data directly, not wrapped in an object
+        const response = await apiClient.put(
+            `/ordenestrabajosistema/${id_orden_trabajo_sistema}`, 
+            data,
+            config
+        );
+        console.log('Back:', response.data);
+        return response.data;
     } catch (error) {
-      throw new Error(`Error al actualizar la orden de trabajo sistema: ${error.message}`)
+        throw new Error(`Error al actualizar la orden de trabajo sistema: ${error.message}`);
     }
-  }
+}
