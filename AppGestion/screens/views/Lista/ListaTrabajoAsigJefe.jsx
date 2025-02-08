@@ -15,9 +15,62 @@ import useOrdenTrabajo from "../../hooks/OrdenTrabajo/useOrdenTrabajo";
 
 const { width } = Dimensions.get('window');
 
+// Move getEstadoConfig outside the component to make it a standalone function
+const getEstadoConfig = (estado) => {
+    switch (estado.toLowerCase()) {
+        case 'pendiente':
+            return {
+                backgroundColor: '#FEF3C7',
+                textColor: '#D97706',
+                icon: 'clock-outline',
+                label: 'Pendiente'
+            };
+        case 'en_progreso':
+            return {
+                backgroundColor: '#DBEAFE',
+                textColor: '#2563EB',
+                icon: 'progress-clock',
+                label: 'En Progreso'
+            };
+        case 'completado':
+            return {
+                backgroundColor: '#DEF7EC',
+                textColor: '#059669',
+                icon: 'check-circle-outline',
+                label: 'Completado'
+            };
+        default:
+            return {
+                backgroundColor: '#E5E7EB',
+                textColor: '#6B7280',
+                icon: 'help-circle-outline',
+                label: estado
+            };
+    }
+};
+
+const EstadoBadge = ({ estado }) => {
+    const config = getEstadoConfig(estado);
+
+    return (
+        <View style={[styles.estadoBadge, { backgroundColor: config.backgroundColor }]}>
+            <MaterialCommunityIcons 
+                name={config.icon} 
+                size={16} 
+                color={config.textColor} 
+                style={styles.estadoIcon}
+            />
+            <Text style={[styles.estadoText, { color: config.textColor }]}>
+                {config.label}
+            </Text>
+        </View>
+    );
+};
+
 const OrdenesTrabajoScreen = ({ navigation }) => {
     const { obtenerTrabajosPorJefeAsig, loading, error } = useOrdenTrabajo();
     const [ordenes, setOrdenes] = useState([]);
+    const [filtroEstado, setFiltroEstado] = useState(null);
 
     useEffect(() => {
         const cargarOrdenes = async () => {
@@ -28,6 +81,50 @@ const OrdenesTrabajoScreen = ({ navigation }) => {
         };
         cargarOrdenes();
     }, []);
+
+    const filtrarPorEstado = (estado) => {
+        setFiltroEstado(filtroEstado === estado ? null : estado);
+    };
+
+    const ordenesFiltradas = filtroEstado
+        ? ordenes.filter(orden => orden.estado.toLowerCase() === filtroEstado.toLowerCase())
+        : ordenes;
+
+    const renderItem = ({ item }) => (
+        <TouchableOpacity 
+            style={styles.card}
+            onPress={() => handleDetailsPress(item)}
+            activeOpacity={0.7}
+        >
+            <View style={styles.cardHeader}>
+                <View style={styles.codeContainer}>
+                    <Text style={styles.codigo}>{item.codigo}</Text>
+                </View>
+                <EstadoBadge estado={item.estado} />
+            </View>
+
+            <View style={styles.cardContent}>
+                <View style={styles.infoRow}>
+                    <MaterialCommunityIcons name="calendar-clock" size={20} color="#6366F1" />
+                    <Text style={styles.infoText}>
+                        <Text style={styles.infoLabel}>Fecha: </Text>
+                        {new Date(item.fecha_asignacion).toLocaleDateString()}
+                    </Text>
+                </View>
+            </View>
+
+            <TouchableOpacity 
+                style={[
+                    styles.detailsButton,
+                    { backgroundColor: getEstadoConfig(item.estado).textColor }
+                ]}
+                onPress={() => handleDetailsPress(item)}
+            >
+                <Text style={styles.detailsButtonText}>Ver detalles</Text>
+                <MaterialCommunityIcons name="arrow-right" size={20} color="white" />
+            </TouchableOpacity>
+        </TouchableOpacity>
+    );
 
     if (loading) {
         return (
@@ -64,55 +161,6 @@ const OrdenesTrabajoScreen = ({ navigation }) => {
         </LinearGradient>
     );
 
-    const renderItem = ({ item }) => (
-        <TouchableOpacity 
-            style={styles.card}
-            onPress={() => handleDetailsPress(item)}
-            activeOpacity={0.7}
-        >
-            <View style={styles.cardHeader}>
-                <View style={styles.codeContainer}>
-                    <Text style={styles.codigo}>{item.codigo}</Text>
-                </View>
-                <MaterialCommunityIcons name="chevron-right" size={24} color="#6366F1" />
-            </View>
-
-            <View style={styles.cardContent}>
-                <View style={styles.infoRow}>
-                    <MaterialCommunityIcons name="account-tie" size={20} color="#6366F1" />
-                    <Text style={styles.infoText}>
-                        <Text style={styles.infoLabel}>Supervisor: </Text>
-                        {item.supervisor}
-                    </Text>
-                </View>
-
-                <View style={styles.infoRow}>
-                    <MaterialCommunityIcons name="truck-delivery" size={20} color="#6366F1" />
-                    <Text style={styles.infoText}>
-                        <Text style={styles.infoLabel}>Motorista: </Text>
-                        {item.motorista}
-                    </Text>
-                </View>
-
-                <View style={styles.infoRow}>
-                    <MaterialCommunityIcons name="format-list-numbered" size={20} color="#6366F1" />
-                    <Text style={styles.infoText}>
-                        <Text style={styles.infoLabel}>ID Trabajo: </Text>
-                        {item.id_tipo_trabajo}
-                    </Text>
-                </View>
-            </View>
-
-            <TouchableOpacity 
-                style={styles.detailsButton}
-                onPress={() => handleDetailsPress(item)}
-            >
-                <Text style={styles.detailsButtonText}>Ver detalles</Text>
-                <MaterialCommunityIcons name="arrow-right" size={20} color="white" />
-            </TouchableOpacity>
-        </TouchableOpacity>
-    );
-
     return (
         <View style={styles.container}>
             <StatusBar barStyle="light-content" />
@@ -123,10 +171,14 @@ const OrdenesTrabajoScreen = ({ navigation }) => {
                 </View>
             ) : (
                 <FlatList
-                    data={ordenes}
+                    data={ordenesFiltradas}
                     keyExtractor={(item) => item.id_orden_trabajo.toString()}
                     renderItem={renderItem}
-                    ListHeaderComponent={renderHeader}
+                    ListHeaderComponent={
+                        <>
+                            {renderHeader()}
+                        </>
+                    }
                     contentContainerStyle={styles.listContainer}
                     showsVerticalScrollIndicator={false}
                 />
@@ -136,56 +188,6 @@ const OrdenesTrabajoScreen = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: "#F3F4F6",
-    },
-    centered: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: "#F3F4F6",
-    },
-    header: {
-        padding: 20,
-        paddingTop: 40,
-        alignItems: 'center',
-        borderBottomLeftRadius: 30,
-        borderBottomRightRadius: 30,
-    },
-    title: {
-        fontSize: 28,
-        fontWeight: "bold",
-        color: "white",
-        marginTop: 10,
-    },
-    subtitle: {
-        fontSize: 16,
-        color: "rgba(255,255,255,0.8)",
-        marginTop: 5,
-    },
-    listContainer: {
-        paddingBottom: 20,
-    },
-    card: {
-        backgroundColor: "white",
-        marginHorizontal: 16,
-        marginTop: 16,
-        borderRadius: 16,
-        elevation: 4,
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 8,
-    },
-    cardHeader: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: 16,
-        borderBottomWidth: 1,
-        borderBottomColor: "#F3F4F6",
-    },
     codeContainer: {
         backgroundColor: "#EEF2FF",
         paddingHorizontal: 12,
@@ -253,6 +255,73 @@ const styles = StyleSheet.create({
         marginTop: 12,
         textAlign: "center",
         paddingHorizontal: 24,
+    },
+    estadoBadge: {
+        flexDirection: 'row',
+        flexWrap:'wrap',
+        alignItems: 'center',
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 20,
+    },
+    estadoIcon: {
+        marginRight: 4,
+    },
+    estadoText: {
+        fontSize: 14,
+        fontWeight: '600',
+    },
+    container: {
+        flex: 1,
+        backgroundColor: "#F3F4F6",
+    },
+    centered: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: "#F3F4F6",
+    },
+    header: {
+        padding: 20,
+        paddingTop: 40,
+        alignItems: 'center',
+        borderBottomLeftRadius: 30,
+        borderBottomRightRadius: 30,
+    },
+    title: {
+        fontSize: 28,
+        fontWeight: "bold",
+        color: "white",
+        marginTop: 10,
+    },
+    subtitle: {
+        fontSize: 16,
+        color: "rgba(255,255,255,0.8)",
+        marginTop: 5,
+    },
+    listContainer: {
+        paddingBottom: 20,
+    },
+    card: {
+        backgroundColor: "white",
+        marginHorizontal: 16,
+        marginTop: 16,
+        borderRadius: 16,
+        elevation: 4,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+    },
+    cardHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: 16,
+        borderBottomWidth: 1,
+        borderBottomColor: "#F3F4F6",
+        flexWrap: 'wrap', // Permite que los elementos se envuelvan si no hay espacio
+        gap: 8, // Espacio entre elementos
     },
 });
 
