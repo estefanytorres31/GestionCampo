@@ -1,4 +1,3 @@
-// Trabajo.js
 import React, { useEffect } from "react";
 import {
     View,
@@ -7,29 +6,37 @@ import {
     StyleSheet,
     SafeAreaView,
     Animated,
-    Dimensions
+    Dimensions,
+    StatusBar
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useFocusEffect } from '@react-navigation/native';
+import { LinearGradient } from 'expo-linear-gradient';
 import useTipoTrabajo from "../../hooks/TipoTrabajo/useTipoTabajo";
 
-const { height } = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 
 const Trabajo = ({ route, navigation }) => {
-    const {empresa, embarcacion}=route.params
-    const { tipotrabajos } = useTipoTrabajo(); // Obtén los tipos de trabajo del contexto
+    const { empresa, embarcacion } = route.params;
+    const { tipotrabajos } = useTipoTrabajo();
     const fadeAnim = React.useRef(new Animated.Value(0)).current;
     const scaleAnim = React.useRef(new Animated.Value(0.95)).current;
+    const translateY = React.useRef(new Animated.Value(50)).current;
 
     useEffect(() => {
         Animated.parallel([
             Animated.timing(fadeAnim, {
                 toValue: 1,
-                duration: 1000,
+                duration: 800,
                 useNativeDriver: true,
             }),
             Animated.spring(scaleAnim, {
                 toValue: 1,
+                friction: 8,
+                tension: 40,
+                useNativeDriver: true,
+            }),
+            Animated.spring(translateY, {
+                toValue: 0,
                 friction: 8,
                 tension: 40,
                 useNativeDriver: true,
@@ -51,48 +58,69 @@ const Trabajo = ({ route, navigation }) => {
                 tension: 40,
                 useNativeDriver: true,
             }),
-        ]).start();
-
-        navigation.navigate("Sistemas", { empresa, embarcacion,  trabajo  });
+        ]).start(() => {
+            navigation.navigate("Sistemas", { empresa, embarcacion, trabajo });
+        });
     };
 
     return (
         <SafeAreaView style={styles.safeArea}>
+            <StatusBar barStyle="light-content" />
+            <LinearGradient
+                colors={['#3B82F6', '#2563EB']}
+                style={styles.header}
+            >
+                <View style={styles.headerContent}>
+                    <Ionicons name="construct-outline" size={40} color="white" />
+                    <Text style={styles.headerTitle}>Tipos de Trabajo</Text>
+                    <Text style={styles.headerSubtitle}>Seleccione el tipo de trabajo a realizar</Text>
+                </View>
+            </LinearGradient>
+
             <Animated.View
                 style={[
                     styles.contentContainer,
                     {
                         opacity: fadeAnim,
-                        transform: [{ scale: scaleAnim }]
+                        transform: [
+                            { scale: scaleAnim },
+                            { translateY: translateY }
+                        ]
                     }
                 ]}
             >
-                <View style={styles.headerContainer}>
-                    <Text style={styles.subtitle}>Selecciona un tipo de trabajo</Text>
-                </View>
-
-                <View style={styles.buttonContainer}>
-                    {tipotrabajos.length > 0 ? (
-                        tipotrabajos.map((trabajo, index) => (
-                            <TouchableOpacity
-                                key={index}
-                                style={[styles.button, { backgroundColor: '#7fa23d' }]} // Ejemplo de estilo
-                                onPress={() => handleButtonPress(trabajo)} // Asume que 'nombre' es el campo del tipo de trabajo
-                                activeOpacity={0.8}
+                {tipotrabajos.length > 0 ? (
+                    tipotrabajos.map((trabajo, index) => (
+                        <TouchableOpacity
+                            key={index}
+                            onPress={() => handleButtonPress(trabajo)}
+                            activeOpacity={0.9}
+                        >
+                            <LinearGradient
+                                colors={['#4ADE80', '#22C55E']}
+                                style={[styles.card, { marginTop: index === 0 ? -50 : 16 }]}
+                                start={{ x: 0, y: 0 }}
+                                end={{ x: 1, y: 1 }}
                             >
-                                <View style={styles.buttonContent}>
+                                <View style={styles.cardContent}>
                                     <View style={styles.iconContainer}>
-                                        <Ionicons name="hammer" size={28} color="white" />
+                                        <Ionicons name="hammer" size={28} color="#22C55E" />
                                     </View>
-                                    <Text style={styles.buttonText}>{trabajo.nombre_trabajo}</Text>
-                                    <Ionicons name="chevron-forward" size={24} color="rgba(255,255,255,0.8)" />
+                                    <View style={styles.textContainer}>
+                                        <Text style={styles.cardTitle}>{trabajo.nombre_trabajo}</Text>
+                                        <Text style={styles.cardSubtitle}>Toque para seleccionar</Text>
+                                    </View>
+                                    <Ionicons name="chevron-forward" size={24} color="white" />
                                 </View>
-                            </TouchableOpacity>
-                        ))
-                    ) : (
-                        <Text>No hay tipos de trabajo disponibles</Text>
-                    )}
-                </View>
+                            </LinearGradient>
+                        </TouchableOpacity>
+                    ))
+                ) : (
+                    <View style={styles.emptyContainer}>
+                        <Ionicons name="alert-circle-outline" size={60} color="#9CA3AF" />
+                        <Text style={styles.emptyText}>No hay tipos de trabajo disponibles</Text>
+                    </View>
+                )}
             </Animated.View>
         </SafeAreaView>
     );
@@ -101,31 +129,35 @@ const Trabajo = ({ route, navigation }) => {
 const styles = StyleSheet.create({
     safeArea: {
         flex: 1,
+        backgroundColor: '#F3F4F6',
+    },
+    header: {
+        paddingTop: 60,
+        paddingBottom: 80,
+        borderBottomLeftRadius: 30,
+        borderBottomRightRadius: 30,
+    },
+    headerContent: {
+        alignItems: 'center',
+        paddingHorizontal: 20,
+    },
+    headerTitle: {
+        fontSize: 28,
+        fontWeight: 'bold',
+        color: 'white',
+        marginTop: 16,
+    },
+    headerSubtitle: {
+        fontSize: 16,
+        color: 'rgba(255, 255, 255, 0.9)',
+        marginTop: 8,
     },
     contentContainer: {
         flex: 1,
-        padding: 20,
-        justifyContent: 'space-between',
+        paddingHorizontal: 20,
+        paddingTop: 20,
     },
-    headerContainer: {
-        flex: 0.2,
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginTop: 20,
-    },
-    subtitle: {
-        fontSize: 24,
-        fontWeight: '600',
-        color: '#636e72',
-        textAlign: 'center',
-    },
-    buttonContainer: {
-        flex: 0.6,
-        justifyContent: 'center',
-        paddingHorizontal: 15,
-    },
-    button: {
-        marginVertical: 10,
+    card: {
         borderRadius: 16,
         elevation: 8,
         shadowColor: '#000',
@@ -133,31 +165,48 @@ const styles = StyleSheet.create({
             width: 0,
             height: 4,
         },
-        shadowOpacity: 0.3,
-        shadowRadius: 4.65,
+        shadowOpacity: 0.2,
+        shadowRadius: 8,
     },
-    buttonContent: {
+    cardContent: {
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: height * 0.022,
-        paddingHorizontal: 20,
+        padding: 20,
     },
     iconContainer: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        backgroundColor: 'rgba(255, 255, 255, 0.2)',
+        width: 50,
+        height: 50,
+        borderRadius: 25,
+        backgroundColor: 'white',
         justifyContent: 'center',
         alignItems: 'center',
     },
-    buttonText: {
-        color: '#fff',
-        fontSize: 20,
-        fontWeight: '700',
-        letterSpacing: 0.5,
+    textContainer: {
         flex: 1,
-        marginLeft: 15,
+        marginLeft: 16,
+    },
+    cardTitle: {
+        fontSize: 18,
+        fontWeight: '700',
+        color: 'white',
+        letterSpacing: 0.5,
+    },
+    cardSubtitle: {
+        fontSize: 14,
+        color: 'rgba(255, 255, 255, 0.8)',
+        marginTop: 4,
+    },
+    emptyContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingBottom: height * 0.1,
+    },
+    emptyText: {
+        fontSize: 18,
+        color: '#9CA3AF',
+        marginTop: 16,
+        textAlign: 'center',
     },
 });
 

@@ -130,7 +130,7 @@ const styles = StyleSheet.create({
     },
     contentContainer: {
         flex: 1,
-        padding: 20,
+        padding: 0.1,
         justifyContent: 'space-between',
     },
     headerContainer: {
