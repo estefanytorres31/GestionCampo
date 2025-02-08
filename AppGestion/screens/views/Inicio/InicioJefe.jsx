@@ -42,7 +42,6 @@ const JefeScreen = ({ navigation }) => {
             useNativeDriver: true,
         }).start(() => {
             logout();
-            navigation.navigate("Login");
         });
     };
 

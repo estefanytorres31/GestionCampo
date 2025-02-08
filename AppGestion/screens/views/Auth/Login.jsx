@@ -67,22 +67,7 @@ const handleLogin = async () => {
     const result = await loginAccess(username, password);
 
     if (result.status === 200 && result.data?.token) {
-      const roles = result.data?.roles || []; // Asegura que 'roles' sea un array válido
 
-      if (roles.includes("Jefe")) {
-        navigation.replace("InicioJefe");
-      } else if (roles.includes("Técnico")) {
-        navigation.replace("Inicio");
-      } else if (roles.includes("Administrador")) {
-        navigation.replace("Clientes");
-      } else {
-        setAlertConfig({
-          type: 'ERROR',
-          title: 'Acceso denegado',
-          message: 'No tienes un rol válido asignado. Contacta al administrador.',
-        });
-        setAlertVisible(true);
-      }
     } else {
       setAlertConfig({
         type: 'ERROR',

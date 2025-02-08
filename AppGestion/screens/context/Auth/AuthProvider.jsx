@@ -11,40 +11,40 @@ const AuthProvider = ({ children }) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
-        const checkAuth = async () => {
-            setLoading(true);
-            try {
-                const token = await AsyncStorage.getItem('token');
-                console.log('token', token);
-                const userId = await AsyncStorage.getItem('userId');
-                const roles = await AsyncStorage.getItem('roles');
+    const checkAuth = async () => {
+        setLoading(true);
+        try {
+            const token = await AsyncStorage.getItem('token');
+            const userId = await AsyncStorage.getItem('userId');
+            const roles = await AsyncStorage.getItem('roles');
 
-                if (token && userId) {
-                    // Aquí podrías hacer una llamada al backend para verificar si el token sigue siendo válido
+            if (token && userId) {
+                try {
                     const userData = await getUserById(userId);
-                    console.log(userData.data);
-
-                    if (userData) {
+                    if (userData && userData.data) {
                         setUser(userData.data);
                         setRole(JSON.parse(roles));
                         setIsAuth(true);
-                    } else {
-                        await AsyncStorage.clear();
-                        setIsAuth(false);
+                        return true;
                     }
+                } catch (error) {
+                    console.error('Error fetching user data:', error);
+                    await logout();
                 }
-            } catch (error) {
-                console.error('Error verificando la sesión:', error);
-                await AsyncStorage.clear();
-                setIsAuth(false);
-            } finally {
-                setLoading(false);
             }
-        };
+            return false;
+        } catch (error) {
+            console.error('Error checking auth:', error);
+            await logout();
+            return false;
+        } finally {
+            setLoading(false);
+        }
+    };
 
-        useEffect(() => {
-            checkAuth();
-        }, []);
+    useEffect(() => {
+        checkAuth();
+    }, []);
 
     const loginAccess = async (username, password) => {
         setLoading(true);
@@ -59,6 +59,7 @@ const AuthProvider = ({ children }) => {
             }
 
             const { roles, userId, token } = data;
+            console.log(data)
 
             // Store auth data
             await AsyncStorage.setItem('token', token);
@@ -103,16 +104,23 @@ const AuthProvider = ({ children }) => {
     
     const logout = async () => {    
         try {
-            await AsyncStorage.clear();
+            const tokenBefore = await AsyncStorage.getItem('token');
+            console.log('Token antes de limpiar:', tokenBefore);
+    
+            await AsyncStorage.removeItem('token');
+            await AsyncStorage.removeItem('userId');
+            await AsyncStorage.removeItem('roles');
             setIsAuth(false);
             setUser(null);
             setRole(null);
+    
             return true;
         } catch (err) {
-            console.error(err);
+            console.error('Error al cerrar sesión:', err);
             return false;
         }
     };
+    
     
     
     return (

@@ -54,7 +54,6 @@ const Inicio = ({ route, navigation }) => {
 
   const handleLogout = () => {
     logout();
-    navigation.navigate("Login");
   };
 
   const showLogoutButton = role && !role.includes("Jefe");

@@ -1,5 +1,6 @@
 import "react-native-gesture-handler";
 import { useContext, useState, useEffect } from "react";
+import { ActivityIndicator, View } from 'react-native';
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import LoginScreen from "./screens/views/Auth/Login";
@@ -30,85 +31,103 @@ import TrabajosAsignadosScreen from "./screens/views/Lista/TrabajosAsignados";
 
 const Stack = createNativeStackNavigator();
 
-export default function Navigation () {
-  const [initialRoute, setInitialRoute] = useState("Login");
-  const [isAuthChecked, setIsAuthChecked] = useState(false);
-  const { loading , role} = useAuth();
+export default function Navigation() {
+  const [isLoading, setIsLoading] = useState(true);
+  const { checkAuth, isAuth, role } = useAuth();
 
   useEffect(() => {
-    const checkStoredRoles = async () => {
+    const initializeAuth = async () => {
       try {
-        const rolesStr = await AsyncStorage.getItem("roles");
-        const roles = rolesStr ? JSON.parse(rolesStr) : [];
-        console.log("Roles from AsyncStorage:", roles);
-        if (roles.includes("Jefe")) {
-          setInitialRoute("InicioJefe");
-        } else if (roles.includes("Técnico")) {
-          setInitialRoute("Inicio");
-        } else if (roles.includes("Administrador")) {
-          setInitialRoute("Clientes");
-        } else {
-          setInitialRoute("Login");
-        }
-      } catch (err) {
-        console.error("Error reading roles from AsyncStorage:", err);
-        setInitialRoute("Login");
+        await checkAuth();
+      } catch (error) {
+        console.error("Error during initialization:", error);
       } finally {
-        setIsAuthChecked(true);
+        setIsLoading(false);
       }
     };
 
-    checkStoredRoles();
+    initializeAuth();
   }, []);
 
-  if (!isAuthChecked || loading) {
-    // Mientras se verifica la autenticación, puedes mostrar un spinner o retornar null
-    return null;
+  if (isLoading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
   }
 
+  // Define authenticated stack screens
+  const AuthenticatedStack = () => (
+    <>
+      {role?.includes("Jefe") && (
+        <Stack.Screen 
+          name="InicioJefe" 
+          component={InicioJefe} 
+          options={{ title: "Inicio", headerShown: false }} 
+        />
+      )}
+      {role?.includes("Técnico") && (
+        <Stack.Screen 
+          name="Inicio" 
+          component={Inicio}  
+          options={{ headerShown: role?.includes("Jefe") ? true : false }}
+        />
+      )}
+      {role?.includes("Administrador") && (
+        <Stack.Screen name="Clientes" component={Clientes} />
+      )}
+      <Stack.Screen name="ListaOTAsignado" component={ListaOTAsignado} options={{ title: "Lista de OT" }} />
+      <Stack.Screen name="Embarcaciones" component={EmbarcacionesScreen} />
+      <Stack.Screen name="Trabajo" component={Trabajo} />
+      <Stack.Screen name="Sistemas" component={SistemasScreen} options={{title:"Sistemas"}}/>
+      <Stack.Screen name="Asignar" component={AsignarTrabajoScreen} />
+      <Stack.Screen name="SeleccionarAyudantes" component={SeleccionarAyudantesScreen} />
+      <Stack.Screen name="SeleccionarTecnico" component={SeleccionarTecnicoScreen} />
+      <Stack.Screen 
+        name="TrabajosAsignados" 
+        component={TrabajosAsignadosScreen} 
+        options={{ title: "Mis Trabajos" }} 
+      />
+      <Stack.Screen name="QRScann" component={QRScann} options={{ title: "Escaneo de QR" }} />
+      <Stack.Screen name="Menu" component={Menu} options={{ title: "Menú"}} />
+      <Stack.Screen name="Mantto" component={Mantto} options={{ title: "Mantenimiento Preventivo" }} />
+      <Stack.Screen name="Montaje" component={Montaje} options={{ title: "Desmontaje / Montaje" }} />
+      <Stack.Screen name="FormPreventivo" component={FormPreventivo} options={{ title: "Formulario Preventivo" }} />
+      <Stack.Screen name="FormMontaje" component={FormMontaje} options={{ title: "Formulario Montaje" }} />
+      <Stack.Screen name="FormCorrectivo" component={FormCorrectivo} options={{ title: "Formulario Correctivo" }} />
+      <Stack.Screen name="FormProyecto" component={FormProyecto} options={{ title: "Formulario de Proyecto" }} />
+      <Stack.Screen name="Desmont" component={Desmont} options={{ title: "Desmontaje / Montaje" }} />
+    </>
+  );
 
-    return (
-        <NavigationContainer >
-            <Stack.Navigator initialRouteName={initialRoute}>
-                <Stack.Screen name="Login" component={LoginScreen}  options={{ headerShown: false }} />
-                <Stack.Screen name="InicioJefe" component={InicioJefe} options={{ tittle:"Inicio",headerShown: false }} />
-                <Stack.Screen name="ListaOTAsignado" component={ListaOTAsignado} options={{ title: "Lista de OT" }} />
-                <Stack.Screen name="Clientes" component={Clientes} />
-                <Stack.Screen name="Embarcaciones" component={EmbarcacionesScreen} />
-                <Stack.Screen name="Trabajo" component={Trabajo} />
-                <Stack.Screen name="Sistemas" component={SistemasScreen} options={{title:"Sistemas"}}/>
-                <Stack.Screen
-                name="Asignar"
-                component={AsignarTrabajoScreen}
-                />
-                <Stack.Screen
-                name="SeleccionarAyudantes"
-                component={SeleccionarAyudantesScreen}
-                />
-                <Stack.Screen
-                name="SeleccionarTecnico"
-                component={SeleccionarTecnicoScreen}
-                />
-                <Stack.Screen 
-                name="TrabajosAsignados" 
-                component={TrabajosAsignadosScreen} 
-                options={{ title: "Mis Trabajos" }} 
-                />
-                <Stack.Screen 
-                name="Inicio" 
-                component={Inicio}  
-                options={{ headerShown: role?.includes("Jefe") ? true : false }}
-                />
-                <Stack.Screen name="QRScann" component={QRScann} options={{ title: "Escaneo de QR" }} />
-                <Stack.Screen name="Menu" component={Menu} options={{ title: "Menú"}} />
-                <Stack.Screen name="Mantto" component={Mantto} options={{ title: "Mantenimiento Preventivo" }} />
-                <Stack.Screen name="Montaje" component={Montaje} options={{ title: "Desmontaje / Montaje" }} />
-                <Stack.Screen name="FormPreventivo" component={FormPreventivo} options={{ title: "Formulario Preventivo" }} />
-                <Stack.Screen name="FormMontaje" component={FormMontaje} options={{ title: "Formulario Montaje" }} />
-                <Stack.Screen name="FormCorrectivo" component={FormCorrectivo} options={{ title: "Formulario Correctivo" }} />
-                <Stack.Screen name="FormProyecto" component={FormProyecto} options={{ title: "Formulario de Proyecto" }} />
-                <Stack.Screen name="Desmont" component={Desmont} options={{ title: "Desmontaje / Montaje" }} />
-            </Stack.Navigator>
-        </NavigationContainer>
-    );
+  // Define the initial route based on role and auth status
+  const getInitialRoute = () => {
+    if (!isAuth) return "Login";
+    if (role?.includes("Jefe")) return "InicioJefe";
+    if (role?.includes("Técnico")) return "Inicio";
+    if (role?.includes("Administrador")) return "Clientes";
+    return "Login";
+  };
+
+  return (
+    <NavigationContainer>
+      <Stack.Navigator 
+        initialRouteName={getInitialRoute()}
+        screenOptions={{
+          headerBackTitleVisible: false,
+        }}
+      >
+        {!isAuth ? (
+          <Stack.Screen 
+            name="Login" 
+            component={LoginScreen}  
+            options={{ headerShown: false }} 
+          />
+        ) : (
+          AuthenticatedStack()
+        )}
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
 }
