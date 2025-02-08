@@ -6,6 +6,7 @@ import {
     obtenerAsistenciaPorId,
     obtenerAsistencias,
     getAsistenciasController,
+    getLastAsistenciaByUsusario
 } from "../controllers/AsistenciaController.js";
 
 const asistenciaRouter = Router();
@@ -26,5 +27,9 @@ asistenciaRouter.put("/:id_asistencia", actualizarAsistencia);
 
 // 📌 Eliminar una Asistencia
 asistenciaRouter.delete("/:id_asistencia", eliminarAsistencia);
+
+// �� Obtener última asistencia de un usuario
+
+asistenciaRouter.get("/usuario/:id_usuario", getLastAsistenciaByUsusario);
 
 export default asistenciaRouter;

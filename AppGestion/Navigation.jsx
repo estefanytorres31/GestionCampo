@@ -18,6 +18,8 @@ import Mantto from "./screens/views/Checklist/Mantto";
 import Montaje from "./screens/views/Checklist/Montaje";
 import FormPreventivo from "./screens/views/Formularios/FormPreventivo";
 import FormMontaje from "./screens/views/Formularios/FormMontaje";
+import FormCorrectivo from "./screens/views/Formularios/FormCorrectivo";
+import FormProyecto from "./screens/views/Formularios/FormProyecto";
 import Desmont from "./screens/views/Boton/Desmont";
 import useAuth from "./screens/hooks/Auth/useAuth";
 import InicioJefe from "./screens/views/Inicio/InicioJefe"
@@ -85,6 +87,8 @@ export default function Navigation () {
                 <Stack.Screen name="Montaje" component={Montaje} options={{ title: "Desmontaje / Montaje" }} />
                 <Stack.Screen name="FormPreventivo" component={FormPreventivo} options={{ title: "Formulario Preventivo" }} />
                 <Stack.Screen name="FormMontaje" component={FormMontaje} options={{ title: "Formulario Montaje" }} />
+                <Stack.Screen name="FormCorrectivo" component={FormCorrectivo} options={{ title: "Formulario Correctivo" }} />
+                <Stack.Screen name="FormProyecto" component={FormProyecto} options={{ title: "Formulario de Proyecto" }} />
                 <Stack.Screen name="Desmont" component={Desmont} options={{ title: "Desmontaje / Montaje" }} />
             </Stack.Navigator>
         </NavigationContainer>

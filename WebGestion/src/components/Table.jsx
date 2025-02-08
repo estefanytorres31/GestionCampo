@@ -1,10 +1,19 @@
+// Table.jsx
 import React from "react";
 
 const Table = ({ columns, data, render = {}, loading, error }) => {
   return (
-    <table className="table w-full border-collapse">
+    <table
+      className="table w-full border-collapse"
+      style={{ backgroundColor: "inherit" }}
+    >
       <thead>
-        <tr className="bg-[#0D1E4C] text-white">
+        <tr
+          style={{
+            backgroundColor: "var(--table-header-bg)",
+            color: "var(--table-header-text)",
+          }}
+        >
           {columns.map(({ name, uuid }) => (
             <th key={uuid} className={`p-2 text-left ${uuid}`}>
               {name}
@@ -12,13 +21,15 @@ const Table = ({ columns, data, render = {}, loading, error }) => {
           ))}
         </tr>
       </thead>
-      <tbody className="">
+      <tbody>
         {loading ? (
           <tr>
             <td colSpan={columns.length} className="text-center p-6 h-32">
-              <div className="flex justify-center items-center">
+              <div className="flex h-full w-full justify-center items-center">
                 <div className="w-6 h-6 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                <span className="ml-3 text-gray-500">Cargando datos...</span>
+                <span className="span-jetbrains ml-3 text-[--primary-text]">
+                  Cargando datos...
+                </span>
               </div>
             </td>
           </tr>
@@ -35,7 +46,7 @@ const Table = ({ columns, data, render = {}, loading, error }) => {
           data.map((row, rowIndex) => (
             <tr
               key={row.id || rowIndex}
-              className="hover:bg-gray-50 transition"
+              className="transition" /* Se mantiene la transición */
             >
               {columns.map(({ uuid }) => (
                 <td

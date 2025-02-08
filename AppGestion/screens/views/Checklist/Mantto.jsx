@@ -4,6 +4,7 @@ import { View, Text, ScrollView, TextInput, SafeAreaView, ActivityIndicator, Sty
 import useOrdenTrabajoSistema from "../../hooks/OrdenTrabajoSistema/useOrdenTrabajoSistema";
 import useOrdenTrabajoParte from "../../hooks/OrdenTrabajoParte/useOrdenTrabajoParte";
 import useOrdenTrabajo from "../../hooks/OrdenTrabajo/useOrdenTrabajo";
+import useTipoTrabajo from "../../hooks/TipoTrabajo/useTipoTabajo";
 
 const CollapsibleSistema = ({ sistema, selectedParts, onTogglePart, comments, onCommentChange, onSaveSystem }) => {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -132,7 +133,8 @@ const SistemasPartes = ({ route, navigation }) => {
   const { idOrden } = route.params;
   const { obtenerOrdenTrabajoSistemaByOrdenTrabajo, actualizarOrdenTrabajoSistema } = useOrdenTrabajoSistema();
   const { actualizarOrdenTrabajoParte } = useOrdenTrabajoParte();
-  const {actualizarOrdenTrabajo}=useOrdenTrabajo();
+  const {actualizarOrdenTrabajo, obtenerOrdenTrabajo}=useOrdenTrabajo();
+  const { getTipoTrabajoPorID } = useTipoTrabajo();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -143,6 +145,7 @@ const SistemasPartes = ({ route, navigation }) => {
     try {
       setLoading(true)
       const response = await obtenerOrdenTrabajoSistemaByOrdenTrabajo(idOrden)
+      console.log(response)
       if (!response || !Array.isArray(response)) {
         throw new Error("Formato de respuesta inválido")
       }
@@ -237,6 +240,27 @@ const SistemasPartes = ({ route, navigation }) => {
       const newOrdenTrabajoStatus = allSystemsCompleted ? "completado" : "en_progreso"
       await actualizarOrdenTrabajo(idOrden, newOrdenTrabajoStatus)
 
+      const orden=await obtenerOrdenTrabajo(idOrden);
+      const tipoTrabajo=await getTipoTrabajoPorID(orden.id_tipo_trabajo);
+
+      let destino = null;
+      switch (tipoTrabajo.nombre_trabajo.toLowerCase()) {
+        case "mantenimiento preventivo":
+          destino = "FormPreventivo";
+          break;
+        case "mantenimiento correctivo":
+          destino = "FormCorrectivo";
+          break;
+        case "proyecto":
+          destino = "FormProyecto";
+          break;
+        case "desmontaje/montaje":
+          destino = "FormMontaje";
+          break;
+        default:
+          throw new Error("Tipo de trabajo desconocido.");
+      }
+
       // Refresh the data after saving
       await fetchSistemasPartes()
       Alert.alert(
@@ -245,7 +269,7 @@ const SistemasPartes = ({ route, navigation }) => {
         [{ 
           text: "OK",
           onPress: () => {
-            navigation.navigate('FormPreventivo', { selectedParts: newlySelectedParts });
+            navigation.navigate(destino, { selectedParts: newlySelectedParts, id_orden_trabajo_sistema: data[0].id_orden_trabajo_sistema });
           }
         }]
       );

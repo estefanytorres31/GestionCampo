@@ -1,12 +1,19 @@
 @layer components {
   .input {
-    @apply rounded-xl border border-solid border-[#1c2c4f] outline-none 
-             px-4 py-3 bg-white text-[#1c2c4f] h-[2.75rem] 
-            hover:border-blue-800 focus:border-blue-900 transition-colors duration-300 ease-in-out;
+    @apply rounded-xl border border-solid outline-none px-4 py-3 h-[2.75rem] transition-colors duration-300 ease-in-out;
+    background: var(--input-bg);
+    color: var(--input-text);
+    border-color: var(--input-border);
     font-family: var(--text-lg-medium-font-family);
     font-size: var(--text-lg-medium-font-size);
     font-style: var(--text-lg-medium-font-style);
     font-weight: var(--text-lg-medium-font-weight);
     line-height: var(--text-lg-medium-line-height);
+  }
+  .input:hover {
+    border-color: var(--input-hover-border);
+  }
+  .input:focus {
+    border-color: var(--input-focus-border);
   }
 }

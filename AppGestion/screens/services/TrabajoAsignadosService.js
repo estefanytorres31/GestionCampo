@@ -23,7 +23,7 @@ export const getOrdenesTrabajoUsuario = async () => {
 // Obtener la información de una orden de trabajo por ID
 export const getOrdenTrabajo = async (idOrden) => {
     try {
-        const response = await apiClient.get(`/ordentrabajo/${idOrden}`);
+        const response = await apiClient.get(`/ordenestrabajo/${idOrden}`);
         return response.data.data;
     } catch (error) {
         console.error(`Error obteniendo orden de trabajo con ID ${idOrden}:`, error);

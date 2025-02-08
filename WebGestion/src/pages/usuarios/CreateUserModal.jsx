@@ -101,7 +101,13 @@ const CreateUserModal = ({ isOpen, onClose, onSuccess }) => {
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <Modal.Header>
-        <h2 className="text-xl font-bold border-b border-[#1c2c4f]/20 py-3 text-[#1c2c4f]">
+      <h2
+          className="text-xl font-bold py-3"
+          style={{
+            borderBottom: "1px solid var(--border-color)",
+            color: "var(--primary-text)"
+          }}
+        >
           Crear Usuario
         </h2>
       </Modal.Header>
@@ -150,6 +156,7 @@ const CreateUserModal = ({ isOpen, onClose, onSuccess }) => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               type="email"
+              autoComplete="new-email"
               required
             />
 
@@ -160,6 +167,7 @@ const CreateUserModal = ({ isOpen, onClose, onSuccess }) => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               type="password"
+              autoComplete="new-password"
               required
             />
 

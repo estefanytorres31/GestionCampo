@@ -7,5 +7,9 @@
 @import "./styles/layouts/_content.css";
 @import "./styles/layouts/_header.css";
 @import './styles/base/_reset.css';
+@import './styles/base/_theme.css';
 @import './styles/base/_typography.css';
 
+.react-flow__panel .react-flow__attribution .bottom .right {
+    display: none;
+}

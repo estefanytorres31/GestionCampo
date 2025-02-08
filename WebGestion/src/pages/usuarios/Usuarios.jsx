@@ -19,13 +19,13 @@ import { VscFilePdf } from "react-icons/vsc";
 import { RiFileExcel2Fill } from "react-icons/ri";
 import DeleteUserModal from "./DeleteUserModal";
 import EditUserModal from "./EditUserModal";
+import TooltipList from "@/components/TooltipList";
 
 const usuariosColumns = [
   { name: "ID", uuid: "id" },
   { name: "👤 Usuario", uuid: "nombre_usuario" },
   { name: "📛 Nombre Completo", uuid: "nombre_completo" },
   { name: "📧 Email", uuid: "email" },
-  { name: "✅ Estado", uuid: "estado" },
   { name: "🎭 Roles", uuid: "roles" },
   { name: "⚙️ Acciones", uuid: "acciones" },
 ];
@@ -42,7 +42,7 @@ const Usuarios = () => {
     email: "",
   });
   const [page, setPage] = useState(1);
-  const [pageSize] = useState(10);
+  const [pageSize] = useState(3);
   const navigate = useNavigate();
 
   const {
@@ -110,7 +110,6 @@ const Usuarios = () => {
 
   // Esta función se ejecuta luego de crear un usuario
   const handleSuccess = async (data) => {
-    console.log("Usuario creado exitosamente", data);
     if (refetch && typeof refetch === "function") {
       try {
         await refetch();
@@ -168,18 +167,6 @@ const Usuarios = () => {
                 placeholder: "Buscar usuario",
                 icon: <BsSearch className="text-gray-400" />,
               },
-              {
-                key: "nombre_completo",
-                type: "text",
-                placeholder: "Buscar nombre completo",
-                icon: <BsSearch className="text-gray-400" />,
-              },
-              {
-                key: "email",
-                type: "text",
-                placeholder: "Buscar por email",
-                icon: <BsSearch className="text-gray-400" />,
-              },
             ]}
           />
           <div className="flex gap-2 flex-col justify-end md:flex-row">
@@ -205,11 +192,15 @@ const Usuarios = () => {
           error={error}
           render={{
             id: (row) => formatId(row.id),
-            roles: (row) =>
-              row.roles && row.roles.length > 0
-                ? row.roles.join(", ")
-                : "Sin rol",
-            estado: (row) => (row.estado ? "🟢 Activo" : "🔴 Inactivo"),
+            roles: (row) => (
+              <TooltipList
+                items={row.roles}
+                defaultText="Sin rol"
+                countMode={true}
+                labelSingular="rol"
+                labelPlural="roles"
+              />
+            ),
             acciones: (row) => (
               <>
                 <RowActions

@@ -56,7 +56,10 @@ const AsignarTrabajoScreen = ({route, navigation }) => {
 
   const createOrdenTrabajoSistemas = async (ordenTrabajoId) => {
     try {
+
       for (let sistema of sistemas) {
+        console.log(ordenTrabajoId);
+        console.log(sistema.id_embarcacion_sistema)
         // Guardamos la orden de trabajo por sistema
         const ordenTrabajoSistema = await guardarOrdenTrabajoSistema(
           ordenTrabajoId,
@@ -72,7 +75,7 @@ const AsignarTrabajoScreen = ({route, navigation }) => {
   
         // Ensure we're accessing the correct part of the response
         const partes = partsResponse.data || partsResponse;
-  
+        console.log(ordenTrabajoSistema.id_orden_trabajo_sistema)
         // Guardar cada parte en orden_trabajo_parte
         for (let parte of partes) {
           await agregarOrdenTrabajoParte(

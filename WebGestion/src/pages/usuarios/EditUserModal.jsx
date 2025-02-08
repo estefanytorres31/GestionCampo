@@ -1,4 +1,3 @@
-// EditUserModal.jsx
 import React, { useState, useEffect } from "react";
 import Modal from "@/components/Modal";
 import { InputLabel } from "@/components/InputLabel";
@@ -8,75 +7,78 @@ import { MdEdit } from "react-icons/md";
 import { RiAiGenerate2 } from "react-icons/ri";
 
 const EditUserModal = ({ isOpen, onClose, onSuccess, user }) => {
-  // Estados para cada campo del formulario, inicializados en blanco
+  // Estados para los campos del formulario
   const [nombreUsuario, setNombreUsuario] = useState("");
   const [nombreCompleto, setNombreCompleto] = useState("");
   const [email, setEmail] = useState("");
-  // Para el password dejamos el campo vacío, en caso de no editarlo se mantiene el anterior
+  // Para el password, si se deja vacío se mantiene la contraseña actual
   const [password, setPassword] = useState("");
-  // Estado para almacenar los 2 dígitos aleatorios (generados una única vez)
+  // Estado para generar dígitos aleatorios para el autogenerado
   const [randomDigits, setRandomDigits] = useState("");
-  // Estado para controlar si el input de nombre de usuario es editable o se autogenera
-  const [isUsernameEditable, setIsUsernameEditable] = useState(false);
+  // Estado para controlar si el campo se edita manualmente o se autogenera
+  // En modo edición, queremos que por defecto sea editable manualmente.
+  const [isUsernameEditable, setIsUsernameEditable] = useState(user ? true : false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  // Determinar si estamos en modo edición (si existe user y tiene id)
+  const isEditMode = Boolean(user && user.id);
 
   // Función para generar 2 dígitos aleatorios (entre 10 y 99)
   const generarDigitosRandom = () => {
     return Math.floor(Math.random() * 90 + 10).toString();
   };
 
-  // Cuando el modal se abre o el usuario cambia, se prellenan los campos con los datos existentes
+  // Prellenar los campos cuando se abre el modal o cambia el usuario
   useEffect(() => {
     if (user) {
+      // En modo edición, se usa el valor del usuario obtenido de la consulta
       setNombreUsuario(user.nombre_usuario || "");
       setNombreCompleto(user.nombre_completo || "");
       setEmail(user.email || "");
       setPassword("");
+      // En modo edición, dejamos el modo manual activado
       setRandomDigits("");
-      setIsUsernameEditable(false);
+      setIsUsernameEditable(true);
     }
   }, [user]);
 
-  // useEffect que autogenera el nombre de usuario a partir del nombre completo,
-  // solo si no se ha habilitado la edición manual.
+  // Si el modo está en autogenerado, recalculamos el nombre de usuario
   useEffect(() => {
-    if (!nombreCompleto.trim()) {
-      setNombreUsuario("");
-      setRandomDigits("");
-      return;
-    }
-
-    if (!randomDigits) {
-      setRandomDigits(generarDigitosRandom());
-    }
-
     if (!isUsernameEditable) {
+      if (!nombreCompleto.trim()) {
+        setNombreUsuario("");
+        setRandomDigits("");
+        return;
+      }
+      if (!randomDigits) {
+        setRandomDigits(generarDigitosRandom());
+      }
       const palabras = nombreCompleto.trim().split(/\s+/);
       if (palabras.length === 0) {
         setNombreUsuario("");
         return;
       }
-      // Toma la primera palabra completa en minúsculas
       let generado = palabras[0].toLowerCase();
-      // Por cada palabra adicional, concatena las primeras 3 letras en minúsculas
       for (let i = 1; i < palabras.length; i++) {
         generado += palabras[i].substring(0, 3).toLowerCase();
       }
-      // Agrega los 2 dígitos aleatorios
       generado += randomDigits;
       setNombreUsuario(generado);
     }
   }, [nombreCompleto, randomDigits, isUsernameEditable]);
 
-  // Función para alternar entre modo autogenerado y edición manual
+  // Función para alternar entre modo manual y autogenerado
   const toggleUsernameEditable = () => {
-    setIsUsernameEditable((prev) => !prev);
-    // Si se desactiva la edición manual, reiniciamos el campo para que se autogenere nuevamente
-    if (isUsernameEditable) {
-      setNombreUsuario("");
-      setRandomDigits(generarDigitosRandom());
-    }
+    setIsUsernameEditable((prev) => {
+      const newState = !prev;
+      // Si se cambia a autogenerado (newState === false), reiniciamos para generar un valor
+      if (!newState) {
+        setNombreUsuario("");
+        setRandomDigits(generarDigitosRandom());
+      }
+      return newState;
+    });
   };
 
   // Manejo del submit del formulario
@@ -85,7 +87,6 @@ const EditUserModal = ({ isOpen, onClose, onSuccess, user }) => {
     setLoading(true);
     setError(null);
     try {
-      // Se arma el payload; se incluye el password solo si se ingresa uno nuevo.
       const payload = {
         nombre_usuario: nombreUsuario,
         nombre_completo: nombreCompleto,
@@ -94,18 +95,17 @@ const EditUserModal = ({ isOpen, onClose, onSuccess, user }) => {
       if (password) {
         payload.contrasena_hash = password;
       }
-      // Petición PUT para actualizar el usuario
       const response = await axiosInstance.put(`/usuario/${user.id}`, payload);
-      onSuccess(response.data); // Notifica el éxito al componente padre
-      onClose(); // Cierra el modal
-
-      // Reinicia los campos del formulario
+      onSuccess(response.data);
+      onClose();
+      // Reiniciar campos
       setNombreUsuario("");
       setNombreCompleto("");
       setEmail("");
       setPassword("");
       setRandomDigits("");
-      setIsUsernameEditable(false);
+      // En modo edición, se conserva manualmente el valor obtenido inicialmente
+      setIsUsernameEditable(user ? true : false);
     } catch (err) {
       const message =
         err.response?.data?.message || "Error al actualizar el usuario.";
@@ -119,11 +119,16 @@ const EditUserModal = ({ isOpen, onClose, onSuccess, user }) => {
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <Modal.Header>
-        <h2 className="text-xl font-bold border-b border-[#1c2c4f]/20 py-3 text-[#1c2c4f]">
+        <h2
+          className="text-xl font-bold py-3"
+          style={{
+            borderBottom: "1px solid var(--border-color)",
+            color: "var(--primary-text)",
+          }}
+        >
           Editar Usuario
         </h2>
       </Modal.Header>
-
       <Modal.Body>
         <div className="flex flex-col gap-4">
           {error && <div className="text-red-500">{error}</div>}
@@ -135,7 +140,7 @@ const EditUserModal = ({ isOpen, onClose, onSuccess, user }) => {
                 placeholder="Se generará automáticamente"
                 value={nombreUsuario}
                 onChange={(e) => setNombreUsuario(e.target.value)}
-                disabled={!isUsernameEditable}
+                disabled={false}  // Siempre editable
               />
               <Button
                 type="button"
@@ -144,8 +149,10 @@ const EditUserModal = ({ isOpen, onClose, onSuccess, user }) => {
                 color="filter"
               >
                 {isUsernameEditable ? (
+                  // Si está en modo manual, muestra el icono de autogenerado (para activar ese modo)
                   <RiAiGenerate2 size={20} className="min-w-max" />
                 ) : (
+                  // Si está en modo autogenerado, muestra el icono de edición manual
                   <MdEdit size={20} className="min-w-max" />
                 )}
               </Button>
@@ -162,12 +169,13 @@ const EditUserModal = ({ isOpen, onClose, onSuccess, user }) => {
             />
 
             <InputLabel
+              type="email"
               id="email"
               label="Email"
               placeholder="Email"
-              value={email}
+              autoComplete="new-email"
               onChange={(e) => setEmail(e.target.value)}
-              type="email"
+              value={email}
               required
             />
 
@@ -177,6 +185,7 @@ const EditUserModal = ({ isOpen, onClose, onSuccess, user }) => {
               placeholder="Dejar en blanco para mantener la contraseña actual"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              autoComplete="new-password"
               type="password"
             />
 

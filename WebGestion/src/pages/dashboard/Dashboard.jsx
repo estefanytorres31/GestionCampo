@@ -9,7 +9,7 @@ const Dashboard = () => {
   if (error) return <div>Error: {error}</div>;
 
   return (
-    <div>
+    <div className="h-full">
       <Mapa asistencias={data} />
     </div>
   );

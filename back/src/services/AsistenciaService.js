@@ -357,3 +357,38 @@ export const eliminarAsistencia = async (id_asistencia) => {
 
     return asistenciaEliminada;
 };
+
+/**
+ * �� Obtener la Asistencia más reciente de un Usuario
+ * @param {number} id_usuario - ID del Usuario
+ * @returns {Promise<Object>} Asistencia más reciente del Usuario
+ * @private
+ * @returns {Promise<Object>} Asistencia
+ * @private
+ * @param {number} id
+ * @returns {Promise<Object>} Asistencia
+ **/
+
+
+export const obtenerUltimaAsistencia = async (id_usuario) => {
+  if (isNaN(id_usuario)) {
+      throw new Error("El ID de usuario debe ser válido.");
+  }
+
+  const ultimaAsistencia = await prisma.asistencia.findFirst({
+      where: {
+          id_usuario: parseInt(id_usuario),
+      },
+      orderBy: { fecha_hora: "desc" },
+      include: {
+          embarcacion: true,
+          usuario: true,
+      },
+  });
+
+  if (!ultimaAsistencia) {
+      throw new Error(`No se encontró ninguna asistencia para el usuario con ID ${id_usuario}.`);
+  }
+
+  return ultimaAsistencia;
+};

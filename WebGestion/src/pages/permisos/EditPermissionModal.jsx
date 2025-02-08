@@ -38,7 +38,13 @@ const EditPermissionModal = ({ isOpen, onClose, onSuccess, permission }) => {
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <Modal.Header>
-        <h2 className="text-xl font-bold border-b border-[#1c2c4f]/20 py-3 text-[#1c2c4f]">
+        <h2
+          className="text-xl font-bold py-3"
+          style={{
+            borderBottom: "1px solid var(--border-color)",
+            color: "var(--primary-text)"
+          }}
+          >
           Editar Permiso
         </h2>
       </Modal.Header>
