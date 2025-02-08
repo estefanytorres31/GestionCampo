@@ -85,6 +85,7 @@ const Login = () => {
             placeholder="Escribe tu usuario"
             iconRight={<FaUser style={{ color: "var(--primary-text)" }} />}
             value={usuarioInput}
+            className="text-medium-jetbrains"
             onChange={onInputChange}
           />
           {/* Campo Contraseña */}
@@ -95,6 +96,7 @@ const Login = () => {
             placeholder="Escribe tu contraseña"
             iconRight={<FaLock style={{ color: "var(--primary-text)" }} />}
             value={contrasena}
+            className="text-medium-jetbrains"
             onChange={onInputChange}
           />
 
