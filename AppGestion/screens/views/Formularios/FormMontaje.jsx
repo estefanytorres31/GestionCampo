@@ -14,17 +14,22 @@ import {
 import { Camera, Image as ImageIcon, Plus, Save, Percent } from 'lucide-react-native';
 import * as ImagePicker from 'expo-image-picker';
 import Slider from '@react-native-community/slider';
+import { CommonActions } from '@react-navigation/native';
+import useOrdenTrabajoSistema from "../../hooks/OrdenTrabajoSistema/useOrdenTrabajoSistema";
+import useAuth from "../../hooks/Auth/useAuth";
 
 const MaintenanceForm = () => {
+  const {id_orden_trabajo_sistema}=route.params;
+  const {role}=useAuth();
   const [formData, setFormData] = useState({
     Observaciones: '',
     Llevar: '',
-    Abordaje: '',
     progress: 0,
     images: []
   });
 
   const [showProgress, setShowProgress] = useState(false);
+  const {actualizarOrdenTrabajoSistemaCompleta}=useOrdenTrabajoSistema();
 
   const pickImage = async (useCamera = false) => {
     try {
@@ -36,8 +41,8 @@ const MaintenanceForm = () => {
           return;
         }
         result = await ImagePicker.launchCameraAsync({
-          mediaTypes: ImagePicker.MediaTypeOptions.Images,
-          quality: 0.8,
+          allowsEditing: true,
+          quality: 1,
         });
       } else {
         const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -46,8 +51,9 @@ const MaintenanceForm = () => {
           return;
         }
         result = await ImagePicker.launchImageLibraryAsync({
-          mediaTypes: ImagePicker.MediaTypeOptions.Images,
-          quality: 0.8,
+          mediaTypes: ImagePicker.MediaType,
+          allowsEditing: true,
+          quality: 1,
         });
       }
 
@@ -69,14 +75,56 @@ const MaintenanceForm = () => {
     }));
   };
 
-  const handleSave = () => {
+  const handleSave = async() => {
     if (!formData.Observaciones.trim()) {
       Alert.alert('Error', 'Por favor ingrese los datos');
       return;
     }
+    try{
+      const formDataToSend=new FormData();
+
+      formDataToSend.append('observaciones',formData.Observaciones);
+      formDataToSend.append('proximo_abordaje',formData.Llevar);
+      formDataToSend.append('avance', Math.round(formData.progress).toString());
+
+        for (let i = 0; i < formData.images.length; i++) {
+            const uri = formData.images[i];
+            const fileName = uri.split('/').pop();
+            
+            // Create blob of the image
+            const imageFile = {
+                uri: Platform.OS === 'ios' ? uri.replace('file://', '') : uri,
+                type: 'image/jpeg',
+                name: fileName || `image${i}.jpg`,
+            };
+            
+            formDataToSend.append('imagenes', imageFile);
+        }
+            const result = await actualizarOrdenTrabajoSistemaCompleta(
+                id_orden_trabajo_sistema,
+                formDataToSend
+            );
     
-    // Aquí iría la lógica para guardar los datos
-    Alert.alert('Éxito', 'Datos guardados correctamente');
+            console.log('Response:', result);
+    
+            Alert.alert(
+                'Éxito',
+                'Los datos se han guardado correctamente',
+                [{ text: 'OK', onPress: () => 
+                  navigation.dispatch(
+                    CommonActions.reset({
+                      index: 1,
+                      routes: [
+                        { name: role.includes("Jefe") ? "InicioJefe" : "Inicio" },
+                      ],
+                    })
+                  ),
+              }]
+            );
+
+    }catch(error){
+
+    }
   };
 
   return (
@@ -104,18 +152,6 @@ const MaintenanceForm = () => {
             placeholder="¿Qué materiales se necesitarán en la próxima visita?"
             multiline
             numberOfLines={4}
-          />
-        </View>
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Abordaje</Text>
-          <TextInput
-            style={[styles.input, styles.textArea]}
-            value={formData.Abordaje}
-            onChangeText={(text) => setFormData(prev => ({ ...prev, Abordaje: text }))}
-            placeholder="Detalles del abordaje"
-            multiline
-            numberOfLines={3}
           />
         </View>
 

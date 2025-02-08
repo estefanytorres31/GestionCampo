@@ -96,7 +96,7 @@ const MaintenanceForm = ({route, navigation}) => {
       formDataToSend.append('pendiente', formData.pendiente);
       formDataToSend.append('observaciones', formData.observaciones);
       formDataToSend.append('materiales', formData.material);
-      formDataToSend.append('avance', formData.progress);
+      formDataToSend.append('avance', Math.round(formData.progress).toString());
       
         for (let i = 0; i < formData.images.length; i++) {
             const uri = formData.images[i];
