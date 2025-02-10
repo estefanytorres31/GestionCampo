@@ -53,8 +53,8 @@ const Trabajo = ({ route, navigation }) => {
             >
                 <LinearGradient
                     colors={isSelected 
-                        ? ['#38A169', '#2F855A']  // Darker green when selected
-                        : ['#4ADE80', '#22C55E']  // Original gradient
+                        ? ['#176a9e', '#02426a']  // Darker green when selected
+                        : ['#75a1bc', '#507c97']  // Original gradient
                     }
                     style={styles.card}
                     start={{ x: 0, y: 0 }}
@@ -65,7 +65,7 @@ const Trabajo = ({ route, navigation }) => {
                             <Ionicons 
                                 name="hammer" 
                                 size={28} 
-                                color={isSelected ? '#2F855A' : '#22C55E'} 
+                                color={isSelected ? '#1f6b79' : '#628b93'} 
                             />
                         </View>
                         <View style={styles.textContainer}>
@@ -91,7 +91,7 @@ const Trabajo = ({ route, navigation }) => {
         <SafeAreaView style={styles.safeArea}>
             <StatusBar barStyle="light-content" />
             <LinearGradient
-                colors={['#3B82F6', '#2563EB']}
+                colors={['#0977a0', '#063d52']}
                 style={styles.header}
             >
                 <View style={styles.headerContent}>

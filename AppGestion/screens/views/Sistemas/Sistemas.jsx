@@ -268,7 +268,7 @@ const styles = StyleSheet.create({
     },
     header: {
         padding: 24,
-        backgroundColor: '#fff',
+        backgroundColor: '#7da588',
         borderBottomLeftRadius: 30,
         borderBottomRightRadius: 30,
         shadowColor: "#000",
@@ -284,7 +284,7 @@ const styles = StyleSheet.create({
     headerTitle: {
         fontSize: 24,
         fontWeight: "800",
-        color: "#1B5E20",
+        color: "#f3fff7",
         marginBottom: 12,
         textAlign: "center",
     },
@@ -306,7 +306,7 @@ const styles = StyleSheet.create({
         padding: 20,
     },
     sistemaCard: {
-        backgroundColor: "#FFF",
+        backgroundColor: "#FFFF",
         borderRadius: 20,
         marginBottom: 16,
         elevation: 4,
@@ -345,7 +345,7 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     sistemaNombre: {
-        fontSize: 20,
+        fontSize: 18,
         fontWeight: "700",
         color: "#1B5E20",
         marginBottom: 8,
