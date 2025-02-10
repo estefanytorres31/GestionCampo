@@ -95,10 +95,11 @@ const Trabajo = ({ route, navigation }) => {
                             key={index}
                             onPress={() => handleButtonPress(trabajo)}
                             activeOpacity={0.9}
+                            style={[styles.buttonWrapper, { marginTop: index === 0 ? -50 : 16 }]}
                         >
                             <LinearGradient
                                 colors={['#4ADE80', '#22C55E']}
-                                style={[styles.card, { marginTop: index === 0 ? -50 : 16 }]}
+                                style={styles.card}
                                 start={{ x: 0, y: 0 }}
                                 end={{ x: 1, y: 1 }}
                             >
@@ -110,7 +111,9 @@ const Trabajo = ({ route, navigation }) => {
                                         <Text style={styles.cardTitle}>{trabajo.nombre_trabajo}</Text>
                                         <Text style={styles.cardSubtitle}>Toque para seleccionar</Text>
                                     </View>
-                                    <Ionicons name="chevron-forward" size={24} color="white" />
+                                    <View style={styles.arrowContainer}>
+                                        <Ionicons name="chevron-forward" size={24} color="white" />
+                                    </View>
                                 </View>
                             </LinearGradient>
                         </TouchableOpacity>
@@ -157,7 +160,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
         paddingTop: 20,
     },
-    card: {
+    buttonWrapper: {
         borderRadius: 16,
         elevation: 8,
         shadowColor: '#000',
@@ -167,6 +170,10 @@ const styles = StyleSheet.create({
         },
         shadowOpacity: 0.2,
         shadowRadius: 8,
+    },
+    card: {
+        borderRadius: 16,
+        overflow: 'hidden',
     },
     cardContent: {
         flexDirection: 'row',
@@ -195,6 +202,9 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: 'rgba(255, 255, 255, 0.8)',
         marginTop: 4,
+    },
+    arrowContainer: {
+        padding: 8,
     },
     emptyContainer: {
         flex: 1,
