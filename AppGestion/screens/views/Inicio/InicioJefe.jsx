@@ -91,8 +91,8 @@ const JefeScreen = ({ navigation }) => {
                                 <View style={[styles.iconCircle, { backgroundColor: "#F0FDF4" }]}>
                                     <Ionicons name="qr-code-outline" size={30} color="#22C55E" />
                                 </View>
-                                <Text style={styles.cardTitle}>Escanear QR</Text>
-                                <Text style={styles.cardSubtitle}>Lectura rápida</Text>
+                                <Text style={styles.cardTitle}>Embarcación</Text>
+                                <Text style={styles.cardSubtitle}>Escaneo de QR</Text>
                             </TouchableOpacity>
                         </View>
 
