@@ -4,9 +4,9 @@ import {
   Text,
   StyleSheet,
   TextInput,
-  FlatList,
   TouchableOpacity,
   SafeAreaView,
+  ScrollView,
   Animated,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
@@ -51,25 +51,6 @@ const SeleccionarAyudantesScreen = ({ route, navigation }) => {
     navigation.goBack();
   };
 
-  const renderItem = ({ item }) => (
-    <TouchableOpacity
-      style={[
-        styles.item,
-        seleccionados.some((u) => u.id === item.id) && styles.itemSelected,
-      ]}
-      onPress={() => handleSeleccionar(item)}
-    >
-      <View style={styles.itemContent}>
-        <Ionicons name="person-outline" size={28} color="white" />
-        <Text style={styles.itemText}>{item.nombre_completo}</Text>
-        {seleccionados.some((u) => u.id === item.id) && (
-          <Ionicons name="checkmark-circle" size={24} color="#2E7D32" />
-        )}
-      </View>
-    </TouchableOpacity>
-  );
-
-  // Filtrar usuarios excluyendo al técnico seleccionado
   const usuariosFiltrados = usuariosTecnicos.filter((u) =>
     !usuarioExcluido.includes(u.id) &&
     u.nombre_completo.toLowerCase().includes(busqueda.toLowerCase())
@@ -77,9 +58,7 @@ const SeleccionarAyudantesScreen = ({ route, navigation }) => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <Animated.View
-        style={[styles.container, { opacity: fadeAnim, transform: [{ scale: scaleAnim }] }]}
-      >
+      <Animated.View style={[styles.container, { opacity: fadeAnim, transform: [{ scale: scaleAnim }] }]}>
         <Text style={styles.title}>Seleccionar Ayudantes</Text>
         <TextInput
           style={styles.input}
@@ -87,12 +66,26 @@ const SeleccionarAyudantesScreen = ({ route, navigation }) => {
           value={busqueda}
           onChangeText={setBusqueda}
         />
-        <FlatList
-          data={usuariosFiltrados}
-          renderItem={renderItem}
-          keyExtractor={(item) => item.id.toString()}
-          contentContainerStyle={styles.list}
-        />
+        <ScrollView contentContainerStyle={styles.list}>
+          {usuariosFiltrados.map((item) => (
+            <TouchableOpacity
+              key={item.id.toString()}
+              style={[
+                styles.item,
+                seleccionados.some((u) => u.id === item.id) && styles.itemSelected,
+              ]}
+              onPress={() => handleSeleccionar(item)}
+            >
+              <View style={styles.itemContent}>
+                <Ionicons name="person-outline" size={28} color="white" />
+                <Text style={styles.itemText}>{item.nombre_completo}</Text>
+                {seleccionados.some((u) => u.id === item.id) && (
+                  <Ionicons name="checkmark-circle" size={24} color="#2E7D32" />
+                )}
+              </View>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
         <TouchableOpacity style={styles.button} onPress={handleGuardar}>
           <Text style={styles.buttonText}>Guardar Selección</Text>
         </TouchableOpacity>
