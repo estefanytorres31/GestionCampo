@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
     View,
     Text,
@@ -19,48 +19,72 @@ const Trabajo = ({ route, navigation }) => {
     const { empresa, embarcacion } = route.params;
     const { tipotrabajos } = useTipoTrabajo();
     const fadeAnim = React.useRef(new Animated.Value(0)).current;
-    const scaleAnim = React.useRef(new Animated.Value(0.95)).current;
-    const translateY = React.useRef(new Animated.Value(50)).current;
+    const [selectedTrabajo, setSelectedTrabajo] = useState(null);
 
     useEffect(() => {
-        Animated.parallel([
-            Animated.timing(fadeAnim, {
-                toValue: 1,
-                duration: 800,
-                useNativeDriver: true,
-            }),
-            Animated.spring(scaleAnim, {
-                toValue: 1,
-                friction: 8,
-                tension: 40,
-                useNativeDriver: true,
-            }),
-            Animated.spring(translateY, {
-                toValue: 0,
-                friction: 8,
-                tension: 40,
-                useNativeDriver: true,
-            }),
-        ]).start();
+        Animated.timing(fadeAnim, {
+            toValue: 1,
+            duration: 800,
+            useNativeDriver: true,
+        }).start();
     }, []);
 
     const handleButtonPress = (trabajo) => {
-        Animated.sequence([
-            Animated.spring(scaleAnim, {
-                toValue: 0.97,
-                friction: 3,
-                tension: 40,
-                useNativeDriver: true,
-            }),
-            Animated.spring(scaleAnim, {
-                toValue: 1,
-                friction: 3,
-                tension: 40,
-                useNativeDriver: true,
-            }),
-        ]).start(() => {
+        setSelectedTrabajo(trabajo);
+        
+        // Small delay to show selection before navigation
+        setTimeout(() => {
             navigation.navigate("Sistemas", { empresa, embarcacion, trabajo });
-        });
+        }, 100);
+    };
+
+    const renderButton = (trabajo, index) => {
+        const isSelected = selectedTrabajo === trabajo;
+        
+        return (
+            <TouchableOpacity
+                key={index}
+                onPress={() => handleButtonPress(trabajo)}
+                activeOpacity={1}
+                style={[
+                    styles.buttonWrapper, 
+                    { marginTop: index === 0 ? -50 : 16 }
+                ]}
+            >
+                <LinearGradient
+                    colors={isSelected 
+                        ? ['#38A169', '#2F855A']  // Darker green when selected
+                        : ['#4ADE80', '#22C55E']  // Original gradient
+                    }
+                    style={styles.card}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                >
+                    <View style={styles.cardContent}>
+                        <View style={styles.iconContainer}>
+                            <Ionicons 
+                                name="hammer" 
+                                size={28} 
+                                color={isSelected ? '#2F855A' : '#22C55E'} 
+                            />
+                        </View>
+                        <View style={styles.textContainer}>
+                            <Text style={styles.cardTitle}>{trabajo.nombre_trabajo}</Text>
+                            <Text style={styles.cardSubtitle}>
+                                {isSelected ? 'Seleccionado' : 'Toque para seleccionar'}
+                            </Text>
+                        </View>
+                        <View style={styles.arrowContainer}>
+                            <Ionicons 
+                                name="chevron-forward" 
+                                size={24} 
+                                color="white" 
+                            />
+                        </View>
+                    </View>
+                </LinearGradient>
+            </TouchableOpacity>
+        );
     };
 
     return (
@@ -80,44 +104,11 @@ const Trabajo = ({ route, navigation }) => {
             <Animated.View
                 style={[
                     styles.contentContainer,
-                    {
-                        opacity: fadeAnim,
-                        transform: [
-                            { scale: scaleAnim },
-                            { translateY: translateY }
-                        ]
-                    }
+                    { opacity: fadeAnim }
                 ]}
             >
                 {tipotrabajos.length > 0 ? (
-                    tipotrabajos.map((trabajo, index) => (
-                        <TouchableOpacity
-                            key={index}
-                            onPress={() => handleButtonPress(trabajo)}
-                            activeOpacity={0.9}
-                            style={[styles.buttonWrapper, { marginTop: index === 0 ? -50 : 16 }]}
-                        >
-                            <LinearGradient
-                                colors={['#4ADE80', '#22C55E']}
-                                style={styles.card}
-                                start={{ x: 0, y: 0 }}
-                                end={{ x: 1, y: 1 }}
-                            >
-                                <View style={styles.cardContent}>
-                                    <View style={styles.iconContainer}>
-                                        <Ionicons name="hammer" size={28} color="#22C55E" />
-                                    </View>
-                                    <View style={styles.textContainer}>
-                                        <Text style={styles.cardTitle}>{trabajo.nombre_trabajo}</Text>
-                                        <Text style={styles.cardSubtitle}>Toque para seleccionar</Text>
-                                    </View>
-                                    <View style={styles.arrowContainer}>
-                                        <Ionicons name="chevron-forward" size={24} color="white" />
-                                    </View>
-                                </View>
-                            </LinearGradient>
-                        </TouchableOpacity>
-                    ))
+                    tipotrabajos.map(renderButton)
                 ) : (
                     <View style={styles.emptyContainer}>
                         <Ionicons name="alert-circle-outline" size={60} color="#9CA3AF" />
@@ -130,6 +121,18 @@ const Trabajo = ({ route, navigation }) => {
 };
 
 const styles = StyleSheet.create({
+    // ... (previous styles remain the same)
+    buttonWrapper: {
+        borderRadius: 16,
+        elevation: 8,
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 4,
+        },
+        shadowOpacity: 0.2,
+        shadowRadius: 8,
+    },
     safeArea: {
         flex: 1,
         backgroundColor: '#F3F4F6',
