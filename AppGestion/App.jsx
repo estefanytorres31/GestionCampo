@@ -19,8 +19,8 @@ export default function App() {
     <AuthProvider>
     <OrdenTrabajoParteProvider>
     <OrdenTrabajoSistemaProvider>
+      <OrdenTrabajoUsuarioProvider>
       <TrabajoAsignadoProvider>
-        <OrdenTrabajoUsuarioProvider>
           <OrdenTrabajoProvider>
             <AsistenciaProvider>
               <PuertoProvider>
@@ -38,8 +38,8 @@ export default function App() {
               </PuertoProvider>
             </AsistenciaProvider>
           </OrdenTrabajoProvider>
-        </OrdenTrabajoUsuarioProvider>
       </TrabajoAsignadoProvider>
+      </OrdenTrabajoUsuarioProvider>
       </OrdenTrabajoSistemaProvider>
       </OrdenTrabajoParteProvider>
     </AuthProvider>

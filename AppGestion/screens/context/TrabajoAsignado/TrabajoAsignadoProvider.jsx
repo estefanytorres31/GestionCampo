@@ -3,12 +3,27 @@ import TrabajoAsignadoContext from "./TrabajoAsignadoContext";
 import apiClient from "../../API/apiClient";
 import useAuth from "../../hooks/Auth/useAuth";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import useOrdenTrabajoUsuario from "../../hooks/OrdenTrabajoUsuario/useOrdenTrabajoUsuario";
 
 const TrabajoAsignadoProvider = ({ children }) => {
     const {isAuth}=useAuth();
     const [trabajos, setTrabajos] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [isResponsable, setIsResponsable] = useState(false);
+    const { getOrdenTrabajoUsuarioByUsuario }=useOrdenTrabajoUsuario();
+
+    const checkUserRole = async () => {
+        try {
+          const response = await getOrdenTrabajoUsuarioByUsuario();
+          const hasResponsableRole = response.some(
+            assignment => assignment.rol_en_orden === "Responsable"
+          );
+          setIsResponsable(hasResponsableRole);
+        } catch (error) {
+          console.error("Error checking user role:", error);
+        }
+      };
 
     // Función para obtener los trabajos asignados al usuario
     const fetchTrabajosAsignados = async () => {
@@ -95,7 +110,9 @@ const TrabajoAsignadoProvider = ({ children }) => {
 
     // Ejecutar la carga de trabajos al montar el provider
     useEffect(() => {
-        if (isAuth) {
+        if (isAuth 
+            && isResponsable
+        ) {
             fetchTrabajosAsignados();
         }
     }, [isAuth]);
