@@ -1,136 +1,248 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from "react-native";
-import Input from "../../components/Input";
-import Select from "../../components/Select";
-import useUsuarioTecnico from "../../hooks/UsuarioTecnico/useUsuarioTecnico";
-import usePuerto from "../../hooks/Puerto/usePuerto";
-import useOrdenTrabajo from "../../hooks/OrdenTrabajo/useOrdenTrabajo";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+  ActivityIndicator,
+  Alert
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import useOrdenTrabajoUsuario from "../../hooks/OrdenTrabajoUsuario/useOrdenTrabajoUsuario";
-import useOrdenTrabajoSistema from "../../hooks/OrdenTrabajoSistema/useOrdenTrabajoSistema";
-import useOrdenTrabajoParte from "../../hooks/OrdenTrabajoParte/useOrdenTrabajoParte";
-import useTipoTrabajoESP from "../../hooks/TipoTrabajoESP/useTipoTrabajoESP"
-import { CommonActions } from '@react-navigation/native';
+import useUsuarioTecnico from "../../hooks/UsuarioTecnico/useUsuarioTecnico";
 
-const ReasignarTrabajo = ({route, navigation }) => {
-  const {sistemas,empresa,embarcacion,trabajo,codigoOT,idOrden }=route.params;
-  const [puerto, setPuerto] = useState(null);
-  const [tecnico, setTecnico] = useState(null);
-  const [motorista, setMotorista] = useState("");
-  const [supervisor, setSupervisor] = useState("");
-  const [ayudantes, setAyudantes] = useState([]);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const { usuariosTecnicos } = useUsuarioTecnico();
-  const { puertos } = usePuerto();
-  const { guardarOrdenTrabajo, loading, error } = useOrdenTrabajo(); 
-  const { guardarOrdenTrabajoUsuario } = useOrdenTrabajoUsuario();
-  const { guardarOrdenTrabajoSistema } = useOrdenTrabajoSistema();
-  const { agregarOrdenTrabajoParte } = useOrdenTrabajoParte();
-  const { parts, fetchPartsBySistema } = useTipoTrabajoESP();
-
-  const [puertosOptions, setPuertosOptions] = useState([]);
+const ReasignarTrabajoScreen = ({ route, navigation }) => {
+  const { idOrden } = route.params;
+  const [usuarios, setUsuarios] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const { getOrdenTrabajoUsuarioByOrden, reasignarOTOtroUsuario } = useOrdenTrabajoUsuario();
+  const { getUsuarioById } = useUsuarioTecnico();
 
   useEffect(() => {
-    const options = puertos.map((puerto) => ({
-      label: puerto.nombre,
-      value: puerto.id_puerto,
-    }));
-    setPuertosOptions(options);
-  }, [puertos]);
+    cargarUsuarios();
+  }, []);
 
-  const handleSeleccionarTecnico = () => {
-    navigation.navigate("SeleccionarTecnico", {
-      tecnicoSeleccionado: tecnico,
-      onSelect: (nuevoTecnico) => setTecnico(nuevoTecnico),
-      usuariosExcluidos: ayudantes.map((a) => a.id),
-    });
-  };
-
-  const handleSeleccionarAyudantes = () => {
-    navigation.navigate("SeleccionarAyudantes", {
-      ayudantesSeleccionados: ayudantes,
-      onSelect: (nuevosAyudantes) => setAyudantes(nuevosAyudantes),
-      usuarioExcluido: tecnico ? [tecnico.id] : [],
-    });
-  };
-
-
-  const handleGuardar = async () => {
-    if (!tecnico || !puerto) {
-      alert("Debe seleccionar un técnico y un puerto.");
-      return;
-    }
-    
+  const cargarUsuarios = async () => {
     try {
-        await guardarOrdenTrabajoUsuario(idOrden, tecnico.id, "Responsable");
-
-        // Luego guardamos los ayudantes con rol de ayudante
-        for (let ayudante of ayudantes) {
-          await guardarOrdenTrabajoUsuario(idOrden, ayudante.id, "Ayudante");
-        }
-  
-        alert("Orden de trabajo y usuarios asociados guardados con éxito");
-        navigation.dispatch(
-          CommonActions.reset({
-            index: 1,
-            routes: [
-              { name: 'InicioJefe' }
-            ],
+      const response = await getOrdenTrabajoUsuarioByOrden(idOrden);
+      if (response) {
+        const usuariosConNombre = await Promise.all(
+          response.map(async (usuario) => {
+            const usuarioData = await getUsuarioById(usuario.id_usuario);
+            return {
+              ...usuario,
+              nombre_completo: usuarioData?.nombre_completo || "Desconocido",
+            };
           })
         );
+
+        const usuariosOrdenados = usuariosConNombre.sort((a, b) =>
+          a.rol_en_orden === "Responsable" ? -1 : 1
+        );
+
+        setUsuarios(usuariosOrdenados);
+      }
+      setIsLoading(false);
     } catch (error) {
-      alert("Error al guardar la orden de trabajo: " + error);
-      console.log(error);
+      console.error("Error al cargar usuarios:", error);
+      Alert.alert("Error", "No se pudieron cargar los usuarios");
+      setIsLoading(false);
     }
   };
 
-  return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Reasignar Trabajo</Text>
-      <View style={styles.field}>
-        <Text style={styles.label}>Código de OT:</Text>
-        <Text style={styles.selectedText}>{codigoOT}</Text>
+  const handleReasignarResponsable = () => {
+    const responsable = usuarios.find(u => u.rol_en_orden === "Responsable");
+    navigation.navigate("SeleccionarTecnicoReasignar", {
+      usuarioActual: responsable,
+      onSelect: async (nuevoTecnico) => {
+        try {
+          const nuevosUsuarios = usuarios.map(u => {
+            if (u.rol_en_orden === "Responsable") {
+              return {
+                id_usuario: nuevoTecnico.id,
+                rol_en_orden: "Responsable",
+                observaciones: u.observaciones || "Responsable de supervisión general."
+              };
+            }
+            return {
+              id_usuario: u.id_usuario,
+              rol_en_orden: u.rol_en_orden,
+              observaciones: u.observaciones || "Responsable de supervisión general."
+            };
+          });
+
+          await reasignarOTOtroUsuario(idOrden, nuevosUsuarios);
+          Alert.alert("Éxito", "Responsable reasignado correctamente");
+          cargarUsuarios();
+        } catch (error) {
+          console.error("Error al reasignar responsable:", error);
+          Alert.alert("Error", "No se pudo reasignar el responsable");
+        }
+      }
+    });
+  };
+
+  const handleReasignarAyudantes = () => {
+    const responsable = usuarios.find(u => u.rol_en_orden === "Responsable");
+    const ayudantes = usuarios.filter(u => u.rol_en_orden === "Ayudante");
+    
+    navigation.navigate("SeleccionarAyudantesReasignar", {
+      ayudantesActuales: ayudantes,
+      usuarioResponsable: responsable,
+      onSelect: async (nuevosAyudantes) => {
+        try {
+          const nuevosUsuarios = [
+            {
+              id_usuario: responsable.id_usuario,
+              rol_en_orden: "Responsable",
+              observaciones: responsable.observaciones || "Responsable de supervisión general."
+            },
+            ...nuevosAyudantes.map(ayudante => ({
+              id_usuario: ayudante.id,
+              rol_en_orden: "Ayudante",
+              observaciones: "Ayudante en el trabajo."
+            }))
+          ];
+
+          await reasignarOTOtroUsuario(idOrden, nuevosUsuarios);
+          Alert.alert("Éxito", "Ayudantes reasignados correctamente");
+          cargarUsuarios();
+        } catch (error) {
+          console.error("Error al reasignar ayudantes:", error);
+          Alert.alert("Error", "No se pudieron reasignar los ayudantes");
+        }
+      }
+    });
+  };
+
+  if (isLoading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#5c6bc0" />
       </View>
-      <View style={styles.field}>
-        <Text style={styles.label}>Técnico:</Text>
-        <TouchableOpacity style={styles.button} onPress={handleSeleccionarTecnico}>
-          <Text style={styles.buttonText}>
-            {tecnico ? tecnico.nombre_completo : "Seleccionar Técnico"}
-          </Text>
-        </TouchableOpacity>
+    );
+  }
+
+  const responsable = usuarios.find(u => u.rol_en_orden === "Responsable");
+  const ayudantes = usuarios.filter(u => u.rol_en_orden === "Ayudante");
+
+  return (
+    <ScrollView style={styles.container}>
+      <Text style={styles.title}>Reasignar Trabajo</Text>
+      
+      <View style={styles.section}>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Responsable Actual</Text>
+          <TouchableOpacity 
+            style={styles.reasignarButton}
+            onPress={handleReasignarResponsable}
+          >
+            <Ionicons name="swap-horizontal" size={20} color="white" />
+            <Text style={styles.buttonText}>Reasignar</Text>
+          </TouchableOpacity>
+        </View>
+        <View style={styles.userCard}>
+          <Ionicons name="person" size={24} color="#00796B" />
+          <Text style={styles.userName}>{responsable?.nombre_completo}</Text>
+        </View>
       </View>
 
-      <View style={styles.field}>
-        <Text style={styles.label}>Apoyo (Ayudantes):</Text>
-        <TouchableOpacity style={styles.button} onPress={handleSeleccionarAyudantes}>
-          <Text style={styles.buttonText}>Seleccionar Ayudantes</Text>
-        </TouchableOpacity>
+      <View style={styles.section}>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Ayudantes Actuales</Text>
+          <TouchableOpacity 
+            style={styles.reasignarButton}
+            onPress={handleReasignarAyudantes}
+          >
+            <Ionicons name="swap-horizontal" size={20} color="white" />
+            <Text style={styles.buttonText}>Reasignar</Text>
+          </TouchableOpacity>
+        </View>
         {ayudantes.length > 0 ? (
-          ayudantes.map((ayudante, index) => (
-            <Text key={index} style={styles.selectedText}>
-              • {ayudante.nombre_completo}
-            </Text>
+          ayudantes.map((ayudante) => (
+            <View key={ayudante.id_orden_trabajo_usuario} style={styles.userCard}>
+              <Ionicons name="person-outline" size={24} color="#00796B" />
+              <Text style={styles.userName}>{ayudante.nombre_completo}</Text>
+            </View>
           ))
         ) : (
-          <Text style={styles.selectedText}>No hay ayudantes seleccionados</Text>
+          <Text style={styles.emptyText}>No hay ayudantes asignados</Text>
         )}
       </View>
-      <TouchableOpacity style={styles.buttonSave} onPress={handleGuardar}>
-        <Text style={styles.buttonText}>GUARDAR</Text>
-      </TouchableOpacity>
     </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flexGrow: 1, padding: 20, backgroundColor: "#F5F6F8" },
-  title: { fontSize: 24, fontWeight: "bold", marginBottom: 20, textAlign: "center" },
-  field: { marginBottom: 16 },
-  label: { fontSize: 16, fontWeight: "500", marginBottom: 8, color: "#333" },
-  button: { backgroundColor: "#5c6bc0", borderRadius: 8, paddingVertical: 10, alignItems: "center", marginVertical: 8 },
-  buttonSave: { marginTop: 20, backgroundColor: "#2E7D32", borderRadius: 8, paddingVertical: 12, alignItems: "center" },
-  buttonText: { color: "#fff", fontSize: 16, fontWeight: "bold" },
-  selectedText: { fontSize: 14, color: "#333", marginTop: 2, marginLeft:10 },
+  container: {
+    flex: 1,
+    backgroundColor: "#F5F6F8",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginVertical: 20,
+    color: "#333",
+  },
+  section: {
+    backgroundColor: "white",
+    marginHorizontal: 20,
+    marginBottom: 20,
+    borderRadius: 12,
+    padding: 16,
+    elevation: 2,
+  },
+  sectionHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#333",
+  },
+  userCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#F5F6F8",
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 8,
+  },
+  userName: {
+    fontSize: 16,
+    marginLeft: 12,
+    color: "#333",
+    flex: 1,
+  },
+  reasignarButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#00796B",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 6,
+  },
+  buttonText: {
+    color: "white",
+    marginLeft: 6,
+    fontWeight: "500",
+  },
+  emptyText: {
+    textAlign: "center",
+    color: "#666",
+    fontStyle: "italic",
+    marginTop: 8,
+  },
 });
 
-export default ReasignarTrabajo;
+export default ReasignarTrabajoScreen;
