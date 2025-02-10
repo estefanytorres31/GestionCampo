@@ -89,10 +89,24 @@ const OrdenesTrabajoScreen = ({ navigation }) => {
         ? ordenes.filter(orden => orden.estado.toLowerCase() === filtroEstado.toLowerCase())
         : ordenes;
 
-    const handleReasignarPress = (item) => {
-        // Implementar lógica de reasignación
-        navigation.navigate('ReasignarOrdenTrabajo', { ordenTrabajo: item });
-    };
+        const handleReasignarPress = (item) => {
+            navigation.navigate('Reasignar', {
+                sistemas: [{ 
+                    id_embarcacion_sistema: item.id_embarcacion_sistema,
+                    id_sistema: item.id_sistema 
+                }],
+                empresa: { id_empresa: item.id_empresa },
+                embarcacion: { 
+                    id_embarcacion: item.id_embarcacion,
+                    nombre: item.nombre_embarcacion 
+                },
+                trabajo: {
+                    id_tipo_trabajo: item.id_tipo_trabajo,
+                    nombre_trabajo: item.nombre_trabajo
+                },
+                codigoOT: item.codigo
+            });
+        };
 
     const renderItem = ({ item }) => (
         <TouchableOpacity 
@@ -368,5 +382,6 @@ const OrdenesTrabajoScreen = ({ navigation }) => {
             gap: 8, // Espacio entre elementos
         },
     });
+
 
 export default OrdenesTrabajoScreen;
