@@ -12,7 +12,7 @@ import useTipoTrabajoESP from "../../hooks/TipoTrabajoESP/useTipoTrabajoESP"
 import { CommonActions } from '@react-navigation/native';
 
 const ReasignarTrabajo = ({route, navigation }) => {
-  const {sistemas,empresa,embarcacion,trabajo,codigoOT }=route.params;
+  const {sistemas,empresa,embarcacion,trabajo,codigoOT,idOrden }=route.params;
   const [puerto, setPuerto] = useState(null);
   const [tecnico, setTecnico] = useState(null);
   const [motorista, setMotorista] = useState("");
@@ -54,43 +54,6 @@ const ReasignarTrabajo = ({route, navigation }) => {
     });
   };
 
-  const createOrdenTrabajoSistemas = async (ordenTrabajoId) => {
-    try {
-
-      for (let sistema of sistemas) {
-        console.log(ordenTrabajoId);
-        console.log(sistema.id_embarcacion_sistema)
-        // Guardamos la orden de trabajo por sistema
-        const ordenTrabajoSistema = await guardarOrdenTrabajoSistema(
-          ordenTrabajoId,
-          sistema.id_embarcacion_sistema
-        );
-  
-        // Obtener las partes del sistema
-        const partsResponse = await fetchPartsBySistema(
-          trabajo.id_tipo_trabajo, 
-          embarcacion.id_embarcacion, 
-          sistema.id_sistema
-        );
-  
-        // Ensure we're accessing the correct part of the response
-        const partes = partsResponse.data || partsResponse;
-        console.log(ordenTrabajoSistema.id_orden_trabajo_sistema)
-        // Guardar cada parte en orden_trabajo_parte
-        for (let parte of partes) {
-          await agregarOrdenTrabajoParte(
-            ordenTrabajoSistema.id_orden_trabajo_sistema, 
-            parte.id_parte
-          );
-        }
-      }
-  
-      console.log('Órdenes de trabajo por sistema y partes creadas exitosamente');
-    } catch (error) {
-      console.error('Detailed error:', error);
-      throw new Error(`Error al crear órdenes de trabajo por sistema y partes: ${error.message}`);
-    }
-  };
 
   const handleGuardar = async () => {
     if (!tecnico || !puerto) {
@@ -99,23 +62,11 @@ const ReasignarTrabajo = ({route, navigation }) => {
     }
     
     try {
-      const response = await guardarOrdenTrabajo(
-        trabajo.id_tipo_trabajo,
-        embarcacion.id_embarcacion,
-        puerto,
-        codigoOT,
-        motorista || null,
-        supervisor || null
-      );
-
-      if (response) {
-        await createOrdenTrabajoSistemas(response.id_orden_trabajo);
-
-        await guardarOrdenTrabajoUsuario(response.id_orden_trabajo, tecnico.id, "Responsable");
+        await guardarOrdenTrabajoUsuario(idOrden, tecnico.id, "Responsable");
 
         // Luego guardamos los ayudantes con rol de ayudante
         for (let ayudante of ayudantes) {
-          await guardarOrdenTrabajoUsuario(response.id_orden_trabajo, ayudante.id, "Ayudante");
+          await guardarOrdenTrabajoUsuario(idOrden, ayudante.id, "Ayudante");
         }
   
         alert("Orden de trabajo y usuarios asociados guardados con éxito");
@@ -127,7 +78,6 @@ const ReasignarTrabajo = ({route, navigation }) => {
             ],
           })
         );
-      }
     } catch (error) {
       alert("Error al guardar la orden de trabajo: " + error);
       console.log(error);
@@ -141,33 +91,6 @@ const ReasignarTrabajo = ({route, navigation }) => {
         <Text style={styles.label}>Código de OT:</Text>
         <Text style={styles.selectedText}>{codigoOT}</Text>
       </View>
-      <View style={styles.field}>
-        <Text style={styles.label}>Trabajo:</Text>
-        <Text style={styles.selectedText}>{trabajo.nombre_trabajo}</Text>
-      </View>
-      <View style={styles.field}>
-        <Text style={styles.label}>Sistemas:</Text>
-        {sistemas.length > 0 ? (
-          sistemas.map((sistema, index) => (
-            <Text key={index} style={styles.selectedText}>
-              • {sistema.id_embarcacion_sistema}
-            </Text>
-          ))
-        ) : (
-          <Text style={styles.selectedText}>No hay sistemas seleccionados</Text>
-        )}
-      </View>
-
-      <View style={styles.field}>
-        <Text style={styles.label}>Puerto:</Text>
-        <Select
-          placeholder="Seleccione un puerto"
-          items={puertosOptions}
-          value={puerto}
-          onValueChange={setPuerto}
-        />
-      </View>
-
       <View style={styles.field}>
         <Text style={styles.label}>Técnico:</Text>
         <TouchableOpacity style={styles.button} onPress={handleSeleccionarTecnico}>
@@ -192,17 +115,6 @@ const ReasignarTrabajo = ({route, navigation }) => {
           <Text style={styles.selectedText}>No hay ayudantes seleccionados</Text>
         )}
       </View>
-
-      <View style={styles.field}>
-        <Text style={styles.label}>Motorista (Opcional):</Text>
-        <Input placeholder="Ingrese el nombre del motorista" value={motorista} onChangeText={setMotorista} />
-      </View>
-
-      <View style={styles.field}>
-        <Text style={styles.label}>Supervisor (Opcional):</Text>
-        <Input placeholder="Ingrese el nombre del supervisor" value={supervisor} onChangeText={setSupervisor} />
-      </View>
-
       <TouchableOpacity style={styles.buttonSave} onPress={handleGuardar}>
         <Text style={styles.buttonText}>GUARDAR</Text>
       </TouchableOpacity>

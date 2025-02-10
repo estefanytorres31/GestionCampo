@@ -1,6 +1,6 @@
 import React, { createContext, useState, useContext } from "react";
 import OrdenTrabajoUsuarioContext from "./OrdenTrabajoUsuarioContext";
-import { createOrdenTrabajoUsuario, getOrdenTrabajoUsuarioByUserId } from "../../services/OrdenTrabajoUsuarioService";
+import { createOrdenTrabajoUsuario, getOrdenTrabajoUsuarioByUserId, reasignarOTOtroUsuario, getOrdenTrabajoUsuarioByOT } from "../../services/OrdenTrabajoUsuarioService";
 const OrdenTrabajoUsuarioProvider = ({ children }) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -33,8 +33,35 @@ const OrdenTrabajoUsuarioProvider = ({ children }) => {
       }
     }
 
+    const getOrdenTrabajoUsuarioByOrden = async (id_orden_trabajo) => {
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await getOrdenTrabajoUsuarioByOT(id_orden_trabajo);
+        return response.data;
+      } catch (err) {
+        setError(err.message);
+        console.error("Error al obtener las ordenes de trabajo de la orden:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    const reasignarOT = async (id_orden_trabajo, id_usuario_nuevo) => {
+      setLoading(true);
+      setError(null);
+      try {
+        const response=await reasignarOTOtroUsuario(id_orden_trabajo, id_usuario_nuevo);
+        return response.data;
+      } catch (err) {
+        setError(err.message);
+        console.error("Error al reasignar la orden de trabajo:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
     return (
-        <OrdenTrabajoUsuarioContext.Provider value={{ guardarOrdenTrabajoUsuario,getOrdenTrabajoUsuarioByUsuario, loading, error }}>
+        <OrdenTrabajoUsuarioContext.Provider value={{ guardarOrdenTrabajoUsuario,getOrdenTrabajoUsuarioByUsuario,reasignarOT,getOrdenTrabajoUsuarioByOrden, loading, error }}>
           {children}
         </OrdenTrabajoUsuarioContext.Provider>
       );

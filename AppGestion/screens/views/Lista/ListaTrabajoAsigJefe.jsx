@@ -104,7 +104,8 @@ const OrdenesTrabajoScreen = ({ navigation }) => {
                 id_tipo_trabajo: item.id_tipo_trabajo,
                 nombre_trabajo: item.nombre_trabajo
             },
-            codigoOT: item.codigo
+            codigoOT: item.codigo,
+            idOrden:item.id_orden_trabajo
         });
     };
 
