@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { 
     View, 
     Text, 
-    FlatList, 
+    ScrollView, 
     ActivityIndicator, 
     StyleSheet, 
     TouchableOpacity,
@@ -15,54 +15,25 @@ import useOrdenTrabajo from "../../hooks/OrdenTrabajo/useOrdenTrabajo";
 
 const { width } = Dimensions.get('window');
 
-// Move getEstadoConfig outside the component to make it a standalone function
 const getEstadoConfig = (estado) => {
     switch (estado.toLowerCase()) {
         case 'pendiente':
-            return {
-                backgroundColor: '#FEF3C7',
-                textColor: '#D97706',
-                icon: 'clock-outline',
-                label: 'Pendiente'
-            };
+            return { backgroundColor: '#FEF3C7', textColor: '#D97706', icon: 'clock-outline', label: 'Pendiente' };
         case 'en_progreso':
-            return {
-                backgroundColor: '#DBEAFE',
-                textColor: '#2563EB',
-                icon: 'progress-clock',
-                label: 'En Progreso'
-            };
+            return { backgroundColor: '#DBEAFE', textColor: '#2563EB', icon: 'progress-clock', label: 'En Progreso' };
         case 'completado':
-            return {
-                backgroundColor: '#DEF7EC',
-                textColor: '#059669',
-                icon: 'check-circle-outline',
-                label: 'Completado'
-            };
+            return { backgroundColor: '#DEF7EC', textColor: '#059669', icon: 'check-circle-outline', label: 'Completado' };
         default:
-            return {
-                backgroundColor: '#E5E7EB',
-                textColor: '#6B7280',
-                icon: 'help-circle-outline',
-                label: estado
-            };
+            return { backgroundColor: '#E5E7EB', textColor: '#6B7280', icon: 'help-circle-outline', label: estado };
     }
 };
 
 const EstadoBadge = ({ estado }) => {
     const config = getEstadoConfig(estado);
-
     return (
         <View style={[styles.estadoBadge, { backgroundColor: config.backgroundColor }]}>
-            <MaterialCommunityIcons 
-                name={config.icon} 
-                size={16} 
-                color={config.textColor} 
-                style={styles.estadoIcon}
-            />
-            <Text style={[styles.estadoText, { color: config.textColor }]}>
-                {config.label}
-            </Text>
+            <MaterialCommunityIcons name={config.icon} size={16} color={config.textColor} style={styles.estadoIcon} />
+            <Text style={[styles.estadoText, { color: config.textColor }]}>{config.label}</Text>
         </View>
     );
 };
@@ -70,7 +41,6 @@ const EstadoBadge = ({ estado }) => {
 const OrdenesTrabajoScreen = ({ navigation }) => {
     const { obtenerTrabajosPorJefeAsig, loading, error } = useOrdenTrabajo();
     const [ordenes, setOrdenes] = useState([]);
-    const [filtroEstado, setFiltroEstado] = useState(null);
 
     useEffect(() => {
         const cargarOrdenes = async () => {
@@ -81,50 +51,6 @@ const OrdenesTrabajoScreen = ({ navigation }) => {
         };
         cargarOrdenes();
     }, []);
-
-    const filtrarPorEstado = (estado) => {
-        setFiltroEstado(filtroEstado === estado ? null : estado);
-    };
-
-    const ordenesFiltradas = filtroEstado
-        ? ordenes.filter(orden => orden.estado.toLowerCase() === filtroEstado.toLowerCase())
-        : ordenes;
-
-    const renderItem = ({ item }) => (
-        <TouchableOpacity 
-            style={styles.card}
-            onPress={() => handleDetailsPress(item)}
-            activeOpacity={0.7}
-        >
-            <View style={styles.cardHeader}>
-                <View style={styles.codeContainer}>
-                    <Text style={styles.codigo}>{item.codigo}</Text>
-                </View>
-                <EstadoBadge estado={item.estado} />
-            </View>
-
-            <View style={styles.cardContent}>
-                <View style={styles.infoRow}>
-                    <MaterialCommunityIcons name="calendar-clock" size={20} color="#6366F1" />
-                    <Text style={styles.infoText}>
-                        <Text style={styles.infoLabel}>Fecha: </Text>
-                        {new Date(item.fecha_asignacion).toLocaleDateString()}
-                    </Text>
-                </View>
-            </View>
-
-            <TouchableOpacity 
-                style={[
-                    styles.detailsButton,
-                    { backgroundColor: getEstadoConfig(item.estado).textColor }
-                ]}
-                onPress={() => handleDetailsPress(item)}
-            >
-                <Text style={styles.detailsButtonText}>Ver detalles</Text>
-                <MaterialCommunityIcons name="arrow-right" size={20} color="white" />
-            </TouchableOpacity>
-        </TouchableOpacity>
-    );
 
     if (loading) {
         return (
@@ -146,44 +72,53 @@ const OrdenesTrabajoScreen = ({ navigation }) => {
 
     const handleDetailsPress = (item) => {
         navigation.navigate('DetallesOrdenTrabajo', { ordenTrabajo: item });
-
     };
-
-    const renderHeader = () => (
-        <LinearGradient
-            colors={['#6366F1', '#4F46E5']}
-            style={styles.header}
-        >
-            <MaterialCommunityIcons name="clipboard-list-outline" size={40} color="white" />
-            <Text style={styles.title}>Órdenes de Trabajo</Text>
-            <Text style={styles.subtitle}>
-                {ordenes.length} {ordenes.length === 1 ? 'orden asignada' : 'órdenes asignadas'}
-            </Text>
-        </LinearGradient>
-    );
 
     return (
         <View style={styles.container}>
             <StatusBar barStyle="light-content" />
-            {ordenes.length === 0 ? (
-                <View style={styles.emptyContainer}>
-                    <MaterialCommunityIcons name="clipboard-outline" size={80} color="#9CA3AF" />
-                    <Text style={styles.noData}>No hay órdenes de trabajo asignadas</Text>
-                </View>
-            ) : (
-                <FlatList
-                    data={ordenesFiltradas}
-                    keyExtractor={(item) => item.id_orden_trabajo.toString()}
-                    renderItem={renderItem}
-                    ListHeaderComponent={
-                        <>
-                            {renderHeader()}
-                        </>
-                    }
-                    contentContainerStyle={styles.listContainer}
-                    showsVerticalScrollIndicator={false}
-                />
-            )}
+            <LinearGradient colors={['#6366F1', '#4F46E5']} style={styles.header}>
+                <MaterialCommunityIcons name="clipboard-list-outline" size={40} color="white" />
+                <Text style={styles.title}>Órdenes de Trabajo</Text>
+                <Text style={styles.subtitle}>{ordenes.length} {ordenes.length === 1 ? 'orden asignada' : 'órdenes asignadas'}</Text>
+            </LinearGradient>
+            <ScrollView contentContainerStyle={styles.listContainer} showsVerticalScrollIndicator={false}>
+                {ordenes.length === 0 ? (
+                    <View style={styles.emptyContainer}>
+                        <MaterialCommunityIcons name="clipboard-outline" size={80} color="#9CA3AF" />
+                        <Text style={styles.noData}>No hay órdenes de trabajo asignadas</Text>
+                    </View>
+                ) : (
+                    ordenes.map((item) => (
+                        <TouchableOpacity 
+                            key={item.id_orden_trabajo}
+                            style={styles.card}
+                            onPress={() => handleDetailsPress(item)}
+                            activeOpacity={0.7}
+                        >
+                            <View style={styles.cardHeader}>
+                                <View style={styles.codeContainer}>
+                                    <Text style={styles.codigo}>{item.codigo}</Text>
+                                </View>
+                                <EstadoBadge estado={item.estado} />
+                            </View>
+                            <View style={styles.cardContent}>
+                                <View style={styles.infoRow}>
+                                    <MaterialCommunityIcons name="calendar-clock" size={20} color="#6366F1" />
+                                    <Text style={styles.infoText}><Text style={styles.infoLabel}>Fecha: </Text>{new Date(item.fecha_asignacion).toLocaleDateString()}</Text>
+                                </View>
+                            </View>
+                            <TouchableOpacity 
+                                style={[styles.detailsButton, { backgroundColor: getEstadoConfig(item.estado).textColor }]}
+                                onPress={() => handleDetailsPress(item)}
+                            >
+                                <Text style={styles.detailsButtonText}>Ver detalles</Text>
+                                <MaterialCommunityIcons name="arrow-right" size={20} color="white" />
+                            </TouchableOpacity>
+                        </TouchableOpacity>
+                    ))
+                )}
+            </ScrollView>
         </View>
     );
 };
