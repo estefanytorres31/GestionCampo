@@ -9,24 +9,13 @@ import { TbViewportWide } from "react-icons/tb";
 import { TbViewportNarrow } from "react-icons/tb";
 import { GiCargoShip, GiHarborDock } from "react-icons/gi";
 import { MdMenu, MdKeyboardArrowDown, MdAssignment } from "react-icons/md";
-import {
-  RiGroup2Fill,
-  RiShieldUserFill,
-  RiUserLocationFill,
-} from "react-icons/ri";
 import { IoLogOut } from "react-icons/io5";
-import { FaUserFriends } from "react-icons/fa";
-import { FaMapLocationDot } from "react-icons/fa6";
-import { BiSolidShip } from "react-icons/bi";
-import { LuShipWheel } from "react-icons/lu";
-import { HiClipboardList } from "react-icons/hi";
 
 import icono from "@/assets/logo.svg";
 import { useAuth } from "@/context/AuthContext";
 import roleMapper from "@/utils/roleMapper";
 
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faGear } from "@fortawesome/free-solid-svg-icons";
+import navigationModules from "@/data/navigationModules";
 
 // Variantes para la animación del submenú
 const subMenuVariants = {
@@ -70,99 +59,80 @@ const SideBar = () => {
     if (isTab) setIsOpen(false);
   }, [pathname, isTab]);
 
+  
+
   useEffect(() => {
-    const navigationElements = [
-      {
-        to: "/dashboard",
-        icon: <FaMapLocationDot size={20} className="min-w-max" />,
-        label: "Dashboard",
-        roles: ["Administrador", "Técnico", "Jefe"],
-      },
-      {
-        to: "/asistencias",
-        icon: <RiUserLocationFill size={20} className="min-w-max" />,
-        label: "Asistencias",
-        roles: ["Administrador", "Técnico", "Jefe"],
-      },
-      {
-        to: "/trabajos-asignados",
-        icon: <HiClipboardList size={20} className="min-w-max" />,
-        label: "Trabajos Asignados",
-        roles: ["Administrador", "Técnico", "Jefe"],
-      },
-      {
-        icon: <RiShieldUserFill size={20} className="min-w-max" />,
-        label: "Usuarios",
-        roles: ["Administrador"],
-        subItems: [
-          {
-            to: "/usuarios",
-            label: "Usuarios",
-            icon: <FaUserFriends size={18} className="min-w-max" />,
-            roles: ["Administrador"],
-          },
-          {
-            to: "/roles",
-            label: "Roles",
-            icon: <RiShieldUserFill size={18} className="min-w-max" />,
-            roles: ["Administrador"],
-          },
-          {
-            to: "/permisos",
-            label: "Permisos",
-            icon: <RiShieldUserFill size={18} className="min-w-max" />,
-            roles: ["Administrador"],
-          },
-        ],
-      },
-    ];
-
-    // Usuario de ejemplo; normalmente proviene del contexto
-
-    console.log("roles", roles)
-    const rolesUsuario = roles?.map((r) => r.nombre) || [];
-
+    // 1. Filtramos los módulos que deben mostrarse en la sidebar.
+    const navigationElements = navigationModules.filter((item) => item.sidebar);
+    console.log("navigationElements", navigationElements);
+  
+    // 2. Extraemos los roles del usuario.
+    const rolesUsuario = roles?.map((r) => r.key) || [];
+    console.log("rolesUsuario", rolesUsuario);
+    console.log("roles", roles);
+  
+    // 3. Extraemos todos los permisos de todos los roles.
     const allPermissions = roles?.flatMap((r) =>
       Array.isArray(r.permisos)
         ? r.permisos.map((p) => ({
             id: p.id,
-            nombre: p.nombre,
+            key: p.key,       // Ej: "permisos.LEER"
+            nombre: p.nombre, // Ej: "Administrar Permisos - Leer"
           }))
         : []
     ) || [];
-    
-    const uniquePermissions = Array.from(
-      new Map(allPermissions.map((permiso) => [permiso.id, permiso])).values()
+    console.log("allPermissions", allPermissions);
+  
+    // 4. Filtramos solo los permisos cuyo key termine en ".LEER"
+    const permissionsEndingInLeer = allPermissions.filter((permiso) =>
+      permiso.key.endsWith(".LEER")
     );
-    
+    console.log("permissionsEndingInLeer", permissionsEndingInLeer);
+  
+    // 5. Eliminamos duplicados basados en el valor de 'key'
+    const uniquePermissions = Array.from(
+      new Map(permissionsEndingInLeer.map((permiso) => [permiso.key, permiso])).values()
+    );
     console.log("uniquePermissions", uniquePermissions);
-
+  
+    // 6. Creamos un Set con los resourceKey permitidos, quitándole el sufijo ".LEER"
+    const allowedResourceKeys = new Set(
+      uniquePermissions.map((permiso) => permiso.key.replace(".LEER", ""))
+    );
+    console.log("allowedResourceKeys", allowedResourceKeys);
+  
+    // 7. Función para filtrar elementos de navegación (incluyendo subItems)
     function filterElements(elements) {
       return elements.reduce((acc, item) => {
-        // Si el elemento tiene la propiedad `roles`, se verifica la intersección:
-        if (item.roles && !item.roles.some((rol) => rolesUsuario.includes(rol))) {
-          // Si no hay coincidencia, se omite el elemento.
+
+  
+        // Filtrado por resourceKey: si el elemento tiene resourceKey y no está en allowedResourceKeys, lo descartamos.
+        if (item.resourceKey && !allowedResourceKeys.has(item.resourceKey)) {
+          console.log(`Se descarta ${item.label} por resourceKey: ${item.resourceKey} no está en [${[...allowedResourceKeys].join(", ")}]`);
           return acc;
         }
-
-        // Clonamos el elemento para no modificar el original
+  
+        // Clonamos el elemento para no modificar el original.
         const newItem = { ...item };
-
-        // Si el elemento tiene subItems, se filtran recursivamente.
+  
+        // Si tiene subItems, los filtramos recursivamente.
         if (newItem.subItems) {
+          console.log(`Evaluando subItems de ${newItem.label}`);
           newItem.subItems = filterElements(newItem.subItems);
         }
-
-        // Se agrega el elemento filtrado.
+  
+        console.log(`Se incluye ${newItem.label}`);
         acc.push(newItem);
         return acc;
       }, []);
     }
-
-    // Se filtran los elementos de navegación.
+  
+    // 8. Se filtran los elementos de navegación.
     const elementsFiltered = filterElements(navigationElements);
+    console.log("elementsFiltered", elementsFiltered);
     setLink(elementsFiltered);
-  }, []);
+  }, [roles]);
+  
 
   return (
     <aside>

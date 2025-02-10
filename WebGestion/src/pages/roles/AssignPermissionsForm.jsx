@@ -72,6 +72,7 @@ const AssignPermissionsForm = ({ onSuccess, onCancel }) => {
         const assigned = assignedData.map((perm) => ({
           id: perm.id,
           nombre: perm.nombre,
+          key: perm.key
         }));
         setAssignedPermissions(assigned);
         setSelectedPermissions(assigned);
@@ -160,6 +161,7 @@ const AssignPermissionsForm = ({ onSuccess, onCancel }) => {
           ? selectedPermissions.map((permiso) => ({
               id: permiso.id,
               nombre: permiso.nombre,
+              key: permiso.key
             }))
           : [];
 
@@ -227,7 +229,7 @@ const AssignPermissionsForm = ({ onSuccess, onCancel }) => {
                 key={perm.id}
                 className="flex items-center p-2 border rounded role-card"
                 onClick={() =>
-                  togglePermission({ id: perm.id, nombre: perm.nombre })
+                  togglePermission({ id: perm.id, nombre: perm.nombre, key: perm.key })
                 }
               >
                 <input
