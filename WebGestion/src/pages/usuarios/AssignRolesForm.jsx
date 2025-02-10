@@ -65,6 +65,8 @@ const AssignRolesForm = ({ onSuccess, onCancel }) => {
   const [selectedRoles, setSelectedRoles] = useState([]);
   const [loading, setLoading] = useState(false);
   const [localError, setLocalError] = useState("");
+  // Estado para mostrar el modal de advertencia cuando no hay roles seleccionados
+  const [showNoRolesModal, setShowNoRolesModal] = useState(false);
 
   // Transformar la data asignada en un array de objetos { id, nombre }
   useEffect(() => {
@@ -88,6 +90,18 @@ const AssignRolesForm = ({ onSuccess, onCancel }) => {
 
   // Función para agregar o quitar un rol de la selección
   const toggleRole = (role) => {
+    // Evitar quitar el rol "Administrador" si el usuario es el superadministrador (id "1")
+    if (
+      userId === "1" &&
+      role.nombre.toLowerCase() === "administrador" &&
+      selectedRoles.find((r) => r.id === role.id)
+    ) {
+      setLocalError("No se puede quitar el rol de Administrador al superadministrador.");
+      return;
+    }
+    // Limpiar error si la acción es válida
+    setLocalError("");
+
     if (selectedRoles.find((r) => r.id === role.id)) {
       setSelectedRoles(selectedRoles.filter((r) => r.id !== role.id));
     } else {
@@ -97,6 +111,16 @@ const AssignRolesForm = ({ onSuccess, onCancel }) => {
 
   // Manejo del checkbox
   const handleCheckboxChange = (e, role) => {
+    // Si se intenta desmarcar el rol Administrador para el usuario 1, se evita
+    if (
+      userId === "1" &&
+      role.nombre.toLowerCase() === "administrador" &&
+      !e.target.checked
+    ) {
+      setLocalError("No se puede quitar el rol de Administrador al superadministrador.");
+      return;
+    }
+    setLocalError("");
     if (e.target.checked) {
       if (!selectedRoles.find((r) => r.id === role.id)) {
         setSelectedRoles([...selectedRoles, role]);
@@ -108,6 +132,13 @@ const AssignRolesForm = ({ onSuccess, onCancel }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Verificar si no se han seleccionado roles.
+    if (selectedRoles.length === 0) {
+      setShowNoRolesModal(true);
+      return;
+    }
+
     setLoading(true);
     setLocalError("");
     try {
@@ -116,9 +147,15 @@ const AssignRolesForm = ({ onSuccess, onCancel }) => {
         (sr) => !assignedRoles.find((ar) => ar.id === sr.id)
       );
       // Roles a remover: los que estaban asignados pero ya no están en selectedRoles
-      const toRemove = assignedRoles.filter(
+      let toRemove = assignedRoles.filter(
         (ar) => !selectedRoles.find((sr) => sr.id === ar.id)
       );
+      // Si es el superadministrador (id "1"), se excluye el rol de Administrador de la remoción.
+      if (userId === "1") {
+        toRemove = toRemove.filter(
+          (role) => role.nombre.toLowerCase() !== "administrador"
+        );
+      }
 
       // Asignar nuevos roles
       await Promise.all(
@@ -175,101 +212,127 @@ const AssignRolesForm = ({ onSuccess, onCancel }) => {
   if (userError) return <p className="text-red-500">{userError}</p>;
   if (!user) return <p>Cargando datos del usuario...</p>;
   if (loadingAvailable || loadingAssigned) return <p>Cargando roles...</p>;
-  if (errorAvailable) return <p className="text-red-500">Error al obtener datos.</p>;
+  if (errorAvailable)
+    return <p className="text-red-500">Error al obtener datos.</p>;
 
   return (
-    <div
-      className="max-w-3xl mx-auto p-6 shadow-md rounded-md"
-      style={{
-        backgroundColor: "var(--primary-bg)",
-        border: "1px solid var(--border-color)",
-        color: "var(--primary-text)",
-      }}
-    >
-      <h2
-        className="text-2xl font-bold mb-4"
-        style={{ color: "var(--primary-text)" }}
+    <div>
+      <div
+        className="max-w-3xl mx-auto p-6 shadow-md rounded-md"
+        style={{
+          backgroundColor: "var(--primary-bg)",
+          border: "1px solid var(--border-color)",
+          color: "var(--primary-text)",
+        }}
       >
-        Asignar Roles al Usuario: {user.nombre_usuario}
-      </h2>
-      {localError && <p className="text-red-500 mb-4">{localError}</p>}
-      <form onSubmit={handleSubmit}>
-        {/* Sección de roles disponibles */}
-        <div className="mb-6">
-          <h3
-            className="text-xl font-semibold mb-2"
-            style={{ color: "var(--primary-text)" }}
-          >
-            Roles Disponibles
-          </h3>
-          <div className="grid grid-cols-2 gap-2">
-            {availableRoles.map((role) => (
-              <div
-                key={role.id}
-                className="flex items-center p-2 border rounded cursor-pointer role-card"
-                onClick={() =>
-                  toggleRole({ id: role.id, nombre: role.nombre_rol })
-                }
-              >
-                <input
-                  type="checkbox"
-                  checked={!!selectedRoles.find((r) => r.id === role.id)}
-                  onChange={(e) =>
-                    handleCheckboxChange(e, {
-                      id: role.id,
-                      nombre: role.nombre_rol,
-                    })
-                  }
-                  className="mr-2"
-                />
-                <span style={{ color: "var(--primary-text)" }}>
-                  {role.nombre_rol}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Sección de roles seleccionados (chips) */}
-        <div className="mb-6">
-          <h3
-            className="text-xl font-semibold mb-2"
-            style={{ color: "var(--primary-text)" }}
-          >
-            Roles Seleccionados
-          </h3>
-          {selectedRoles.length > 0 ? (
-            <div className="flex flex-wrap gap-2">
-              {selectedRoles.map((role) => (
+        <h2
+          className="text-2xl font-bold mb-4"
+          style={{ color: "var(--primary-text)" }}
+        >
+          Asignar Roles al Usuario: {user.nombre_usuario}
+        </h2>
+        {localError && <p className="text-red-500 mb-4">{localError}</p>}
+        <form onSubmit={handleSubmit}>
+          {/* Sección de roles disponibles */}
+          <div className="mb-6">
+            <h3
+              className="text-xl font-semibold mb-2"
+              style={{ color: "var(--primary-text)" }}
+            >
+              Roles Disponibles
+            </h3>
+            <div className="grid grid-cols-2 gap-2">
+              {availableRoles.map((role) => (
                 <div
                   key={role.id}
-                  className="flex items-center bg-blue-100 text-blue-700 px-3 py-1 rounded-full"
+                  className="flex items-center p-2 border rounded cursor-pointer role-card"
+                  onClick={() =>
+                    toggleRole({ id: role.id, nombre: role.nombre_rol })
+                  }
                 >
-                  <span>{role.nombre}</span>
-                  <button
-                    type="button"
-                    onClick={() => toggleRole(role)}
-                    className="ml-2 focus:outline-none"
-                  >
-                    <MdClose />
-                  </button>
+                  <input
+                    type="checkbox"
+                    checked={!!selectedRoles.find((r) => r.id === role.id)}
+                    onChange={(e) =>
+                      handleCheckboxChange(e, {
+                        id: role.id,
+                        nombre: role.nombre_rol,
+                      })
+                    }
+                    className="mr-2"
+                  />
+                  <span style={{ color: "var(--primary-text)" }}>
+                    {role.nombre_rol}
+                  </span>
                 </div>
               ))}
             </div>
-          ) : (
-            <p className="text-gray-500">No hay roles seleccionados.</p>
-          )}
-        </div>
+          </div>
 
-        <div className="flex justify-end gap-4">
-          <Button type="button" onClick={handleCancel} disabled={loading}>
-            Cancelar
-          </Button>
-          <Button type="submit" disabled={loading}>
-            {loading ? "Guardando..." : "Guardar Cambios"}
-          </Button>
+          {/* Sección de roles seleccionados (chips) */}
+          <div className="mb-6">
+            <h3
+              className="text-xl font-semibold mb-2"
+              style={{ color: "var(--primary-text)" }}
+            >
+              Roles Seleccionados
+            </h3>
+            {selectedRoles.length > 0 ? (
+              <div className="flex flex-wrap gap-2">
+                {selectedRoles.map((role) => (
+                  <div
+                    key={role.id}
+                    className="flex items-center bg-blue-100 text-blue-700 px-3 py-1 rounded-full"
+                  >
+                    <span>{role.nombre}</span>
+                    <button
+                      type="button"
+                      onClick={() => toggleRole(role)}
+                      className="ml-2 focus:outline-none"
+                    >
+                      <MdClose />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-gray-500">No hay roles seleccionados.</p>
+            )}
+          </div>
+
+          <div className="flex justify-end gap-4">
+            <Button type="button" onClick={handleCancel} disabled={loading}>
+              Cancelar
+            </Button>
+            <Button type="submit" disabled={loading}>
+              {loading ? "Guardando..." : "Guardar Cambios"}
+            </Button>
+          </div>
+        </form>
+      </div>
+
+      {/* Modal de advertencia cuando no hay roles seleccionados */}
+      {showNoRolesModal && (
+        <div
+          className="fixed inset-0 flex items-center justify-center z-50"
+          style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}
+        >
+          <div
+            className="p-6 rounded shadow-md max-w-sm w-full"
+            style={{
+              background: "var(--secondary-bg)",
+              border: "1px solid var(--border-color)",
+              color: "var(--primary-text)",
+            }}
+          >
+            <h2 className="text-xl font-bold mb-4">Atención</h2>
+            <p>El usuario debe tener al menos un rol asignado.</p>
+            <div className="mt-4 flex justify-end">
+              <Button onClick={() => setShowNoRolesModal(false)}>Cerrar</Button>
+            </div>
+          </div>
         </div>
-      </form>
+      )}
     </div>
   );
 };

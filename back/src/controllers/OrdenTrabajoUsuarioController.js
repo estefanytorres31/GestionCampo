@@ -61,3 +61,20 @@ export const deleteOrdenTrabajoUsuario = async (req, res) => {
         res.status(400).json({ message: error.message });
     }
 };
+
+/**
+ * Reasignar una orden de trabajo a nuevos usuarios
+ */
+export const reassignOrdenTrabajoUsuario = async (req, res) => {
+    try {
+        const { id_orden_trabajo, nuevos_usuarios } = req.body;
+        if (!id_orden_trabajo || !nuevos_usuarios) {
+            return res.status(400).json({ error: "Los campos id_orden_trabajo y nuevos_usuarios son obligatorios." });
+        }
+
+        const result = await OrdenTrabajoUsuarioService.reasignarOrdenTrabajo(id_orden_trabajo, nuevos_usuarios);
+        res.status(200).json({ message: "Orden de trabajo reasignada exitosamente.", data:result });
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+};

@@ -30,6 +30,12 @@ export const login = async (nombreUsuario, contrasena_hash) => {
   // Obtener los nombres de los roles
   const roles = usuario.usuario_roles.map((ur) => ur.rol.nombre_rol);
 
+  // Obtener tanto el id como el nombre de cada rol
+  const rolesPorId = usuario.usuario_roles.map((ur) => ({
+    id: ur.rol.id,
+    nombre: ur.rol.nombre_rol,
+  }));
+
   // Buscar la configuración de tema para el usuario
   const userThemeRecord = await prisma.usuarioConfiguracion.findFirst({
     where: {
@@ -61,7 +67,8 @@ export const login = async (nombreUsuario, contrasena_hash) => {
     nombreUsuario: usuario.nombre_usuario,
     nombreCompleto: usuario.nombre_completo,
     roles,
-    theme: userTheme, // Se agrega el tema configurado o "light" por defecto
+    rolesPorId,
+    theme: userTheme,
   };
 };
 

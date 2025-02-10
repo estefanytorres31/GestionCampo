@@ -191,3 +191,84 @@ export const deleteOrdenTrabajoUsuario = async (id) => {
         data: { estado: false }
     });
 };
+
+/**
+ * Reasignar una orden de trabajo a otro usuario
+ */
+export const reasignarOrdenTrabajo = async (id_orden_trabajo, nuevos_usuarios) => {
+    if (!id_orden_trabajo || !nuevos_usuarios || !Array.isArray(nuevos_usuarios)) {
+        throw new Error("El id_orden_trabajo y la lista de nuevos_usuarios son obligatorios.");
+    }
+
+    const fechaActual = getUTCTime(new Date().toISOString());
+
+    // Verificar si la Orden de Trabajo existe y si su estado permite la reasignación
+    const ordenTrabajo = await prisma.ordenTrabajo.findUnique({
+        where: { id_orden_trabajo }
+    });
+
+    if (!ordenTrabajo) {
+        throw new Error(`No se encontró la Orden de Trabajo con ID ${id_orden_trabajo}.`);
+    }
+
+    if (!["en_progreso", "pendiente"].includes(ordenTrabajo.estado)) {
+        throw new Error(`La Orden de Trabajo no puede ser reasignada porque su estado es ${ordenTrabajo.estado}.`);
+    }
+
+    // Verificar si todos los nuevos usuarios pueden ser asignados
+    for (const usuario of nuevos_usuarios) {
+        const { id_usuario, rol_en_orden } = usuario;
+
+        if (!id_usuario || !rol_en_orden) {
+            throw new Error("Cada nuevo usuario debe tener id_usuario y rol_en_orden.");
+        }
+    }
+
+    // Desactivar todas las asignaciones previas de esta orden que no se van a reutilizar
+    await prisma.ordenTrabajoUsuario.updateMany({
+        where: {
+            id_orden_trabajo,
+            estado: true,
+            id_usuario: { notIn: nuevos_usuarios.map(usuario => usuario.id_usuario) }
+        },
+        data: { estado: false, actualizado_en: fechaActual }
+    });
+
+    // Crear nuevas asignaciones o reactivar asignaciones existentes con nuevos roles
+    const nuevasAsignaciones = nuevos_usuarios.map(async (usuario) => {
+        const { id_usuario, rol_en_orden, observaciones } = usuario;
+
+        // Buscar asignación existente, incluso si está inactiva
+        const asignacionExistente = await prisma.ordenTrabajoUsuario.findFirst({
+            where: { id_orden_trabajo, id_usuario }
+        });
+
+        if (asignacionExistente) {
+            // Reactivar y actualizar rol y observaciones si la asignación existe
+            return await prisma.ordenTrabajoUsuario.update({
+                where: { id_orden_trabajo_usuario: asignacionExistente.id_orden_trabajo_usuario },
+                data: {
+                    estado: true,
+                    rol_en_orden,
+                    observaciones: observaciones || "",
+                    actualizado_en: fechaActual
+                }
+            });
+        }
+
+        // Crear nueva asignación si no existe
+        return await prisma.ordenTrabajoUsuario.create({
+            data: {
+                id_orden_trabajo,
+                id_usuario,
+                rol_en_orden,
+                observaciones: observaciones || "",
+                estado: true,
+                creado_en: fechaActual,
+                actualizado_en: fechaActual
+            }
+        });
+    });
+
+    return await Promise.all(nuevasAsignaciones);
+};

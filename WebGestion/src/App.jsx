@@ -23,13 +23,26 @@ import Configuración from "./pages/configuracion/Configuración";
 import CodigoDetalle from "./pages/trabajosasignados/CodigoDetalle";
 
 const AppContent = () => {
-  const { isAuth } = useAuth();
+  const { isAuth, usuario, roles } = useAuth();
   const RootRedirect = () => {
     return isAuth ? <Navigate to="/dashboard" /> : <Navigate to="/login" />;
   };
 
   const PrivateRoute = ({ children }) => {
     return isAuth ? children : <Navigate to="/login" />;
+  };
+
+  console.log("usuario", usuario);
+  console.log("roles", roles)
+  const PrivateRouteWrapper = ({ element: Component, authorizedRoles }) => {
+    // const rol = roleMapper(user?.rol || 0);
+    
+  
+    return authorizedRoles ? (
+      <Component />
+    ) : (
+      <Navigate to="/dashboard" />
+    );
   };
   return (
     <>

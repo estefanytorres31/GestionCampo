@@ -4,8 +4,10 @@ import { MdClose } from "react-icons/md";
 import Button from "@/components/Button";
 import axiosInstance from "@/config/axiosConfig";
 import useFetchData from "@/hooks/useFetchData";
+import { useAuth } from "@/context/AuthContext";
 
 const AssignPermissionsForm = ({ onSuccess, onCancel }) => {
+  const { refreshUsuario } = useAuth();
   const { roleId } = useParams();
   const navigate = useNavigate();
 
@@ -50,7 +52,8 @@ const AssignPermissionsForm = ({ onSuccess, onCancel }) => {
   } = useFetchData(`/rolespermisos/permisos/${roleId}`, {}, 1, 100);
 
   const errorAssigned =
-    errorAssignedRaw && errorAssignedRaw.includes("No hay permisos asignados a este rol.")
+    errorAssignedRaw &&
+    errorAssignedRaw.includes("No hay permisos asignados a este rol.")
       ? null
       : errorAssignedRaw;
 
@@ -81,7 +84,9 @@ const AssignPermissionsForm = ({ onSuccess, onCancel }) => {
 
   const togglePermission = (perm) => {
     if (selectedPermissions.find((p) => p.id === perm.id)) {
-      setSelectedPermissions(selectedPermissions.filter((p) => p.id !== perm.id));
+      setSelectedPermissions(
+        selectedPermissions.filter((p) => p.id !== perm.id)
+      );
     } else {
       setSelectedPermissions([...selectedPermissions, perm]);
     }
@@ -93,7 +98,9 @@ const AssignPermissionsForm = ({ onSuccess, onCancel }) => {
         setSelectedPermissions([...selectedPermissions, perm]);
       }
     } else {
-      setSelectedPermissions(selectedPermissions.filter((p) => p.id !== perm.id));
+      setSelectedPermissions(
+        selectedPermissions.filter((p) => p.id !== perm.id)
+      );
     }
   };
 
@@ -141,6 +148,39 @@ const AssignPermissionsForm = ({ onSuccess, onCancel }) => {
       );
 
       if (refetchAssigned) await refetchAssigned();
+
+      // Actualizar los permisos de cada rol en localStorage y el contexto
+      const storedRoles = localStorage.getItem("roles");
+
+      if (storedRoles) {
+
+        const rolesArray = JSON.parse(storedRoles);
+
+        const permisosModificados = selectedPermissions.length
+          ? selectedPermissions.map((permiso) => ({
+              id: permiso.id,
+              nombre: permiso.nombre,
+            }))
+          : [];
+
+        const updatedRoles = rolesArray.map((role) => {
+          if (role.id === parseInt(roleId, 10)) {
+            return {
+              ...role,
+              permisos: permisosModificados,
+            };
+          }
+          return role;
+        });
+
+        localStorage.setItem("roles", JSON.stringify(updatedRoles));
+
+        refreshUsuario();
+
+        if (onSuccess) onSuccess();
+      }
+
+      if (refetchAssigned) await refetchAssigned();
       if (onSuccess) onSuccess();
     } catch (err) {
       console.error(err);
@@ -153,25 +193,32 @@ const AssignPermissionsForm = ({ onSuccess, onCancel }) => {
   if (roleError) return <p className="text-red-500">{roleError}</p>;
   if (!role) return <p>Cargando datos del rol...</p>;
   if (loadingAvailable || loadingAssigned) return <p>Cargando permisos...</p>;
-  if (errorAvailable || errorAssigned) return <p className="text-red-500">Error al obtener datos.</p>;
+  if (errorAvailable || errorAssigned)
+    return <p className="text-red-500">Error al obtener datos.</p>;
 
   return (
     <div
       className="max-w-3xl mx-auto p-6 shadow-md rounded-md"
       style={{
-        backgroundColor: "var(--primary-bg)",
+        background: "var(--primary-bg)",
         border: "1px solid var(--border-color)",
         color: "var(--primary-text)",
       }}
     >
-      <h2 className="text-2xl font-bold mb-4" style={{ color: "var(--primary-text)" }}>
+      <h2
+        className="text-2xl font-bold mb-4"
+        style={{ color: "var(--primary-text)" }}
+      >
         Asignar Permisos al Rol: {role.nombre_rol}
       </h2>
       {localError && <p className="text-red-500 mb-4">{localError}</p>}
       <form onSubmit={handleSubmit}>
         {/* Sección de permisos disponibles */}
         <div className="mb-6">
-          <h3 className="text-xl font-semibold mb-2" style={{ color: "var(--primary-text)" }}>
+          <h3
+            className="text-xl font-semibold mb-2"
+            style={{ color: "var(--primary-text)" }}
+          >
             Permisos Disponibles
           </h3>
           <div className="grid grid-cols-2 gap-2">
@@ -187,11 +234,16 @@ const AssignPermissionsForm = ({ onSuccess, onCancel }) => {
                   type="checkbox"
                   checked={!!selectedPermissions.find((p) => p.id === perm.id)}
                   onChange={(e) =>
-                    handleCheckboxChange(e, { id: perm.id, nombre: perm.nombre })
+                    handleCheckboxChange(e, {
+                      id: perm.id,
+                      nombre: perm.nombre,
+                    })
                   }
                   className="mr-2"
                 />
-                <span style={{ color: "var(--primary-text)" }}>{perm.nombre}</span>
+                <span style={{ color: "var(--primary-text)" }}>
+                  {perm.nombre}
+                </span>
               </div>
             ))}
           </div>
@@ -199,7 +251,10 @@ const AssignPermissionsForm = ({ onSuccess, onCancel }) => {
 
         {/* Sección de permisos seleccionados (chips) */}
         <div className="mb-6">
-          <h3 className="text-xl font-semibold mb-2" style={{ color: "var(--primary-text)" }}>
+          <h3
+            className="text-xl font-semibold mb-2"
+            style={{ color: "var(--primary-text)" }}
+          >
             Permisos Seleccionados
           </h3>
           {selectedPermissions.length > 0 ? (
