@@ -1,22 +1,20 @@
 import React from 'react';
-import RNPickerSelect from 'react-native-picker-select';
+import { Picker } from '@react-native-picker/picker';
 import { StyleSheet, View } from 'react-native';
 
 const Select = ({ placeholder, items, value, onValueChange }) => {
   return (
     <View style={styles.selectContainer}>
-      <RNPickerSelect
+      <Picker
+        selectedValue={value}
         onValueChange={onValueChange}
-        items={items}
-        value={value}
-        placeholder={{
-          label: placeholder,
-          value: null,
-          color: '#999',
-        }}
-        style={pickerSelectStyles}
-        useNativeAndroidPickerStyle={false}
-      />
+        style={styles.picker}
+      >
+        <Picker.Item label={placeholder} value={null} color="#999" />
+        {items.map((item, index) => (
+          <Picker.Item key={index} label={item.label} value={item.value} />
+        ))}
+      </Picker>
     </View>
   );
 };
@@ -30,15 +28,7 @@ const styles = StyleSheet.create({
     height: 40,
     justifyContent: 'center',
   },
-});
-
-const pickerSelectStyles = StyleSheet.create({
-  inputIOS: {
-    fontSize: 16,
-    color: '#000',
-    paddingVertical: 8,
-  },
-  inputAndroid: {
+  picker: {
     fontSize: 16,
     color: '#000',
   },
