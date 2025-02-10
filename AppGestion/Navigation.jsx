@@ -28,6 +28,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import TrabajosAsignadosScreen from "./screens/views/Lista/TrabajosAsignados";
+import ReasignarTrabajo from "./screens/views/ReasignarTrabajo/ReasignarTrabajo";
 
 const Stack = createNativeStackNavigator();
 
@@ -82,6 +83,7 @@ export default function Navigation() {
       <Stack.Screen name="Trabajo" component={Trabajo} />
       <Stack.Screen name="Sistemas" component={SistemasScreen} options={{title:"Sistemas"}}/>
       <Stack.Screen name="Asignar" component={AsignarTrabajoScreen} />
+      <Stack.Screen name="Reasignar" component={ReasignarTrabajo} options={{ title: "Reasignar Trabajo" }} />
       <Stack.Screen name="SeleccionarAyudantes" component={SeleccionarAyudantesScreen} />
       <Stack.Screen name="SeleccionarTecnico" component={SeleccionarTecnicoScreen} />
       <Stack.Screen 
