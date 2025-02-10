@@ -43,14 +43,15 @@ const Login = () => {
 
     try {
       const response = await axiosInstance.post("/auth/login", { usuario: usuarioInput, contrasena });
+
       if (response.status === 200) {
-        const { token, expiracion, userId, nombreUsuario, nombreCompleto, roles, theme } = response.data;
-        // Llama al contexto de login
-        login({ token, expiracion, userId, nombreUsuario, nombreCompleto, roles, theme });
-        // Redirige al dashboard
+        const { token, expiracion, userId, nombreUsuario, nombreCompleto, rolesPorId, theme } = response.data;
+
+        login({ token, expiracion, userId, nombreUsuario, nombreCompleto, rolesPorId, theme });
         navigate("/dashboard");
       }
     } catch (error) {
+      console.log("error", error);
       setErrorMessage(error.response?.data?.message || "Error al iniciar sesión.");
     }
   };

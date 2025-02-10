@@ -87,7 +87,6 @@ const Mapa = ({ asistencias }) => {
     { name: "👤 Nombre", uuid: "nombre_completo" },
     { name: "📅 Fecha", uuid: "fecha_hora_entrada" },
     { name: "⛵ Embarcación", uuid: "embarcacion" },
-    { name: "📍 Puerto", uuid: "puerto_actual" },
     { name: "⚙️ Acciones", uuid: "acciones" },
   ];
 
@@ -163,7 +162,7 @@ const Mapa = ({ asistencias }) => {
           const popupContenido =
             grupo.registros.length > 1 ? (
               <div>
-                <strong>{grupo.registros.length} trabajadores</strong>
+                <strong>{grupo.registros.length} colaboradores</strong>
                 <br />
                 {grupo.registros.map((reg, i) => (
                   <div key={i}>

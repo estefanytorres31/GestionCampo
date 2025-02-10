@@ -43,7 +43,7 @@ const subMenuVariants = {
 };
 
 const SideBar = () => {
-  const { logout } = useAuth();
+  const { logout, roles } = useAuth();
   const { pathname } = useLocation();
   const [link, setLink] = useState([]);
   const [openMenus, setOpenMenus] = useState({});
@@ -71,117 +71,96 @@ const SideBar = () => {
   }, [pathname, isTab]);
 
   useEffect(() => {
-    const elements = [
+    const navigationElements = [
       {
         to: "/dashboard",
         icon: <FaMapLocationDot size={20} className="min-w-max" />,
         label: "Dashboard",
-        roles: ["admin"],
+        roles: ["Administrador", "Técnico", "Jefe"],
       },
       {
         to: "/asistencias",
         icon: <RiUserLocationFill size={20} className="min-w-max" />,
         label: "Asistencias",
-        roles: ["admin"],
+        roles: ["Administrador", "Técnico", "Jefe"],
       },
       {
         to: "/trabajos-asignados",
         icon: <HiClipboardList size={20} className="min-w-max" />,
         label: "Trabajos Asignados",
-        roles: ["admin"],
+        roles: ["Administrador", "Técnico", "Jefe"],
       },
       {
         icon: <RiShieldUserFill size={20} className="min-w-max" />,
         label: "Usuarios",
-        roles: ["admin"],
+        roles: ["Administrador"],
         subItems: [
           {
             to: "/usuarios",
             label: "Usuarios",
             icon: <FaUserFriends size={18} className="min-w-max" />,
+            roles: ["Administrador"],
           },
           {
             to: "/roles",
             label: "Roles",
             icon: <RiShieldUserFill size={18} className="min-w-max" />,
+            roles: ["Administrador"],
           },
           {
             to: "/permisos",
             label: "Permisos",
             icon: <RiShieldUserFill size={18} className="min-w-max" />,
+            roles: ["Administrador"],
           },
         ],
       },
-      // {
-      //   // Ítem contenedor para subitems
-      //   icon: <MdAssignment size={20} className="min-w-max" />,
-      //   label: "Asignaciones",
-      //   roles: ["admin"],
-      //   subItems: [
-      //     {
-      //       to: "/asignaciones",
-      //       icon: <GiCargoShip size={20} className="min-w-max" />,
-      //       label: "Asignaciones",
-      //       roles: ["admin"],
-      //     },
-      //     {
-      //       to: "/puertos",
-      //       icon: <GiHarborDock size={20} className="min-w-max" />,
-      //       label: "Puerto",
-      //       roles: ["admin"],
-      //     },
-      //     {
-      //       to: "/historial-puertos",
-      //       label: "Historial de Puertos",
-      //       icon: <LuShipWheel size={18} className="min-w-max" />,
-      //     },
-      //   ],
-      // },
-      // {
-      //   // Ítem contenedor para subitems
-      //   icon: <BiSolidShip size={20} className="min-w-max" />,
-      //   label: "Embarcacion",
-      //   roles: ["admin"],
-      //   subItems: [
-      //     {
-      //       to: "/embarcacion",
-      //       icon: <GiCargoShip size={20} className="min-w-max" />,
-      //       label: "Embarcación",
-      //       roles: ["admin"],
-      //     },
-      //     {
-      //       to: "/puerto",
-      //       icon: <GiHarborDock size={20} className="min-w-max" />,
-      //       label: "Puerto",
-      //       roles: ["admin"],
-      //     },
-      //     {
-      //       to: "/historial-puertos",
-      //       label: "Historial de Puertos",
-      //       icon: <LuShipWheel size={18} className="min-w-max" />,
-      //     },
-      //   ],
-      // },
-      // {
-      //   to: "/sistema",
-      //   icon: <FontAwesomeIcon icon={faGear} style={{ fontSize: "17px" }} />,
-      //   label: "Sistema",
-      //   roles: ["admin"],
-      // },
     ];
 
     // Usuario de ejemplo; normalmente proviene del contexto
-    const user = {
-      username: "yoiber",
-      nombre: "Yoiber",
-      email_principal: "yoiber@gmail.com",
-      rol: "admin",
-    };
 
-    const rol = roleMapper(user?.rol || 0);
-    const elementsFiltered = elements.filter((element) =>
-      element?.roles?.includes(rol)
+    console.log("roles", roles)
+    const rolesUsuario = roles?.map((r) => r.nombre) || [];
+
+    const allPermissions = roles?.flatMap((r) =>
+      Array.isArray(r.permisos)
+        ? r.permisos.map((p) => ({
+            id: p.id,
+            nombre: p.nombre,
+          }))
+        : []
+    ) || [];
+    
+    const uniquePermissions = Array.from(
+      new Map(allPermissions.map((permiso) => [permiso.id, permiso])).values()
     );
+    
+    console.log("uniquePermissions", uniquePermissions);
+
+    function filterElements(elements) {
+      return elements.reduce((acc, item) => {
+        // Si el elemento tiene la propiedad `roles`, se verifica la intersección:
+        if (item.roles && !item.roles.some((rol) => rolesUsuario.includes(rol))) {
+          // Si no hay coincidencia, se omite el elemento.
+          return acc;
+        }
+
+        // Clonamos el elemento para no modificar el original
+        const newItem = { ...item };
+
+        // Si el elemento tiene subItems, se filtran recursivamente.
+        if (newItem.subItems) {
+          newItem.subItems = filterElements(newItem.subItems);
+        }
+
+        // Se agrega el elemento filtrado.
+        acc.push(newItem);
+        return acc;
+      }, []);
+    }
+
+    // Se filtran los elementos de navegación.
+    const elementsFiltered = filterElements(navigationElements);
     setLink(elementsFiltered);
   }, []);
 
@@ -273,7 +252,10 @@ const SideBar = () => {
                           >
                             {element.subItems.map((sub) => (
                               <li key={sub.to}>
-                                <NavLink to={sub.to} className="link text-medium-jetbrains">
+                                <NavLink
+                                  to={sub.to}
+                                  className="link text-medium-jetbrains"
+                                >
                                   {sub.icon}
                                   <span>{sub.label}</span>
                                 </NavLink>
@@ -291,7 +273,9 @@ const SideBar = () => {
                     <NavLink
                       to={element.to}
                       className={({ isActive }) =>
-                        `link text-medium-jetbrains ${isActive ? "link-active" : ""}`
+                        `link text-medium-jetbrains ${
+                          isActive ? "link-active" : ""
+                        }`
                       }
                     >
                       {element.icon}
