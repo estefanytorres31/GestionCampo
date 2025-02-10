@@ -120,10 +120,6 @@ export const crearAsistencia = async ({
     return asistencia;
 };
 
-/**
- * Obtener asistencias con cálculos de entrada y salida sin usar la vista,
- * y agregando el puerto actual (último registro de historialPuertos) de la embarcación.
- */
 export const getAsistencias = async (filters, page = 1, pageSize = 10) => {
     const { nombre_completo, fecha, nombre_embarcacion } = filters;
   
@@ -149,25 +145,22 @@ export const getAsistencias = async (filters, page = 1, pageSize = 10) => {
       };
     }
   
-    const skip = (page - 1) * pageSize; // Calcular cuántos registros omitir
+    const skip = (page - 1) * pageSize;
   
     const [asistencias, total] = await Promise.all([
       prisma.asistencia.findMany({
         where: whereClause,
         include: {
           usuario: { select: { nombre_completo: true } },
-          // Se incluye también el id de la embarcación para usarlo en la búsqueda del historial
           embarcacion: { select: { id_embarcacion: true, nombre: true } },
         },
         orderBy: { fecha_hora: "desc" },
         skip,
         take: pageSize,
       }),
-      prisma.asistencia.count({ where: whereClause }), // Obtener total de registros filtrados
+      prisma.asistencia.count({ where: whereClause }),
     ]);
   
-    // Por cada entrada, se busca la salida correspondiente, se calculan las horas trabajadas
-    // y se busca el último historial (para obtener el puerto actual y su nombre)
     const asistenciasConSalidas = await Promise.all(
       asistencias.map(async (entrada) => {
         // Buscar la salida correspondiente a la entrada
@@ -176,7 +169,7 @@ export const getAsistencias = async (filters, page = 1, pageSize = 10) => {
             id_usuario: entrada.id_usuario,
             id_embarcacion: entrada.id_embarcacion,
             tipo: "salida",
-            fecha_hora: { gte: entrada.fecha_hora }, // Buscar la salida posterior a la entrada
+            fecha_hora: { gte: entrada.fecha_hora },
           },
           orderBy: { fecha_hora: "asc" },
         });
@@ -192,17 +185,6 @@ export const getAsistencias = async (filters, page = 1, pageSize = 10) => {
             .toString()
             .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
         }
-  
-        // Buscar el último historial de puerto para la embarcación
-        const ultimoHistorial = await prisma.historialPuerto.findFirst({
-          where: {
-            embarcacion_id: entrada.embarcacion.id_embarcacion,
-          },
-          orderBy: { fecha_llegada: "desc" },
-          include: {
-            puerto: { select: { nombre: true } },
-          },
-        });
   
         return {
           id: entrada.id_asistencia,
@@ -223,8 +205,6 @@ export const getAsistencias = async (filters, page = 1, pageSize = 10) => {
             : null,
           embarcacion: entrada.embarcacion.nombre,
           horas_trabajo,
-          // Se agrega el nombre del puerto actual obtenido del último historial
-          puerto_actual: ultimoHistorial ? ultimoHistorial.puerto.nombre : null,
         };
       })
     );
