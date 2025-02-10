@@ -4,11 +4,11 @@
     "slug": "AppGestion",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/pulpo.png",
+    "icon": "./assets/pcs.jpg",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/pulpo.png",
+      "image": "./assets/pcs.jpg",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
