@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 const Filtrado = ({ empresas, ordenes, fetchEmbarcacionesByEmpresa, onOrdersFiltered }) => {
   const [selectedEmpresa, setSelectedEmpresa] = useState('');
   const [selectedEmbarcacion, setSelectedEmbarcacion] = useState('');
   const [embarcaciones, setEmbarcaciones] = useState([]);
 
-  // Cargar embarcaciones cuando se selecciona una empresa
   useEffect(() => {
     if (selectedEmpresa) {
       const loadEmbarcaciones = async () => {
@@ -26,36 +26,50 @@ const Filtrado = ({ empresas, ordenes, fetchEmbarcacionesByEmpresa, onOrdersFilt
     }
   }, [selectedEmpresa]);
 
-  // Efecto para filtrar órdenes cuando cambia la embarcación seleccionada
   useEffect(() => {
     let filteredOrders = [...ordenes];
 
-    // Si hay una embarcación seleccionada, filtrar por ella
     if (selectedEmbarcacion) {
       filteredOrders = ordenes.filter(orden => 
         orden.id_embarcacion && orden.id_embarcacion.toString() === selectedEmbarcacion.toString()
       );
     } else {
-      // Si no hay embarcación seleccionada pero hay empresa, mostrar todas las órdenes
       filteredOrders = ordenes;
     }
 
-    // Enviar las órdenes filtradas al componente padre
     onOrdersFiltered(filteredOrders);
   }, [selectedEmbarcacion, ordenes]);
 
   const handleEmpresaChange = (empresaId) => {
     setSelectedEmpresa(empresaId);
-    setSelectedEmbarcacion(''); // Resetear la embarcación seleccionada
-    onOrdersFiltered(ordenes); // Resetear el filtro
+    setSelectedEmbarcacion('');
+    onOrdersFiltered(ordenes);
   };
 
   const handleEmbarcacionChange = (embarcacionId) => {
     setSelectedEmbarcacion(embarcacionId);
   };
 
+  const handleClearFilters = () => {
+    setSelectedEmpresa('');
+    setSelectedEmbarcacion('');
+    setEmbarcaciones([]);
+    onOrdersFiltered(ordenes);
+  };
+
   return (
     <View style={styles.container}>
+      <View style={styles.headerContainer}>
+        <Text style={styles.title}>Filtros</Text>
+        <TouchableOpacity 
+          onPress={handleClearFilters}
+          style={styles.clearButton}
+        >
+          <MaterialCommunityIcons name="filter-off" size={20} color="#6366F1" />
+          <Text style={styles.clearButtonText}>Limpiar filtros</Text>
+        </TouchableOpacity>
+      </View>
+
       <View style={styles.pickerContainer}>
         <Text style={styles.label}>Empresa</Text>
         <View style={styles.picker}>
@@ -113,6 +127,30 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.2,
     shadowRadius: 3,
+  },
+  headerContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#374151',
+  },
+  clearButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 8,
+    borderRadius: 8,
+    backgroundColor: '#EEF2FF',
+  },
+  clearButtonText: {
+    marginLeft: 4,
+    color: '#6366F1',
+    fontWeight: '600',
+    fontSize: 14,
   },
   pickerContainer: {
     marginBottom: 16,

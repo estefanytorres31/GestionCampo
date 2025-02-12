@@ -83,9 +83,6 @@ const OrdenesTrabajoScreen = ({ navigation }) => {
     const [filtroEstado, setFiltroEstado] = useState(null);
     const {empresas}=useEmpresa();
     const {fetchEmbarcacionesByEmpresa}=useEmbarcacion();
-    const [selectedEmpresa, setSelectedEmpresa] = useState(null);
-    const [embarcaciones, setEmbarcaciones] = useState([]);
-    const [selectedEmbarcacion, setSelectedEmbarcacion] = useState(null);
     const [filteredOrdenes, setFilteredOrdenes] = useState([]);
 
     useEffect(() => {
