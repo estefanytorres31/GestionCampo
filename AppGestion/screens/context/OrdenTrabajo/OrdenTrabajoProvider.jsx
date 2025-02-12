@@ -6,11 +6,11 @@ const OrdenTrabajoProvider = ({ children }) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
   
-    const guardarOrdenTrabajo = async (id_tipo_trabajo, id_embarcacion, id_puerto, codigo, motorista, supervisor) => {
+    const guardarOrdenTrabajo = async (id_tipo_trabajo, id_embarcacion, codigo) => {
       setLoading(true);
       setError(null);
       try {
-        const response = await createOrdenTrabajo(id_tipo_trabajo, id_embarcacion, id_puerto, codigo, motorista, supervisor);
+        const response = await createOrdenTrabajo(id_tipo_trabajo, id_embarcacion, codigo);
         return response.data; 
       } catch (err) {
         setError(err.message);

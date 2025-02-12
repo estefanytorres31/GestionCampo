@@ -312,7 +312,7 @@ model OrdenTrabajo {
   id_orden_trabajo        Int                 @id @default(autoincrement()) @map("id_orden_trabajo")
   id_tipo_trabajo         Int                 @map("id_tipo_trabajo")
   id_embarcacion          Int                 @map("id_embarcacion")
-  id_puerto               Int                 @map("id_puerto")
+  id_puerto               Int?                @map("id_puerto")
   id_jefe_asigna          Int                 @map("id_jefe_asigna")
   fecha_asignacion        DateTime            @map("fecha_asignacion")
   estado                  EstadoOrdenTrabajo  @default(pendiente) @map("estado")
@@ -325,7 +325,7 @@ model OrdenTrabajo {
 
   tipo_trabajo            TipoTrabajo         @relation(fields: [id_tipo_trabajo], references: [id_tipo_trabajo], onDelete: NoAction, onUpdate: Cascade)
   embarcacion             Embarcacion         @relation("EmbarcacionOrdenTrabajo", fields: [id_embarcacion], references: [id_embarcacion], onDelete: NoAction, onUpdate: Cascade)
-  puerto                  Puerto              @relation(fields: [id_puerto], references: [id_puerto], onDelete: NoAction, onUpdate: Cascade)
+  puerto                  Puerto?              @relation(fields: [id_puerto], references: [id_puerto], onDelete: NoAction, onUpdate: Cascade)
   jefe_asigna             Usuario             @relation("JefeAsigna", fields: [id_jefe_asigna], references: [id], onDelete: NoAction, onUpdate: Cascade)
 
   orden_trabajo_usuario   OrdenTrabajoUsuario[]

@@ -1,7 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView, Animated, ScrollView, ActivityIndicator, Dimensions } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import useTipoTrabajoESP from "../../hooks/TipoTrabajoESP/useTipoTrabajoESP";
+import usePuerto from "../../hooks/Puerto/usePuerto";
+import useOrdenTrabajo from "../../hooks/OrdenTrabajo/useOrdenTrabajo";
+import useOrdenTrabajoUsuario from "../../hooks/OrdenTrabajoUsuario/useOrdenTrabajoUsuario";
+import useOrdenTrabajoSistema from "../../hooks/OrdenTrabajoSistema/useOrdenTrabajoSistema";
+import useOrdenTrabajoParte from "../../hooks/OrdenTrabajoParte/useOrdenTrabajoParte";
+import useTipoTrabajoESP from "../../hooks/TipoTrabajoESP/useTipoTrabajoESP"
+import { CommonActions } from '@react-navigation/native';
 
 const { width, height } = Dimensions.get('window');
 
@@ -9,8 +15,13 @@ const SistemasScreen = ({ route, navigation }) => {
     const { empresa, embarcacion, trabajo } = route.params;
     const { 
         tipoTrabajosESP, 
-        fetchTiposTrabajosESP 
+        fetchTiposTrabajosESP,
+        fetchPartsBySistema
     } = useTipoTrabajoESP();
+
+    const { guardarOrdenTrabajo, loading, error } = useOrdenTrabajo(); 
+    const { guardarOrdenTrabajoSistema } = useOrdenTrabajoSistema();
+    const { agregarOrdenTrabajoParte } = useOrdenTrabajoParte();
     
     // Estado para manejar las selecciones
     const [selectedSistemas, setSelectedSistemas] = useState(new Set());
@@ -112,11 +123,42 @@ const SistemasScreen = ({ route, navigation }) => {
         const codigoOT = `${codigoEmpresa}_${codigoEmbarcacion}_${codigoTrabajo}_${dia}${mes}${año}_${horas}${minutos}${segundos}`;
         return codigoOT;
     };
+
+    const createOrdenTrabajoSistemas = async (ordenTrabajoId, sistemasSeleccionados) => {
+        try {
+            for (let sistema of sistemasSeleccionados) {
+                console.log(ordenTrabajoId, sistema.id_embarcacion_sistema);
+    
+                const ordenTrabajoSistema = await guardarOrdenTrabajoSistema(
+                    ordenTrabajoId,
+                    sistema.id_embarcacion_sistema
+                );
+    
+                const partsResponse = await fetchPartsBySistema(
+                    trabajo.id_tipo_trabajo, 
+                    embarcacion.id_embarcacion, 
+                    sistema.id_sistema
+                );
+    
+                const partes = partsResponse.data || partsResponse;
+                console.log("Orden trabajo sistema ID:", ordenTrabajoSistema.id_orden_trabajo_sistema);
+    
+                for (let parte of partes) {
+                    await agregarOrdenTrabajoParte(
+                        ordenTrabajoSistema.id_orden_trabajo_sistema, 
+                        parte.id_parte
+                    );
+                }
+            }
+            console.log('Órdenes de trabajo por sistema y partes creadas exitosamente');
+        } catch (error) {
+            console.error('Error al crear órdenes de trabajo por sistema y partes:', error);
+            throw new Error(`Error al crear órdenes de trabajo por sistema y partes: ${error.message}`);
+        }
+    };
     
     
-
-
-    const handleGuardarSeleccion = () => {
+    const handleGuardarSeleccion = async() => {
         const sistemasSeleccionados = tipoTrabajosESP.filter(sistema => 
             selectedSistemas.has(sistema.id_sistema)
         );
@@ -128,15 +170,36 @@ const SistemasScreen = ({ route, navigation }) => {
         
         const codigoOT = generarCodigoOT(empresa, embarcacion, trabajo);
         console.log("Código de la orden de trabajo:", codigoOT);
-        
-        // Aquí puedes navegar a la siguiente pantalla o guardar la selección
-        navigation.navigate("Asignar", { 
-            sistemas: sistemasSeleccionados,
-            empresa,
-            embarcacion,
-            trabajo,
-            codigoOT 
-        });
+
+
+        console.log(sistemasSeleccionados)
+    
+
+        const response = await guardarOrdenTrabajo(
+            trabajo.id_tipo_trabajo,
+            embarcacion.id_embarcacion,
+            codigoOT,
+
+          );
+          console.log(trabajo.id_tipo_trabajo)
+          console.log(embarcacion.id_embarcacion)
+          console.log(codigoOT)
+          console.log(response.id_orden_trabajo)
+          console.log(response)
+
+        if (response) {
+            await createOrdenTrabajoSistemas(response.id_orden_trabajo, sistemasSeleccionados);
+    
+          alert("Orden de trabajo y usuarios asociados guardados con éxito");
+          navigation.dispatch(
+            CommonActions.reset({
+              index: 1,
+              routes: [
+                { name: 'InicioJefe' }
+              ],
+            })
+          );
+        }
     };
 
     const renderContent = () => {

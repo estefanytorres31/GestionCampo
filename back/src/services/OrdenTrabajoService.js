@@ -10,7 +10,7 @@ export const asignarTrabajoAEmbarcacion = async (data) => {
   const {
     id_tipo_trabajo,
     id_embarcacion,
-    id_puerto,
+    id_puerto=null,
     id_jefe_asigna,
     codigo,
     comentarios = null,
@@ -18,21 +18,20 @@ export const asignarTrabajoAEmbarcacion = async (data) => {
     supervisor = null,
   } = data;
 
-  if (!id_tipo_trabajo || !id_embarcacion || !id_puerto || !id_jefe_asigna || !codigo) {
+  if (!id_tipo_trabajo || !id_embarcacion  || !id_jefe_asigna || !codigo) {
     throw new Error("Los campos obligatorios deben estar completos.");
   }
 
   // Validación de claves foráneas
-  const [tipoTrabajo, embarcacion, puerto, jefeAsigna] = await Promise.all([
+  const [tipoTrabajo, embarcacion, jefeAsigna] = await Promise.all([
     prisma.tipoTrabajo.findUnique({ where: { id_tipo_trabajo } }),
     prisma.embarcacion.findUnique({ where: { id_embarcacion } }),
-    prisma.puerto.findUnique({ where: { id_puerto } }),
     prisma.usuario.findUnique({ where: { id: id_jefe_asigna } }),
   ]);
 
   if (!tipoTrabajo) throw new Error(`No se encontró el Tipo de Trabajo con ID ${id_tipo_trabajo}.`);
   if (!embarcacion) throw new Error(`No se encontró la Embarcación con ID ${id_embarcacion}.`);
-  if (!puerto) throw new Error(`No se encontró el Puerto con ID ${id_puerto}.`);
+  //if (!puerto) throw new Error(`No se encontró el Puerto con ID ${id_puerto}.`);
   if (!jefeAsigna) throw new Error(`No se encontró el Usuario Jefe con ID ${id_jefe_asigna}.`);
 
   const fechaActual = getUTCTime(new Date().toISOString());
