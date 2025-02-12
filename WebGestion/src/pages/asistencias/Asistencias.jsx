@@ -10,7 +10,7 @@ const asistenciasColumns = [
   { name: "🕰️ Entrada", uuid: "fecha_hora_entrada" },
   { name: "🚪 Salida", uuid: "fecha_hora_salida" },
   { name: "⛵ Embarcación", uuid: "embarcacion" },
-  { name: "📍 Puerto", uuid: "puerto_actual" },
+  { name: "📍 Empresa", uuid: "empresa" },
   { name: "🌍 Ubicación", uuid: "ubicacion" },
   { name: "⏳ Horas Trabajadas", uuid: "horas_trabajo" },
 ];
@@ -22,12 +22,42 @@ const asistenciasFilters = [
     placeholder: "Buscar por nombre",
     icon: <BsSearch className="text-gray-400" />,
   },
-  { key: "fecha", type: "date", placeholder: "Fecha de entrada" },
+  {
+    key: "fecha",
+    type: "date",
+    placeholder: "Fecha de entrada",
+  },
   {
     key: "nombre_embarcacion",
     type: "text",
     placeholder: "Buscar por Embarcación",
     icon: <BsSearch className="text-gray-400" />,
+  },
+  // Filtros adicionales:
+  {
+    key: "fecha_salida",
+    type: "date",
+    placeholder: "Fecha de salida",
+  },
+  {
+    key: "fecha_inicio",
+    type: "date",
+    placeholder: "Fecha inicio entrada",
+  },
+  {
+    key: "fecha_fin",
+    type: "date",
+    placeholder: "Fecha fin entrada",
+  },
+  {
+    key: "fecha_salida_inicio",
+    type: "date",
+    placeholder: "Fecha inicio salida",
+  },
+  {
+    key: "fecha_salida_fin",
+    type: "date",
+    placeholder: "Fecha fin salida",
   },
 ];
 

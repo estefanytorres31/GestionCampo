@@ -121,9 +121,18 @@ export const crearAsistencia = async ({
 };
 
 export const getAsistencias = async (filters, page = 1, pageSize = 10) => {
-    const { nombre_completo, fecha, nombre_embarcacion } = filters;
+    const {
+      nombre_completo,
+      fecha, // Fecha específica para la entrada
+      nombre_embarcacion,
+      fecha_salida,         // Fecha específica para la salida
+      fecha_inicio,         // Rango de fechas para la entrada (inicio)
+      fecha_fin,            // Rango de fechas para la entrada (fin)
+      fecha_salida_inicio,  // Rango de fechas para la salida (inicio)
+      fecha_salida_fin      // Rango de fechas para la salida (fin)
+    } = filters;
   
-    // Construcción dinámica de filtros: se inicia filtrando solo registros de "entrada"
+    // Filtramos registros de "entrada"
     const whereClause = { tipo: "entrada" };
   
     if (nombre_completo) {
@@ -132,10 +141,19 @@ export const getAsistencias = async (filters, page = 1, pageSize = 10) => {
       };
     }
   
+    // Filtro por fecha de entrada: día específico
     if (fecha) {
       whereClause.fecha_hora = {
         gte: new Date(`${fecha}T00:00:00.000Z`),
         lt: new Date(`${fecha}T23:59:59.999Z`),
+      };
+    }
+  
+    // Filtro por rango de fechas de entrada
+    if (fecha_inicio && fecha_fin) {
+      whereClause.fecha_hora = {
+        gte: new Date(`${fecha_inicio}T00:00:00.000Z`),
+        lt: new Date(`${fecha_fin}T23:59:59.999Z`),
       };
     }
   
@@ -147,12 +165,19 @@ export const getAsistencias = async (filters, page = 1, pageSize = 10) => {
   
     const skip = (page - 1) * pageSize;
   
+    // Consulta principal: registros de entrada, incluyendo la relación con la empresa a través de embarcacion
     const [asistencias, total] = await Promise.all([
       prisma.asistencia.findMany({
         where: whereClause,
         include: {
           usuario: { select: { nombre_completo: true } },
-          embarcacion: { select: { id_embarcacion: true, nombre: true } },
+          embarcacion: { 
+            select: { 
+              id_embarcacion: true, 
+              nombre: true,
+              empresa: { select: { nombre: true } }  // Se incluye la empresa
+            } 
+          },
         },
         orderBy: { fecha_hora: "desc" },
         skip,
@@ -161,9 +186,10 @@ export const getAsistencias = async (filters, page = 1, pageSize = 10) => {
       prisma.asistencia.count({ where: whereClause }),
     ]);
   
-    const asistenciasConSalidas = await Promise.all(
+    // Para cada entrada se busca la salida correspondiente y se calcula el tiempo trabajado
+    let asistenciasConSalidas = await Promise.all(
       asistencias.map(async (entrada) => {
-        // Buscar la salida correspondiente a la entrada
+        // Buscamos la salida de la entrada
         const salida = await prisma.asistencia.findFirst({
           where: {
             id_usuario: entrada.id_usuario,
@@ -192,7 +218,6 @@ export const getAsistencias = async (filters, page = 1, pageSize = 10) => {
           fecha: entrada.fecha_hora.toISOString().split("T")[0],
           fecha_hora_entrada: entrada.fecha_hora,
           fecha_hora_salida: salida ? salida.fecha_hora : null,
-          // Coordenadas de la entrada y, en caso de existir, de la salida
           coordenadas_entrada: {
             latitud: entrada.latitud,
             longitud: entrada.longitud,
@@ -204,10 +229,37 @@ export const getAsistencias = async (filters, page = 1, pageSize = 10) => {
               }
             : null,
           embarcacion: entrada.embarcacion.nombre,
+          // Se agrega el nombre de la empresa, si existe
+          empresa: entrada.embarcacion.empresa ? entrada.embarcacion.empresa.nombre : null,
           horas_trabajo,
         };
       })
     );
+  
+    // Filtro adicional en memoria para la salida: día específico
+    if (fecha_salida) {
+      const salidaDate = new Date(`${fecha_salida}T00:00:00.000Z`);
+      asistenciasConSalidas = asistenciasConSalidas.filter((a) => {
+        if (a.fecha_hora_salida) {
+          const salida = new Date(a.fecha_hora_salida);
+          return salida.toISOString().split("T")[0] === salidaDate.toISOString().split("T")[0];
+        }
+        return false;
+      });
+    }
+  
+    // Filtro adicional en memoria para rango de fechas de salida
+    if (fecha_salida_inicio && fecha_salida_fin) {
+      const inicioSalida = new Date(`${fecha_salida_inicio}T00:00:00.000Z`);
+      const finSalida = new Date(`${fecha_salida_fin}T23:59:59.999Z`);
+      asistenciasConSalidas = asistenciasConSalidas.filter((a) => {
+        if (a.fecha_hora_salida) {
+          const salida = new Date(a.fecha_hora_salida);
+          return salida >= inicioSalida && salida <= finSalida;
+        }
+        return false;
+      });
+    }
   
     return {
       total,
@@ -218,7 +270,6 @@ export const getAsistencias = async (filters, page = 1, pageSize = 10) => {
     };
   };
   
-
 /**
  * 🔹 Obtener Asistencias con Filtros Opcionales (Usuario, Embarcación, OrdenTrabajo)
  * @param {Object} query - Parámetros de búsqueda
