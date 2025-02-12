@@ -49,7 +49,7 @@ const JefeScreen = ({ navigation }) => {
         <View style={styles.container}>
             <StatusBar barStyle="light-content" />
             <LinearGradient
-                colors={["#4F46E5", "#7C3AED", "#2D3748"]}
+                colors={["#002dad", "#0465d9", "#081959"]}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
                 style={styles.gradient}
@@ -63,7 +63,7 @@ const JefeScreen = ({ navigation }) => {
                 ]}>
                     <View style={styles.headerContainer}>
                         <View style={styles.iconBackground}>
-                            <Ionicons name="grid" size={40} color="#4F46E5" />
+                            <Ionicons name="grid" size={40} color="#002dad" />
                         </View>
                         <Text style={styles.title}>Panel de Control</Text>
                         <Text style={styles.subtitle}>Gestión y Administración</Text>
@@ -77,7 +77,7 @@ const JefeScreen = ({ navigation }) => {
                                 activeOpacity={0.9}
                             >
                                 <View style={[styles.iconCircle, { backgroundColor: "#EEF2FF" }]}>
-                                    <Ionicons name="clipboard-outline" size={30} color="#4F46E5" />
+                                    <Ionicons name="clipboard-outline" size={30} color="#00b7ba" />
                                 </View>
                                 <Text style={styles.cardTitle}>Asignar OT</Text>
                                 <Text style={styles.cardSubtitle}>Gestionar órdenes</Text>
@@ -208,7 +208,7 @@ const styles = StyleSheet.create({
     },
     cardPrimary: {
         borderLeftWidth: 4,
-        borderLeftColor: "#4F46E5",
+        borderLeftColor: "#00b7ba",
     },
     cardSecondary: {
         borderLeftWidth: 4,
@@ -231,7 +231,7 @@ const styles = StyleSheet.create({
         marginBottom: 12,
     },
     cardTitle: {
-        fontSize: 18,
+        fontSize: 17,
         fontWeight: "700",
         color: "#1F2937",
         marginBottom: 4,

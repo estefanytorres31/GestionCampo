@@ -1,4 +1,4 @@
-import React,{useState,  useEffect} from "react";
+import React, { useState, useEffect } from "react";
 import {
   SafeAreaView,
   View,
@@ -17,7 +17,7 @@ import useOrdenTrabajoUsuario from "../../hooks/OrdenTrabajoUsuario/useOrdenTrab
 const { width } = Dimensions.get("window");
 
 const Inicio = ({ route, navigation }) => {
-  const { logout, role } = useAuth();
+  const { logout, role, user } = useAuth(); // Add user to the destructured values
   const { getOrdenTrabajoUsuarioByUsuario } = useOrdenTrabajoUsuario();
   const [isResponsable, setIsResponsable] = useState(false);
 
@@ -69,7 +69,9 @@ const Inicio = ({ route, navigation }) => {
         <View style={styles.overlay}>
           <View style={styles.content}>
             <View style={styles.header}>
-              <Text style={styles.welcomeText}>¡Bienvenido!</Text>
+              <Text style={styles.welcomeText}>
+                ¡Bienvenido, {user?.nombre_usuario || ''}!
+              </Text>
               <Text style={styles.headerTitle}>Panel Principal</Text>
               <Text style={styles.headerSubtitle}>
                 Selecciona una opción para comenzar
@@ -147,6 +149,7 @@ const Inicio = ({ route, navigation }) => {
 };
 
 const styles = StyleSheet.create({
+  // ... (previous styles remain the same)
   safeArea: {
     flex: 1,
   },

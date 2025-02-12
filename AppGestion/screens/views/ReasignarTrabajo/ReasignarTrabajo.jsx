@@ -1,247 +1,325 @@
-import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ScrollView,
-  ActivityIndicator,
-  Alert
-} from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import useOrdenTrabajoUsuario from "../../hooks/OrdenTrabajoUsuario/useOrdenTrabajoUsuario";
+import React, { useState } from "react";
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from "react-native";
+import Input from "../../components/Input";
 import useUsuarioTecnico from "../../hooks/UsuarioTecnico/useUsuarioTecnico";
+import useOrdenTrabajo from "../../hooks/OrdenTrabajo/useOrdenTrabajo";
+import useOrdenTrabajoUsuario from "../../hooks/OrdenTrabajoUsuario/useOrdenTrabajoUsuario";
+import useOrdenTrabajoSistema from "../../hooks/OrdenTrabajoSistema/useOrdenTrabajoSistema";
+import useOrdenTrabajoParte from "../../hooks/OrdenTrabajoParte/useOrdenTrabajoParte";
+import useTipoTrabajoESP from "../../hooks/TipoTrabajoESP/useTipoTrabajoESP"
+import { CommonActions } from '@react-navigation/native';
 
-const ReasignarTrabajoScreen = ({ route, navigation }) => {
-  const { idOrden } = route.params;
-  const [usuarios, setUsuarios] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const { getOrdenTrabajoUsuarioByOrden, reasignarOTOtroUsuario } = useOrdenTrabajoUsuario();
-  const { getUsuarioById } = useUsuarioTecnico();
+const ReasignarTrabajoScreen = ({route, navigation }) => {
+  const {sistemas, empresa, embarcacion, trabajo, codigoOT} = route.params;
+  const [tecnico, setTecnico] = useState(null);
+  const [motorista, setMotorista] = useState("");
+  const [supervisor, setSupervisor] = useState("");
+  const [ayudantes, setAyudantes] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { usuariosTecnicos } = useUsuarioTecnico();
+  const { guardarOrdenTrabajo, loading, error } = useOrdenTrabajo(); 
+  const { guardarOrdenTrabajoUsuario } = useOrdenTrabajoUsuario();
+  const { guardarOrdenTrabajoSistema } = useOrdenTrabajoSistema();
+  const { agregarOrdenTrabajoParte } = useOrdenTrabajoParte();
+  const { parts, fetchPartsBySistema } = useTipoTrabajoESP();
 
-  useEffect(() => {
-    cargarUsuarios();
-  }, []);
+  const handleSeleccionarTecnico = () => {
+    navigation.navigate("SeleccionarTecnico", {
+      tecnicoSeleccionado: tecnico,
+      onSelect: (nuevoTecnico) => setTecnico(nuevoTecnico),
+      usuariosExcluidos: ayudantes.map((a) => a.id),
+    });
+  };
 
-  const cargarUsuarios = async () => {
+  const handleSeleccionarAyudantes = () => {
+    navigation.navigate("SeleccionarAyudantes", {
+      ayudantesSeleccionados: ayudantes,
+      onSelect: (nuevosAyudantes) => setAyudantes(nuevosAyudantes),
+      usuarioExcluido: tecnico ? [tecnico.id] : [],
+    });
+  };
+
+  const createOrdenTrabajoSistemas = async (ordenTrabajoId) => {
     try {
-      const response = await getOrdenTrabajoUsuarioByOrden(idOrden);
-      if (response) {
-        const usuariosConNombre = await Promise.all(
-          response.map(async (usuario) => {
-            const usuarioData = await getUsuarioById(usuario.id_usuario);
-            return {
-              ...usuario,
-              nombre_completo: usuarioData?.nombre_completo || "Desconocido",
-            };
-          })
+      for (let sistema of sistemas) {
+        const ordenTrabajoSistema = await guardarOrdenTrabajoSistema(
+          ordenTrabajoId,
+          sistema.id_embarcacion_sistema
         );
-
-        const usuariosOrdenados = usuariosConNombre.sort((a, b) =>
-          a.rol_en_orden === "Responsable" ? -1 : 1
+  
+        const partsResponse = await fetchPartsBySistema(
+          trabajo.id_tipo_trabajo, 
+          embarcacion.id_embarcacion, 
+          sistema.id_sistema
         );
-
-        setUsuarios(usuariosOrdenados);
+  
+        const partes = partsResponse.data || partsResponse;
+        
+        for (let parte of partes) {
+          await agregarOrdenTrabajoParte(
+            ordenTrabajoSistema.id_orden_trabajo_sistema, 
+            parte.id_parte
+          );
+        }
       }
-      setIsLoading(false);
+  
+      console.log('Órdenes de trabajo por sistema y partes creadas exitosamente');
     } catch (error) {
-      console.error("Error al cargar usuarios:", error);
-      Alert.alert("Error", "No se pudieron cargar los usuarios");
-      setIsLoading(false);
+      console.error('Detailed error:', error);
+      throw new Error(`Error al crear órdenes de trabajo por sistema y partes: ${error.message}`);
     }
   };
 
-  const handleReasignarResponsable = () => {
-    const responsable = usuarios.find(u => u.rol_en_orden === "Responsable");
-    navigation.navigate("SeleccionarTecnicoReasignar", {
-      usuarioActual: responsable,
-      onSelect: async (nuevoTecnico) => {
-        try {
-          const nuevosUsuarios = usuarios.map(u => {
-            if (u.rol_en_orden === "Responsable") {
-              return {
-                id_usuario: nuevoTecnico.id,
-                rol_en_orden: "Responsable",
-                observaciones: u.observaciones || "Responsable de supervisión general."
-              };
-            }
-            return {
-              id_usuario: u.id_usuario,
-              rol_en_orden: u.rol_en_orden,
-              observaciones: u.observaciones || "Responsable de supervisión general."
-            };
-          });
-
-          await reasignarOTOtroUsuario(idOrden, nuevosUsuarios);
-          Alert.alert("Éxito", "Responsable reasignado correctamente");
-          cargarUsuarios();
-        } catch (error) {
-          console.error("Error al reasignar responsable:", error);
-          Alert.alert("Error", "No se pudo reasignar el responsable");
-        }
-      }
-    });
-  };
-
-  const handleReasignarAyudantes = () => {
-    const responsable = usuarios.find(u => u.rol_en_orden === "Responsable");
-    const ayudantes = usuarios.filter(u => u.rol_en_orden === "Ayudante");
+  const handleGuardar = async () => {
+    if (!tecnico) {
+      alert("Debe seleccionar un técnico.");
+      return;
+    }
     
-    navigation.navigate("SeleccionarAyudantesReasignar", {
-      ayudantesActuales: ayudantes,
-      usuarioResponsable: responsable,
-      onSelect: async (nuevosAyudantes) => {
-        try {
-          const nuevosUsuarios = [
-            {
-              id_usuario: responsable.id_usuario,
-              rol_en_orden: "Responsable",
-              observaciones: responsable.observaciones || "Responsable de supervisión general."
-            },
-            ...nuevosAyudantes.map(ayudante => ({
-              id_usuario: ayudante.id,
-              rol_en_orden: "Ayudante",
-              observaciones: "Ayudante en el trabajo."
-            }))
-          ];
-
-          await reasignarOTOtroUsuario(idOrden, nuevosUsuarios);
-          Alert.alert("Éxito", "Ayudantes reasignados correctamente");
-          cargarUsuarios();
-        } catch (error) {
-          console.error("Error al reasignar ayudantes:", error);
-          Alert.alert("Error", "No se pudieron reasignar los ayudantes");
+    try {
+      const response = await guardarOrdenTrabajo(
+        trabajo.id_tipo_trabajo,
+        embarcacion.id_embarcacion,
+        null,
+        codigoOT,
+        motorista || null,
+        supervisor || null,
+        reasignado // Add the status here
+      );
+  
+      if (response) {
+        await createOrdenTrabajoSistemas(response.id_orden_trabajo);
+        await guardarOrdenTrabajoUsuario(response.id_orden_trabajo, tecnico.id, "Responsable");
+        
+        for (let ayudante of ayudantes) {
+          await guardarOrdenTrabajoUsuario(response.id_orden_trabajo, ayudante.id, "Ayudante");
         }
+
+        alert("Orden de trabajo reasignada con éxito");
+        navigation.dispatch(
+          CommonActions.reset({
+            index: 1,
+            routes: [
+              { name: 'InicioJefe' }
+            ],
+          })
+        );
       }
-    });
+    } catch (error) {
+      alert("Error al reasignar la orden de trabajo: " + error);
+      console.log(error);
+    }
   };
-
-  if (isLoading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#5c6bc0" />
-      </View>
-    );
-  }
-
-  const responsable = usuarios.find(u => u.rol_en_orden === "Responsable");
-  const ayudantes = usuarios.filter(u => u.rol_en_orden === "Ayudante");
 
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.title}>Reasignar Trabajo</Text>
-      
-      <View style={styles.section}>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Responsable Actual</Text>
-          <TouchableOpacity 
-            style={styles.reasignarButton}
-            onPress={handleReasignarResponsable}
-          >
-            <Ionicons name="swap-horizontal" size={20} color="white" />
-            <Text style={styles.buttonText}>Reasignar</Text>
-          </TouchableOpacity>
-        </View>
-        <View style={styles.userCard}>
-          <Ionicons name="person" size={24} color="#00796B" />
-          <Text style={styles.userName}>{responsable?.nombre_completo}</Text>
+    <ScrollView 
+      contentContainerStyle={styles.container}
+      showsVerticalScrollIndicator={false}
+    >
+      <View style={styles.header}>
+        <Text style={styles.title}>Reasignar Trabajo</Text>
+        <View style={styles.divider} />
+      </View>
+
+      <View style={styles.card}>
+        <View style={styles.field}>
+          <Text style={styles.label}>Código de OT</Text>
+          <Text style={styles.infoText}>{codigoOT}</Text>
         </View>
       </View>
 
-      <View style={styles.section}>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Ayudantes Actuales</Text>
+      <View style={styles.card}>
+        <View style={styles.field}>
+          <Text style={styles.label}>Técnico</Text>
           <TouchableOpacity 
-            style={styles.reasignarButton}
-            onPress={handleReasignarAyudantes}
+            style={[styles.button, tecnico && styles.buttonSelected]} 
+            onPress={handleSeleccionarTecnico}
           >
-            <Ionicons name="swap-horizontal" size={20} color="white" />
-            <Text style={styles.buttonText}>Reasignar</Text>
+            <Text style={styles.buttonText}>
+              {tecnico ? tecnico.nombre_completo : "Seleccionar Técnico"}
+            </Text>
           </TouchableOpacity>
         </View>
-        {ayudantes.length > 0 ? (
-          ayudantes.map((ayudante) => (
-            <View key={ayudante.id_orden_trabajo_usuario} style={styles.userCard}>
-              <Ionicons name="person-outline" size={24} color="#00796B" />
-              <Text style={styles.userName}>{ayudante.nombre_completo}</Text>
-            </View>
-          ))
-        ) : (
-          <Text style={styles.emptyText}>No hay ayudantes asignados</Text>
-        )}
+
+        <View style={styles.field}>
+          <Text style={styles.label}>Apoyo (Ayudantes)</Text>
+          <TouchableOpacity 
+            style={[styles.button, ayudantes.length > 0 && styles.buttonSelected]} 
+            onPress={handleSeleccionarAyudantes}
+          >
+            <Text style={styles.buttonText}>Seleccionar Ayudantes</Text>
+          </TouchableOpacity>
+          <View style={styles.ayudantesContainer}>
+            {ayudantes.length > 0 ? (
+              ayudantes.map((ayudante, index) => (
+                <View key={index} style={styles.ayudanteItem}>
+                  <Text style={styles.ayudanteText}>{ayudante.nombre_completo}</Text>
+                </View>
+              ))
+            ) : (
+              <Text style={styles.emptyText}>No hay ayudantes seleccionados</Text>
+            )}
+          </View>
+        </View>
       </View>
+
+      <View style={styles.card}>
+        <View style={styles.field}>
+          <Text style={styles.label}>Motorista (Opcional)</Text>
+          <Input 
+            placeholder="Ingrese el nombre del motorista" 
+            value={motorista} 
+            onChangeText={setMotorista}
+          />
+        </View>
+
+        <View style={styles.field}>
+          <Text style={styles.label}>Supervisor (Opcional)</Text>
+          <Input 
+            placeholder="Ingrese el nombre del supervisor" 
+            value={supervisor} 
+            onChangeText={setSupervisor}
+          />
+        </View>
+      </View>
+
+      <TouchableOpacity 
+        style={styles.saveButton} 
+        onPress={handleGuardar}
+      >
+        <Text style={styles.saveButtonText}>GUARDAR</Text>
+      </TouchableOpacity>
     </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: "#F5F6F8",
+    flexGrow: 1,
+    padding: 16,
+    backgroundColor: "#f0f0f0",
   },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+  header: {
+    marginBottom: 24,
   },
   title: {
-    fontSize: 24,
-    fontWeight: "bold",
+    fontSize: 28,
+    fontWeight: "700",
+    color: "#1A237E",
     textAlign: "center",
-    marginVertical: 20,
-    color: "#333",
-  },
-  section: {
-    backgroundColor: "white",
-    marginHorizontal: 20,
-    marginBottom: 20,
-    borderRadius: 12,
-    padding: 16,
-    elevation: 2,
-  },
-  sectionHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 12,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#333",
-  },
-  userCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#F5F6F8",
-    padding: 12,
-    borderRadius: 8,
+    fontFamily: "System",
     marginBottom: 8,
   },
-  userName: {
-    fontSize: 16,
-    marginLeft: 12,
-    color: "#333",
-    flex: 1,
+  divider: {
+    height: 4,
+    backgroundColor: "#1A237E",
+    width: 60,
+    alignSelf: "center", 
+    borderRadius: 2,
   },
-  reasignarButton: {
+  card: {
+    backgroundColor: "#FFFF",
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 16,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  field: {
+    marginBottom: 20,
+  },
+  label: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#666",
+    marginBottom: 8,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+  infoText: {
+    fontSize: 12.5,
+    color: "#333",
+    fontWeight: "500",
+  },
+  systemsContainer: {
     flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#00796B",
+    flexWrap: "wrap",
+    marginTop: 8,
+  },
+  systemItem: {
+    backgroundColor: "#E8EAF6",
     paddingHorizontal: 12,
     paddingVertical: 6,
-    borderRadius: 6,
+    borderRadius: 20,
+    marginRight: 8,
+    marginBottom: 8,
+  },
+  systemText: {
+    color: "#3949AB",
+    fontSize: 14,
+    fontWeight: "500",
+  },
+  button: {
+    backgroundColor: "#5C6BC0",
+    borderRadius: 12,
+    paddingVertical: 12,
+    alignItems: "center",
+    marginVertical: 8,
+  },
+  buttonSelected: {
+    backgroundColor: "#3949AB",
   },
   buttonText: {
-    color: "white",
-    marginLeft: 6,
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  ayudantesContainer: {
+    marginTop: 8,
+  },
+  ayudanteItem: {
+    backgroundColor: "#E8EAF6",
+    padding: 12,
+    borderRadius: 12,
+    marginBottom: 8,
+  },
+  ayudanteText: {
+    color: "#3949AB",
+    fontSize: 14,
     fontWeight: "500",
   },
   emptyText: {
-    textAlign: "center",
-    color: "#666",
+    color: "#999",
+    fontSize: 14,
     fontStyle: "italic",
-    marginTop: 8,
+  },
+  saveButton: {
+    backgroundColor: "#2E7D32",
+    borderRadius: 12,
+    paddingVertical: 16,
+    alignItems: "center",
+    marginTop: 24,
+    marginBottom: 32,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  saveButtonText: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "700",
+    letterSpacing: 1,
   },
 });
 
