@@ -1,6 +1,6 @@
 import React, { createContext, useState, useContext } from "react";
 import OrdenTrabajoContext from "./OrdenTrabajoContext";
-import { createOrdenTrabajo, getOrdenTrabajoById, getAllTrabajosByJefeAsig, updateOrdenTrabajo, updateAllOrdenTrabajo } from "../../services/OrdenTrabajoService";
+import { createOrdenTrabajo, getOrdenTrabajoById, getAllTrabajosByJefeAsig, updateOrdenTrabajo, updateAllOrdenTrabajo, getAllTrabajosByEmbarcacion } from "../../services/OrdenTrabajoService";
 
 const OrdenTrabajoProvider = ({ children }) => {
     const [loading, setLoading] = useState(false);
@@ -48,6 +48,20 @@ const OrdenTrabajoProvider = ({ children }) => {
       }
     }
 
+    const obtenerTrabajosPorEmbarcacion = async (id_embarcacion) => {
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await getAllTrabajosByEmbarcacion(id_embarcacion);
+        return response.data;
+      } catch (err) {
+        setError(err.message);
+        console.error("Error al obtener los trabajos por embarcación:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
     const actualizarOrdenTrabajo = async (id_orden_trabajo, estado) => {
       setLoading(true);
       setError(null);
@@ -78,7 +92,7 @@ const OrdenTrabajoProvider = ({ children }) => {
     }
 
     return (
-        <OrdenTrabajoContext.Provider value={{ updateOT,guardarOrdenTrabajo, obtenerOrdenTrabajo,obtenerTrabajosPorJefeAsig, actualizarOrdenTrabajo, loading, error }}>
+        <OrdenTrabajoContext.Provider value={{ obtenerTrabajosPorEmbarcacion, updateOT,guardarOrdenTrabajo, obtenerOrdenTrabajo,obtenerTrabajosPorJefeAsig, actualizarOrdenTrabajo, loading, error }}>
           {children}
         </OrdenTrabajoContext.Provider>
       );

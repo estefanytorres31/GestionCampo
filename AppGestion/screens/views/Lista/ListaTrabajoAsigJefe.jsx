@@ -13,6 +13,9 @@ import {
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { LinearGradient } from 'expo-linear-gradient';
 import useOrdenTrabajo from "../../hooks/OrdenTrabajo/useOrdenTrabajo";
+import useEmpresa from "../../hooks/Empresa/useEmpresa";
+import useEmbarcacion from "../../hooks/Embarcacion/useEmbarcacion";
+import Filtrado from "../../components/Filtrado"
 
 const { width } = Dimensions.get('window');
 
@@ -75,12 +78,18 @@ const EstadoBadge = ({ estado }) => {
 };
 
 const OrdenesTrabajoScreen = ({ navigation }) => {
-    const { obtenerTrabajosPorJefeAsig, loading, error } = useOrdenTrabajo();
+    const { obtenerTrabajosPorJefeAsig, loading, error, obtenerTrabajosPorEmbarcacion } = useOrdenTrabajo();
     const [ordenes, setOrdenes] = useState([]);
     const [filtroEstado, setFiltroEstado] = useState(null);
+    const {empresas}=useEmpresa();
+    const {fetchEmbarcacionesByEmpresa}=useEmbarcacion();
+    const [selectedEmpresa, setSelectedEmpresa] = useState(null);
+    const [embarcaciones, setEmbarcaciones] = useState([]);
+    const [selectedEmbarcacion, setSelectedEmbarcacion] = useState(null);
+    const [filteredOrdenes, setFilteredOrdenes] = useState([]);
 
     useEffect(() => {
-        const cargarOrdenes = async () => {
+        const cargarOrdenes = async() => {
             const data = await obtenerTrabajosPorJefeAsig();
             if (data) {
                 setOrdenes(data);
@@ -92,6 +101,11 @@ const OrdenesTrabajoScreen = ({ navigation }) => {
     const filtrarPorEstado = (estado) => {
         setFiltroEstado(filtroEstado === estado ? null : estado);
     };
+
+    const handleOrdersFiltered = (filtered) => {
+        setFilteredOrdenes(filtered);
+    };
+    
 
     const ordenesFiltradas = filtroEstado
         ? ordenes.filter(orden => orden.estado.toLowerCase() === filtroEstado.toLowerCase())
@@ -105,9 +119,6 @@ const OrdenesTrabajoScreen = ({ navigation }) => {
         });
     };
 
-    const handleDetailsPress = (item) => {
-        navigation.navigate('DetallesOrdenTrabajo', { ordenTrabajo: item });
-    };
 
     const renderItem = (item) => (
         <TouchableOpacity 
@@ -150,7 +161,7 @@ const OrdenesTrabajoScreen = ({ navigation }) => {
                         styles.reasignarButtonText, 
                         { color: getEstadoConfig(item.estado).textColor }
                     ]}>
-                        Reasignar
+                        Siguiente
                     </Text>}
                 </TouchableOpacity>
             )}
@@ -202,7 +213,13 @@ const OrdenesTrabajoScreen = ({ navigation }) => {
                     showsVerticalScrollIndicator={false}
                 >
                     {renderHeader()}
-                    {ordenesFiltradas.map(renderItem)}
+                    <Filtrado 
+                        empresas={empresas}
+                        ordenes={ordenes}
+                        fetchEmbarcacionesByEmpresa={fetchEmbarcacionesByEmpresa}
+                        onOrdersFiltered={handleOrdersFiltered}
+                    />
+                    {(filteredOrdenes.length > 0 ? filteredOrdenes : ordenesFiltradas).map(renderItem)}
                 </ScrollView>
             )}
         </View>

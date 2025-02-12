@@ -38,6 +38,15 @@ export const getAllTrabajosByJefeAsig=async()=>{
     }
 }
 
+export const getAllTrabajosByEmbarcacion=async(id_embarcacion)=>{
+    try {
+        const response = await apiClient.get(`/ordenestrabajo?id_embarcacion=${id_embarcacion}`);
+        return response.data;
+    } catch (error) {
+        throw new Error(`Error al obtener las ordenes de trabajo: ${error.message}`);
+    }
+}
+
 export const updateOrdenTrabajo=async(id_orden_trabajo, estado)=>{
     try {
         const response = await apiClient.put(`/ordenestrabajo/${id_orden_trabajo}`, {estado});
