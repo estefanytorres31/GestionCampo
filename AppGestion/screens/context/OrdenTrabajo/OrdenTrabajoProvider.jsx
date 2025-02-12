@@ -1,6 +1,6 @@
 import React, { createContext, useState, useContext } from "react";
 import OrdenTrabajoContext from "./OrdenTrabajoContext";
-import { createOrdenTrabajo, getOrdenTrabajoById, getAllTrabajosByJefeAsig, updateOrdenTrabajo } from "../../services/OrdenTrabajoService";
+import { createOrdenTrabajo, getOrdenTrabajoById, getAllTrabajosByJefeAsig, updateOrdenTrabajo, updateAllOrdenTrabajo } from "../../services/OrdenTrabajoService";
 
 const OrdenTrabajoProvider = ({ children }) => {
     const [loading, setLoading] = useState(false);
@@ -62,8 +62,23 @@ const OrdenTrabajoProvider = ({ children }) => {
       }
     }
 
+    const updateOT=async(id_orden_trabajo, id_puerto, motorista, supervisor)=>{
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await updateAllOrdenTrabajo(id_orden_trabajo, id_puerto, motorista, supervisor);
+        return response.data;
+      } catch (err) {
+        setError(err.message);
+        console.error("Error al actualizar la orden de trabajo:", err);
+      } finally {
+        setLoading(false);
+      }
+
+    }
+
     return (
-        <OrdenTrabajoContext.Provider value={{ guardarOrdenTrabajo, obtenerOrdenTrabajo,obtenerTrabajosPorJefeAsig, actualizarOrdenTrabajo, loading, error }}>
+        <OrdenTrabajoContext.Provider value={{ updateOT,guardarOrdenTrabajo, obtenerOrdenTrabajo,obtenerTrabajosPorJefeAsig, actualizarOrdenTrabajo, loading, error }}>
           {children}
         </OrdenTrabajoContext.Provider>
       );

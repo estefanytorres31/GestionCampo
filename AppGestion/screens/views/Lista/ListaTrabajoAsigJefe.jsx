@@ -98,22 +98,10 @@ const OrdenesTrabajoScreen = ({ navigation }) => {
         : ordenes;
 
     const handleReasignarPress = (item) => {
-        navigation.navigate('Reasignar', {
-            sistemas: [{ 
-                id_embarcacion_sistema: item.id_embarcacion_sistema,
-                id_sistema: item.id_sistema 
-            }],
-            empresa: { id_empresa: item.id_empresa },
-            embarcacion: { 
-                id_embarcacion: item.id_embarcacion,
-                nombre: item.nombre_embarcacion 
-            },
-            trabajo: {
-                id_tipo_trabajo: item.id_tipo_trabajo,
-                nombre_trabajo: item.nombre_trabajo
-            },
+        navigation.navigate('Asignar', {
             codigoOT: item.codigo,
-            idOrden:item.id_orden_trabajo
+            idOrden:item.id_orden_trabajo,
+            ordenTrabajo:item
         });
     };
 
@@ -145,36 +133,25 @@ const OrdenesTrabajoScreen = ({ navigation }) => {
                 </View>
             </View>
 
-            {/* <TouchableOpacity 
-                style={[
-                    styles.detailsButton,
-                    { backgroundColor: getEstadoConfig(item.estado).textColor }
-                ]}
-                onPress={() => handleDetailsPress(item)}
-            >
-                <Text style={styles.detailsButtonText}>Ver detalles</Text>
-                <MaterialCommunityIcons name="arrow-right" size={20} color="white" />
-            </TouchableOpacity> */}
-
             {['pendiente', 'en_progreso'].includes(item.estado.toLowerCase()) && (
                 <TouchableOpacity 
                     style={[
                         styles.reasignarButton,
                         { backgroundColor: getEstadoConfig(item.estado).backgroundColor }
                     ]}
-                    // onPress={() => handleReasignarPress(item)}
+                    onPress={() => handleReasignarPress(item)}
                 >
-                    {/* <MaterialCommunityIcons 
+                    {<MaterialCommunityIcons 
                         name="swap-horizontal" 
                         size={20} 
                         color={getEstadoConfig(item.estado).textColor} 
-                    /> */}
-                    {/* <Text style={[
+                    /> }
+                    {<Text style={[
                         styles.reasignarButtonText, 
                         { color: getEstadoConfig(item.estado).textColor }
                     ]}>
                         Reasignar
-                    </Text> */}
+                    </Text>}
                 </TouchableOpacity>
             )}
         </TouchableOpacity>

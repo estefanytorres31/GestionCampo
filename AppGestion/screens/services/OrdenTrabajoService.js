@@ -30,7 +30,7 @@ export const getAllTrabajosByJefeAsig=async()=>{
     try {
         const userId = await AsyncStorage.getItem('userId');
         const userIdInt = parseInt(userId, 10);
-        const response = await apiClient.get(`/ordenestrabajo?id_jefe_asigna=${userIdInt}`);
+        const response = await apiClient.get(`/ordenestrabajo`);
         console.log(response.data);
         return response.data;
     } catch (error) {
@@ -47,4 +47,15 @@ export const updateOrdenTrabajo=async(id_orden_trabajo, estado)=>{
         throw new Error(`Error al actualizar la orden de trabajo: ${error.message}`);
     }
 
+}
+
+export const updateAllOrdenTrabajo=async(id_orden_trabajo, id_puerto, motorista, supervisor)=>{
+    try {
+        const response = await apiClient.put(`/ordenestrabajo/${id_orden_trabajo}`, {id_puerto, motorista, supervisor});
+        console.log(id_orden_trabajo,'Puerto',id_puerto,'Motorista',motorista,'Supervisor',supervisor)
+        return response.data;
+    } catch (error) {
+        throw new Error(`Error al actualizar la orden de trabajo: ${error.message}`);
+    }
+    
 }

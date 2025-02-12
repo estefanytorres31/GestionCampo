@@ -12,7 +12,7 @@ import useTipoTrabajoESP from "../../hooks/TipoTrabajoESP/useTipoTrabajoESP"
 import { CommonActions } from '@react-navigation/native';
 
   const AsignarTrabajoScreen = ({route, navigation }) => {
-    const {sistemas,empresa,embarcacion,trabajo,codigoOT }=route.params;
+    const {codigoOT, ordenTrabajo }=route.params;
     const [puerto, setPuerto] = useState(null);
     const [tecnico, setTecnico] = useState(null);
     const [motorista, setMotorista] = useState("");
@@ -22,11 +22,8 @@ import { CommonActions } from '@react-navigation/native';
   
     const { usuariosTecnicos } = useUsuarioTecnico();
     const { puertos } = usePuerto();
-    const { guardarOrdenTrabajo, loading, error } = useOrdenTrabajo(); 
+    const { updateOT, loading, error } = useOrdenTrabajo(); 
     const { guardarOrdenTrabajoUsuario } = useOrdenTrabajoUsuario();
-    const { guardarOrdenTrabajoSistema } = useOrdenTrabajoSistema();
-    const { agregarOrdenTrabajoParte } = useOrdenTrabajoParte();
-    const { parts, fetchPartsBySistema } = useTipoTrabajoESP();
   
     const [puertosOptions, setPuertosOptions] = useState([]);
   
@@ -54,43 +51,6 @@ import { CommonActions } from '@react-navigation/native';
       });
     };
   
-    const createOrdenTrabajoSistemas = async (ordenTrabajoId) => {
-      try {
-  
-        for (let sistema of sistemas) {
-          console.log(ordenTrabajoId);
-          console.log(sistema.id_embarcacion_sistema)
-          // Guardamos la orden de trabajo por sistema
-          const ordenTrabajoSistema = await guardarOrdenTrabajoSistema(
-            ordenTrabajoId,
-            sistema.id_embarcacion_sistema
-          );
-    
-          // Obtener las partes del sistema
-          const partsResponse = await fetchPartsBySistema(
-            trabajo.id_tipo_trabajo, 
-            embarcacion.id_embarcacion, 
-            sistema.id_sistema
-          );
-    
-          // Ensure we're accessing the correct part of the response
-          const partes = partsResponse.data || partsResponse;
-          console.log(ordenTrabajoSistema.id_orden_trabajo_sistema)
-          // Guardar cada parte en orden_trabajo_parte
-          for (let parte of partes) {
-            await agregarOrdenTrabajoParte(
-              ordenTrabajoSistema.id_orden_trabajo_sistema, 
-              parte.id_parte
-            );
-          }
-        }
-    
-        console.log('Órdenes de trabajo por sistema y partes creadas exitosamente');
-      } catch (error) {
-        console.error('Detailed error:', error);
-        throw new Error(`Error al crear órdenes de trabajo por sistema y partes: ${error.message}`);
-      }
-    };
   
     const handleGuardar = async () => {
       if (!puerto) {
@@ -99,34 +59,28 @@ import { CommonActions } from '@react-navigation/native';
       }
       
       try {
-        const response = await guardarOrdenTrabajo(
-          trabajo.id_tipo_trabajo,
-          embarcacion.id_embarcacion,
+        console.log('Puerto: ',puerto)
+        console.log('Motorista: ',motorista)
+        console.log('Supervisor: ',supervisor)
+        console.log(ordenTrabajo.id_orden_trabajo)
+        const response = await updateOT(
+          ordenTrabajo.id_orden_trabajo,
           puerto,
-          codigoOT,
           motorista || null,
           supervisor || null
         );
   
         if (response) {
-          await createOrdenTrabajoSistemas(response.id_orden_trabajo);
   
-          await guardarOrdenTrabajoUsuario(response.id_orden_trabajo, tecnico.id, "Responsable");
+          await guardarOrdenTrabajoUsuario(ordenTrabajo.id_orden_trabajo, tecnico.id, "Responsable");
   
           // Luego guardamos los ayudantes con rol de ayudante
           for (let ayudante of ayudantes) {
-            await guardarOrdenTrabajoUsuario(response.id_orden_trabajo, ayudante.id, "Ayudante");
+            await guardarOrdenTrabajoUsuario(ordenTrabajo.id_orden_trabajo, ayudante.id, "Ayudante");
           }
     
           alert("Orden de trabajo y usuarios asociados guardados con éxito");
-          navigation.dispatch(
-            CommonActions.reset({
-              index: 1,
-              routes: [
-                { name: 'InicioJefe' }
-              ],
-            })
-          );
+          navigation.navigate('Mantto',{idOrden:ordenTrabajo.id_orden_trabajo})
         }
       } catch (error) {
         alert("Error al guardar la orden de trabajo: " + error);
@@ -139,8 +93,9 @@ import { CommonActions } from '@react-navigation/native';
       contentContainerStyle={styles.container}
       showsVerticalScrollIndicator={false}
     >
+
       <View style={styles.header}>
-        <Text style={styles.title}>Asignar Trabajo</Text>
+        <Text style={styles.title}>Formulario</Text>
         <View style={styles.divider} />
       </View>
 
@@ -150,27 +105,6 @@ import { CommonActions } from '@react-navigation/native';
           <Text style={styles.infoText}>{codigoOT}</Text>
         </View>
 
-        <View style={styles.field}>
-          <Text style={styles.label}>Trabajo</Text>
-          <Text style={styles.infoText}>{trabajo.nombre_trabajo}</Text>
-        </View>
-
-        <View style={styles.field}>
-          <Text style={styles.label}>Sistemas</Text>
-          <View style={styles.systemsContainer}>
-            {sistemas.length > 0 ? (
-              sistemas.map((sistema, index) => (
-                <View key={index} style={styles.systemItem}>
-                  <Text style={styles.systemText}>
-                    {sistema.id_embarcacion_sistema}
-                  </Text>
-                </View>
-              ))
-            ) : (
-              <Text style={styles.emptyText}>No hay sistemas seleccionados</Text>
-            )}
-          </View>
-        </View>
       </View>
 
       <View style={styles.card}>
