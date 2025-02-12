@@ -399,3 +399,61 @@ export const desactivarTipoTrabajoESP = async (id) => {
 
     return relacionDesactivada;
 };
+
+/**
+ * Asignar múltiples embarcaciones, sistemas y partes a un tipo de trabajo.
+ * @param {number} id_tipo_trabajo - ID del tipo de trabajo
+ * @param {Array<number>} ids_embarcacion_sistema_parte - Lista de IDs de embarcación-sistema-parte
+ * @returns {Promise<Array<Object>>} - Lista de relaciones creadas o reactivadas
+ */
+export const assignMultipleTipoTrabajoESP = async (id_tipo_trabajo, ids_embarcacion_sistema_parte) => {
+    if (!id_tipo_trabajo || !Array.isArray(ids_embarcacion_sistema_parte) || ids_embarcacion_sistema_parte.length === 0) {
+        throw { status: 400, message: "El ID del tipo de trabajo y una lista de relaciones embarcación-sistema-parte son obligatorios." };
+    }
+
+    const fechaActual = getUTCTime(new Date().toISOString());
+
+    // Verificar si el Tipo de Trabajo existe
+    const tipoTrabajo = await prisma.tipoTrabajo.findUnique({ where: { id_tipo_trabajo } });
+    if (!tipoTrabajo) {
+        throw { status: 404, message: `Tipo de Trabajo con ID ${id_tipo_trabajo} no encontrado.` };
+    }
+
+    // Filtrar las relaciones embarcación-sistema-parte existentes
+    const relacionesExistentes = await prisma.tipoTrabajoEmbarcacionSistemaParte.findMany({
+        where: {
+            id_tipo_trabajo,
+            id_embarcacion_sistema_parte: { in: ids_embarcacion_sistema_parte },
+        },
+    });
+
+    const idsExistentes = relacionesExistentes.map(rel => rel.id_embarcacion_sistema_parte);
+    const idsNuevos = ids_embarcacion_sistema_parte.filter(id => !idsExistentes.includes(id));
+
+    // Reactivar relaciones existentes que estaban inactivas
+    const reactivadas = await Promise.all(
+        relacionesExistentes
+            .filter(rel => !rel.estado)
+            .map(rel => prisma.tipoTrabajoEmbarcacionSistemaParte.update({
+                where: { id_tipo_trabajo_embarcacion_sistema_parte: rel.id_tipo_trabajo_embarcacion_sistema_parte },
+                data: { estado: true, actualizado_en: fechaActual },
+            }))
+    );
+
+    // Crear nuevas relaciones para los IDs que no existían
+    const nuevasRelaciones = await Promise.all(
+        idsNuevos.map(id_embarcacion_sistema_parte =>
+            prisma.tipoTrabajoEmbarcacionSistemaParte.create({
+                data: {
+                    id_tipo_trabajo,
+                    id_embarcacion_sistema_parte,
+                    estado: true,
+                    creado_en: fechaActual,
+                    actualizado_en: fechaActual,
+                },
+            })
+        )
+    );
+
+    return [...reactivadas, ...nuevasRelaciones];
+};

@@ -109,3 +109,59 @@ export const deleteEmbarcacionSistemaParte = async (id_embarcacion_sistema_parte
         data: { estado: false, actualizado_en: fechaActual },
     });
 };
+
+
+/**
+ * Asignar varias Partes a un Sistema en una Embarcación
+ */
+export const assignMultiplePartesToEmbarcacionSistema = async (id_embarcacion_sistema, id_partes) => {
+    if (!id_embarcacion_sistema) {
+        throw { status: 400, message: "El ID de la embarcación-sistema es obligatorio." };
+    }
+
+    if (!Array.isArray(id_partes) || id_partes.length === 0) {
+        throw { status: 400, message: "Se debe proporcionar un array con al menos un ID de parte." };
+    }
+
+    const fechaActual = getUTCTime(new Date().toISOString());
+
+    const asignaciones = await Promise.all(
+        id_partes.map(async (id_parte) => {
+            // Verificar si la relación ya existe
+            const relacionExistente = await prisma.embarcacionSistemaParte.findFirst({
+                where: { id_embarcacion_sistema, id_parte },
+            });
+
+            if (relacionExistente) {
+                if (relacionExistente.estado) {
+                    return { id_parte, status: "Ya asignado" };
+                } else {
+                    // Reactivar si estaba desactivada
+                    await prisma.embarcacionSistemaParte.update({
+                        where: { id_embarcacion_sistema_parte: relacionExistente.id_embarcacion_sistema_parte },
+                        data: {
+                            estado: true,
+                            actualizado_en: fechaActual,
+                        },
+                    });
+                    return { id_parte, status: "Reactivado" };
+                }
+            }
+
+            // Crear nueva relación
+            await prisma.embarcacionSistemaParte.create({
+                data: {
+                    id_embarcacion_sistema,
+                    id_parte,
+                    estado: true,
+                    creado_en: fechaActual,
+                    actualizado_en: fechaActual,
+                },
+            });
+
+            return { id_parte, status: "Asignado" };
+        })
+    );
+
+    return asignaciones;
+};

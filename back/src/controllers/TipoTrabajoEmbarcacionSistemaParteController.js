@@ -115,3 +115,13 @@ export const desactivarTipoTrabajoESP = async (req, res) => {
         res.status(error.status || 500).json({ message: error.message });
     }
 };
+
+export const asignacionMultiple = async (req, res) => {
+    const {id_tipo_trabajo, id_embarcacion_sistema_parte }=req.body;
+    try{
+        const relacion = await TipoTrabajoESPService.assignMultipleTipoTrabajoESP(id_tipo_trabajo, id_embarcacion_sistema_parte);
+        res.status(201).json({ message: "Relaciones creadas exitosamente.", data: relacion });
+    }catch(error){
+        res.status(error.status || 500).json({ message: error.message || "Error interno del servidor." });
+    }
+}

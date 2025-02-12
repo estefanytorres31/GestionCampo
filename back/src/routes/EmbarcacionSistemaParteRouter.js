@@ -2,7 +2,8 @@ import {
     assignParteToEmbarcacionSistema,
     getPartesByEmbarcacionSistema,
     updateEmbarcacionSistemaParte,
-    deleteEmbarcacionSistemaParte
+    deleteEmbarcacionSistemaParte,
+    asignacionMultiple
 } from "../controllers/EmbarcacionSistemaParteController.js";
 
 import { Router } from "express";
@@ -20,5 +21,8 @@ embarcacionSistemaParteRouter.put("/:id_embarcacion_sistema_parte", updateEmbarc
 
 // Desactivar una relación específica
 embarcacionSistemaParteRouter.delete("/:id_embarcacion_sistema_parte", deleteEmbarcacionSistemaParte);
+
+// Asignar múltiples partes a una embarcación-sistema
+embarcacionSistemaParteRouter.post("/asignacion_multiple", asignacionMultiple);
 
 export default embarcacionSistemaParteRouter;

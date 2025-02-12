@@ -7,7 +7,8 @@ import {
     desactivarTipoTrabajoESP,
     getSistemasPorTipoTrabajoEmbarcacion,
     getSistemasPartesPorTipoTrabajoEmbarcacion,
-    getPartesPorSistemaTipoTrabajoEmbarcacion
+    getPartesPorSistemaTipoTrabajoEmbarcacion,
+    asignacionMultiple
 } from "../controllers/TipoTrabajoEmbarcacionSistemaParteController.js";
 
 const tipoTrabajoESPRouter = Router();
@@ -36,5 +37,8 @@ tipoTrabajoESPRouter.get("/tipo/:id_tipo_trabajo/embarcacion/:id_embarcacion/sis
 // 📌 Obtener lista de Partes para un Sistema específico dentro de un Tipo de Trabajo y Embarcación
 tipoTrabajoESPRouter.get("/tipo/:id_tipo_trabajo/embarcacion/:id_embarcacion/sistema/:id_sistema/partes", getPartesPorSistemaTipoTrabajoEmbarcacion);
 
+// �� Asignación de múltiples relaciones
+
+tipoTrabajoESPRouter.post("/asignacionmultpiple", asignacionMultiple);
 
 export default tipoTrabajoESPRouter;
