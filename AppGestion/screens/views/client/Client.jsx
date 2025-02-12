@@ -86,7 +86,7 @@ const ClientScreen = ({ navigation }) => {
                     style={[styles.contentContainer, { opacity: fadeAnim, transform: [{ scale: scaleAnim }] }]}
                 >
                     <View style={styles.headerContainer}>
-                        <Text style={styles.welcomeText}>¡Bienvenido!</Text>
+                        {/* <Text style={styles.welcomeText}>¡Bienvenido!</Text> */}
                         <Text style={styles.subtitle}>Selecciona un cliente</Text>
                     </View>
 
