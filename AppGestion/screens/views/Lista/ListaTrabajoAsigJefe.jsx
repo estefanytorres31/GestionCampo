@@ -137,7 +137,7 @@ const OrdenesTrabajoScreen = ({ navigation }) => {
                 </View>
             </View>
 
-            <TouchableOpacity 
+            {/* <TouchableOpacity 
                 style={[
                     styles.detailsButton,
                     { backgroundColor: getEstadoConfig(item.estado).textColor }
@@ -146,7 +146,7 @@ const OrdenesTrabajoScreen = ({ navigation }) => {
             >
                 <Text style={styles.detailsButtonText}>Ver detalles</Text>
                 <MaterialCommunityIcons name="arrow-right" size={20} color="white" />
-            </TouchableOpacity>
+            </TouchableOpacity> */}
 
             {['pendiente', 'en_progreso'].includes(item.estado.toLowerCase()) && (
                 <TouchableOpacity 
@@ -154,19 +154,19 @@ const OrdenesTrabajoScreen = ({ navigation }) => {
                         styles.reasignarButton,
                         { backgroundColor: getEstadoConfig(item.estado).backgroundColor }
                     ]}
-                    onPress={() => handleReasignarPress(item)}
+                    // onPress={() => handleReasignarPress(item)}
                 >
-                    <MaterialCommunityIcons 
+                    {/* <MaterialCommunityIcons 
                         name="swap-horizontal" 
                         size={20} 
                         color={getEstadoConfig(item.estado).textColor} 
-                    />
-                    <Text style={[
+                    /> */}
+                    {/* <Text style={[
                         styles.reasignarButtonText, 
                         { color: getEstadoConfig(item.estado).textColor }
                     ]}>
                         Reasignar
-                    </Text>
+                    </Text> */}
                 </TouchableOpacity>
             )}
         </TouchableOpacity>

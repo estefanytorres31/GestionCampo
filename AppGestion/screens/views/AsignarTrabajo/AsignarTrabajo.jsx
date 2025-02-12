@@ -93,8 +93,8 @@ const AsignarTrabajoScreen = ({route, navigation }) => {
   };
 
   const handleGuardar = async () => {
-    if (!tecnico || !puerto) {
-      alert("Debe seleccionar un técnico y un puerto.");
+    if (!puerto) {
+      alert("Debe seleccionar un puerto.");
       return;
     }
     
