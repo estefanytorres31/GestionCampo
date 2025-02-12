@@ -121,7 +121,7 @@ const Trabajo = ({ route, navigation }) => {
 };
 
 const styles = StyleSheet.create({
-    // ... (previous styles remain the same)
+    
     buttonWrapper: {
         borderRadius: 16,
         elevation: 8,

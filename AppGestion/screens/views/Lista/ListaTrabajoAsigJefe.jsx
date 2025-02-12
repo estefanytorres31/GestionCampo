@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { 
     View, 
@@ -31,6 +32,13 @@ const getEstadoConfig = (estado) => {
                 icon: 'progress-clock',
                 label: 'En Progreso'
             };
+            case 'reasignado':
+                return {
+                    backgroundColor: '#E0E7FF',
+                    textColor: '#9da7ac',
+                    icon: 'swap-horizontal',
+                    label: 'Reasignado'
+                };
         case 'completado':
             return {
                 backgroundColor: '#DEF7EC',
@@ -222,7 +230,6 @@ const OrdenesTrabajoScreen = ({ navigation }) => {
         </View>
     );
 };
-
 
     const styles = StyleSheet.create({
         // Existing styles...

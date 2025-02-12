@@ -18,7 +18,6 @@ export const createOrdenTrabajo=async(id_tipo_trabajo, id_embarcacion, id_puerto
     } catch (error) {
         throw new Error(`Error al crear la orden de trabajo: ${error.message}`);
     }
- 
 }
 
 export const getOrdenTrabajoById=async(id_orden_trabajo)=>{
@@ -40,7 +39,6 @@ export const getAllTrabajosByJefeAsig=async()=>{
         throw new Error(`Error al obtener las ordenes de trabajo: ${error.message}`);
     }
 }
-
 
 export const updateOrdenTrabajo=async(id_orden_trabajo, estado)=>{
     try {

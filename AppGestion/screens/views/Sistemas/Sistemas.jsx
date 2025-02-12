@@ -268,7 +268,7 @@ const styles = StyleSheet.create({
     },
     header: {
         padding: 24,
-        backgroundColor: '#7da588',
+        backgroundColor: '#7da578',
         borderBottomLeftRadius: 30,
         borderBottomRightRadius: 30,
         shadowColor: "#000",
@@ -284,7 +284,7 @@ const styles = StyleSheet.create({
     headerTitle: {
         fontSize: 24,
         fontWeight: "800",
-        color: "#f3fff7",
+        color: "#f3fff3",
         marginBottom: 12,
         textAlign: "center",
     },

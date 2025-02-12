@@ -1,9 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from "react-native";
 import Input from "../../components/Input";
-import Select from "../../components/Select";
 import useUsuarioTecnico from "../../hooks/UsuarioTecnico/useUsuarioTecnico";
-import usePuerto from "../../hooks/Puerto/usePuerto";
 import useOrdenTrabajo from "../../hooks/OrdenTrabajo/useOrdenTrabajo";
 import useOrdenTrabajoUsuario from "../../hooks/OrdenTrabajoUsuario/useOrdenTrabajoUsuario";
 import useOrdenTrabajoSistema from "../../hooks/OrdenTrabajoSistema/useOrdenTrabajoSistema";
@@ -11,128 +9,107 @@ import useOrdenTrabajoParte from "../../hooks/OrdenTrabajoParte/useOrdenTrabajoP
 import useTipoTrabajoESP from "../../hooks/TipoTrabajoESP/useTipoTrabajoESP"
 import { CommonActions } from '@react-navigation/native';
 
-  const ReasignarTrabajoScreen = ({route, navigation }) => {
-    const {sistemas,empresa,embarcacion,trabajo,codigoOT }=route.params;
-    const [puerto, setPuerto] = useState(null);
-    const [tecnico, setTecnico] = useState(null);
-    const [motorista, setMotorista] = useState("");
-    const [supervisor, setSupervisor] = useState("");
-    const [ayudantes, setAyudantes] = useState([]);
-    const [isSubmitting, setIsSubmitting] = useState(false);
-  
-    const { usuariosTecnicos } = useUsuarioTecnico();
-    const { puertos } = usePuerto();
-    const { guardarOrdenTrabajo, loading, error } = useOrdenTrabajo(); 
-    const { guardarOrdenTrabajoUsuario } = useOrdenTrabajoUsuario();
-    const { guardarOrdenTrabajoSistema } = useOrdenTrabajoSistema();
-    const { agregarOrdenTrabajoParte } = useOrdenTrabajoParte();
-    const { parts, fetchPartsBySistema } = useTipoTrabajoESP();
-  
-    const [puertosOptions, setPuertosOptions] = useState([]);
-  
-    useEffect(() => {
-      const options = puertos.map((puerto) => ({
-        label: puerto.nombre,
-        value: puerto.id_puerto,
-      }));
-      setPuertosOptions(options);
-    }, [puertos]);
-  
-    const handleSeleccionarTecnico = () => {
-      navigation.navigate("SeleccionarTecnico", {
-        tecnicoSeleccionado: tecnico,
-        onSelect: (nuevoTecnico) => setTecnico(nuevoTecnico),
-        usuariosExcluidos: ayudantes.map((a) => a.id),
-      });
-    };
-  
-    const handleSeleccionarAyudantes = () => {
-      navigation.navigate("SeleccionarAyudantes", {
-        ayudantesSeleccionados: ayudantes,
-        onSelect: (nuevosAyudantes) => setAyudantes(nuevosAyudantes),
-        usuarioExcluido: tecnico ? [tecnico.id] : [],
-      });
-    };
-  
-    const createOrdenTrabajoSistemas = async (ordenTrabajoId) => {
-      try {
-  
-        for (let sistema of sistemas) {
-          console.log(ordenTrabajoId);
-          console.log(sistema.id_embarcacion_sistema)
-          // Guardamos la orden de trabajo por sistema
-          const ordenTrabajoSistema = await guardarOrdenTrabajoSistema(
-            ordenTrabajoId,
-            sistema.id_embarcacion_sistema
-          );
-    
-          // Obtener las partes del sistema
-          const partsResponse = await fetchPartsBySistema(
-            trabajo.id_tipo_trabajo, 
-            embarcacion.id_embarcacion, 
-            sistema.id_sistema
-          );
-    
-          // Ensure we're accessing the correct part of the response
-          const partes = partsResponse.data || partsResponse;
-          console.log(ordenTrabajoSistema.id_orden_trabajo_sistema)
-          // Guardar cada parte en orden_trabajo_parte
-          for (let parte of partes) {
-            await agregarOrdenTrabajoParte(
-              ordenTrabajoSistema.id_orden_trabajo_sistema, 
-              parte.id_parte
-            );
-          }
-        }
-    
-        console.log('Órdenes de trabajo por sistema y partes creadas exitosamente');
-      } catch (error) {
-        console.error('Detailed error:', error);
-        throw new Error(`Error al crear órdenes de trabajo por sistema y partes: ${error.message}`);
-      }
-    };
-  
-    const handleGuardar = async () => {
-      if (!tecnico || !puerto) {
-        alert("Debe seleccionar un técnico y un puerto.");
-        return;
-      }
-      
-      try {
-        const response = await guardarOrdenTrabajo(
-          trabajo.id_tipo_trabajo,
-          embarcacion.id_embarcacion,
-          puerto,
-          codigoOT,
-          motorista || null,
-          supervisor || null
+const ReasignarTrabajoScreen = ({route, navigation }) => {
+  const {sistemas, empresa, embarcacion, trabajo, codigoOT} = route.params;
+  const [tecnico, setTecnico] = useState(null);
+  const [motorista, setMotorista] = useState("");
+  const [supervisor, setSupervisor] = useState("");
+  const [ayudantes, setAyudantes] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { usuariosTecnicos } = useUsuarioTecnico();
+  const { guardarOrdenTrabajo, loading, error } = useOrdenTrabajo(); 
+  const { guardarOrdenTrabajoUsuario } = useOrdenTrabajoUsuario();
+  const { guardarOrdenTrabajoSistema } = useOrdenTrabajoSistema();
+  const { agregarOrdenTrabajoParte } = useOrdenTrabajoParte();
+  const { parts, fetchPartsBySistema } = useTipoTrabajoESP();
+
+  const handleSeleccionarTecnico = () => {
+    navigation.navigate("SeleccionarTecnico", {
+      tecnicoSeleccionado: tecnico,
+      onSelect: (nuevoTecnico) => setTecnico(nuevoTecnico),
+      usuariosExcluidos: ayudantes.map((a) => a.id),
+    });
+  };
+
+  const handleSeleccionarAyudantes = () => {
+    navigation.navigate("SeleccionarAyudantes", {
+      ayudantesSeleccionados: ayudantes,
+      onSelect: (nuevosAyudantes) => setAyudantes(nuevosAyudantes),
+      usuarioExcluido: tecnico ? [tecnico.id] : [],
+    });
+  };
+
+  const createOrdenTrabajoSistemas = async (ordenTrabajoId) => {
+    try {
+      for (let sistema of sistemas) {
+        const ordenTrabajoSistema = await guardarOrdenTrabajoSistema(
+          ordenTrabajoId,
+          sistema.id_embarcacion_sistema
         );
   
-        if (response) {
-          await createOrdenTrabajoSistemas(response.id_orden_trabajo);
+        const partsResponse = await fetchPartsBySistema(
+          trabajo.id_tipo_trabajo, 
+          embarcacion.id_embarcacion, 
+          sistema.id_sistema
+        );
   
-          await guardarOrdenTrabajoUsuario(response.id_orden_trabajo, tecnico.id, "Responsable");
-  
-          // Luego guardamos los ayudantes con rol de ayudante
-          for (let ayudante of ayudantes) {
-            await guardarOrdenTrabajoUsuario(response.id_orden_trabajo, ayudante.id, "Ayudante");
-          }
-    
-          alert("Orden de trabajo y usuarios asociados guardados con éxito");
-          navigation.dispatch(
-            CommonActions.reset({
-              index: 1,
-              routes: [
-                { name: 'InicioJefe' }
-              ],
-            })
+        const partes = partsResponse.data || partsResponse;
+        
+        for (let parte of partes) {
+          await agregarOrdenTrabajoParte(
+            ordenTrabajoSistema.id_orden_trabajo_sistema, 
+            parte.id_parte
           );
         }
-      } catch (error) {
-        alert("Error al guardar la orden de trabajo: " + error);
-        console.log(error);
       }
-    };
+  
+      console.log('Órdenes de trabajo por sistema y partes creadas exitosamente');
+    } catch (error) {
+      console.error('Detailed error:', error);
+      throw new Error(`Error al crear órdenes de trabajo por sistema y partes: ${error.message}`);
+    }
+  };
+
+  const handleGuardar = async () => {
+    if (!tecnico) {
+      alert("Debe seleccionar un técnico.");
+      return;
+    }
+    
+    try {
+      const response = await guardarOrdenTrabajo(
+        trabajo.id_tipo_trabajo,
+        embarcacion.id_embarcacion,
+        null,
+        codigoOT,
+        motorista || null,
+        supervisor || null,
+        reasignado // Add the status here
+      );
+  
+      if (response) {
+        await createOrdenTrabajoSistemas(response.id_orden_trabajo);
+        await guardarOrdenTrabajoUsuario(response.id_orden_trabajo, tecnico.id, "Responsable");
+        
+        for (let ayudante of ayudantes) {
+          await guardarOrdenTrabajoUsuario(response.id_orden_trabajo, ayudante.id, "Ayudante");
+        }
+
+        alert("Orden de trabajo reasignada con éxito");
+        navigation.dispatch(
+          CommonActions.reset({
+            index: 1,
+            routes: [
+              { name: 'InicioJefe' }
+            ],
+          })
+        );
+      }
+    } catch (error) {
+      alert("Error al reasignar la orden de trabajo: " + error);
+      console.log(error);
+    }
+  };
 
   return (
     <ScrollView 
@@ -149,41 +126,9 @@ import { CommonActions } from '@react-navigation/native';
           <Text style={styles.label}>Código de OT</Text>
           <Text style={styles.infoText}>{codigoOT}</Text>
         </View>
-
-        <View style={styles.field}>
-          <Text style={styles.label}>Trabajo</Text>
-          <Text style={styles.infoText}>{trabajo.nombre_trabajo}</Text>
-        </View>
-
-        <View style={styles.field}>
-          <Text style={styles.label}>Sistemas</Text>
-          <View style={styles.systemsContainer}>
-            {sistemas.length > 0 ? (
-              sistemas.map((sistema, index) => (
-                <View key={index} style={styles.systemItem}>
-                  <Text style={styles.systemText}>
-                    {sistema.id_embarcacion_sistema}
-                  </Text>
-                </View>
-              ))
-            ) : (
-              <Text style={styles.emptyText}>No hay sistemas seleccionados</Text>
-            )}
-          </View>
-        </View>
       </View>
 
       <View style={styles.card}>
-        <View style={styles.field}>
-          <Text style={styles.label}>Puerto</Text>
-          <Select
-            placeholder="Seleccione un puerto"
-            items={puertosOptions}
-            value={puerto}
-            onValueChange={setPuerto}
-          />
-        </View>
-
         <View style={styles.field}>
           <Text style={styles.label}>Técnico</Text>
           <TouchableOpacity 
