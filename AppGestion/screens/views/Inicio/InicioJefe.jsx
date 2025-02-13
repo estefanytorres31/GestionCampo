@@ -87,8 +87,13 @@ const NotificationButton = ({ count, onPress }) => (
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
         >
-            <MaterialCommunityIcons name="bell-ring-outline" size={22} color="white" />
-            <Text style={styles.notificationCount}>{count}</Text>
+            <View style={styles.notificationContent}>
+                <View style={styles.notificationTopRow}>
+                    <Text style={styles.notificationLabel}>Avisos</Text>
+                    <MaterialCommunityIcons name="bell-ring-outline" size={22} color="white" />
+                </View>
+                <Text style={styles.notificationCount}>{count}</Text>
+            </View>
         </LinearGradient>
     </TouchableOpacity>
 );
@@ -132,7 +137,7 @@ const CompanyButton = ({ empresa, gradientColors, onPress, onNotificationPress }
                                     <Ionicons name="boat-outline" size={24} color="white" />
                                 </View>
                                 <Text style={styles.buttonText}>{empresa.nombre}</Text>
-                                <Ionicons name="chevron-forward" size={24} color="rgba(255,255,255,0.9)" />
+                                {/* <Ionicons name="chevron-forward" size={24} color="rgba(255,255,255,0.9)" /> */}
                             </View>
                         </BlurView>
                     </LinearGradient>
@@ -231,6 +236,13 @@ const ClientScreen = ({ navigation }) => {
                                 count={0}
                                 gradientColors={['#4f46e5', '#7c3aed']}
                                 onPress={() => navigation.navigate('Clientes')}
+                            />                            
+                            <ActionButton 
+                                icon="clipboard-list-outline" 
+                                title="Lista OT" 
+                                count={12}
+                                gradientColors={['#0d9488', '#14b8a6']}
+                                onPress={() => navigation.navigate('ListaOTAsignado')}
                             />
                             <ActionButton 
                                 icon="qrcode-scan" 
@@ -239,13 +251,7 @@ const ClientScreen = ({ navigation }) => {
                                 gradientColors={['#2563eb', '#3b82f6']}
                                 onPress={() => navigation.navigate('QRScann')}
                             />
-                            <ActionButton 
-                                icon="clipboard-list-outline" 
-                                title="Lista OT" 
-                                count={12}
-                                gradientColors={['#0d9488', '#14b8a6']}
-                                onPress={() => navigation.navigate('ListaOTAsignado')}
-                            />
+
                             <ActionButton 
                                 icon="clipboard-account-outline" 
                                 title="Historial" 
@@ -436,12 +442,12 @@ const styles = StyleSheet.create({
     },
     buttonText: {
         color: '#fff',
-        fontSize: 18,
-        fontWeight: '600',
+        fontSize: 14,
+        fontWeight: '400',
         flex: 1,
     },
     notificationButton: {
-        width: 80,
+        width: 160,
         height: 80,
         borderRadius: 24,
         overflow: 'hidden',
@@ -453,18 +459,42 @@ const styles = StyleSheet.create({
     },
     notificationGradient: {
         flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
         padding: 12,
+    },
+    notificationContent: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingVertical: 8,
+    },
+    notificationTopRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+    },
+    notificationLabel: {
+        color: 'white',
+        fontSize: 16,
+        fontWeight: '400',
     },
     notificationCount: {
         color: 'white',
-        fontSize: 14,
+        fontSize: 24,
         fontWeight: 'bold',
-        marginTop: 4,
     },
     companiesScrollContent: {
         paddingBottom: 80, // Add padding to accommodate the logout button
+    },
+    notificationLabel: { // Avisos
+        color: 'white',
+        fontSize: 16,
+        fontWeight: '400',
+    },
+    notificationContent: {
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 12,
     },
     logoutButton: {
         position: 'absolute',
