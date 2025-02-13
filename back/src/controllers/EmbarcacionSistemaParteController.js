@@ -66,3 +66,14 @@ export const deleteEmbarcacionSistemaParte = async (req, res) => {
         res.status(error.status || 500).json({ message: error.message });
     }
 };
+
+
+export const asignacionMultiple = async (req, res) => {
+    const { id_embarcacion_sistema, id_parte } = req.body;
+    try{
+        const relacion = await EmbarcacionSistemaParteService.assignMultiplePartesToEmbarcacionSistema(id_embarcacion_sistema, id_parte);
+        res.status(201).json({ message: "Partes asignadas exitosamente.", data: relacion });
+    }catch(error){
+        res.status(error.status || 500).json({ message: error.message });
+    }
+}

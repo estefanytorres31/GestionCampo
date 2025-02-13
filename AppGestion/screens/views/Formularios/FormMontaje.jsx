@@ -18,7 +18,7 @@ import { CommonActions } from '@react-navigation/native';
 import useOrdenTrabajoSistema from "../../hooks/OrdenTrabajoSistema/useOrdenTrabajoSistema";
 import useAuth from "../../hooks/Auth/useAuth";
 
-const MaintenanceForm = () => {
+const MaintenanceForm = ({route, navigation}) => {
   const {id_orden_trabajo_sistema}=route.params;
   const {role}=useAuth();
   const [formData, setFormData] = useState({

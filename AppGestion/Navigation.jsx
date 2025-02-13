@@ -15,6 +15,8 @@ import SistemasScreen from "./screens/views/Sistemas/Sistemas";
 import Menu from "./screens/views/Asistencia/Menu";
 import SeleccionarTecnicoScreen from "./screens/views/AsignarTrabajo/SeleccionarTecnico";
 import ListaOTAsignado from "./screens/views/Lista/ListaTrabajoAsigJefe";
+import { SeleccionarAyudantesReasignarScreen } from "./screens/views/ReasignarTrabajo/ListaTécnicos";
+import { SeleccionarTecnicoReasignarScreen } from "./screens/views/ReasignarTrabajo/ListaTécnicos";
 import Mantto from "./screens/views/Checklist/Mantto";
 import Montaje from "./screens/views/Checklist/Montaje";
 import FormPreventivo from "./screens/views/Formularios/FormPreventivo";
@@ -82,8 +84,7 @@ export default function Navigation() {
       <Stack.Screen name="Embarcaciones" component={EmbarcacionesScreen} />
       <Stack.Screen name="Trabajo" component={Trabajo} />
       <Stack.Screen name="Sistemas" component={SistemasScreen} options={{title:"Sistemas"}}/>
-      <Stack.Screen name="Asignar" component={AsignarTrabajoScreen} />
-      <Stack.Screen name="Reasignar" component={ReasignarTrabajo} options={{ title: "Reasignar Trabajo" }} />
+      <Stack.Screen name="Asignar" component={AsignarTrabajoScreen} options={{title:"Formulario"}}/>
       <Stack.Screen name="SeleccionarAyudantes" component={SeleccionarAyudantesScreen} />
       <Stack.Screen name="SeleccionarTecnico" component={SeleccionarTecnicoScreen} />
       <Stack.Screen 

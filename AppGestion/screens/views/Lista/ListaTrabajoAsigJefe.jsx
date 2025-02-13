@@ -13,6 +13,9 @@ import {
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { LinearGradient } from 'expo-linear-gradient';
 import useOrdenTrabajo from "../../hooks/OrdenTrabajo/useOrdenTrabajo";
+import useEmpresa from "../../hooks/Empresa/useEmpresa";
+import useEmbarcacion from "../../hooks/Embarcacion/useEmbarcacion";
+import Filtrado from "../../components/Filtrado"
 
 const { width } = Dimensions.get('window');
 
@@ -75,12 +78,15 @@ const EstadoBadge = ({ estado }) => {
 };
 
 const OrdenesTrabajoScreen = ({ navigation }) => {
-    const { obtenerTrabajosPorJefeAsig, loading, error } = useOrdenTrabajo();
+    const { obtenerTrabajosPorJefeAsig, loading, error, obtenerTrabajosPorEmbarcacion } = useOrdenTrabajo();
     const [ordenes, setOrdenes] = useState([]);
     const [filtroEstado, setFiltroEstado] = useState(null);
+    const {empresas}=useEmpresa();
+    const {fetchEmbarcacionesByEmpresa}=useEmbarcacion();
+    const [filteredOrdenes, setFilteredOrdenes] = useState([]);
 
     useEffect(() => {
-        const cargarOrdenes = async () => {
+        const cargarOrdenes = async() => {
             const data = await obtenerTrabajosPorJefeAsig();
             if (data) {
                 setOrdenes(data);
@@ -93,38 +99,28 @@ const OrdenesTrabajoScreen = ({ navigation }) => {
         setFiltroEstado(filtroEstado === estado ? null : estado);
     };
 
+    const handleOrdersFiltered = (filtered) => {
+        setFilteredOrdenes(filtered);
+    };
+    
+
     const ordenesFiltradas = filtroEstado
         ? ordenes.filter(orden => orden.estado.toLowerCase() === filtroEstado.toLowerCase())
         : ordenes;
 
     const handleReasignarPress = (item) => {
-        navigation.navigate('Reasignar', {
-            sistemas: [{ 
-                id_embarcacion_sistema: item.id_embarcacion_sistema,
-                id_sistema: item.id_sistema 
-            }],
-            empresa: { id_empresa: item.id_empresa },
-            embarcacion: { 
-                id_embarcacion: item.id_embarcacion,
-                nombre: item.nombre_embarcacion 
-            },
-            trabajo: {
-                id_tipo_trabajo: item.id_tipo_trabajo,
-                nombre_trabajo: item.nombre_trabajo
-            },
-            codigoOT: item.codigo
+        navigation.navigate('Asignar', {
+            codigoOT: item.codigo,
+            idOrden:item.id_orden_trabajo,
+            ordenTrabajo:item
         });
     };
 
-    const handleDetailsPress = (item) => {
-        navigation.navigate('DetallesOrdenTrabajo', { ordenTrabajo: item });
-    };
 
     const renderItem = (item) => (
         <TouchableOpacity 
             key={item.id_orden_trabajo}
             style={styles.card}
-            onPress={() => handleDetailsPress(item)}
             activeOpacity={0.7}
         >
             <View style={styles.cardHeader}>
@@ -144,17 +140,6 @@ const OrdenesTrabajoScreen = ({ navigation }) => {
                 </View>
             </View>
 
-            <TouchableOpacity 
-                style={[
-                    styles.detailsButton,
-                    { backgroundColor: getEstadoConfig(item.estado).textColor }
-                ]}
-                onPress={() => handleDetailsPress(item)}
-            >
-                <Text style={styles.detailsButtonText}>Ver detalles</Text>
-                <MaterialCommunityIcons name="arrow-right" size={20} color="white" />
-            </TouchableOpacity>
-
             {['pendiente', 'en_progreso'].includes(item.estado.toLowerCase()) && (
                 <TouchableOpacity 
                     style={[
@@ -163,17 +148,17 @@ const OrdenesTrabajoScreen = ({ navigation }) => {
                     ]}
                     onPress={() => handleReasignarPress(item)}
                 >
-                    <MaterialCommunityIcons 
+                    {<MaterialCommunityIcons 
                         name="swap-horizontal" 
                         size={20} 
                         color={getEstadoConfig(item.estado).textColor} 
-                    />
-                    <Text style={[
+                    /> }
+                    {<Text style={[
                         styles.reasignarButtonText, 
                         { color: getEstadoConfig(item.estado).textColor }
                     ]}>
-                        Reasignar
-                    </Text>
+                        Siguiente
+                    </Text>}
                 </TouchableOpacity>
             )}
         </TouchableOpacity>
@@ -224,7 +209,13 @@ const OrdenesTrabajoScreen = ({ navigation }) => {
                     showsVerticalScrollIndicator={false}
                 >
                     {renderHeader()}
-                    {ordenesFiltradas.map(renderItem)}
+                    <Filtrado 
+                        empresas={empresas}
+                        ordenes={ordenes}
+                        fetchEmbarcacionesByEmpresa={fetchEmbarcacionesByEmpresa}
+                        onOrdersFiltered={handleOrdersFiltered}
+                    />
+                    {(filteredOrdenes.length > 0 ? filteredOrdenes : ordenesFiltradas).map(renderItem)}
                 </ScrollView>
             )}
         </View>

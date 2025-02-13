@@ -1,7 +1,7 @@
 import React, { useContext, useState, useEffect } from 'react';
 import UsuarioTecnicoContext from "./UsuarioTecnicoContext";
 import AuthContext from "../Auth/AuthContext";
-import { getAllUsuariosByRol } from "../../services/UsuarioService";
+import { getAllUsuariosByRol, getUserById } from "../../services/UsuarioService";
 
 const UsuarioTecnicoProvider = ({ children }) => {
     const [usuariosTecnicos, setUsuariosTecnicos] = useState([]);
@@ -26,8 +26,25 @@ const UsuarioTecnicoProvider = ({ children }) => {
         }
     }, [isAuth]);
 
+    const getUsuarioById = async (id_usuario) => {
+        try{
+            const response = await getUserById(id_usuario);
+            if (response) {
+                return response.data;
+            } else {
+                console.log('No se encontró el usuario técnico con el id:', id_usuario);
+                return null;
+            }
+            
+        }catch (error) {
+            console.error('Error al obtener usuario técnico:', error);
+            return null;
+        }
+
+    }
+
     return (
-        <UsuarioTecnicoContext.Provider value={{ usuariosTecnicos, setUsuariosTecnicos }}>
+        <UsuarioTecnicoContext.Provider value={{ usuariosTecnicos, setUsuariosTecnicos, getUsuarioById }}>
             {children}
         </UsuarioTecnicoContext.Provider>
     );

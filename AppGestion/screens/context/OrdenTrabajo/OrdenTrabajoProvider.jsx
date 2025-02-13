@@ -1,16 +1,16 @@
 import React, { createContext, useState, useContext } from "react";
 import OrdenTrabajoContext from "./OrdenTrabajoContext";
-import { createOrdenTrabajo, getOrdenTrabajoById, getAllTrabajosByJefeAsig, updateOrdenTrabajo } from "../../services/OrdenTrabajoService";
+import { createOrdenTrabajo, getOrdenTrabajoById, getAllTrabajosByJefeAsig, updateOrdenTrabajo, updateAllOrdenTrabajo, getAllTrabajosByEmbarcacion } from "../../services/OrdenTrabajoService";
 
 const OrdenTrabajoProvider = ({ children }) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
   
-    const guardarOrdenTrabajo = async (id_tipo_trabajo, id_embarcacion, id_puerto, codigo, motorista, supervisor) => {
+    const guardarOrdenTrabajo = async (id_tipo_trabajo, id_embarcacion, codigo) => {
       setLoading(true);
       setError(null);
       try {
-        const response = await createOrdenTrabajo(id_tipo_trabajo, id_embarcacion, id_puerto, codigo, motorista, supervisor);
+        const response = await createOrdenTrabajo(id_tipo_trabajo, id_embarcacion, codigo);
         return response.data; 
       } catch (err) {
         setError(err.message);
@@ -48,6 +48,20 @@ const OrdenTrabajoProvider = ({ children }) => {
       }
     }
 
+    const obtenerTrabajosPorEmbarcacion = async (id_embarcacion) => {
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await getAllTrabajosByEmbarcacion(id_embarcacion);
+        return response.data;
+      } catch (err) {
+        setError(err.message);
+        console.error("Error al obtener los trabajos por embarcación:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
     const actualizarOrdenTrabajo = async (id_orden_trabajo, estado) => {
       setLoading(true);
       setError(null);
@@ -62,8 +76,23 @@ const OrdenTrabajoProvider = ({ children }) => {
       }
     }
 
+    const updateOT=async(id_orden_trabajo, id_puerto, motorista, supervisor)=>{
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await updateAllOrdenTrabajo(id_orden_trabajo, id_puerto, motorista, supervisor);
+        return response.data;
+      } catch (err) {
+        setError(err.message);
+        console.error("Error al actualizar la orden de trabajo:", err);
+      } finally {
+        setLoading(false);
+      }
+
+    }
+
     return (
-        <OrdenTrabajoContext.Provider value={{ guardarOrdenTrabajo, obtenerOrdenTrabajo,obtenerTrabajosPorJefeAsig, actualizarOrdenTrabajo, loading, error }}>
+        <OrdenTrabajoContext.Provider value={{ obtenerTrabajosPorEmbarcacion, updateOT,guardarOrdenTrabajo, obtenerOrdenTrabajo,obtenerTrabajosPorJefeAsig, actualizarOrdenTrabajo, loading, error }}>
           {children}
         </OrdenTrabajoContext.Provider>
       );
