@@ -346,18 +346,32 @@ model OrdenTrabajoUsuario {
   id_usuario              Int         @map("id_usuario")
   rol_en_orden            RolEnOrden? @map("rol_en_orden")
   observaciones           String?     @map("observaciones")
-  estado                  Boolean     @default(true) @map("estado") // Nuevo campo para activación/desactivación
+  estado                  Boolean     @default(true) @map("estado")
   creado_en               DateTime    @default(now()) @map("creado_en")
   actualizado_en          DateTime    @updatedAt @map("actualizado_en")
+  
   orden_trabajo           OrdenTrabajo @relation(fields: [id_orden_trabajo], references: [id_orden_trabajo], onDelete: NoAction, onUpdate: Cascade)
   usuario                 Usuario     @relation(fields: [id_usuario], references: [id], onDelete: NoAction, onUpdate: Cascade)
 
+  // Relación inversa a Abordaje (opcional, ya que puede no existir)
+  abordaje                Abordaje?
+
   @@unique([id_orden_trabajo, id_usuario], name: "orden_trabajo_usuario_unique")
   @@map("orden_trabajo_usuario")
-  
-  // Índices adicionales
   @@index([id_orden_trabajo], name: "idx_orden_trabajo_usuario_orden_trabajo")
   @@index([id_usuario], name: "idx_orden_trabajo_usuario_usuario")
+}
+
+model Abordaje {
+  id                       Int                   @id @default(autoincrement())
+  id_orden_trabajo_usuario Int                   @unique
+  motorista                String?
+  supervisor               String?
+
+  // Relación con OrdenTrabajoUsuario
+  ordenTrabajoUsuario      OrdenTrabajoUsuario   @relation(fields: [id_orden_trabajo_usuario], references: [id_orden_trabajo_usuario], onDelete: Cascade, onUpdate: Cascade)
+
+  @@map("abordaje")
 }
 
 model OrdenTrabajoSistema {
@@ -388,7 +402,6 @@ model OrdenTrabajoSistema {
   @@index([id_orden_trabajo], name: "idx_otsis_ot")
   @@index([estado], name: "idx_otsis_est")
 }
-
 
 model OrdenTrabajoSistemaDetalle {
   id_detalle               Int  @id @default(autoincrement()) @map("id_detalle")
