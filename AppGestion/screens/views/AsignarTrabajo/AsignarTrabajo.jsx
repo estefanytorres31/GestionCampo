@@ -33,6 +33,37 @@ import  useAbordaje from "../../hooks/Abordaje/useAbordaje"
       }));
       setPuertosOptions(options);
     }, [puertos]);
+
+    useEffect(() => {
+      const loadAbordajes = async () => {
+        try {
+          const abordajes = await obtenerAbordajePorOrdenTrabajo(ordenTrabajo.id_orden_trabajo);
+          if (abordajes && abordajes.length > 0) {
+            const options = abordajes.map((abordaje, index) => ({
+              label: `Abordaje ${index + 1}`,
+              value: abordaje.id_abordaje,
+              data: abordaje
+            }));
+            setAbordajesOptions(options);
+          }
+        } catch (error) {
+          console.error("Error al cargar abordajes:", error);
+        }
+      };
+  
+      loadAbordajes();
+    }, [ordenTrabajo.id_orden_trabajo]);
+
+    const handleAbordajeChange = (value) => {
+      const selectedOption = abordajesOptions.find(option => option.value === value);
+      if (selectedOption) {
+        setSelectedAbordaje(selectedOption.data);
+        // Pre-llenar los campos con la información del abordaje seleccionado
+        setPuerto(selectedOption.data.id_puerto);
+        setMotorista(selectedOption.data.motorista || "");
+        setSupervisor(selectedOption.data.supervisor || "");
+      }
+    };
   
     const handleSeleccionarTecnico = () => {
       navigation.navigate("SeleccionarTecnico", {
@@ -127,6 +158,20 @@ import  useAbordaje from "../../hooks/Abordaje/useAbordaje"
         <Text style={styles.title}>Formulario</Text>
         <View style={styles.divider} />
       </View>
+
+      {abordajesOptions.length > 0 && (
+        <View style={styles.card}>
+          <View style={styles.field}>
+            <Text style={styles.label}>Abordajes Anteriores</Text>
+            <Select
+              placeholder="Seleccione un abordaje"
+              items={abordajesOptions}
+              value={selectedAbordaje?.id_abordaje}
+              onValueChange={handleAbordajeChange}
+            />
+          </View>
+        </View>
+      )}
 
       <View style={styles.card}>
         <View style={styles.field}>
@@ -338,6 +383,17 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "700",
     letterSpacing: 1,
+  },
+  abordajeInfo: {
+    marginTop: 8,
+    padding: 12,
+    backgroundColor: "#E8EAF6",
+    borderRadius: 8,
+  },
+  abordajeInfoText: {
+    color: "#3949AB",
+    fontSize: 14,
+    marginBottom: 4,
   },
 });
 
