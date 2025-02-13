@@ -43,7 +43,7 @@ export const createAbordaje = async (data) => {
   }
 
   // Convertir la fecha a UTC utilizando la función getUTCTime
-  const fechaParsed = getUTCTime(fecha);
+  const fechaParsed =fechaDate;
 
   // Validar que la OrdenTrabajoUsuario exista
   const ordenTrabajoUsuarioExistente =

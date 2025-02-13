@@ -6,7 +6,6 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import LoginScreen from "./screens/views/Auth/Login";
 import Clientes from "./screens/views/client/Client";
 import EmbarcacionesScreen from "./screens/views/Embarcacion/Embarcacion";
-import Inicio from "./screens/views/Inicio/Inicio";
 import Trabajo from "./screens/views/TipoTrabajo/TipoTrabajo";
 import AsignarTrabajoScreen from "./screens/views/AsignarTrabajo/AsignarTrabajo";
 import SeleccionarAyudantesScreen from "./screens/views/AsignarTrabajo/SeleccionarAyudantes";
@@ -15,8 +14,6 @@ import SistemasScreen from "./screens/views/Sistemas/Sistemas";
 import Menu from "./screens/views/Asistencia/Menu";
 import SeleccionarTecnicoScreen from "./screens/views/AsignarTrabajo/SeleccionarTecnico";
 import ListaOTAsignado from "./screens/views/Lista/ListaTrabajoAsigJefe";
-import { SeleccionarAyudantesReasignarScreen } from "./screens/views/ReasignarTrabajo/ListaTécnicos";
-import { SeleccionarTecnicoReasignarScreen } from "./screens/views/ReasignarTrabajo/ListaTécnicos";
 import Mantto from "./screens/views/Checklist/Mantto";
 import Montaje from "./screens/views/Checklist/Montaje";
 import FormPreventivo from "./screens/views/Formularios/FormPreventivo";
@@ -26,11 +23,7 @@ import FormProyecto from "./screens/views/Formularios/FormProyecto";
 import Desmont from "./screens/views/Boton/Desmont";
 import useAuth from "./screens/hooks/Auth/useAuth";
 import InicioJefe from "./screens/views/Inicio/InicioJefe";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { TouchableOpacity } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
 import TrabajosAsignadosScreen from "./screens/views/Lista/TrabajosAsignados";
-import ReasignarTrabajo from "./screens/views/ReasignarTrabajo/ReasignarTrabajo";
 
 const Stack = createNativeStackNavigator();
 

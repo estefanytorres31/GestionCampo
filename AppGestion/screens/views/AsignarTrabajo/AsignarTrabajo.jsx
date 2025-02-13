@@ -6,10 +6,7 @@ import useUsuarioTecnico from "../../hooks/UsuarioTecnico/useUsuarioTecnico";
 import usePuerto from "../../hooks/Puerto/usePuerto";
 import useOrdenTrabajo from "../../hooks/OrdenTrabajo/useOrdenTrabajo";
 import useOrdenTrabajoUsuario from "../../hooks/OrdenTrabajoUsuario/useOrdenTrabajoUsuario";
-import useOrdenTrabajoSistema from "../../hooks/OrdenTrabajoSistema/useOrdenTrabajoSistema";
-import useOrdenTrabajoParte from "../../hooks/OrdenTrabajoParte/useOrdenTrabajoParte";
-import useTipoTrabajoESP from "../../hooks/TipoTrabajoESP/useTipoTrabajoESP"
-import { CommonActions } from '@react-navigation/native';
+import  useAbordaje from "../../hooks/Abordaje/useAbordaje"
 
   const AsignarTrabajoScreen = ({route, navigation }) => {
     const {codigoOT, ordenTrabajo }=route.params;

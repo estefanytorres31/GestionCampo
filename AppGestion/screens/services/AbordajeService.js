@@ -1,0 +1,27 @@
+import apiClient from "../API/apiClient";
+
+export const createAbordaje=async(id_orden_trabajo_usuario, fecha, motorista, supervisor,  id_puerto)=>{
+    try{
+        const response=await apiClient.post(`/abordaje`, {
+        id_orden_trabajo_usuario,
+        fecha,
+        motorista,
+        supervisor,
+        id_puerto
+    })
+    return response.data;
+    }catch(e){
+        console.error(e);
+        throw new Error("Error al crear abordaje");
+    }
+}
+
+export const getAllAbordajes=async()=>{
+    try{
+        const response=await apiClient.get(`/abordaje`);
+        return response.data;
+    }catch(e){
+        console.error(e);
+        throw new Error("Error al obtener abordajes");
+    }
+}
