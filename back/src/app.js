@@ -27,8 +27,7 @@ import tipoTrabajoESPRouter from './routes/TipoTrabajoEmbarcacionSistemaParteRou
 import asistenciaRouter from './routes/AsistenciaRouter.js';
 import ordenTrabajoParteRouter from './routes/OrdenTrabajoParteRouter.js';
 import routerConfiguration from './routes/UserConfigurationRouter.js';
-import recursoRouter from './routes/recursoRouter.js';
-import accionRouter from './routes/accionRouter.js';
+import abordajeRouter from './routes/AbordajeRouter.js';
 
 const app = express();
 
@@ -71,5 +70,6 @@ app.use("/api/embarcacionsistemaparte", embarcacionSistemaParteRouter);
 app.use("/api/tipotrabajoesp", tipoTrabajoESPRouter);
 app.use("/api/asistencia", asistenciaRouter);
 app.use("/api/theme", routerConfiguration);
+app.use("/api/abordaje", abordajeRouter);
 
 export default app;

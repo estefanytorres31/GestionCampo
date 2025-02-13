@@ -9,13 +9,25 @@ import { TbViewportWide } from "react-icons/tb";
 import { TbViewportNarrow } from "react-icons/tb";
 import { GiCargoShip, GiHarborDock } from "react-icons/gi";
 import { MdMenu, MdKeyboardArrowDown, MdAssignment } from "react-icons/md";
+import {
+  RiGroup2Fill,
+  RiShieldUserFill,
+  RiUserLocationFill,
+} from "react-icons/ri";
 import { IoLogOut } from "react-icons/io5";
+import { FaUserFriends } from "react-icons/fa";
+import { FaMapLocationDot } from "react-icons/fa6";
+import { BiSolidShip } from "react-icons/bi";
+import { LuShipWheel } from "react-icons/lu";
+import { HiClipboardList } from "react-icons/hi";
 
 import icono from "@/assets/logo.svg";
 import { useAuth } from "@/context/AuthContext";
 import roleMapper from "@/utils/roleMapper";
 
-import navigationModules from "@/data/navigationModules";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faGear } from "@fortawesome/free-solid-svg-icons";
+import { getUniquePermissions } from "@/utils/getUniquePermissions";
 
 // Variantes para la animación del submenú
 const subMenuVariants = {
@@ -59,80 +71,141 @@ const SideBar = () => {
     if (isTab) setIsOpen(false);
   }, [pathname, isTab]);
 
-  
-
   useEffect(() => {
-    // 1. Filtramos los módulos que deben mostrarse en la sidebar.
-    const navigationElements = navigationModules.filter((item) => item.sidebar);
-    console.log("navigationElements", navigationElements);
-  
-    // 2. Extraemos los roles del usuario.
-    const rolesUsuario = roles?.map((r) => r.key) || [];
-    console.log("rolesUsuario", rolesUsuario);
-    console.log("roles", roles);
-  
-    // 3. Extraemos todos los permisos de todos los roles.
-    const allPermissions = roles?.flatMap((r) =>
-      Array.isArray(r.permisos)
-        ? r.permisos.map((p) => ({
-            id: p.id,
-            key: p.key,       // Ej: "permisos.LEER"
-            nombre: p.nombre, // Ej: "Administrar Permisos - Leer"
-          }))
-        : []
-    ) || [];
-    console.log("allPermissions", allPermissions);
-  
-    // 4. Filtramos solo los permisos cuyo key termine en ".LEER"
-    const permissionsEndingInLeer = allPermissions.filter((permiso) =>
-      permiso.key.endsWith(".LEER")
-    );
-    console.log("permissionsEndingInLeer", permissionsEndingInLeer);
-  
-    // 5. Eliminamos duplicados basados en el valor de 'key'
-    const uniquePermissions = Array.from(
-      new Map(permissionsEndingInLeer.map((permiso) => [permiso.key, permiso])).values()
-    );
-    console.log("uniquePermissions", uniquePermissions);
-  
-    // 6. Creamos un Set con los resourceKey permitidos, quitándole el sufijo ".LEER"
-    const allowedResourceKeys = new Set(
-      uniquePermissions.map((permiso) => permiso.key.replace(".LEER", ""))
-    );
-    console.log("allowedResourceKeys", allowedResourceKeys);
-  
-    // 7. Función para filtrar elementos de navegación (incluyendo subItems)
+    const navigationElements = [
+      {
+        to: "/dashboard",
+        icon: <FaMapLocationDot size={20} className="min-w-max" />,
+        label: "Dashboard",
+      },
+      {
+        to: "/horas-hombre",
+        icon: <RiUserLocationFill size={20} className="min-w-max" />,
+        label: "Horas Hombre",
+        permisos: ["Ver todo", "Ver Horas Hombre"],
+      },
+      {
+        to: "/orden-trabajo",
+        icon: <HiClipboardList size={20} className="min-w-max" />,
+        label: "Orden Trabajo",
+        permisos: ["Ver todo", "Ver Orden Trabajo"],
+      },
+      //   // Ítem contenedor para subitems
+      //   icon: <MdAssignment size={20} className="min-w-max" />,
+      //   label: "Asignaciones",
+      //   roles: ["admin"],
+      //   subItems: [
+      //     {
+      //       to: "/asignaciones",
+      //       icon: <GiCargoShip size={20} className="min-w-max" />,
+      //       label: "Asignaciones",
+      //       roles: ["admin"],
+      //     },
+      //     {
+      //       to: "/puertos",
+      //       icon: <GiHarborDock size={20} className="min-w-max" />,
+      //       label: "Puerto",
+      //       roles: ["admin"],
+      //     },
+      //     {
+      //       to: "/historial-puertos",
+      //       label: "Historial de Puertos",
+      //       icon: <LuShipWheel size={18} className="min-w-max" />,
+      //     },
+      //   ],
+      // },
+      // {
+      //   // Ítem contenedor para subitems
+      //   icon: <BiSolidShip size={20} className="min-w-max" />,
+      //   label: "Embarcacion",
+      //   roles: ["admin"],
+      //   subItems: [
+      //     {
+      //       to: "/embarcacion",
+      //       icon: <GiCargoShip size={20} className="min-w-max" />,
+      //       label: "Embarcación",
+      //       roles: ["admin"],
+      //     },
+      //     {
+      //       to: "/puerto",
+      //       icon: <GiHarborDock size={20} className="min-w-max" />,
+      //       label: "Puerto",
+      //       roles: ["admin"],
+      //     },
+      //     {
+      //       to: "/historial-puertos",
+      //       label: "Historial de Puertos",
+      //       icon: <LuShipWheel size={18} className="min-w-max" />,
+      //     },
+      //   ],
+      // },
+      // {
+      //   to: "/sistema",
+      //   icon: <FontAwesomeIcon icon={faGear} style={{ fontSize: "17px" }} />,
+      //   label: "Sistema",
+      //   roles: ["admin"],
+      // },
+      {
+        icon: <RiShieldUserFill size={20} className="min-w-max" />,
+        label: "Usuarios",
+        permisos: ["Ver todo", "Ver Usuarios"],
+        subItems: [
+          {
+            to: "/usuarios",
+            label: "Usuarios",
+            icon: <FaUserFriends size={18} className="min-w-max" />,
+            permisos: ["Ver todo", "Ver Usuarios"],
+          },
+          {
+            to: "/roles",
+            label: "Roles",
+            icon: <RiShieldUserFill size={18} className="min-w-max" />,
+            permisos: ["Ver todo", "Ver Roles"],
+          },
+          {
+            to: "/permisos",
+            label: "Permisos",
+            icon: <RiGroup2Fill size={18} className="min-w-max" />,
+            permisos: ["Ver todo", "Ver Permisos"],
+          },
+        ],
+      },
+    ];
+
+    const permissionsUsuario = getUniquePermissions(roles);
+
     function filterElements(elements) {
       return elements.reduce((acc, item) => {
-
-  
-        // Filtrado por resourceKey: si el elemento tiene resourceKey y no está en allowedResourceKeys, lo descartamos.
-        if (item.resourceKey && !allowedResourceKeys.has(item.resourceKey)) {
-          console.log(`Se descarta ${item.label} por resourceKey: ${item.resourceKey} no está en [${[...allowedResourceKeys].join(", ")}]`);
+        // Si es Dashboard, se agrega sin filtrar
+        if (item.to === "/dashboard" || item.label === "Dashboard") {
+          const newItem = { ...item };
+          if (newItem.subItems) {
+            newItem.subItems = filterElements(newItem.subItems);
+          }
+          acc.push(newItem);
           return acc;
         }
-  
-        // Clonamos el elemento para no modificar el original.
+
+        // Para los demás elementos, si se definen permisos y ninguno coincide, se descarta
+        if (
+          item.permisos &&
+          !item.permisos.some((perm) => permissionsUsuario.includes(perm))
+        ) {
+          return acc;
+        }
+
         const newItem = { ...item };
-  
-        // Si tiene subItems, los filtramos recursivamente.
         if (newItem.subItems) {
-          console.log(`Evaluando subItems de ${newItem.label}`);
           newItem.subItems = filterElements(newItem.subItems);
         }
-  
-        console.log(`Se incluye ${newItem.label}`);
         acc.push(newItem);
         return acc;
       }, []);
     }
-  
-    // 8. Se filtran los elementos de navegación.
+
     const elementsFiltered = filterElements(navigationElements);
-    console.log("elementsFiltered", elementsFiltered);
     setLink(elementsFiltered);
   }, [roles]);
-  
 
   return (
     <aside>

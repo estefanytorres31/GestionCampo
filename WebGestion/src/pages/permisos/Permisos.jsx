@@ -16,7 +16,7 @@ const permisosColumns = [
   { name: "ID", uuid: "id" },
   { name: "🔑 Nombre", uuid: "nombre" },
   { name: "📝 Descripción", uuid: "descripcion" },
-  { name: "⚙️ Acciones", uuid: "acciones" },
+  // { name: "⚙️ Acciones", uuid: "acciones" },
 ];
 
 // Filtros de búsqueda
@@ -68,14 +68,14 @@ const Permisos = () => {
   return (
     <>
       {/* Modal para crear permiso */}
-      <CreatePermissionModal
+      {/* <CreatePermissionModal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         onSuccess={handleSuccess}
-      />
+      /> */}
 
       {/* Modal para editar permiso */}
-      {permissionToEdit && (
+      {/* {permissionToEdit && (
         <EditPermissionModal
           isOpen={isEditModalOpen}
           onClose={() => {
@@ -85,10 +85,10 @@ const Permisos = () => {
           permission={permissionToEdit}
           onSuccess={handleSuccess}
         />
-      )}
+      )} */}
 
       {/* Modal para eliminar permiso */}
-      {permissionToDelete && (
+      {/* {permissionToDelete && (
         <DeletePermissionModal
           isOpen={isDeleteModalOpen}
           onClose={() => {
@@ -98,7 +98,7 @@ const Permisos = () => {
           permission={permissionToDelete}
           onSuccess={handleSuccess}
         />
-      )}
+      )} */}
 
       <ListPage
         useFetchHook={usePermisos}
@@ -106,10 +106,12 @@ const Permisos = () => {
         filterFields={permisosFilters}
         title="Permisos"
         createButton={
-          <Button onClick={() => setIsCreateModalOpen(true)}>
+          <>
+          {/* <Button onClick={() => setIsCreateModalOpen(true)}>
             <IoAdd size={20} className="min-w-max" />
             Crear Permiso
-          </Button>
+          </Button> */}
+          </>
         }
         // Asignamos la función refetch al ref
         onRefetch={(refetch) => {
@@ -119,9 +121,9 @@ const Permisos = () => {
         }}
         render={{
           id: (row) => formatId(row.id),
-          acciones: (row) => (
-            <RowActions row={row} onEdit={handleEdit} onDelete={handleDelete} />
-          ),
+          // acciones: (row) => (
+          //   <RowActions row={row} onEdit={handleEdit} onDelete={handleDelete} />
+          // ),
         }}
       />
     </>

@@ -72,7 +72,6 @@ const AssignPermissionsForm = ({ onSuccess, onCancel }) => {
         const assigned = assignedData.map((perm) => ({
           id: perm.id,
           nombre: perm.nombre,
-          key: perm.key
         }));
         setAssignedPermissions(assigned);
         setSelectedPermissions(assigned);
@@ -94,6 +93,20 @@ const AssignPermissionsForm = ({ onSuccess, onCancel }) => {
   };
 
   const handleCheckboxChange = (e, perm) => {
+    if (
+      role &&
+      role.nombre_rol.toLowerCase() === "administrador" &&
+      perm.nombre.toLowerCase() === "ver todo" &&
+      !e.target.checked
+    ) {
+      setLocalError(
+        "No se puede quitar el permiso 'Ver todo' del Administrador."
+      );
+      return;
+    }
+
+    setLocalError("");
+
     if (e.target.checked) {
       if (!selectedPermissions.find((p) => p.id === perm.id)) {
         setSelectedPermissions([...selectedPermissions, perm]);
@@ -154,14 +167,12 @@ const AssignPermissionsForm = ({ onSuccess, onCancel }) => {
       const storedRoles = localStorage.getItem("roles");
 
       if (storedRoles) {
-
         const rolesArray = JSON.parse(storedRoles);
 
         const permisosModificados = selectedPermissions.length
           ? selectedPermissions.map((permiso) => ({
               id: permiso.id,
               nombre: permiso.nombre,
-              key: permiso.key
             }))
           : [];
 
@@ -228,22 +239,45 @@ const AssignPermissionsForm = ({ onSuccess, onCancel }) => {
               <div
                 key={perm.id}
                 className="flex items-center p-2 border rounded role-card"
-                onClick={() =>
-                  togglePermission({ id: perm.id, nombre: perm.nombre, key: perm.key })
-                }
+                onClick={() => {
+                  // Si el rol es Administrador y el permiso es "ver todo", no se permite el toggle.
+                  if (
+                    role &&
+                    role.nombre_rol.toLowerCase() === "administrador" &&
+                    perm.nombre.toLowerCase() === "ver todo"
+                  ) {
+                    return; // No hace nada
+                  }
+                  // Para los demás permisos se ejecuta el toggle.
+                  togglePermission({ id: perm.id, nombre: perm.nombre });
+                }}
               >
                 <input
                   type="checkbox"
                   checked={!!selectedPermissions.find((p) => p.id === perm.id)}
-                  onChange={(e) =>
+                  onChange={(e) => {
+                    // Evita la modificación si se trata del permiso "ver todo" para Administrador.
+                    if (
+                      role &&
+                      role.nombre_rol.toLowerCase() === "administrador" &&
+                      perm.nombre.toLowerCase() === "ver todo"
+                    ) {
+                      return;
+                    }
                     handleCheckboxChange(e, {
                       id: perm.id,
                       nombre: perm.nombre,
-                    })
+                    });
+                  }}
+                  // Se deshabilita el checkbox en caso de que el rol sea Administrador y el permiso sea "ver todo"
+                  disabled={
+                    role &&
+                    role.nombre_rol.toLowerCase() === "administrador" &&
+                    perm.nombre.toLowerCase() === "ver todo"
                   }
                   className="mr-2"
                 />
-                <span style={{ color: "var(--primary-text)" }}>
+                <span style={{ color: "var(--primary-text)" }} className="cursor-default">
                   {perm.nombre}
                 </span>
               </div>

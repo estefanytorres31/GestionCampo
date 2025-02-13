@@ -14,8 +14,6 @@ export const asignarTrabajoAEmbarcacion = async (data) => {
     id_jefe_asigna,
     codigo,
     comentarios = null,
-    motorista = null,
-    supervisor = null,
   } = data;
 
   if (!id_tipo_trabajo || !id_embarcacion || !id_puerto || !id_jefe_asigna || !codigo) {
@@ -50,8 +48,6 @@ export const asignarTrabajoAEmbarcacion = async (data) => {
           data: {
             estado: "pendiente",
             comentarios: comentarios || ordenTrabajo.comentarios,
-            motorista: motorista || ordenTrabajo.motorista,
-            supervisor: supervisor || ordenTrabajo.supervisor,
             fecha_asignacion: fechaActual,
             actualizado_en: fechaActual,
           },
@@ -69,8 +65,6 @@ export const asignarTrabajoAEmbarcacion = async (data) => {
           id_jefe_asigna,
           codigo,
           comentarios,
-          motorista,
-          supervisor,
           fecha_asignacion: fechaActual,
           estado: "pendiente",
           creado_en: fechaActual,
