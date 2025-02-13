@@ -45,8 +45,6 @@ app.use(fileUpload({
 // Routes
 app.use('/api/rol', rolRouter);
 app.use('/api/permiso', permisoRouter);
-app.use('/api/recurso', recursoRouter);
-app.use('/api/accion', accionRouter);
 app.use('/api/usuario', usuarioRouter);
 app.use('/api/usuariorol', usuarioRolRouter);
 app.use('/api/auth', authRouter);
