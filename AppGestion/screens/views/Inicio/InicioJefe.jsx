@@ -155,7 +155,7 @@ const ActionButton = ({ icon, title, count, onPress, gradientColors }) => {
 
 const ClientScreen = ({ navigation }) => {
     const { empresas } = useEmpresa();
-    const { user, logout } = useAuth();
+    const { user,role, logout } = useAuth(); 
     const { obtenerTrabajosPorJefeAsig } = useOrdenTrabajo();
     const [ordenesPorEmpresa, setOrdenesPorEmpresa] = useState({});
     const [totalOrdenes, setTotalOrdenes] = useState(0);
@@ -202,6 +202,8 @@ const ClientScreen = ({ navigation }) => {
             console.error('Error during logout:', error);
         }
     };
+
+    const showButton = role && !role.includes("Jefe");
 
     useEffect(() => {
         Animated.parallel([
@@ -262,13 +264,15 @@ const ClientScreen = ({ navigation }) => {
                             showsHorizontalScrollIndicator={false}
                             contentContainerStyle={styles.actionButtonsRow}
                         >
-                            <ActionButton 
+                            {!showButton && (
+                                <ActionButton 
                                 icon="file-plus-outline" 
                                 title="Crear OT" 
                                 count={0}
                                 gradientColors={['#4f46e5', '#7c3aed']}
                                 onPress={() => navigation.navigate('Clientes')}
-                            />                            
+                            />
+                             )}                      
                             <ActionButton 
                                 icon="clipboard-list-outline" 
                                 title="Lista OT" 
