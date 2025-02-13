@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { 
     View, 
     Text, 
@@ -15,6 +15,7 @@ import { BlurView } from "expo-blur";
 import MaskedView from "@react-native-masked-view/masked-view";
 import useEmpresa from "../../hooks/Empresa/useEmpresa";
 import useAuth from '../../hooks/Auth/useAuth';
+import useOrdenTrabajo from '../../hooks/OrdenTrabajo/useOrdenTrabajo';
 
 const { height, width } = Dimensions.get('window');
 
@@ -27,55 +28,7 @@ const coloresBotones = [
     ['#7c2d12', '#9a3412']  // Orange shades
 ];
 
-const ActionButton = ({ icon, title, count, onPress, gradientColors }) => {
-    const scaleAnim = useRef(new Animated.Value(1)).current;
-
-    const handlePressIn = () => {
-        Animated.spring(scaleAnim, {
-            toValue: 0.95,
-            useNativeDriver: true,
-        }).start();
-    };
-
-    const handlePressOut = () => {
-        Animated.spring(scaleAnim, {
-            toValue: 1,
-            useNativeDriver: true,
-        }).start();
-    };
-
-    return (
-        <TouchableOpacity 
-            onPressIn={handlePressIn}
-            onPressOut={handlePressOut}
-            onPress={onPress}
-            activeOpacity={0.9}
-        >
-            <Animated.View style={[{ transform: [{ scale: scaleAnim }] }]}>
-                <LinearGradient
-                    colors={gradientColors}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                    style={styles.actionButton}
-                >
-                    <View style={styles.actionButtonInner}>
-                        <View style={styles.iconBadgeContainer}>
-                            <MaterialCommunityIcons name={icon} size={28} color="white" />
-                            {count > 0 && (
-                                <View style={styles.badge}>
-                                    <Text style={styles.badgeText}>{count}</Text>
-                                </View>
-                            )}
-                        </View>
-                        <Text style={styles.actionButtonText}>{title}</Text>
-                    </View>
-                </LinearGradient>
-            </Animated.View>
-        </TouchableOpacity>
-    );
-};
-
-const NotificationButton = ({ count, onPress }) => (
+const NotificationButton = ({ count, totalOrdenes, onPress }) => (
     <TouchableOpacity 
         style={styles.notificationButton} 
         onPress={onPress}
@@ -92,13 +45,14 @@ const NotificationButton = ({ count, onPress }) => (
                     <Text style={styles.notificationLabel}>Avisos</Text>
                     <MaterialCommunityIcons name="bell-ring-outline" size={22} color="white" />
                 </View>
-                <Text style={styles.notificationCount}>{count} OT</Text>
+                <Text style={styles.notificationCount}>{totalOrdenes} OT</Text>
             </View>
         </LinearGradient>
     </TouchableOpacity>
 );
 
-const CompanyButton = ({ empresa, gradientColors, onPress, onNotificationPress }) => {
+
+const CompanyButton = ({ empresa, gradientColors, onPress, orderCount, totalOrdenes }) => {
     const scaleAnim = useRef(new Animated.Value(1)).current;
 
     const handlePressIn = () => {
@@ -137,22 +91,102 @@ const CompanyButton = ({ empresa, gradientColors, onPress, onNotificationPress }
                                     <Ionicons name="boat-outline" size={20} color="white" />
                                 </View>
                                 <Text style={styles.buttonText}>{empresa.nombre}</Text>
-                                {/* <Ionicons name="chevron-forward" size={24} color="rgba(255,255,255,0.9)" /> */}
                             </View>
                         </BlurView>
                     </LinearGradient>
                 </Animated.View>
             </TouchableOpacity>
-            <NotificationButton count={14} onPress={onNotificationPress} />  {/*Avisos */}
+            <NotificationButton 
+                count={orderCount}
+                totalOrdenes={totalOrdenes}
+                onPress={() => onPress(empresa.id)} 
+            />
         </View>
+    );
+};
+
+const ActionButton = ({ icon, title, count, onPress, gradientColors }) => {
+    const scaleAnim = useRef(new Animated.Value(1)).current;
+
+    const handlePressIn = () => {
+        Animated.spring(scaleAnim, {
+            toValue: 0.95,
+            useNativeDriver: true,
+        }).start();
+    };
+
+    const handlePressOut = () => {
+        Animated.spring(scaleAnim, {
+            toValue: 1,
+            useNativeDriver: true,
+        }).start();
+    };
+
+    return (
+        <TouchableOpacity 
+            onPressIn={handlePressIn}
+            onPressOut={handlePressOut}
+            onPress={onPress}
+            activeOpacity={0.9}
+        >
+            <Animated.View style={[{ transform: [{ scale: scaleAnim }] }]}>
+                <LinearGradient
+                    colors={gradientColors}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={styles.actionButton}
+                >
+                    <View style={styles.actionButtonInner}>
+                        <View style={styles.iconBadgeContainer}>
+                            <MaterialCommunityIcons name={icon} size={28} color="white" />
+                            {count > 0 && (
+                                <View style={styles.badge}>
+                                    <Text style={styles.badgeText}>{count}</Text> {/*Superior*/}
+                                </View>
+                            )}
+                        </View>
+                        <Text style={styles.actionButtonText}>{title}</Text>
+                    </View>
+                </LinearGradient>
+            </Animated.View>
+        </TouchableOpacity>
     );
 };
 
 const ClientScreen = ({ navigation }) => {
     const { empresas } = useEmpresa();
-    const { user, logout } = useAuth(); // Add logout from useAuth
+    const { user, logout } = useAuth();
+    const { obtenerTrabajosPorJefeAsig } = useOrdenTrabajo();
+    const [ordenesPorEmpresa, setOrdenesPorEmpresa] = useState({});
+    const [totalOrdenes, setTotalOrdenes] = useState(0);
     const fadeAnim = useRef(new Animated.Value(0)).current;
     const scaleAnim = useRef(new Animated.Value(0.95)).current;
+
+    useEffect(() => {
+        const cargarOrdenes = async () => {
+            try {
+                const data = await obtenerTrabajosPorJefeAsig();
+                if (data) {
+                    // Agrupar órdenes por empresa
+                    const ordenesAgrupadas = data.reduce((acc, orden) => {
+                        const empresaId = orden.empresa_id;
+                        if (!acc[empresaId]) {
+                            acc[empresaId] = [];
+                        }
+                        acc[empresaId].push(orden);
+                        return acc;
+                    }, {});
+                    
+                    setOrdenesPorEmpresa(ordenesAgrupadas);
+                    setTotalOrdenes(data.length);
+                }
+            } catch (error) {
+                console.error('Error al cargar órdenes:', error);
+            }
+        };
+        
+        cargarOrdenes();
+    }, []);
 
     const empresasOrdenadas = [...empresas].sort((a, b) => {
         return empresasOrden.indexOf(a.nombre) - empresasOrden.indexOf(b.nombre);
@@ -197,9 +231,7 @@ const ClientScreen = ({ navigation }) => {
                 <MaskedView
                     style={styles.backgroundPattern}
                     maskElement={
-                        <View style={styles.patternContainer}>
-                            {/* Add your pattern elements here */}
-                        </View>
+                        <View style={styles.patternContainer} />
                     }
                 >
                     <LinearGradient
@@ -240,7 +272,7 @@ const ClientScreen = ({ navigation }) => {
                             <ActionButton 
                                 icon="clipboard-list-outline" 
                                 title="Lista OT" 
-                                count={14}  //Lista
+                                count={totalOrdenes}
                                 gradientColors={['#0d9488', '#14b8a6']}
                                 onPress={() => navigation.navigate('ListaOTAsignado')}
                             />
@@ -251,11 +283,10 @@ const ClientScreen = ({ navigation }) => {
                                 gradientColors={['#2563eb', '#3b82f6']}
                                 onPress={() => navigation.navigate('QRScann')}
                             />
-
                             <ActionButton 
                                 icon="clipboard-account-outline" 
                                 title="Historial" 
-                                count={5}
+                                count={0}
                                 gradientColors={['#0891b2', '#06b6d4']}
                                 onPress={() => navigation.navigate('MisOT')}
                             />
@@ -268,15 +299,16 @@ const ClientScreen = ({ navigation }) => {
                             showsVerticalScrollIndicator={false}
                             contentContainerStyle={styles.companiesScrollContent}
                         >
-                            {empresasOrdenadas.map((empresa, index) => (
-                                <CompanyButton
-                                    key={empresa.id || index}
-                                    empresa={empresa}
-                                    gradientColors={coloresBotones[index % coloresBotones.length]}
-                                    onPress={() => {}}
-                                    onNotificationPress={() => {}}
-                                />
-                            ))}
+                    {empresasOrdenadas.map((empresa, index) => (
+                        <CompanyButton
+                            key={empresa.id || index}
+                            empresa={empresa}
+                            gradientColors={coloresBotones[index % coloresBotones.length]}
+                            onPress={() => navigation.navigate('DetalleEmpresa', { empresaId: empresa.id })}
+                            orderCount={ordenesPorEmpresa[empresa.id]?.length || 0}
+                            totalOrdenes={totalOrdenes}
+                        />
+                    ))}
                         </ScrollView>
                     </View>
 
@@ -477,13 +509,13 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: '400',
     },
-    notificationCount: {
+    notificationCount: { //Cantidad de avisos
         color: 'white',
         fontSize: 16,
         fontWeight: 'bold',
-        position: 'absolute',
-        left: -2,
-        top: 30
+        // position: 'absolute',
+        // left: -2,
+        // top: 30
     },
     companiesScrollContent: {
         paddingBottom: 80, // Add padding to accommodate the logout button
