@@ -37,7 +37,7 @@ export const getOrdenTrabajoUsuarioByOT=async(id_orden_trabajo)=>{
     }
 }
 
-export const reasignarOTOtroUsuario=async(id_orden_trabajo, nuevos_usuarios)=>{
+export const asignarOT=async(id_orden_trabajo, nuevos_usuarios)=>{
     try{
         const response = await apiClient.post(`/ordenestrabajousuario/reasignar`,{
             id_orden_trabajo,

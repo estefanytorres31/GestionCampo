@@ -23,7 +23,7 @@ import { CommonActions } from '@react-navigation/native';
     const { usuariosTecnicos } = useUsuarioTecnico();
     const { puertos } = usePuerto();
     const { updateOT, loading, error } = useOrdenTrabajo(); 
-    const { guardarOrdenTrabajoUsuario } = useOrdenTrabajoUsuario();
+    const { guardarOrdenTrabajoUsuario, asignarOrdenTrabajo } = useOrdenTrabajoUsuario();
   
     const [puertosOptions, setPuertosOptions] = useState([]);
   
@@ -72,15 +72,22 @@ import { CommonActions } from '@react-navigation/native';
   
         if (response) {
   
-          await guardarOrdenTrabajoUsuario(ordenTrabajo.id_orden_trabajo, tecnico.id, "Responsable");
-  
-          // Luego guardamos los ayudantes con rol de ayudante
-          for (let ayudante of ayudantes) {
-            await guardarOrdenTrabajoUsuario(ordenTrabajo.id_orden_trabajo, ayudante.id, "Ayudante");
-          }
+          const usuariosAsignados = [
+            {
+                id_usuario: tecnico.id,
+                rol_en_orden: "Responsable",
+            },
+            ...ayudantes.map(ayudante => ({
+                id_usuario: ayudante.id,
+                rol_en_orden: "Ayudante",
+            }))
+        ];
+        
+        await asignarOrdenTrabajo(ordenTrabajo.id_orden_trabajo, usuariosAsignados);
+        
     
-          alert("Orden de trabajo y usuarios asociados guardados con éxito");
-          navigation.navigate('Mantto',{idOrden:ordenTrabajo.id_orden_trabajo})
+        alert("Orden de trabajo y usuarios asociados guardados con éxito");
+        navigation.navigate('Mantto',{idOrden:ordenTrabajo.id_orden_trabajo})
         }
       } catch (error) {
         alert("Error al guardar la orden de trabajo: " + error);

@@ -85,9 +85,6 @@ export default function Navigation() {
       <Stack.Screen name="Trabajo" component={Trabajo} />
       <Stack.Screen name="Sistemas" component={SistemasScreen} options={{title:"Sistemas"}}/>
       <Stack.Screen name="Asignar" component={AsignarTrabajoScreen} />
-      <Stack.Screen name="Reasignar" component={ReasignarTrabajo} options={{ title: "Reasignar Trabajo" }} />
-      <Stack.Screen name="SeleccionarAyudantesReasignar" component={SeleccionarAyudantesReasignarScreen} />
-      <Stack.Screen name="SeleccionarTecnicoReasignar" component={SeleccionarTecnicoReasignarScreen} />
       <Stack.Screen name="SeleccionarAyudantes" component={SeleccionarAyudantesScreen} />
       <Stack.Screen name="SeleccionarTecnico" component={SeleccionarTecnicoScreen} />
       <Stack.Screen 
