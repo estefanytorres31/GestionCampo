@@ -15,7 +15,6 @@ import {
 } from 'react-native';
 import { Camera, Image as ImageIcon, Plus, Save, Percent } from 'lucide-react-native';
 import * as ImagePicker from 'expo-image-picker';
-import Slider from '@react-native-community/slider';
 import { CommonActions } from '@react-navigation/native';
 import useOrdenTrabajoSistema from "../../hooks/OrdenTrabajoSistema/useOrdenTrabajoSistema";
 import useAuth from "../../hooks/Auth/useAuth";
@@ -408,9 +407,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#6366f1',
   },
-  slider: {
-    height: 40,
-  },
   saveButton: {
     backgroundColor: '#6366f1',
     flexDirection: 'row',
@@ -441,9 +437,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#e2e8f0',
   },
-  progressSelectorText: {
-    fontSize: 16,
-    color: '#334155',
+  progressValue: {
+    fontSize: 18,
+    fontWeight: 'semibold',
+    color: 'black',
   },
   modalOverlay: {
     flex: 1,
