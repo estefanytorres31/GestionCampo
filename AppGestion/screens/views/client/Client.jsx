@@ -16,14 +16,8 @@ import useAuth from '../../hooks/Auth/useAuth';
 
 const { height, width } = Dimensions.get('window');
 
-// Definición ordenada de clientes con sus colores personalizados
-const clientesOrdenados = [
-    { id: '1', nombre: 'Tasa', color: '#00A3E0' },     // Azul moderno
-    { id: '2', nombre: 'Exalmar', color: '#FF6B6B' },  // Coral vibrante
-    { id: '3', nombre: 'Austral', color: '#4CAF50' },  // Verde fresco
-    { id: '4', nombre: 'Diamante', color: '#7E57C2' }, // Púrpura elegante
-    { id: '5', nombre: 'Centinela', color: '#FF9800' } // Naranja cálido
-];
+// Colores que se asignarán dinámicamente a los botones
+const coloresBotones = ['#00A3E0', '#FF6B6B','#4CAF50', '#7E57C2','#FF9800'];
 
 const ClientScreen = ({ navigation }) => {
     const { empresas } = useEmpresa();
@@ -31,23 +25,24 @@ const ClientScreen = ({ navigation }) => {
     const fadeAnim = React.useRef(new Animated.Value(0)).current;
     const scaleAnim = React.useRef(new Animated.Value(0.95)).current;
 
+    
     useEffect(() => {
         Animated.parallel([
             Animated.timing(fadeAnim, {
                 toValue: 1,
-                duration: 800,
+                duration: 1000,
                 useNativeDriver: true,
             }),
             Animated.spring(scaleAnim, {
                 toValue: 1,
-                friction: 6,
-                tension: 45,
+                friction: 8,
+                tension: 40,
                 useNativeDriver: true,
             }),
         ]).start();
     }, []);
 
-    const handleButtonPress = (empresa) => {
+    const handleButtonPress = (empresa, index) => {
         Animated.sequence([
             Animated.spring(scaleAnim, {
                 toValue: 0.97,
@@ -63,7 +58,12 @@ const ClientScreen = ({ navigation }) => {
             }),
         ]).start();
 
-        navigation.navigate('Embarcaciones', { empresa });
+        const empresaConColor = {
+            ...empresa,
+            color: coloresBotones[index % coloresBotones.length]
+        };
+
+        navigation.navigate('Embarcaciones', { empresa: empresaConColor });
     };
 
     return (
@@ -75,20 +75,17 @@ const ClientScreen = ({ navigation }) => {
                 end={{ x: 1, y: 1 }}
             >
                 <Animated.View 
-                    style={[styles.contentContainer, { 
-                        opacity: fadeAnim, 
-                        transform: [{ scale: scaleAnim }] 
-                    }]}
+                    style={[styles.contentContainer, { opacity: fadeAnim, transform: [{ scale: scaleAnim }] }]}
                 >
                     <View style={styles.headerContainer}>
                         <Text style={styles.subtitle}>Selecciona un cliente</Text>
-                        <View style={styles.subtitleLine} />
                     </View>
 
                     <View style={styles.buttonContainer}>
-                        {clientesOrdenados.map((cliente, index) => (
-                            <Animated.View
-                                key={cliente.id}
+                        {empresas.length > 0 ? (
+                            empresas.map((empresa, index) => (
+                                <Animated.View
+                                key={empresa.id}
                                 style={{
                                     transform: [{
                                         translateY: fadeAnim.interpolate({
@@ -99,22 +96,27 @@ const ClientScreen = ({ navigation }) => {
                                 }}
                             >
                                 <TouchableOpacity
-                                    style={[styles.button, { backgroundColor: cliente.color }]}
-                                    onPress={() => handleButtonPress(cliente)}
-                                    activeOpacity={0.85}
+                                    key={empresa.id || index}
+                                    style={[styles.button, { backgroundColor: coloresBotones[index % coloresBotones.length] }]} // Asignación dinámica de color
+                                    onPress={() => handleButtonPress(empresa, index)}
+                                    activeOpacity={0.8}
                                 >
                                     <View style={styles.buttonContent}>
                                         <View style={styles.iconContainer}>
                                             <Ionicons name="boat-outline" size={28} color="white" />
                                         </View>
-                                        <Text style={styles.buttonText}>{cliente.nombre}</Text>
-                                        <View style={styles.arrowContainer}>
-                                            <Ionicons name="chevron-forward" size={24} color="rgba(255,255,255,0.9)" />
-                                        </View>
+                                        <Text style={styles.buttonText}>{empresa.nombre}</Text>
+                                        <Ionicons name="chevron-forward" size={24} color="rgba(255,255,255,0.8)" />
                                     </View>
                                 </TouchableOpacity>
-                            </Animated.View>
-                        ))}
+                                </Animated.View>
+                            ))
+                        ) : (
+                            <Text style={styles.loadingText}>Cargando empresas...</Text>
+                        )}
+                    </View>
+
+                    <View style={styles.footerContainer}>
                     </View>
                 </Animated.View>
             </LinearGradient>
@@ -125,79 +127,99 @@ const ClientScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
     safeArea: {
         flex: 1,
-        backgroundColor: '#ffffff',
     },
     container: {
         flex: 1,
     },
     contentContainer: {
         flex: 1,
-        padding: 16,
+        padding: 0.1,
+        justifyContent: 'space-between',
     },
     headerContainer: {
-        marginTop: height * 0.05,
-        marginBottom: height * 0.04,
+        flex: 0.2,
+        justifyContent: 'center',
         alignItems: 'center',
+        marginTop: 20,
     },
-    subtitle: {
-        fontSize: 28,
-        fontWeight: '700',
+    welcomeText: {
+        fontSize: 32,
+        fontWeight: '800',
         color: '#2d3436',
-        fontFamily: 'System',
-        letterSpacing: 0.5,
         marginBottom: 8,
     },
-    subtitleLine: {
-        width: 40,
-        height: 4,
-        backgroundColor: '#00A3E0',
-        borderRadius: 2,
-        marginTop: 8,
+    subtitle: {
+        fontSize: 24,
+        fontWeight: '600',
+        color: '#636e72',
+        textAlign: 'center',
     },
     buttonContainer: {
-        flex: 1,
-        justifyContent: 'flex-start',
-        paddingHorizontal: 8,
+        flex: 0.6,
+        justifyContent: 'center',
+        paddingHorizontal: 15,
     },
     button: {
-        marginVertical: 8,
-        borderRadius: 20,
-        elevation: 6,
+        marginVertical: 10,
+        borderRadius: 16,
+        elevation: 8,
         shadowColor: '#000',
         shadowOffset: {
             width: 0,
-            height: 3,
+            height: 4,
         },
-        shadowOpacity: 0.25,
-        shadowRadius: 4,
+        shadowOpacity: 0.3,
+        shadowRadius: 4.65,
     },
     buttonContent: {
         flexDirection: 'row',
         alignItems: 'center',
+        justifyContent: 'space-between',
         padding: height * 0.022,
         paddingHorizontal: 20,
     },
     iconContainer: {
-        width: 46,
-        height: 46,
-        borderRadius: 23,
+        width: 40,
+        height: 40,
+        borderRadius: 20,
         backgroundColor: 'rgba(255, 255, 255, 0.2)',
         justifyContent: 'center',
         alignItems: 'center',
-        marginRight: 15,
     },
     buttonText: {
         color: '#fff',
         fontSize: 20,
-        fontWeight: '600',
+        fontWeight: '700',
         flex: 1,
-        letterSpacing: 0.5,
+        marginLeft: 15,
     },
-    arrowContainer: {
-        backgroundColor: 'rgba(255, 255, 255, 0.1)',
-        borderRadius: 15,
-        padding: 4,
-    }
+    loadingText: {
+        textAlign: "center",
+        fontSize: 18,
+        fontWeight: "bold",
+        color: "#636e72",
+    },
+    footerContainer: {
+        flex: 0.2,
+        justifyContent: 'flex-end',
+        alignItems: 'center',
+        paddingBottom: 20,
+    },
+    logoutButton: {
+        flexDirection: "row",
+        alignItems: "center",
+        backgroundColor: "transparent",
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+    },
+    logoutIcon: {
+        marginRight: 10,
+    },
+    logoutText: {
+        fontSize: 18,
+        fontWeight: "600",
+        color: "#EB1111",
+    },
 });
 
 export default ClientScreen;
