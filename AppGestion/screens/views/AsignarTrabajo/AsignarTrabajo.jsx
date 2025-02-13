@@ -17,8 +17,9 @@ import  useAbordaje from "../../hooks/Abordaje/useAbordaje"
     const [ayudantes, setAyudantes] = useState([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
   
-    const { usuariosTecnicos } = useUsuarioTecnico();
-    const {crearAbordaje}=useAbordaje();
+    const [abordajesOptions, setAbordajesOptions] = useState([]);
+    const [selectedAbordaje, setSelectedAbordaje] = useState(null);
+    const {crearAbordaje, obtenerAbordajePorOrdenTrabajo}=useAbordaje();
     const { puertos } = usePuerto();
     const { updateOT, loading, error } = useOrdenTrabajo(); 
     const { guardarOrdenTrabajoUsuario, asignarOrdenTrabajo } = useOrdenTrabajoUsuario();
@@ -94,7 +95,7 @@ import  useAbordaje from "../../hooks/Abordaje/useAbordaje"
                 id_puerto: puerto,
               });
     
-              await crearAbordaje(
+              const result=await crearAbordaje(
                 responsable.id_orden_trabajo_usuario,
                 new Date().toLocaleString(),
                 motorista,
@@ -103,7 +104,7 @@ import  useAbordaje from "../../hooks/Abordaje/useAbordaje"
               );
     
               alert("Registro guardado exitosamente");
-              navigation.navigate("Mantto", { idOrden: ordenTrabajo.id_orden_trabajo });
+              navigation.navigate("Mantto", { idOrden: ordenTrabajo.id_orden_trabajo, idAbordaje: result.id});
             } else {
               alert("No se encontró el id_orden_trabajo_usuario del responsable");
             }

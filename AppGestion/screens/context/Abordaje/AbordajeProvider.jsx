@@ -1,6 +1,6 @@
 import React,{useState, useEffect} from "react";
 import AbordajeContext from "./AbordajeContext";
-import { createAbordaje, getAllAbordajes } from "../../services/AbordajeService";
+import { createAbordaje, getAllAbordajes,  getAbordajeByOrdenTrabajo } from "../../services/AbordajeService";
 
 const AbordajeProvider = ({ children }) => {
     const [abordajes, setAbordajes] = useState([]);
@@ -32,13 +32,23 @@ const AbordajeProvider = ({ children }) => {
         obtenerTodosLosAbordajes();
     },[]);
 
+    const obtenerAbordajePorOrdenTrabajo=async(id)=>{
+        try {
+            const response = await getAbordajeByOrdenTrabajo(id);
+            setAbordaje(response.data);
+            return response.data;
+        } catch (error) {
+            console.error(error);
+        }
+    }
     return (
         <AbordajeContext.Provider value={{
             abordajes,
             setAbordajes,
             abordaje,
             setAbordaje,
-            crearAbordaje
+            crearAbordaje,
+            obtenerAbordajePorOrdenTrabajo
         }}>
             {children}
         </AbordajeContext.Provider>

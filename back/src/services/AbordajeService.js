@@ -136,7 +136,6 @@ export const createAbordaje = async (data) => {
 export const getAllAbordajes = async () => {
   const abordajes = await prisma.abordaje.findMany({
     where: { estado: true },
-    orderBy: { fecha: "desc" },
   });
 
   if (!abordajes || abordajes.length === 0) {
