@@ -246,7 +246,7 @@ const OrdenesTrabajoScreen = ({ navigation }) => {
             borderRadius: 8,
         },
         codigo: {
-            fontSize: 16,
+            fontSize: 15,
             fontWeight: "bold",
             color: "#6366F1",
         },

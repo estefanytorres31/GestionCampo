@@ -31,6 +31,7 @@ import { TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import TrabajosAsignadosScreen from "./screens/views/Lista/TrabajosAsignados";
 import ReasignarTrabajo from "./screens/views/ReasignarTrabajo/ReasignarTrabajo";
+import Historial from "./screens/views/Historial/Historial";
 
 const Stack = createNativeStackNavigator();
 
@@ -63,11 +64,11 @@ export default function Navigation() {
   // Define authenticated stack screens
   const AuthenticatedStack = () => (
     <>
-        <Stack.Screen 
-          name="InicioJefe" 
-          component={InicioJefe} 
-          options={{ title: "Inicio", headerShown: false }} 
-        />
+      <Stack.Screen 
+        name="InicioJefe" 
+        component={InicioJefe} 
+        options={{ title: "Inicio", headerShown: false }} 
+      />
       <Stack.Screen name="Clientes" component={Clientes} />
       <Stack.Screen name="ListaOTAsignado" component={ListaOTAsignado} options={{ title: "Lista de OT" }} />
       <Stack.Screen name="Embarcaciones" component={EmbarcacionesScreen} />
@@ -90,6 +91,7 @@ export default function Navigation() {
       <Stack.Screen name="FormCorrectivo" component={FormCorrectivo} options={{ title: "Formulario Correctivo" }} />
       <Stack.Screen name="FormProyecto" component={FormProyecto} options={{ title: "Formulario de Proyecto" }} />
       <Stack.Screen name="Desmont" component={Desmont} options={{ title: "Desmontaje / Montaje" }} />
+      <Stack.Screen name="Historial" component={Historial} options={{ title: "Historial"}}/>
     </>
   );
 

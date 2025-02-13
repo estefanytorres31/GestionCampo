@@ -31,11 +31,10 @@ const coloresBotones = [
 const NotificationButton = ({ count, totalOrdenes, onPress }) => (
     <TouchableOpacity 
         style={styles.notificationButton} 
-        // onPress={onPress}
         activeOpacity={0.8}
     >
         <LinearGradient
-            colors={['#ef4444', '#dc2626']}
+            colors={['#5cb97c', '#258e4a']} //color aviso
             style={styles.notificationGradient}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
@@ -43,14 +42,15 @@ const NotificationButton = ({ count, totalOrdenes, onPress }) => (
             <View style={styles.notificationContent}>
                 <View style={styles.notificationTopRow}>
                     <Text style={styles.notificationLabel}>Avisos</Text>
-                    <MaterialCommunityIcons name="bell-ring-outline" size={22} color="white" />
+                    <MaterialCommunityIcons name="bell-ring-outline" size={22} color="yellow" />
                 </View>
-                <Text style={styles.notificationCount}>{totalOrdenes} OT</Text>
+                <View>
+                    <Text style={styles.notificationCount}>{totalOrdenes} OT</Text>
+                </View>
             </View>
         </LinearGradient>
     </TouchableOpacity>
 );
-
 
 const CompanyButton = ({ empresa, gradientColors, onPress, orderCount, totalOrdenes }) => {
     const scaleAnim = useRef(new Animated.Value(1)).current;
@@ -141,7 +141,7 @@ const ActionButton = ({ icon, title, count, onPress, gradientColors }) => {
                             <MaterialCommunityIcons name={icon} size={28} color="white" />
                             {count > 0 && (
                                 <View style={styles.badge}>
-                                    <Text style={styles.badgeText}>{count}</Text> {/*Superior*/}
+                                    <Text style={styles.badgeText}>{count}</Text>
                                 </View>
                             )}
                         </View>
@@ -167,7 +167,6 @@ const ClientScreen = ({ navigation }) => {
             try {
                 const data = await obtenerTrabajosPorJefeAsig();
                 if (data) {
-                    // Agrupar órdenes por empresa
                     const ordenesAgrupadas = data.reduce((acc, orden) => {
                         const empresaId = orden.empresa_id;
                         if (!acc[empresaId]) {
@@ -195,10 +194,10 @@ const ClientScreen = ({ navigation }) => {
     const handleLogout = async () => {
         try {
             await logout();
-            navigation.reset({
-                index: 0,
-                routes: [{ name: 'Login' }],
-            });
+            // navigation.reset({
+            //     index: 0,
+            //     routes: [{ name: 'Login' }],
+            // });
         } catch (error) {
             console.error('Error during logout:', error);
         }
@@ -252,7 +251,8 @@ const ClientScreen = ({ navigation }) => {
                     <View style={styles.welcomeContainer}>
                         <View style={styles.welcomeRow}>
                             <Text style={styles.welcomeText}>¡Bienvenido, </Text>
-                            <Text style={styles.userName}>{user?.nombre_usuario || ''}!</Text>
+                            <Text style={styles.userName}>{user?.nombre_usuario || ''}</Text>
+                            <Text style={styles.welcomeText}>!</Text>
                         </View>
                     </View>
 
@@ -288,7 +288,7 @@ const ClientScreen = ({ navigation }) => {
                                 title="Historial" 
                                 count={0}
                                 gradientColors={['#0891b2', '#06b6d4']}
-                                onPress={() => navigation.navigate('MisOT')}
+                                onPress={() => navigation.navigate('Historial')}
                             />
                         </ScrollView>
                     </View>
@@ -299,16 +299,15 @@ const ClientScreen = ({ navigation }) => {
                             showsVerticalScrollIndicator={false}
                             contentContainerStyle={styles.companiesScrollContent}
                         >
-                    {empresasOrdenadas.map((empresa, index) => (
-                        <CompanyButton
-                            key={empresa.id || index}
-                            empresa={empresa}
-                            gradientColors={coloresBotones[index % coloresBotones.length]}
-                            // onPress={() => navigation.navigate('DetalleEmpresa', { empresaId: empresa.id })}
-                            orderCount={ordenesPorEmpresa[empresa.id]?.length || 0}
-                            totalOrdenes={totalOrdenes}
-                        />
-                    ))}
+                            {empresasOrdenadas.map((empresa, index) => (
+                                <CompanyButton
+                                    key={empresa.id || index}
+                                    empresa={empresa}
+                                    gradientColors={coloresBotones[index % coloresBotones.length]}
+                                    orderCount={ordenesPorEmpresa[empresa.id]?.length || 0}
+                                    totalOrdenes={totalOrdenes}
+                                />
+                            ))}
                         </ScrollView>
                     </View>
 
@@ -334,6 +333,7 @@ const ClientScreen = ({ navigation }) => {
         </SafeAreaView>
     );
 };
+
 const styles = StyleSheet.create({
     safeArea: {
         flex: 1,
@@ -523,7 +523,7 @@ const styles = StyleSheet.create({
     notificationLabel: { // Avisos
         color: 'white',
         fontSize: 16,
-        fontWeight: '400',
+        fontWeight: '600',
     },
     notificationContent: {
         flexDirection: 'column',
