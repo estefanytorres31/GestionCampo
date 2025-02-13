@@ -58,10 +58,10 @@ export const updateOrdenTrabajo=async(id_orden_trabajo, estado)=>{
 
 }
 
-export const updateAllOrdenTrabajo=async(id_orden_trabajo, id_puerto, motorista, supervisor)=>{
+export const updateAllOrdenTrabajo=async(id_orden_trabajo, id_puerto)=>{
     try {
-        const response = await apiClient.put(`/ordenestrabajo/${id_orden_trabajo}`, {id_puerto, motorista, supervisor});
-        console.log(id_orden_trabajo,'Puerto',id_puerto,'Motorista',motorista,'Supervisor',supervisor)
+        const response = await apiClient.put(`/ordenestrabajo/${id_orden_trabajo}`, {id_puerto});
+        console.log(id_orden_trabajo,'Puerto',id_puerto)
         return response.data;
     } catch (error) {
         throw new Error(`Error al actualizar la orden de trabajo: ${error.message}`);

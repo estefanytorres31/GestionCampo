@@ -60,14 +60,10 @@ import { CommonActions } from '@react-navigation/native';
       
       try {
         console.log('Puerto: ',puerto)
-        console.log('Motorista: ',motorista)
-        console.log('Supervisor: ',supervisor)
         console.log(ordenTrabajo.id_orden_trabajo)
         const response = await updateOT(
           ordenTrabajo.id_orden_trabajo,
-          puerto,
-          motorista || null,
-          supervisor || null
+          puerto
         );
   
         if (response) {

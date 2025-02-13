@@ -13,7 +13,7 @@ const abordajeRouter = Router();
 
 abordajeRouter.post("/", createAbordaje);
 abordajeRouter.get("/", getAllAbordajes);
-abordajeRouter.get("/orden-trabajo", getAbordajesByOrdenTrabajoController);
+abordajeRouter.get("/orden-trabajo/:id", getAbordajesByOrdenTrabajoController);
 abordajeRouter.get("/:id", getAbordajeById);
 abordajeRouter.get("/detalle/:id", getAbordajeUserSistemParteByIdController);
 abordajeRouter.put("/:id", updateAbordaje);

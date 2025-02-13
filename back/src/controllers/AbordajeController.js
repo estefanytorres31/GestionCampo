@@ -43,7 +43,7 @@ export const getAllAbordajes = async (req, res) => {
  */
 export const getAbordajesByOrdenTrabajoController = async (req, res) => {
   try {
-    const abordajes = await AbordajeService.getAbordajesByOrdenTrabajo();
+    const abordajes = await AbordajeService.getAbordajesByOrdenTrabajo(req.params.id);
     res.status(200).json({ message: "Registros de abordaje obtenidos exitosamente.", data: abordajes });
   } catch (error) {
     res.status(404).json({ message: error.message });
@@ -69,7 +69,7 @@ export const getAbordajeById = async (req, res) => {
 export const getAbordajeUserSistemParteByIdController = async (req, res) => {
   const { id } = req.params;
   try {
-    const abordaje = await AbordajeService.getAbordajeById(id);
+    const abordaje = await AbordajeService.getAbordajeUserSistemaParteById(id);
     res.status(200).json({ message: "Abordaje obtenido exitosamente.", data: abordaje });
   } catch (error) {
     res.status(404).json({ message: error.message });
