@@ -149,7 +149,7 @@ const OrdenesTrabajoScreen = ({ navigation }) => {
                     onPress={() => handleReasignarPress(item)}
                 >
                     {<MaterialCommunityIcons 
-                        name="swap-horizontal" 
+                        name="arrow-right-thick" 
                         size={20} 
                         color={getEstadoConfig(item.estado).textColor} 
                     /> }
