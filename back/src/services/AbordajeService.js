@@ -44,6 +44,7 @@ export const createAbordaje = async (data) => {
 
   // Convertir la fecha a UTC utilizando la función getUTCTime
   const fechaParsed =fechaDate;
+  const fechaActual = getUTCTime(new Date().toISOString());
 
   // Validar que la OrdenTrabajoUsuario exista
   const ordenTrabajoUsuarioExistente =
@@ -110,10 +111,12 @@ export const createAbordaje = async (data) => {
     const nuevoAbordaje = await prisma.abordaje.create({
       data: {
         id_orden_trabajo_usuario: ordenUsuarioId,
-        fecha: fechaParsed,
+        fecha: fechaActual,
         motorista: motorista ? String(motorista) : null,
         supervisor: supervisor ? String(supervisor) : null,
         id_puerto: puertoId,
+        creado_en:fechaActual,
+        actualizado_en:fechaActual,
         estado: true, // Se asegura que se cree activo
       },
     });

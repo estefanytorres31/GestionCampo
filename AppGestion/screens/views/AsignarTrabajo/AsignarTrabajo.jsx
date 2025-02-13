@@ -18,6 +18,7 @@ import  useAbordaje from "../../hooks/Abordaje/useAbordaje"
     const [isSubmitting, setIsSubmitting] = useState(false);
   
     const { usuariosTecnicos } = useUsuarioTecnico();
+    const {crearAbordaje}=useAbordaje();
     const { puertos } = usePuerto();
     const { updateOT, loading, error } = useOrdenTrabajo(); 
     const { guardarOrdenTrabajoUsuario, asignarOrdenTrabajo } = useOrdenTrabajoUsuario();
@@ -54,39 +55,66 @@ import  useAbordaje from "../../hooks/Abordaje/useAbordaje"
         alert("Debe seleccionar un puerto.");
         return;
       }
-      
+    
       try {
-        console.log('Puerto: ',puerto)
-        console.log(ordenTrabajo.id_orden_trabajo)
-        const response = await updateOT(
-          ordenTrabajo.id_orden_trabajo,
-          puerto
-        );
-  
-        if (response) {
-  
+        console.log("Puerto: ", puerto);
+        console.log(ordenTrabajo.id_orden_trabajo);
+    
+        const responseOT = await updateOT(ordenTrabajo.id_orden_trabajo, puerto);
+    
+        if (responseOT) {
           const usuariosAsignados = [
             {
-                id_usuario: tecnico.id,
-                rol_en_orden: "Responsable",
+              id_usuario: tecnico.id,
+              rol_en_orden: "Responsable",
             },
-            ...ayudantes.map(ayudante => ({
-                id_usuario: ayudante.id,
-                rol_en_orden: "Ayudante",
-            }))
-        ];
-        
-        await asignarOrdenTrabajo(ordenTrabajo.id_orden_trabajo, usuariosAsignados);
-        
+            ...ayudantes.map((ayudante) => ({
+              id_usuario: ayudante.id,
+              rol_en_orden: "Ayudante",
+            })),
+          ];
     
-        alert("Orden de trabajo y usuarios asociados guardados con éxito");
-        navigation.navigate('Mantto',{idOrden:ordenTrabajo.id_orden_trabajo})
+          const responseAsignacion = await asignarOrdenTrabajo(
+            ordenTrabajo.id_orden_trabajo,
+            usuariosAsignados
+          );
+    
+          if (responseAsignacion) {
+            const responsable = responseAsignacion.find(
+              (u) => u.rol_en_orden === "Responsable"
+            );
+    
+
+            if (responsable && responsable.id_orden_trabajo_usuario) {
+              console.log("Creando abordaje con:", {
+                id_orden_trabajo_usuario: responsable.id_orden_trabajo_usuario,
+                fecha: new Date().toLocaleString(),
+                motorista,
+                supervisor,
+                id_puerto: puerto,
+              });
+    
+              await crearAbordaje(
+                responsable.id_orden_trabajo_usuario,
+                new Date().toLocaleString(),
+                motorista,
+                supervisor,
+                puerto,
+              );
+    
+              alert("Registro guardado exitosamente");
+              navigation.navigate("Mantto", { idOrden: ordenTrabajo.id_orden_trabajo });
+            } else {
+              alert("No se encontró el id_orden_trabajo_usuario del responsable");
+            }
+          }
         }
       } catch (error) {
         alert("Error al guardar la orden de trabajo: " + error);
         console.log(error);
       }
     };
+    
 
   return (
     <ScrollView 
