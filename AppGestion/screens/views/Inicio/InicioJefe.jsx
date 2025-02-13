@@ -31,7 +31,7 @@ const coloresBotones = [
 const NotificationButton = ({ count, totalOrdenes, onPress }) => (
     <TouchableOpacity 
         style={styles.notificationButton} 
-        onPress={onPress}
+        // onPress={onPress}
         activeOpacity={0.8}
     >
         <LinearGradient
@@ -304,7 +304,7 @@ const ClientScreen = ({ navigation }) => {
                             key={empresa.id || index}
                             empresa={empresa}
                             gradientColors={coloresBotones[index % coloresBotones.length]}
-                            onPress={() => navigation.navigate('DetalleEmpresa', { empresaId: empresa.id })}
+                            // onPress={() => navigation.navigate('DetalleEmpresa', { empresaId: empresa.id })}
                             orderCount={ordenesPorEmpresa[empresa.id]?.length || 0}
                             totalOrdenes={totalOrdenes}
                         />
