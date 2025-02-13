@@ -18,11 +18,11 @@ const { height, width } = Dimensions.get('window');
 
 // Definición ordenada de clientes con sus colores personalizados
 const clientesOrdenados = [
-    { id: '1', nombre: 'Tasa', color: '#00A3E0' },     // Azul moderno
-    { id: '2', nombre: 'Exalmar', color: '#FF6B6B' },  // Coral vibrante
-    { id: '3', nombre: 'Austral', color: '#4CAF50' },  // Verde fresco
+    { id: '5', nombre: 'Tasa', color: '#00A3E0' },     // Azul moderno
+    { id: '1', nombre: 'Exalmar', color: '#FF6B6B' },  // Coral vibrante
+    { id: '2', nombre: 'Austral', color: '#4CAF50' },  // Verde fresco
     { id: '4', nombre: 'Diamante', color: '#7E57C2' }, // Púrpura elegante
-    { id: '5', nombre: 'Centinela', color: '#FF9800' } // Naranja cálido
+    { id: '3', nombre: 'Centinela', color: '#FF9800' } // Naranja cálido
 ];
 
 const ClientScreen = ({ navigation }) => {

@@ -134,7 +134,7 @@ const CompanyButton = ({ empresa, gradientColors, onPress, onNotificationPress }
                         <BlurView intensity={20} style={styles.blurOverlay}>
                             <View style={styles.buttonContent}>
                                 <View style={styles.iconContainer}>
-                                    <Ionicons name="boat-outline" size={24} color="white" />
+                                    <Ionicons name="boat-outline" size={20} color="white" />
                                 </View>
                                 <Text style={styles.buttonText}>{empresa.nombre}</Text>
                                 {/* <Ionicons name="chevron-forward" size={24} color="rgba(255,255,255,0.9)" /> */}
@@ -432,22 +432,22 @@ const styles = StyleSheet.create({
         padding: 20,
         gap: 16,
     },
-    iconContainer: {
-        width: 48,
-        height: 48,
+    iconContainer: { // EMBARCACIÓN
+        width: 40,
+        height: 40,
         borderRadius: 24,
         backgroundColor: 'rgba(255, 255, 255, 0.2)',
         justifyContent: 'center',
         alignItems: 'center',
     },
-    buttonText: {
+    buttonText: { // EMBARCACIÓN
         color: '#fff',
-        fontSize: 14,
-        fontWeight: '400',
+        fontSize: 13,
+        fontWeight: '600',
         flex: 1,
     },
     notificationButton: {
-        width: 160,
+        width: 180,
         height: 80,
         borderRadius: 24,
         overflow: 'hidden',
@@ -479,8 +479,11 @@ const styles = StyleSheet.create({
     },
     notificationCount: {
         color: 'white',
-        fontSize: 24,
+        fontSize: 16,
         fontWeight: 'bold',
+        position: 'absolute',
+        left: -2,
+        top: 30
     },
     companiesScrollContent: {
         paddingBottom: 80, // Add padding to accommodate the logout button
