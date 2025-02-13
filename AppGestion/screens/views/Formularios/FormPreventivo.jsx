@@ -196,7 +196,6 @@ const ProgressPicker = () => (
 );
 
 
-
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
