@@ -92,7 +92,7 @@ const NotificationButton = ({ count, onPress }) => (
                     <Text style={styles.notificationLabel}>Avisos</Text>
                     <MaterialCommunityIcons name="bell-ring-outline" size={22} color="white" />
                 </View>
-                <Text style={styles.notificationCount}>{count}</Text>
+                <Text style={styles.notificationCount}>{count} OT</Text>
             </View>
         </LinearGradient>
     </TouchableOpacity>
@@ -143,7 +143,7 @@ const CompanyButton = ({ empresa, gradientColors, onPress, onNotificationPress }
                     </LinearGradient>
                 </Animated.View>
             </TouchableOpacity>
-            <NotificationButton count={12} onPress={onNotificationPress} />
+            <NotificationButton count={14} onPress={onNotificationPress} />  {/*Avisos */}
         </View>
     );
 };
@@ -240,7 +240,7 @@ const ClientScreen = ({ navigation }) => {
                             <ActionButton 
                                 icon="clipboard-list-outline" 
                                 title="Lista OT" 
-                                count={12}
+                                count={14}  //Lista
                                 gradientColors={['#0d9488', '#14b8a6']}
                                 onPress={() => navigation.navigate('ListaOTAsignado')}
                             />
