@@ -63,23 +63,11 @@ export default function Navigation() {
   // Define authenticated stack screens
   const AuthenticatedStack = () => (
     <>
-      {role?.includes("Jefe") && (
         <Stack.Screen 
           name="InicioJefe" 
           component={InicioJefe} 
           options={{ title: "Inicio", headerShown: false }} 
         />
-      )}
-      {role?.includes("Técnico") && (
-        <Stack.Screen 
-          name="Inicio" 
-          component={Inicio}  
-          options={{ headerShown: role?.includes("Jefe") ? true : false }}
-        />
-      )}
-      {role?.includes("Administrador") && (
-        <Stack.Screen name="Clientes" component={Clientes} />
-      )}
       <Stack.Screen name="ListaOTAsignado" component={ListaOTAsignado} options={{ title: "Lista de OT" }} />
       <Stack.Screen name="Embarcaciones" component={EmbarcacionesScreen} />
       <Stack.Screen name="Trabajo" component={Trabajo} />

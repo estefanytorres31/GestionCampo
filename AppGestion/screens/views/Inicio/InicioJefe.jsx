@@ -150,7 +150,7 @@ const CompanyButton = ({ empresa, gradientColors, onPress, onNotificationPress }
 
 const ClientScreen = ({ navigation }) => {
     const { empresas } = useEmpresa();
-    const { user, logout } = useAuth(); // Add logout from useAuth
+    const { user,role, logout } = useAuth(); // Add logout from useAuth
     const fadeAnim = useRef(new Animated.Value(0)).current;
     const scaleAnim = useRef(new Animated.Value(0.95)).current;
 
@@ -181,6 +181,8 @@ const ClientScreen = ({ navigation }) => {
             }),
         ]).start();
     }, []);
+
+    const showLogoutButton = role && !role.includes("Jefe");
 
     return (
         <SafeAreaView style={styles.safeArea}>
@@ -226,13 +228,15 @@ const ClientScreen = ({ navigation }) => {
                             showsHorizontalScrollIndicator={false}
                             contentContainerStyle={styles.actionButtonsRow}
                         >
+                            {!showLogoutButton && (
                             <ActionButton 
                                 icon="file-plus-outline" 
                                 title="Crear OT" 
                                 count={0}
                                 gradientColors={['#4f46e5', '#7c3aed']}
                                 onPress={() => navigation.navigate('Clientes')}
-                            />                            
+                            />   
+                            )}                         
                             <ActionButton 
                                 icon="clipboard-list-outline" 
                                 title="Lista OT" 
