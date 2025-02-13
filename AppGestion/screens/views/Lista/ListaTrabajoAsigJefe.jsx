@@ -121,7 +121,6 @@ const OrdenesTrabajoScreen = ({ navigation }) => {
         <TouchableOpacity 
             key={item.id_orden_trabajo}
             style={styles.card}
-            onPress={() => handleDetailsPress(item)}
             activeOpacity={0.7}
         >
             <View style={styles.cardHeader}>

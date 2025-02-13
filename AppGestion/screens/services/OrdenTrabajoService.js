@@ -30,7 +30,7 @@ export const getAllTrabajosByJefeAsig=async()=>{
     try {
         const userId = await AsyncStorage.getItem('userId');
         const userIdInt = parseInt(userId, 10);
-        const response = await apiClient.get(`/ordenestrabajo`);
+        const response = await apiClient.get(`/ordenestrabajo?estados=en_progreso,pendiente`);
         console.log(response.data);
         return response.data;
     } catch (error) {
