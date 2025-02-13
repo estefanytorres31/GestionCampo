@@ -68,3 +68,15 @@ export const updateAllOrdenTrabajo=async(id_orden_trabajo, id_puerto)=>{
     }
     
 }
+
+export const getTrabajoCompletado=async()=>{
+    try {
+        const userId = await AsyncStorage.getItem('userId');
+        const userIdInt = parseInt(userId, 10);
+        const response = await apiClient.get(`/ordenestrabajo?estados=completado`);
+        console.log(response.data);
+        return response.data;
+    } catch (error) {
+        throw new Error(`Error al obtener las ordenes de trabajo: ${error.message}`);
+    }
+}

@@ -1,5 +1,5 @@
 import "react-native-gesture-handler";
-import { useContext, useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { ActivityIndicator, View } from 'react-native';
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
@@ -24,6 +24,7 @@ import Desmont from "./screens/views/Boton/Desmont";
 import useAuth from "./screens/hooks/Auth/useAuth";
 import InicioJefe from "./screens/views/Inicio/InicioJefe";
 import TrabajosAsignadosScreen from "./screens/views/Lista/TrabajosAsignados";
+import Historial from "./screens/views/Historial/Historial";
 
 const Stack = createNativeStackNavigator();
 
@@ -56,11 +57,11 @@ export default function Navigation() {
   // Define authenticated stack screens
   const AuthenticatedStack = () => (
     <>
-        <Stack.Screen 
-          name="InicioJefe" 
-          component={InicioJefe} 
-          options={{ title: "Inicio", headerShown: false }} 
-        />
+      <Stack.Screen 
+        name="InicioJefe" 
+        component={InicioJefe} 
+        options={{ title: "Inicio", headerShown: false }} 
+      />
       <Stack.Screen name="Clientes" component={Clientes} />
       <Stack.Screen name="ListaOTAsignado" component={ListaOTAsignado} options={{ title: "Lista de OT" }} />
       <Stack.Screen name="Embarcaciones" component={EmbarcacionesScreen} />
@@ -83,6 +84,7 @@ export default function Navigation() {
       <Stack.Screen name="FormCorrectivo" component={FormCorrectivo} options={{ title: "Formulario Correctivo" }} />
       <Stack.Screen name="FormProyecto" component={FormProyecto} options={{ title: "Formulario de Proyecto" }} />
       <Stack.Screen name="Desmont" component={Desmont} options={{ title: "Desmontaje / Montaje" }} />
+      <Stack.Screen name="Historial" component={Historial} options={{ title: "Historial"}}/>
     </>
   );
 

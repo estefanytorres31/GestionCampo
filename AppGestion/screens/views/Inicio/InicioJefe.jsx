@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { 
     View, 
     Text, 
@@ -15,6 +15,7 @@ import { BlurView } from "expo-blur";
 import MaskedView from "@react-native-masked-view/masked-view";
 import useEmpresa from "../../hooks/Empresa/useEmpresa";
 import useAuth from '../../hooks/Auth/useAuth';
+import useOrdenTrabajo from '../../hooks/OrdenTrabajo/useOrdenTrabajo';
 
 const { height, width } = Dimensions.get('window');
 
@@ -26,6 +27,83 @@ const coloresBotones = [
     ['#0891b2', '#06b6d4'], // Cyan shades
     ['#7c2d12', '#9a3412']  // Orange shades
 ];
+
+const NotificationButton = ({ count, totalOrdenes, onPress }) => (
+    <TouchableOpacity 
+        style={styles.notificationButton} 
+        activeOpacity={0.8}
+    >
+        <LinearGradient
+            colors={['#5cb97c', '#258e4a']} //color aviso
+            style={styles.notificationGradient}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+        >
+            <View style={styles.notificationContent}>
+                <View style={styles.notificationTopRow}>
+                    <Text style={styles.notificationLabel}>Avisos</Text>
+                    <MaterialCommunityIcons name="bell-ring-outline" size={22} color="yellow" />
+                </View>
+                <View>
+                    <Text style={styles.notificationCount}>{totalOrdenes} OT</Text>
+                </View>
+            </View>
+        </LinearGradient>
+    </TouchableOpacity>
+);
+
+const CompanyButton = ({ empresa, gradientColors, onPress, orderCount, totalOrdenes }) => {
+    const scaleAnim = useRef(new Animated.Value(1)).current;
+
+    const handlePressIn = () => {
+        Animated.spring(scaleAnim, {
+            toValue: 0.98,
+            useNativeDriver: true,
+        }).start();
+    };
+
+    const handlePressOut = () => {
+        Animated.spring(scaleAnim, {
+            toValue: 1,
+            useNativeDriver: true,
+        }).start();
+    };
+
+    return (
+        <View style={styles.companyButtonRow}>
+            <TouchableOpacity 
+                onPressIn={handlePressIn}
+                onPressOut={handlePressOut}
+                onPress={onPress}
+                activeOpacity={0.9}
+                style={styles.buttonWrapper}
+            >
+                <Animated.View style={[styles.buttonAnimatedContainer, { transform: [{ scale: scaleAnim }] }]}>
+                    <LinearGradient
+                        colors={gradientColors}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 1 }}
+                        style={styles.companyButton}
+                    >
+                        <BlurView intensity={20} style={styles.blurOverlay}>
+                            <View style={styles.buttonContent}>
+                                <View style={styles.iconContainer}>
+                                    <Ionicons name="boat-outline" size={20} color="white" />
+                                </View>
+                                <Text style={styles.buttonText}>{empresa.nombre}</Text>
+                            </View>
+                        </BlurView>
+                    </LinearGradient>
+                </Animated.View>
+            </TouchableOpacity>
+            <NotificationButton 
+                count={orderCount}
+                totalOrdenes={totalOrdenes}
+                onPress={() => onPress(empresa.id)} 
+            />
+        </View>
+    );
+};
 
 const ActionButton = ({ icon, title, count, onPress, gradientColors }) => {
     const scaleAnim = useRef(new Animated.Value(1)).current;
@@ -75,84 +153,39 @@ const ActionButton = ({ icon, title, count, onPress, gradientColors }) => {
     );
 };
 
-const NotificationButton = ({ count, onPress }) => (
-    <TouchableOpacity 
-        style={styles.notificationButton} 
-        onPress={onPress}
-        activeOpacity={0.8}
-    >
-        <LinearGradient
-            colors={['#ef4444', '#dc2626']}
-            style={styles.notificationGradient}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-        >
-            <View style={styles.notificationContent}>
-                <View style={styles.notificationTopRow}>
-                    <Text style={styles.notificationLabel}>Avisos</Text>
-                    <MaterialCommunityIcons name="bell-ring-outline" size={22} color="white" />
-                </View>
-                <Text style={styles.notificationCount}>{count}</Text>
-            </View>
-        </LinearGradient>
-    </TouchableOpacity>
-);
-
-const CompanyButton = ({ empresa, gradientColors, onPress, onNotificationPress }) => {
-    const scaleAnim = useRef(new Animated.Value(1)).current;
-
-    const handlePressIn = () => {
-        Animated.spring(scaleAnim, {
-            toValue: 0.98,
-            useNativeDriver: true,
-        }).start();
-    };
-
-    const handlePressOut = () => {
-        Animated.spring(scaleAnim, {
-            toValue: 1,
-            useNativeDriver: true,
-        }).start();
-    };
-
-    return (
-        <View style={styles.companyButtonRow}>
-            <TouchableOpacity 
-                onPressIn={handlePressIn}
-                onPressOut={handlePressOut}
-                onPress={onPress}
-                activeOpacity={0.9}
-                style={styles.buttonWrapper}
-            >
-                <Animated.View style={[styles.buttonAnimatedContainer, { transform: [{ scale: scaleAnim }] }]}>
-                    <LinearGradient
-                        colors={gradientColors}
-                        start={{ x: 0, y: 0 }}
-                        end={{ x: 1, y: 1 }}
-                        style={styles.companyButton}
-                    >
-                        <BlurView intensity={20} style={styles.blurOverlay}>
-                            <View style={styles.buttonContent}>
-                                <View style={styles.iconContainer}>
-                                    <Ionicons name="boat-outline" size={24} color="white" />
-                                </View>
-                                <Text style={styles.buttonText}>{empresa.nombre}</Text>
-                                {/* <Ionicons name="chevron-forward" size={24} color="rgba(255,255,255,0.9)" /> */}
-                            </View>
-                        </BlurView>
-                    </LinearGradient>
-                </Animated.View>
-            </TouchableOpacity>
-            <NotificationButton count={12} onPress={onNotificationPress} />
-        </View>
-    );
-};
-
 const ClientScreen = ({ navigation }) => {
     const { empresas } = useEmpresa();
-    const { user,role, logout } = useAuth(); // Add logout from useAuth
+    const { user, logout } = useAuth();
+    const { obtenerTrabajosPorJefeAsig } = useOrdenTrabajo();
+    const [ordenesPorEmpresa, setOrdenesPorEmpresa] = useState({});
+    const [totalOrdenes, setTotalOrdenes] = useState(0);
     const fadeAnim = useRef(new Animated.Value(0)).current;
     const scaleAnim = useRef(new Animated.Value(0.95)).current;
+
+    useEffect(() => {
+        const cargarOrdenes = async () => {
+            try {
+                const data = await obtenerTrabajosPorJefeAsig();
+                if (data) {
+                    const ordenesAgrupadas = data.reduce((acc, orden) => {
+                        const empresaId = orden.empresa_id;
+                        if (!acc[empresaId]) {
+                            acc[empresaId] = [];
+                        }
+                        acc[empresaId].push(orden);
+                        return acc;
+                    }, {});
+                    
+                    setOrdenesPorEmpresa(ordenesAgrupadas);
+                    setTotalOrdenes(data.length);
+                }
+            } catch (error) {
+                console.error('Error al cargar órdenes:', error);
+            }
+        };
+        
+        cargarOrdenes();
+    }, []);
 
     const empresasOrdenadas = [...empresas].sort((a, b) => {
         return empresasOrden.indexOf(a.nombre) - empresasOrden.indexOf(b.nombre);
@@ -161,6 +194,10 @@ const ClientScreen = ({ navigation }) => {
     const handleLogout = async () => {
         try {
             await logout();
+            // navigation.reset({
+            //     index: 0,
+            //     routes: [{ name: 'Login' }],
+            // });
         } catch (error) {
             console.error('Error during logout:', error);
         }
@@ -182,8 +219,6 @@ const ClientScreen = ({ navigation }) => {
         ]).start();
     }, []);
 
-    const showLogoutButton = role && !role.includes("Jefe");
-
     return (
         <SafeAreaView style={styles.safeArea}>
             <LinearGradient
@@ -195,9 +230,7 @@ const ClientScreen = ({ navigation }) => {
                 <MaskedView
                     style={styles.backgroundPattern}
                     maskElement={
-                        <View style={styles.patternContainer}>
-                            {/* Add your pattern elements here */}
-                        </View>
+                        <View style={styles.patternContainer} />
                     }
                 >
                     <LinearGradient
@@ -218,7 +251,8 @@ const ClientScreen = ({ navigation }) => {
                     <View style={styles.welcomeContainer}>
                         <View style={styles.welcomeRow}>
                             <Text style={styles.welcomeText}>¡Bienvenido, </Text>
-                            <Text style={styles.userName}>{user?.nombre_usuario || ''}!</Text>
+                            <Text style={styles.userName}>{user?.nombre_usuario || ''}</Text>
+                            <Text style={styles.welcomeText}>!</Text>
                         </View>
                     </View>
 
@@ -228,19 +262,17 @@ const ClientScreen = ({ navigation }) => {
                             showsHorizontalScrollIndicator={false}
                             contentContainerStyle={styles.actionButtonsRow}
                         >
-                            {!showLogoutButton && (
                             <ActionButton 
                                 icon="file-plus-outline" 
                                 title="Crear OT" 
                                 count={0}
                                 gradientColors={['#4f46e5', '#7c3aed']}
                                 onPress={() => navigation.navigate('Clientes')}
-                            />   
-                            )}                         
+                            />                            
                             <ActionButton 
                                 icon="clipboard-list-outline" 
                                 title="Lista OT" 
-                                count={12}
+                                count={totalOrdenes}
                                 gradientColors={['#0d9488', '#14b8a6']}
                                 onPress={() => navigation.navigate('ListaOTAsignado')}
                             />
@@ -251,13 +283,12 @@ const ClientScreen = ({ navigation }) => {
                                 gradientColors={['#2563eb', '#3b82f6']}
                                 onPress={() => navigation.navigate('QRScann')}
                             />
-
                             <ActionButton 
                                 icon="clipboard-account-outline" 
                                 title="Historial" 
-                                count={5}
+                                count={0}
                                 gradientColors={['#0891b2', '#06b6d4']}
-                                onPress={() => navigation.navigate('MisOT')}
+                                onPress={() => navigation.navigate('Historial')}
                             />
                         </ScrollView>
                     </View>
@@ -273,8 +304,8 @@ const ClientScreen = ({ navigation }) => {
                                     key={empresa.id || index}
                                     empresa={empresa}
                                     gradientColors={coloresBotones[index % coloresBotones.length]}
-                                    onPress={() => {}}
-                                    onNotificationPress={() => {}}
+                                    orderCount={ordenesPorEmpresa[empresa.id]?.length || 0}
+                                    totalOrdenes={totalOrdenes}
                                 />
                             ))}
                         </ScrollView>
@@ -302,6 +333,7 @@ const ClientScreen = ({ navigation }) => {
         </SafeAreaView>
     );
 };
+
 const styles = StyleSheet.create({
     safeArea: {
         flex: 1,
@@ -432,22 +464,22 @@ const styles = StyleSheet.create({
         padding: 20,
         gap: 16,
     },
-    iconContainer: {
-        width: 48,
-        height: 48,
+    iconContainer: { // EMBARCACIÓN
+        width: 40,
+        height: 40,
         borderRadius: 24,
         backgroundColor: 'rgba(255, 255, 255, 0.2)',
         justifyContent: 'center',
         alignItems: 'center',
     },
-    buttonText: {
+    buttonText: { // EMBARCACIÓN
         color: '#fff',
-        fontSize: 14,
-        fontWeight: '400',
+        fontSize: 13,
+        fontWeight: '600',
         flex: 1,
     },
     notificationButton: {
-        width: 160,
+        width: 180,
         height: 80,
         borderRadius: 24,
         overflow: 'hidden',
@@ -477,10 +509,13 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: '400',
     },
-    notificationCount: {
+    notificationCount: { //Cantidad de avisos
         color: 'white',
-        fontSize: 24,
+        fontSize: 16,
         fontWeight: 'bold',
+        // position: 'absolute',
+        // left: -2,
+        // top: 30
     },
     companiesScrollContent: {
         paddingBottom: 80, // Add padding to accommodate the logout button
@@ -488,7 +523,7 @@ const styles = StyleSheet.create({
     notificationLabel: { // Avisos
         color: 'white',
         fontSize: 16,
-        fontWeight: '400',
+        fontWeight: '600',
     },
     notificationContent: {
         flexDirection: 'column',

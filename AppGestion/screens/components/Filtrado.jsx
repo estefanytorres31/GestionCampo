@@ -65,7 +65,7 @@ const Filtrado = ({ empresas, ordenes, fetchEmbarcacionesByEmpresa, onOrdersFilt
           onPress={handleClearFilters}
           style={styles.clearButton}
         >
-          <MaterialCommunityIcons name="filter-off" size={20} color="#6366F1" />
+          <MaterialCommunityIcons name="filter-off" size={20} color="#250b8d" />
           <Text style={styles.clearButtonText}>Limpiar filtros</Text>
         </TouchableOpacity>
       </View>
@@ -148,7 +148,7 @@ const styles = StyleSheet.create({
   },
   clearButtonText: {
     marginLeft: 4,
-    color: '#6366F1',
+    color: '#250b8d',
     fontWeight: '600',
     fontSize: 14,
   },
@@ -168,7 +168,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F9FAFB',
   },
   pickerInput: {
-    height: 50,
+    height: 60,
   }
 });
 
