@@ -1,18 +1,18 @@
-// src/routes/PermisoRouter.js
+import { Router } from "express";
 import {
   createPermiso,
   getPermisoById,
   updatePermiso,
   deletePermiso,
   getAllPermisosController,
+  getAllPermisosFilteredController,
 } from "../controllers/PermisoController.js";
-import { Router } from "express";
 
 const permisoRouter = Router();
 
-// Definir las rutas
 permisoRouter.post("/", createPermiso);
 permisoRouter.get("/", getAllPermisosController);
+permisoRouter.get("/ar", getAllPermisosFilteredController);
 permisoRouter.get("/:id", getPermisoById);
 permisoRouter.put("/:id", updatePermiso);
 permisoRouter.delete("/:id", deletePermiso);
