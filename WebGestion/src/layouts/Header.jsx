@@ -10,7 +10,6 @@ const Header = ({ title }) => {
   const perfilCheckboxRef = useRef(null);
   const location = useLocation();
 
-  // Función para regresar a la ruta anterior
   const handleBack = () => {
     navigate(-1);
   };
@@ -28,7 +27,6 @@ const Header = ({ title }) => {
     }
   }, [location.pathname]);
 
-  // Si la ruta actual incluye "detalle-codigo", se mostrará el botón de retroceder
   const showBackButton = location.pathname.includes("detalle-codigo");
 
   return (

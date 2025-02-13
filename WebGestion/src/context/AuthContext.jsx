@@ -90,7 +90,8 @@ export const AuthProvider = ({ children }) => {
           // Mapea cada permiso para obtener solo el id y nombre
           const permisosModificados = permisosArray.map((permiso) => ({
             id: permiso.id,
-            nombre: permiso.nombre
+            nombre: permiso.nombre,
+            key: permiso.key
           }));
     
           // Retorna el rol extendido con la propiedad 'permisos'

@@ -1,0 +1,22 @@
+[
+  {
+    "nombre": "Usuarios",
+    "ruta": "/usuarios",
+    "descripcion": "Sección para administrar usuarios"
+  },
+  {
+    "nombre": "Roles",
+    "ruta": "/roles",
+    "descripcion": "Sección para administrar roles"
+  },
+  {
+    "nombre": "Permisos",
+    "ruta": "/permisos",
+    "descripcion": "Sección para administrar permisos"
+  },
+  {
+    "nombre": "Asistencias",
+    "ruta": "/asistencias",
+    "descripcion": "Sección para administrar asistencias"
+  }
+]

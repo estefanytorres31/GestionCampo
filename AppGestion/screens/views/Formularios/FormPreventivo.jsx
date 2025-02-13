@@ -137,7 +137,7 @@ const MaintenanceForm = ({route, navigation}) => {
                 CommonActions.reset({
                   index: 1,
                   routes: [
-                    { name: role.includes("Jefe") ? "InicioJefe" : "Inicio" },
+                    { name:"InicioJefe" },
                   ],
                 })
               ),
@@ -194,7 +194,6 @@ const ProgressPicker = () => (
     </View>
   </Modal>
 );
-
 
 
   return (

@@ -81,7 +81,7 @@ const Menu = ({ route }) => {
                 CommonActions.reset({
                   index: 1,
                   routes: [
-                    { name: role.includes("Jefe") ? "InicioJefe" : "Inicio" },
+                    { name:"InicioJefe" },
                   ],
                 })
               ),

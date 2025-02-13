@@ -133,17 +133,17 @@ const Mapa = ({ asistencias }) => {
         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
 
         {/* Renderizamos el GeoJSON original de la línea de la costa (opcional) */}
-        <GeoJSON
+        {/* <GeoJSON
           data={peruBoundaries}
           style={{
             color: "red",
             weight: 2,
             fill: false,
           }}
-        />
+        /> */}
 
         {/* Si deseas ver el polígono buffer, puedes renderizarlo también */}
-        {costaBuffer && (
+        {/* {costaBuffer && (
           <GeoJSON
             data={costaBuffer}
             style={{
@@ -152,7 +152,7 @@ const Mapa = ({ asistencias }) => {
               fillOpacity: 0.1,
             }}
           />
-        )}
+        )} */}
 
         {/* Componente que centra el mapa cuando se selecciona un marcador */}
         <MapController selectedPosition={selectedMarker} zoom={18} />

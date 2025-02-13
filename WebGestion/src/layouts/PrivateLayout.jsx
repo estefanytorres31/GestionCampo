@@ -25,7 +25,7 @@ const PrivateLayout = ({ children }) => {
   const pageTitle = useMemo(() => {
     const titles = {
       "/dashboard": "Panel de Control",
-      "/asistencias": "Gestión de Asistencias",
+      "/horas_hombre": "Gestión de Horas Hombre",
       "/usuarios": "Gestión de Usuarios",
       "/roles": "Gestión de Roles",
       "/permisos": "Gestión de Permisos",
@@ -35,18 +35,18 @@ const PrivateLayout = ({ children }) => {
         "Detalle del Código",
     };
 
-    location.pathname.includes("detalle-codigo") ? setLayoutOffset(true) : setLayoutOffset(false);
+    location.pathname.includes("detalle-codigo")
+      ? setLayoutOffset(true)
+      : setLayoutOffset(false);
 
     return titles[location.pathname] || "Gestión de Campo";
   }, [location.pathname]);
 
-  // Actualizar el title del <head>
   useEffect(() => {
     document.title = `${pageTitle} - Gestión de Campo`;
   }, [pageTitle]);
 
   return (
-    // Contenedor externo usa el color secundario
     <div
       className="flex h-screen"
       style={{
@@ -57,7 +57,6 @@ const PrivateLayout = ({ children }) => {
       <SideBar />
       <main className="flex flex-col flex-1 overflow-auto md:pl-0 w-full h-full">
         <Header title={pageTitle} />
-        {/* Contenedor principal (ListLayout) usa el color primario */}
         {!layoutOffset ? (
           <div className="h-full flex flex-col justify-start gap-4 overflow-auto relative m-5 rounded-2xl">
             {children}
