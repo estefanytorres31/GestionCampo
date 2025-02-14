@@ -22,7 +22,7 @@ import useAuth from "../../hooks/Auth/useAuth";
 const PROGRESS_VALUES = [0, 25, 50, 75, 90, 100];
 
 const MaintenanceForm = ({route, navigation}) => {
-  const {id_orden_trabajo_sistema}=route.params;
+  const {id_orden_trabajo_sistema, idAbordaje}=route.params;
   const {role}=useAuth();
   const [formData, setFormData] = useState({
     material: '',
@@ -104,6 +104,7 @@ const MaintenanceForm = ({route, navigation}) => {
         formDataToSend.append('observaciones', formData.observations);
         formDataToSend.append('proximo_abordaje', formData.nextVisitItems);
         formDataToSend.append('avance', Math.round(formData.progress).toString());
+        formDataToSend.append('id_abordaje',idAbordaje.toString());
 
         // Add images
         for (let i = 0; i < formData.images.length; i++) {
