@@ -42,7 +42,7 @@ export const getAsistenciasController = async (req, res) => {
       nombre_completo: req.query.nombre_completo || undefined,
       fecha: req.query.fecha || undefined,
       nombre_embarcacion: req.query.nombre_embarcacion || undefined,
-      // Nuevos filtros para fecha de salida y rangos de fechas
+      empresa: req.query.empresa || undefined,
       fecha_salida: req.query.fecha_salida || undefined,
       fecha_inicio: req.query.fecha_inicio || undefined,
       fecha_fin: req.query.fecha_fin || undefined,

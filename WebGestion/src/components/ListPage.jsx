@@ -1,31 +1,25 @@
+// ListPage.jsx
 import { useState, useEffect } from "react";
 import Pagination from "../components/Pagination";
-import Filters from "../components/Filters";
-import Button from "../components/Button";
-import { VscFilePdf } from "react-icons/vsc";
-import { RiFileExcel2Fill } from "react-icons/ri";
+import Table from "./Table";
 import * as xlsx from "node-xlsx";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 import { saveAs } from "file-saver";
-import Table from "./Table";
 
 const ListPage = ({
   useFetchHook,
   columns,
-  filterFields,
+  filters, // Estado de filtros administrado externamente
   title,
   render = {},
   createButton,
   onRefetch,
-  // Props opcionales para exportar: si se pasan, se usan; si no, se usan las funciones por defecto
+  // Props opcionales para exportar:
   onExportExcel,
   onExportPDF,
   showExportButtons = true,
 }) => {
-  const [filters, setFilters] = useState(
-    filterFields.reduce((acc, field) => ({ ...acc, [field.key]: "" }), {})
-  );
   const [page, setPage] = useState(1);
   const [pageSize] = useState(10);
 
@@ -50,7 +44,6 @@ const ListPage = ({
     const header = columns.map((col) => col.name);
     const body = data.map((row) =>
       columns.map((col) => {
-        // Si la columna es "orden_trabajo_usuario", extraemos el responsable
         if (col.uuid === "orden_trabajo_usuario") {
           const responsable =
             row.orden_trabajo_usuario &&
@@ -61,7 +54,6 @@ const ListPage = ({
             ? responsable.usuario.nombre_completo
             : "Sin responsable";
         }
-        // Para otros campos que sean objetos, intentamos extraer la propiedad 'nombre_completo' o lo convertimos a cadena
         if (typeof row[col.uuid] === "object" && row[col.uuid] !== null) {
           return row[col.uuid].nombre_completo || JSON.stringify(row[col.uuid]);
         }
@@ -129,45 +121,6 @@ const ListPage = ({
 
   return (
     <>
-      <section className="flex flex-col justify-between items-center gap-4 w-full">
-        <div
-          className={`flex gap-2 items-center w-full ${
-            filterFields.length > 0 ? "justify-between" : "justify-end"
-          }`}
-        >
-          <div>
-            {filterFields.length > 0 && (
-              <Filters
-                filters={filters}
-                setFilters={setFilters}
-                filterFields={filterFields}
-              />
-            )}
-          </div>
-          <div className="flex gap-2 md:items-end justify-end md:flex-row">
-            {showExportButtons && (
-              <>
-                <Button
-                  color="filter"
-                  className="flex gap-1"
-                  onClick={handleExportToPDF}
-                >
-                  <VscFilePdf size={20} className="min-w-max" />
-                </Button>
-                <Button
-                  color="filter"
-                  className="flex gap-1"
-                  onClick={handleExportToExcel}
-                >
-                  <RiFileExcel2Fill size={20} className="min-w-max" />
-                </Button>
-              </>
-            )}
-            {createButton && createButton}
-          </div>
-        </div>
-      </section>
-
       <main className="list-layout">
         <Table
           columns={columns}
@@ -177,7 +130,6 @@ const ListPage = ({
           error={error}
         />
       </main>
-
       <Pagination pagination={pagination} setPage={setPage} />
     </>
   );

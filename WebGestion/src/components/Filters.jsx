@@ -28,7 +28,7 @@ const Filters = ({ filters, setFilters, filterFields }) => {
               lastInputRef.current = el; // Guardar el último input donde se escribió
             }
           }}
-          className="border border-[#0D1E4C] rounded-lg py-2 px-4 focus:outline-none flex-1 md:max-w-[355px]"
+          className="border border-[#0D1E4C] rounded-lg focus:outline-none flex-1 md:max-w-[355px]"
           onChange={(e) => handleInputChange(key, e.target.value, e.target)}
         />
       ))}
