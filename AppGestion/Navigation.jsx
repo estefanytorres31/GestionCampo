@@ -25,6 +25,7 @@ import useAuth from "./screens/hooks/Auth/useAuth";
 import InicioJefe from "./screens/views/Inicio/InicioJefe";
 import TrabajosAsignadosScreen from "./screens/views/Lista/TrabajosAsignados";
 import Historial from "./screens/views/Historial/Historial";
+import Abordaje from "./screens/views/Abordaje/Abordaje";
 
 const Stack = createNativeStackNavigator();
 
@@ -85,6 +86,7 @@ export default function Navigation() {
       <Stack.Screen name="FormProyecto" component={FormProyecto} options={{ title: "Formulario de Proyecto" }} />
       <Stack.Screen name="Desmont" component={Desmont} options={{ title: "Desmontaje / Montaje" }} />
       <Stack.Screen name="Historial" component={Historial} options={{ title: "Historial"}}/>
+      <Stack.Screen name="Abordaje" component={Abordaje} options={{ title: "Abordaje"}}/>
     </>
   );
 

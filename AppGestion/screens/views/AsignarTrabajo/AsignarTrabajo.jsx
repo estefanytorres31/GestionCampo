@@ -6,64 +6,60 @@ import useUsuarioTecnico from "../../hooks/UsuarioTecnico/useUsuarioTecnico";
 import usePuerto from "../../hooks/Puerto/usePuerto";
 import useOrdenTrabajo from "../../hooks/OrdenTrabajo/useOrdenTrabajo";
 import useOrdenTrabajoUsuario from "../../hooks/OrdenTrabajoUsuario/useOrdenTrabajoUsuario";
-import  useAbordaje from "../../hooks/Abordaje/useAbordaje"
+import useAbordaje from "../../hooks/Abordaje/useAbordaje";
 
-  const AsignarTrabajoScreen = ({route, navigation }) => {
-    const {codigoOT, ordenTrabajo }=route.params;
-    const [puerto, setPuerto] = useState(null);
-    const [tecnico, setTecnico] = useState(null);
-    const [motorista, setMotorista] = useState("");
-    const [supervisor, setSupervisor] = useState("");
-    const [ayudantes, setAyudantes] = useState([]);
-    const [isSubmitting, setIsSubmitting] = useState(false);
-  
-    const [abordajesOptions, setAbordajesOptions] = useState([]);
-    const [selectedAbordaje, setSelectedAbordaje] = useState(null);
-    const {crearAbordaje, obtenerAbordajePorOrdenTrabajo}=useAbordaje();
-    const { puertos } = usePuerto();
-    const { updateOT, loading, error } = useOrdenTrabajo(); 
-    const { guardarOrdenTrabajoUsuario, asignarOrdenTrabajo } = useOrdenTrabajoUsuario();
-  
-    const [puertosOptions, setPuertosOptions] = useState([]);
-  
-    useEffect(() => {
-      const options = puertos.map((puerto) => ({
-        label: puerto.nombre,
-        value: puerto.id_puerto,
-      }));
-      setPuertosOptions(options);
-    }, [puertos]);
+const AsignarTrabajoScreen = ({ route, navigation }) => {
+  const { codigoOT, ordenTrabajo } = route.params;
+  const [puerto, setPuerto] = useState(null);
+  const [tecnico, setTecnico] = useState(null);
+  const [motorista, setMotorista] = useState("");
+  const [supervisor, setSupervisor] = useState("");
+  const [ayudantes, setAyudantes] = useState([]);
+  const [selectedAbordaje, setSelectedAbordaje] = useState(null);
+  const [abordajesOptions, setAbordajesOptions] = useState([]);
 
-    useEffect(() => {
-      const loadAbordajes = async () => {
-        try {
-          const abordajes = await obtenerAbordajePorOrdenTrabajo(ordenTrabajo.id_orden_trabajo);
-          if (abordajes && abordajes.length > 0) {
-            const options = abordajes.map((abordaje, index) => ({
-              label: `Abordaje ${index + 1}`,
-              value: abordaje.id_abordaje,
-              data: abordaje
-            }));
-            setAbordajesOptions(options);
-          }
-        } catch (error) {
-          console.error("Error al cargar abordajes:", error);
+  const { crearAbordaje, obtenerAbordajePorOrdenTrabajo } = useAbordaje();
+  const { puertos } = usePuerto();
+  const { updateOT, loading, error } = useOrdenTrabajo();
+  const { guardarOrdenTrabajoUsuario, asignarOrdenTrabajo } = useOrdenTrabajoUsuario();
+
+  const [puertosOptions, setPuertosOptions] = useState([]);
+
+  // Load ports options
+  useEffect(() => {
+    const options = puertos.map((puerto) => ({
+      label: puerto.nombre,
+      value: puerto.id_puerto,
+    }));
+    setPuertosOptions(options);
+  }, [puertos]);
+
+  // Load abordajes options
+  useEffect(() => {
+    const loadAbordajes = async () => {
+      try {
+        const abordajes = await obtenerAbordajePorOrdenTrabajo(ordenTrabajo.id_orden_trabajo);
+        if (abordajes && abordajes.length > 0) {
+          const options = abordajes.map((abordaje, index) => ({
+            label: `Abordaje ${index + 1}`,
+            value: abordaje.id_abordaje,
+            data: abordaje
+          }));
+          setAbordajesOptions(options);
         }
-      };
-  
-      loadAbordajes();
-    }, [ordenTrabajo.id_orden_trabajo]);
-
-    const handleAbordajeChange = (value) => {
-      const selectedOption = abordajesOptions.find(option => option.value === value);
-      if (selectedOption) {
-        setSelectedAbordaje(selectedOption.data);
-        // Pre-llenar los campos con la información del abordaje seleccionado
-        setPuerto(selectedOption.data.id_puerto);
-        setMotorista(selectedOption.data.motorista || "");
-        setSupervisor(selectedOption.data.supervisor || "");
+      } catch (error) {
+        console.error("Error al cargar abordajes:", error);
       }
     };
+    loadAbordajes();
+  }, [ordenTrabajo.id_orden_trabajo]);
+
+  const handleAbordajeChange = (value) => {
+    setSelectedAbordaje(value);
+    if (value) {
+      navigation.navigate("Abordaje", { idAbordaje: value });
+    }
+  };
   
     const handleSeleccionarTecnico = () => {
       navigation.navigate("SeleccionarTecnico", {
@@ -80,7 +76,6 @@ import  useAbordaje from "../../hooks/Abordaje/useAbordaje"
         usuarioExcluido: tecnico ? [tecnico.id] : [],
       });
     };
-  
   
     const handleGuardar = async () => {
       if (!puerto) {
