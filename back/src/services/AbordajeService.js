@@ -14,11 +14,11 @@ const prisma = new PrismaClient();
  * @returns {Promise<Object>} - El registro de abordaje creado o reactivado.
  */
 export const createAbordaje = async (data) => {
-  const { id_orden_trabajo_usuario, fecha, motorista, supervisor, id_puerto } =
+  const { id_orden_trabajo_usuario, motorista, supervisor, id_puerto } =
     data;
 
   // Validación de campos obligatorios
-  if (!id_orden_trabajo_usuario || !fecha || !id_puerto) {
+  if (!id_orden_trabajo_usuario || !id_puerto) {
     throw new Error(
       "Los campos id_orden_trabajo_usuario, fecha e id_puerto son obligatorios."
     );
@@ -36,14 +36,8 @@ export const createAbordaje = async (data) => {
     throw new Error("El campo id_puerto debe ser un número válido.");
   }
 
-  // Validar la fecha
-  const fechaDate = new Date(fecha);
-  if (isNaN(fechaDate.getTime())) {
-    throw new Error("El campo fecha debe ser una fecha válida.");
-  }
-
   // Convertir la fecha a UTC utilizando la función getUTCTime
-  const fechaParsed =fechaDate;
+
   const fechaActual = getUTCTime(new Date().toISOString());
 
   // Validar que la OrdenTrabajoUsuario exista
@@ -69,7 +63,7 @@ export const createAbordaje = async (data) => {
   const abordajeExistente = await prisma.abordaje.findFirst({
     where: {
       id_orden_trabajo_usuario: ordenUsuarioId,
-      fecha: fechaParsed,
+      fecha: fechaActual,
     },
   });
 

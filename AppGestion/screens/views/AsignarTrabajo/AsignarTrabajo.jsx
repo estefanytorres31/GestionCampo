@@ -120,7 +120,6 @@ import  useAbordaje from "../../hooks/Abordaje/useAbordaje"
             if (responsable && responsable.id_orden_trabajo_usuario) {
               console.log("Creando abordaje con:", {
                 id_orden_trabajo_usuario: responsable.id_orden_trabajo_usuario,
-                fecha: new Date().toLocaleString(),
                 motorista,
                 supervisor,
                 id_puerto: puerto,
@@ -128,7 +127,6 @@ import  useAbordaje from "../../hooks/Abordaje/useAbordaje"
     
               const result=await crearAbordaje(
                 responsable.id_orden_trabajo_usuario,
-                new Date().toISOString(),
                 motorista,
                 supervisor,
                 puerto,
