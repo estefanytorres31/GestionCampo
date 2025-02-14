@@ -33,65 +33,14 @@ enum RolEnOrden {
   Ayudante
 }
 
-enum TipoAccion {
-  CREAR
-  LEER
-  EDITAR
-  ELIMINAR
-  BUSCAR
-}
-
-model Recurso {
-  id             Int        @id @default(autoincrement())
-  nombre         String     @unique // Ejemplo: "usuarios", "roles", "asistencias"
-  descripcion    String?
-  estado         Boolean    @default(true)
-  creado_en      DateTime   @default(now())
-  actualizado_en DateTime   @updatedAt
-  
-  permisos       Permiso[]
-
-  @@map("recursos")
-}
-
-model Accion {
-  id             Int        @id @default(autoincrement())
-  key            TipoAccion @unique
-  nombre         String
-  descripcion    String?
-  estado         Boolean    @default(true)
-  creado_en      DateTime   @default(now())
-  actualizado_en DateTime   @updatedAt
-
-  permisos       Permiso[]
-
-  @@map("acciones")
-}
-
 model Permiso {
   id             Int      @id @default(autoincrement())
-  key            String   @unique  // Nueva columna para la convención, ej: "roles.list"
-  
-  // Relación con el recurso (por ejemplo, "usuarios")
-  recursoId      Int
-  recurso        Recurso  @relation(fields: [recursoId], references: [id])
-  
-  // Relación con la acción (por ejemplo, "crear")
-  accionId       Int
-  accion         Accion   @relation(fields: [accionId], references: [id])
-  
-  // Nombre y descripción que se muestran en la interfaz (pueden ser personalizados)
-  nombre         String   // Ejemplo: "Crear Usuario"
+  nombre         String   @unique // Se marca como único
   descripcion    String?
-  
   estado         Boolean  @default(true)
   creado_en      DateTime @default(now())
   actualizado_en DateTime @updatedAt
-
-  // Relación con roles (para asignar permisos a roles)
   roles_permisos RolesPermiso[]
-
-  @@unique([recursoId, accionId]) // Cada recurso solo puede tener una acción específica una vez.
   @@map("permisos")
   @@index([estado], name: "idx_permiso_estado")
 }
