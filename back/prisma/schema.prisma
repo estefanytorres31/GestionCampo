@@ -33,14 +33,6 @@ enum RolEnOrden {
   Ayudante
 }
 
-enum TipoAccion {
-  CREAR
-  LEER
-  EDITAR
-  ELIMINAR
-  BUSCAR
-}
-
 model Permiso {
   id             Int      @id @default(autoincrement())
   nombre         String   @unique // Se marca como único
