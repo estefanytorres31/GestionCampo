@@ -1,116 +1,134 @@
-/* Tema por defecto: light (con variables de botón definidas) */
+/* Tema por defecto: light */
 :root,
 [data-theme="light"] {
   /* Variables generales */
   --primary-bg: #ffffff;
-  --secondary-bg: #f7f7f7; /* Fondo suave, ligeramente grisáceo */
+  --primary-bg-light: #ffffff; /* Variante más clara (igual que la principal) */
+  --primary-bg-dark: #f2f2f2; /* Variante ligeramente oscura */
+
+  --secondary-bg: #f7f7f7;
+
   --primary-text: #0d1e4c;
+  --primary-text-light: #0d1e4c; /* Opción para resaltar, si es necesario */
+  --primary-text-dark: #091228; /* Variante más oscura */
+
   --border-color: #d1d5db;
+
   --hover-bg: #f0f4ff;
+  --hover-bg-light: #f5faff;
+  --hover-bg-dark: #e0e8ff;
+
   --active-bg: #bfdbfe;
+  --active-bg-light: #c8e0ff;
+  --active-bg-dark: #a8c8ff;
+
   --active-text: #1e3a8a;
 
-  /* Variables específicas para el input en light */
-  --input-bg: #ffffff;
-  --input-text: #0d1e4c;
-  --input-border: #1c2c4f;
-  --input-hover-border: #1c2c4f;
-  --input-focus-border: #1c2c4f;
+  --table-header-bg: #0d1e4c; /* Fondo del encabezado */
+  --table-header-text: #ffffff; /* Texto del encabezado */
+  --table-row-hover-bg: #f9fafb; /* Fondo al pasar el mouse en filas */
 
-  /* Variables específicas para la tabla */
-  --table-header-bg: #0d1e4c;
-  --table-header-text: #ffffff;
-  --table-row-hover-bg: #f9fafb;
+  /* Variables adicionales para botones o acentos */
+  --button-bg: #0d1e4c;
+  --button-bg-light: #1a2e56;
+  --button-bg-dark: #0a1a38;
 
-  /* Variables específicas para botones en light */
-  --button-bg: #0d1e4c; /* Fondo oscuro para el botón */
-  --button-text: #ffffff; /* Texto en blanco */
-  --button-hover-bg: #0a1630; /* Fondo un poco más oscuro en hover */
-  --button-active-bg: #09122b; /* Fondo aún más oscuro al hacer click */
+  --button-text: #ffffff;
+
+  --button-hover-bg: #0a1630;
+  --button-active-bg: #09122b;
+
+  --accent-color: #3b82f6;
+  --accent-color-light: #60a5fa;
+  --accent-color-dark: #2563eb;
 }
 
 /* Tema dark */
 [data-theme="dark"] {
   /* Variables generales */
-  --primary-bg: #121212; /* Fondo oscuro */
-  --secondary-bg: #1e1e1e; /* Fondo secundario oscuro */
-  --primary-text: #e0e0e0; /* Texto claro */
+  --primary-bg: #121212;
+  --primary-bg-light: #1a1a1a;
+  --primary-bg-dark: #0f0f0f;
+
+  --secondary-bg: #1e1e1e;
+
+  --primary-text: #e0e0e0;
+  --primary-text-light: #e8e8e8;
+  --primary-text-dark: #c0c0c0;
+
   --border-color: #444444;
+
   --hover-bg: #2a2a2a;
+  --hover-bg-light: #323232;
+  --hover-bg-dark: #242424;
+
   --active-bg: #333333;
+  --active-bg-light: #3a3a3a;
+  --active-bg-dark: #2a2a2a;
+
   --active-text: #ffffff;
 
-  /* Input en dark */
-  --input-bg: #121212;
-  --input-text: #e0e0e0;
-  --input-border: #e0e0e0;
-  --input-hover-border: #e0e0e0;
-  --input-focus-border: #e0e0e0;
+  --table-header-bg: #e0e0e0; /* Fondo del encabezado */
+  --table-header-text: #121212; /* Texto del encabezado */
+  --table-row-hover-bg: #2c2c2c; /* Fondo al pasar el mouse en filas */
 
-  /* Variables específicas para la tabla */
-  --table-header-bg: #e0e0e0;
-  --table-header-text: #121212;
-  --table-row-hover-bg: #2c2c2c;
+  /* Variables adicionales para botones o acentos */
+  --button-bg: #e0e0e0;
+  --button-bg-light: #f0f0f0;
+  --button-bg-dark: #cccccc;
 
-  /* Variables específicas para botones en dark */
-  --button-bg: #e0e0e0; /* Fondo claro para contraste */
-  --button-text: #121212; /* Texto oscuro */
-  --button-hover-bg: #cccccc; /* Fondo ligeramente más oscuro en hover */
-  --button-active-bg: #b3b3b3; /* Fondo aún más oscuro al hacer click */
+  --button-text: #121212;
+
+  --button-hover-bg: #cccccc;
+  --button-active-bg: #b3b3b3;
+
+  --accent-color: #bb86fc;
+  --accent-color-light: #d6b0ff;
+  --accent-color-dark: #985eff;
 }
-
-   .preview[data-theme="system"] {
-    /* Por defecto, se asume light */
-    --primary-bg: #ffffff;
-    --secondary-bg: #f7f7f7;
-    --primary-text: #0d1e4c;
-    --border-color: #d1d5db;
-    --hover-bg: #f0f4ff;
-    --active-bg: #bfdbfe;
-    --active-text: #1e3a8a;
-  }
-  
-  @media (prefers-color-scheme: dark) {
-    .preview[data-theme="system"] {
-      --primary-bg: #121212;
-      --secondary-bg: #1e1e1e;
-      --primary-text: #e0e0e0;
-      --border-color: #444444;
-      --hover-bg: #2a2a2a;
-      --active-bg: #333333;
-      --active-text: #ffffff;
-    }
-  }
-  
 
 /* Tema darkblue */
 [data-theme="darkblue"] {
   /* Variables generales */
   --primary-bg: #1f2937;
+  --primary-bg-light: #2b3a4e;
+  --primary-bg-dark: #192532;
+
   --secondary-bg: #2e3a46;
+
   --primary-text: #f3f4f6;
+  --primary-text-light: #ffffff;
+  --primary-text-dark: #d1d5db;
+
   --border-color: #4b5563;
+
   --hover-bg: #374151;
+  --hover-bg-light: #3f4a5b;
+  --hover-bg-dark: #2e3b47;
+
   --active-bg: rgba(37, 99, 235, 0.31);
+  --active-bg-light: rgba(37, 99, 235, 0.4);
+  --active-bg-dark: rgba(37, 99, 235, 0.2);
+
   --active-text: #93c5fd;
 
-  /* Input en darkblue */
-  --input-bg: #1f2937;
-  --input-text: #f3f4f6;
-  --input-border: #1c2c4f;
-  --input-hover-border: #1c2c4f;
-  --input-focus-border: #1c2c4f;
+  --table-header-bg: #374151; /* Fondo del encabezado */
+  --table-header-text: #1f2937; /* Texto del encabezado */
+  --table-row-hover-bg: #2d3748; /* Fondo al pasar el mouse en filas */
 
-  /* Variables específicas para la tabla */
-  --table-header-bg: #374151;
-  --table-header-text: #1f2937;
-  --table-row-hover-bg: #2d3748;
+  /* Variables adicionales para botones o acentos */
+  --button-bg: #0d1e4c;
+  --button-bg-light: #203d73;
+  --button-bg-dark: #0a1630;
 
-  /* Variables específicas para botones en darkblue */
-  --button-bg: #0d1e4c; /* Fondo azul oscuro para el botón */
-  --button-text: #ffffff; /* Texto en blanco */
-  --button-hover-bg: #0a1e44; /* Fondo un poco más oscuro en hover */
-  --button-active-bg: #08143d; /* Fondo aún más oscuro al hacer click */
+  --button-text: #ffffff;
+
+  --button-hover-bg: #0a1e44;
+  --button-active-bg: #08143d;
+
+  --accent-color: #0d1e4c;
+  --accent-color-light: #203d73;
+  --accent-color-dark: #0a1630;
 }
 
 /* Ayu Dark Theme */

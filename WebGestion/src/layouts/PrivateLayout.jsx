@@ -58,7 +58,7 @@ const PrivateLayout = ({ children }) => {
       <main className="flex flex-col flex-1 overflow-auto md:pl-0 w-full h-full">
         <Header title={pageTitle} />
         {!layoutOffset ? (
-          <div className="h-full flex flex-col justify-start gap-4 overflow-auto relative m-5 rounded-2xl">
+          <div className="h-full flex flex-col justify-start gap-4 overflow-auto relative m-5">
             {children}
           </div>
         ) : (
