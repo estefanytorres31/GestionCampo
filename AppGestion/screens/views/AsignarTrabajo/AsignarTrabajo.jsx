@@ -54,10 +54,10 @@ const AsignarTrabajoScreen = ({ route, navigation }) => {
     loadAbordajes();
   }, [ordenTrabajo.id_orden_trabajo]);
 
-  const handleAbordajeChange = (value) => {
-    setSelectedAbordaje(value);
+  const handleAbordajeChange = (idAbordaje) => {
+    // setSelectedAbordaje(value);
     if (value) {
-      navigation.navigate("Abordaje", { idAbordaje: value });
+      navigation.navigate("Abordaje", { idAbordaje });
     }
   };
   
