@@ -18,11 +18,11 @@ const OrdenTrabajoParteProvider = ({children}) => {
         }
     }
     
-    const actualizarOrdenTrabajoParte = async (id_orden_trabajo_parte, estado, comentario) => {
+    const actualizarOrdenTrabajoParte = async (id_orden_trabajo_parte, estado, comentario, id_abordaje) => {
         setLoading(true)
         setError(null)
         try{
-            await updateOrdenTrabajoParte(id_orden_trabajo_parte, estado, comentario)
+            await updateOrdenTrabajoParte(id_orden_trabajo_parte, estado, comentario, id_abordaje)
             setLoading(false)
         }catch(err){
             setError(err.message)

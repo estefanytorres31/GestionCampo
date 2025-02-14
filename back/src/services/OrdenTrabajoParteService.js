@@ -77,6 +77,7 @@ export const getAllOrdenesTrabajoParte = async (filters) => {
       estado: filters.estado || { not: "inactivo" },
       ...(filters.id_orden_trabajo_sistema && { id_orden_trabajo_sistema: parseInt(filters.id_orden_trabajo_sistema) }),
       ...(filters.id_parte && { id_parte: parseInt(filters.id_parte) }),
+      ...(filters.id_abordaje && { id_abordaje: parseInt(filters.id_abordaje) }),
     };
   
     const ordenes = await prisma.ordenTrabajoParte.findMany({

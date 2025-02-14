@@ -118,18 +118,35 @@ export const getAllOrdenesTrabajo = async (query) => {
       ...(codigo && { codigo }),
   };
 
-  // Obtener las órdenes filtradas
-  const ordenesTrabajo = await prisma.ordenTrabajo.findMany({
-      where: whereClause,
-      orderBy: { fecha_asignacion: "desc" },
-  });
-
-  // Validar si hay resultados
-  if (ordenesTrabajo.length === 0) {
-      throw new Error("No hay órdenes de trabajo disponibles con los criterios especificados.");
+  // Validación de claves foráneas
+  if (id_tipo_trabajo) {
+      const tipoTrabajo = await prisma.tipoTrabajo.findUnique({ where: { id_tipo_trabajo: parseInt(id_tipo_trabajo) } });
+      if (!tipoTrabajo) throw new Error(`No se encontró el Tipo de Trabajo con ID ${id_tipo_trabajo}.`);
+  }
+  if (id_embarcacion) {
+      const embarcacion = await prisma.embarcacion.findUnique({ where: { id_embarcacion: parseInt(id_embarcacion) } });
+      if (!embarcacion) throw new Error(`No se encontró la Embarcación con ID ${id_embarcacion}.`);
+  }
+  if (id_puerto) {
+      const puerto = await prisma.puerto.findUnique({ where: { id_puerto: parseInt(id_puerto) } });
+      if (!puerto) throw new Error(`No se encontró el Puerto con ID ${id_puerto}.`);
+  }
+  if (id_jefe_asigna) {
+      const jefeAsigna = await prisma.usuario.findUnique({ where: { id: parseInt(id_jefe_asigna) } });
+      if (!jefeAsigna) throw new Error(`No se encontró el Usuario Jefe con ID ${id_jefe_asigna}.`);
   }
 
-  return ordenesTrabajo;
+  // Obtener las órdenes filtradas
+  try {
+    const ordenesTrabajo = await prisma.ordenTrabajo.findMany({
+        where: whereClause,
+        orderBy: { fecha_asignacion: "desc" },
+    });
+    return ordenesTrabajo;
+} catch (error) {
+    console.error("Error en getAllOrdenesTrabajo:", error);
+    throw new Error("No se pudieron obtener las órdenes de trabajo.");
+}
 };
 
 export const getAllOrdenesTrabajoWeb = async (

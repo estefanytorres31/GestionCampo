@@ -34,7 +34,7 @@ const OrdenTrabajoSistemaProvider = ({ children }) => {
         }
     }
 
-    const actualizarOrdenTrabajoSistema= async(id_orden_trabajo_sistema, estado)=>{
+    const actualizarEstadoOrdenTrabajoSistema= async(id_orden_trabajo_sistema, estado)=>{
       setLoading(true);
       setError(null);
       try{
@@ -66,7 +66,7 @@ const OrdenTrabajoSistemaProvider = ({ children }) => {
 
     
     return (
-        <OrdenTrabajoSistemaContext.Provider value={{ actualizarOrdenTrabajoSistemaCompleta, guardarOrdenTrabajoSistema,obtenerOrdenTrabajoSistemaByOrdenTrabajo, actualizarOrdenTrabajoSistema, ordenTrabajoSistemas, loading, error }}>
+        <OrdenTrabajoSistemaContext.Provider value={{ actualizarOrdenTrabajoSistemaCompleta, guardarOrdenTrabajoSistema,obtenerOrdenTrabajoSistemaByOrdenTrabajo, actualizarEstadoOrdenTrabajoSistema, ordenTrabajoSistemas, loading, error }}>
           {children}
         </OrdenTrabajoSistemaContext.Provider>
       );

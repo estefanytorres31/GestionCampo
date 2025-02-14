@@ -31,11 +31,13 @@ export const getAllOrdenesTrabajo = async (req, res) => {
   try {
       const ordenesTrabajo = await OrdenTrabajoService.getAllOrdenesTrabajo(req.query);
       res.status(200).json({
-          message: "Órdenes de trabajo obtenidas exitosamente.",
-          data: ordenesTrabajo,
-      });
+        message: ordenesTrabajo.length > 0 
+            ? "Órdenes de trabajo obtenidas exitosamente." 
+            : "No hay órdenes de trabajo disponibles.",
+        data: ordenesTrabajo,
+    });
   } catch (error) {
-      res.status(500).json({ message: error.message });
+      res.status(400).json({ message: error.message });
   }
 };
 
