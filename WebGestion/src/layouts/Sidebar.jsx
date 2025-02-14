@@ -82,13 +82,13 @@ const SideBar = () => {
         to: "/horas-hombre",
         icon: <RiUserLocationFill size={20} className="min-w-max" />,
         label: "Horas Hombre",
-        permisos: ["Ver todo", "Ver Horas Hombre"],
+        permisos: ["Ver Todo", "Ver Horas Hombre"],
       },
       {
         to: "/orden-trabajo",
         icon: <HiClipboardList size={20} className="min-w-max" />,
         label: "Orden Trabajo",
-        permisos: ["Ver todo", "Ver Orden Trabajo"],
+        permisos: ["Ver Todo", "Ver Orden Trabajo"],
       },
       //   // Ítem contenedor para subitems
       //   icon: <MdAssignment size={20} className="min-w-max" />,
@@ -148,25 +148,25 @@ const SideBar = () => {
       {
         icon: <RiShieldUserFill size={20} className="min-w-max" />,
         label: "Usuarios",
-        permisos: ["Ver todo", "Ver Usuarios"],
+        permisos: ["Ver Todo", "Ver Usuarios"],
         subItems: [
           {
             to: "/usuarios",
             label: "Usuarios",
             icon: <FaUserFriends size={18} className="min-w-max" />,
-            permisos: ["Ver todo", "Ver Usuarios"],
+            permisos: ["Ver Todo", "Ver Usuarios"],
           },
           {
             to: "/roles",
             label: "Roles",
             icon: <RiShieldUserFill size={18} className="min-w-max" />,
-            permisos: ["Ver todo", "Ver Roles"],
+            permisos: ["Ver Todo", "Ver Roles"],
           },
           {
             to: "/permisos",
             label: "Permisos",
             icon: <RiGroup2Fill size={18} className="min-w-max" />,
-            permisos: ["Ver todo", "Ver Permisos"],
+            permisos: ["Ver Todo", "Ver Permisos"],
           },
         ],
       },

@@ -42,14 +42,17 @@ const AppContent = () => {
     element: Component,
     authorizedPermissions,
   }) => {
-    // const rol = roleMapper(user?.rol || 0);
-    // const permission = permissionsUsuario(usuario)
-    const hasPermission = authorizedPermissions.some((perm) =>
-      permissionsUsuario.includes(perm)
-    );
-
+    // Si el usuario tiene el permiso "Ver Todo", se le permite el acceso
+    const hasVerTodo = permissionsUsuario.includes("Ver Todo");
+    console.log("hasVerTodo", permissionsUsuario)
+    console.log("ver Todo", hasVerTodo)
+    const hasPermission =
+      hasVerTodo ||
+      authorizedPermissions.some((perm) => permissionsUsuario.includes(perm));
+    console.log("hasPermission", hasPermission)
     return hasPermission ? <Component /> : <Navigate to="/dashboard" />;
   };
+
   return (
     <>
       <Routes>
@@ -113,7 +116,7 @@ const AppContent = () => {
             <PrivateRoute>
               <PrivateLayout>
                 <PrivateRouteWrapper
-                  authorizedPermissions={["Ver Horas Hombre"]}
+                  authorizedPermissions={["Ver Todo", "Ver Horas Hombre"]}
                   element={Asistencias}
                 />
               </PrivateLayout>
@@ -126,7 +129,7 @@ const AppContent = () => {
             <PrivateRoute>
               <PrivateLayout>
                 <PrivateRouteWrapper
-                  authorizedPermissions={["Ver Orden Trabajo"]}
+                  authorizedPermissions={["Ver Todo", "Ver Orden Trabajo"]}
                   element={TrabajosAsignados}
                 />
               </PrivateLayout>
@@ -139,7 +142,7 @@ const AppContent = () => {
             <PrivateRoute>
               <PrivateLayout>
                 <PrivateRouteWrapper
-                  authorizedPermissions={["Ver Orden Trabajo"]}
+                  authorizedPermissions={["Ver Todo", "Ver Orden Trabajo"]}
                   element={CodigoDetalle}
                 />
               </PrivateLayout>
@@ -152,7 +155,7 @@ const AppContent = () => {
             <PrivateRoute>
               <PrivateLayout>
                 <PrivateRouteWrapper
-                  authorizedPermissions={["Ver Usuarios"]}
+                  authorizedPermissions={["Ver Todo", "Ver Usuarios"]}
                   element={Usuarios}
                 />
               </PrivateLayout>
@@ -165,7 +168,7 @@ const AppContent = () => {
             <PrivateRoute>
               <PrivateLayout>
                 <PrivateRouteWrapper
-                  authorizedPermissions={["Ver Usuarios"]}
+                  authorizedPermissions={["Ver Todo", "Ver Usuarios"]}
                   element={AssignRolesForm}
                 />
               </PrivateLayout>
@@ -178,7 +181,7 @@ const AppContent = () => {
             <PrivateRoute>
               <PrivateLayout>
                 <PrivateRouteWrapper
-                  authorizedPermissions={["Ver Roles"]}
+                  authorizedPermissions={["Ver Todo", "Ver Roles"]}
                   element={Roles}
                 />
               </PrivateLayout>
@@ -191,7 +194,7 @@ const AppContent = () => {
             <PrivateRoute>
               <PrivateLayout>
                 <PrivateRouteWrapper
-                  authorizedPermissions={["Ver Roles"]}
+                  authorizedPermissions={["Ver Todo", "Ver Roles"]}
                   element={AssignPermissionsPage}
                 />
               </PrivateLayout>
@@ -204,7 +207,7 @@ const AppContent = () => {
             <PrivateRoute>
               <PrivateLayout>
                 <PrivateRouteWrapper
-                  authorizedPermissions={["Ver Permisos"]}
+                  authorizedPermissions={["Ver Todo", "Ver Permisos"]}
                   element={Permisos}
                 />
               </PrivateLayout>
