@@ -1,4 +1,3 @@
-// Roles.jsx
 import React, { useMemo, useState, useRef } from "react";
 import ListPage from "@/components/ListPage";
 import useRoles from "../../hooks/roles/useRoles";
@@ -26,7 +25,7 @@ const rolesFilters = [
   {
     key: "nombre_rol",
     type: "text",
-    placeholder: "Buscar por nombre",
+    placeholder: "Buscar por nombre de rol",
     icon: <BsSearch className="text-gray-400" />,
   },
 ];
@@ -38,15 +37,17 @@ const Roles = () => {
   const [roleToEdit, setRoleToEdit] = useState(null);
   const [roleToDelete, setRoleToDelete] = useState(null);
   const listPageRefetchRef = useRef(null);
-  const [filters, setFilters] = useState({});
+
+  // Inicializamos el estado de filtros a partir de rolesFilters
+  const [filters, setFilters] = useState(
+    rolesFilters.reduce((acc, field) => ({ ...acc, [field.key]: "" }), {})
+  );
   const memoizedFilters = useMemo(() => filters, [filters]);
+
   const navigate = useNavigate();
 
   const handleSuccess = async (data) => {
-    if (
-      listPageRefetchRef.current &&
-      typeof listPageRefetchRef.current === "function"
-    ) {
+    if (listPageRefetchRef.current && typeof listPageRefetchRef.current === "function") {
       try {
         await listPageRefetchRef.current();
       } catch (error) {
@@ -105,8 +106,10 @@ const Roles = () => {
       <ListPage
         useFetchHook={useRoles}
         columns={rolesColumns}
+        filters={memoizedFilters}
         filterFields={rolesFilters}
         title="Roles"
+        showExportButtons={false}
         createButton={
           <Button onClick={() => setIsCreateModalOpen(true)}>
             <IoAdd size={20} className="min-w-max" />
@@ -131,15 +134,8 @@ const Roles = () => {
           ),
           acciones: (row) => (
             <>
-              <RowActions
-                row={row}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-              />
-              <Button
-                onClick={() => handleAssignPermissions(row)}
-                color="secondary"
-              >
+              <RowActions row={row} onEdit={handleEdit} onDelete={handleDelete} />
+              <Button onClick={() => handleAssignPermissions(row)} color="secondary">
                 <MdAssignmentAdd size={20} className="min-w-max" />
               </Button>
             </>

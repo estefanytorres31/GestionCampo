@@ -51,7 +51,7 @@ const FiltroAsistencias = ({ filters, setFilters }) => {
           <FilterInput
             label="Nombre:"
             type="text"
-            placeholder="Buscar por nombre..."
+            placeholder="Buscar por nombre"
             value={filters.nombre_completo || ""}
             onChange={(e) =>
               setFilters((prev) => ({
@@ -63,7 +63,7 @@ const FiltroAsistencias = ({ filters, setFilters }) => {
           <FilterInput
             label="Embarcación:"
             type="text"
-            placeholder="Buscar por embarcación..."
+            placeholder="Buscar por embarcación"
             value={filters.nombre_embarcacion || ""}
             onChange={(e) =>
               setFilters((prev) => ({
@@ -73,44 +73,50 @@ const FiltroAsistencias = ({ filters, setFilters }) => {
             }
           />
           <FilterInput
-            label="Fecha de entrada:"
-            type="date"
-            placeholder="Fecha de entrada..."
-            value={filters.fecha || ""}
+            label="Cliente:"
+            type="text"
+            placeholder="Buscar por cliente"
+            value={filters.empresa || ""}
             onChange={(e) =>
-              setFilters((prev) => ({ ...prev, fecha: e.target.value }))
+              setFilters((prev) => ({ ...prev, empresa: e.target.value }))
             }
           />
         </div>
 
         {/* Segunda fila de filtros */}
-        <div className="flex flex-col w-full gap-2 border-t-2" style={{ borderColor: "var(--primary-bg)" }}>
+        <div
+          className="flex flex-col w-full gap-2 border-t-2"
+          style={{ borderColor: "var(--primary-bg)" }}
+        >
           <div className="flex w-full gap-2">
+            <FilterInput
+              label="Fecha:"
+              type="date"
+              placeholder="Fecha"
+              value={filters.fecha || ""}
+              onChange={(e) =>
+                setFilters((prev) => ({ ...prev, fecha: e.target.value }))
+              }
+            />
             <FilterInput
               label="Desde:"
               type="date"
-              placeholder="Fecha inicio entrada..."
+              placeholder="Fecha inicio entrada"
               value={filters.fecha_inicio || ""}
               onChange={(e) =>
-                setFilters((prev) => ({ ...prev, fecha_inicio: e.target.value }))
+                setFilters((prev) => ({
+                  ...prev,
+                  fecha_inicio: e.target.value,
+                }))
               }
             />
             <FilterInput
               label="Hasta:"
               type="date"
-              placeholder="Fecha fin entrada..."
+              placeholder="Fecha fin entrada"
               value={filters.fecha_fin || ""}
               onChange={(e) =>
                 setFilters((prev) => ({ ...prev, fecha_fin: e.target.value }))
-              }
-            />
-            <FilterInput
-              label="Empresa:"
-              type="text"
-              placeholder="Buscar por empresa..."
-              value={filters.empresa || ""}
-              onChange={(e) =>
-                setFilters((prev) => ({ ...prev, empresa: e.target.value }))
               }
             />
           </div>
