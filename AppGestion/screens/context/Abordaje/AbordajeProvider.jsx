@@ -6,9 +6,9 @@ const AbordajeProvider = ({ children }) => {
     const [abordajes, setAbordajes] = useState([]);
     const [abordaje, setAbordaje] = useState(null);
 
-    const crearAbordaje=async(id_orden_trabajo_usuario, fecha, motorista, supervisor,  id_puerto)=>{
+    const crearAbordaje=async(id_orden_trabajo_usuario, motorista, supervisor,  id_puerto)=>{
         try {
-            const response = await createAbordaje(id_orden_trabajo_usuario, fecha, motorista, supervisor,  id_puerto);
+            const response = await createAbordaje(id_orden_trabajo_usuario, motorista, supervisor,  id_puerto);
             setAbordajes([...abordajes, response.data]);
             setAbordaje(null);
             return response.data;
