@@ -128,7 +128,7 @@ import  useAbordaje from "../../hooks/Abordaje/useAbordaje"
     
               const result=await crearAbordaje(
                 responsable.id_orden_trabajo_usuario,
-                new Date().toLocaleString(),
+                new Date().toISOString(),
                 motorista,
                 supervisor,
                 puerto,
