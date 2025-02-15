@@ -10,6 +10,7 @@ import useAbordaje from "../../hooks/Abordaje/useAbordaje";
 
 const AsignarTrabajoScreen = ({ route, navigation }) => {
   const { codigoOT, ordenTrabajo } = route.params;
+  const { idAbordaje } = route.params 
   const [puerto, setPuerto] = useState(null);
   const [tecnico, setTecnico] = useState(null);
   const [motorista, setMotorista] = useState("");
@@ -22,7 +23,7 @@ const AsignarTrabajoScreen = ({ route, navigation }) => {
   const { puertos } = usePuerto();
   const { updateOT, loading, error } = useOrdenTrabajo();
   const { guardarOrdenTrabajoUsuario, asignarOrdenTrabajo } = useOrdenTrabajoUsuario();
-
+  const [abordajes, setAbordajes] = useState([]);
   const [puertosOptions, setPuertosOptions] = useState([]);
 
   // Load ports options
@@ -38,14 +39,9 @@ const AsignarTrabajoScreen = ({ route, navigation }) => {
   useEffect(() => {
     const loadAbordajes = async () => {
       try {
-        const abordajes = await obtenerAbordajePorOrdenTrabajo(ordenTrabajo.id_orden_trabajo);
-        if (abordajes && abordajes.length > 0) {
-          const options = abordajes.map((abordaje, index) => ({
-            label: `Abordaje ${index + 1}`,
-            value: abordaje.id_abordaje,
-            data: abordaje
-          }));
-          setAbordajesOptions(options);
+        const abordajesData = await obtenerAbordajePorOrdenTrabajo(ordenTrabajo.id_orden_trabajo);
+        if (abordajesData && abordajesData.length > 0) {
+          setAbordajes(abordajesData);
         }
       } catch (error) {
         console.error("Error al cargar abordajes:", error);
@@ -54,11 +50,8 @@ const AsignarTrabajoScreen = ({ route, navigation }) => {
     loadAbordajes();
   }, [ordenTrabajo.id_orden_trabajo]);
 
-  const handleAbordajeChange = (idAbordaje) => {
-    // setSelectedAbordaje(value);
-    if (value) {
-      navigation.navigate("Abordaje", { idAbordaje });
-    }
+  const handleAbordajeSelect = (idAbordaje) => {
+    navigation.navigate("Abordaje", { idAbordaje });
   };
   
     const handleSeleccionarTecnico = () => {
@@ -143,25 +136,32 @@ const AsignarTrabajoScreen = ({ route, navigation }) => {
 
   return (
     <ScrollView 
-      contentContainerStyle={styles.container}
+
+  contentContainerStyle={styles.container}
       showsVerticalScrollIndicator={false}
     >
-
       <View style={styles.header}>
         <Text style={styles.title}>Formulario</Text>
         <View style={styles.divider} />
       </View>
 
-      {abordajesOptions.length > 0 && (
+      {abordajes.length > 0 && (
         <View style={styles.card}>
           <View style={styles.field}>
             <Text style={styles.label}>Abordajes Anteriores</Text>
-            <Select
-              placeholder="Seleccione un abordaje"
-              items={abordajesOptions}
-              value={selectedAbordaje?.id_abordaje}
-              onValueChange={handleAbordajeChange}
-            />
+            <View style={styles.abordajesContainer}>
+              {abordajes.map((abordaje, index) => (
+                <TouchableOpacity
+                  key={abordaje.id_abordaje}
+                  style={styles.abordajeButton}
+                  onPress={() => handleAbordajeSelect(abordaje.id_abordaje)}
+                >
+                  <Text style={styles.abordajeButtonText}>
+                    Abordaje {index + 1}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
           </View>
         </View>
       )}
@@ -387,6 +387,25 @@ const styles = StyleSheet.create({
     color: "#3949AB",
     fontSize: 14,
     marginBottom: 4,
+  },
+  abordajesContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+    marginTop: 8,
+  },
+  abordajeButton: {
+    backgroundColor: '#E8EAF6',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#3949AB',
+  },
+  abordajeButtonText: {
+    color: '#3949AB',
+    fontSize: 14,
+    fontWeight: '600',
   },
 });
 

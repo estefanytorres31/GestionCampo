@@ -1,12 +1,16 @@
 import React, { useState } from 'react';
-import { View, Text, Image, ScrollView, TextInput } from 'react-native';
-import { Checkbox, Button } from 'react-native-paper';
-import { Download } from 'lucide-react-native';
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  TextInput,
+  StyleSheet,
+  SafeAreaView,
+} from 'react-native';
 
-const Abordaje =({ route })  => {
-    const { idOrden } = route.params
+const Abordaje = () => {
   const reportData = {
-    logoUrl: "https://media.licdn.com/dms/image/v2/D4E03AQHP5SGxw__fyg/profile-displayphoto-shrink_200_200/profile-displayphoto-shrink_200_200/0/1709238131266?e=2147483647&v=beta&t=vogCwG6YzyXMsfRRcB-grCotNTVAgZn_4zc3_29hYMg",
     tipoTrabajo: "Mantenimiento Preventivo",
     codigoOT: "OT-2025-001",
     empresa: "Naviera Pacífico S.A.",
@@ -26,63 +30,256 @@ const Abordaje =({ route })  => {
     { id: 3, descripcion: "Pruebas de funcionamiento", completado: false }
   ]);
 
-  const [sistemaForm, setSistemaForm] = useState([
-    { id: 1, campo: "Estado general", valor: "" },
-    { id: 2, campo: "Observaciones", valor: "" },
-    { id: 3, campo: "Recomendaciones", valor: "" }
-  ]);
+  const [formData, setFormData] = useState({
+    estadoGeneral: "",
+    observaciones: "",
+    recomendaciones: ""
+  });
+
+  const handleChecklistToggle = (id) => {
+    setChecklist(checklist.map(item => 
+      item.id === id ? { ...item, completado: !item.completado } : item
+    ));
+  };
+
+  const handleFormChange = (field, value) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
 
   const handleDownloadPDF = () => {
-    console.log("Descargando PDF...");
+    console.log("Descargando PDF...", { reportData, checklist, formData });
   };
 
   return (
-    <ScrollView style={{ flex: 1, padding: 20, backgroundColor: '#f8f9fa' }}>
-      <View style={{ alignItems: 'center', marginBottom: 20 }}>
-        <Image source={{ uri: reportData.logoUrl }} style={{ width: 80, height: 80, borderRadius: 40 }} />
-      </View>
+    <SafeAreaView style={styles.container}>
+      <ScrollView style={styles.scrollView}>
+        <View style={styles.card}>
+          {/* Header */}
+          <View style={styles.header}>
+            <Text style={styles.title}>{reportData.tipoTrabajo}</Text>
+          
 
-      <Button mode="contained" onPress={handleDownloadPDF} icon={() => <Download size={20} color="white" />}>
-        Descargar PDF
-      </Button>
 
-      <Text style={{ fontSize: 22, fontWeight: 'bold', marginVertical: 20 }}>{reportData.tipoTrabajo}</Text>
-      
-      <View style={{ marginBottom: 20 }}>
-        <Text>Código OT: {reportData.codigoOT}</Text>
-        <Text>Empresa: {reportData.empresa}</Text>
-        <Text>Embarcación: {reportData.embarcacion}</Text>
-        <Text>Puerto: {reportData.puerto}</Text>
-        <Text>Fecha y Hora: {reportData.fecha} - {reportData.hora}</Text>
-      </View>
+          
+          </View>
 
-      <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 10 }}>Personal Asignado</Text>
-      <Text>Técnico: {reportData.tecnico}</Text>
-      <Text>Ayudante: {reportData.ayudante}</Text>
-      <Text>Motorista: {reportData.motorista}</Text>
-      <Text>Supervisor: {reportData.supervisor}</Text>
+          {/* Main Information */}
+          <View style={styles.infoGrid}>
+            <InfoItem label="Código OT" value={reportData.codigoOT} />
+            <InfoItem label="Empresa" value={reportData.empresa} />
+            <InfoItem label="Embarcación" value={reportData.embarcacion} />
+            <InfoItem label="Puerto" value={reportData.puerto} />
+            <InfoItem label="Fecha y Hora" value={`${reportData.fecha} - ${reportData.hora}`} />
+          </View>
 
-      <Text style={{ fontSize: 18, fontWeight: 'bold', marginTop: 20 }}>Checklist de Trabajo</Text>
-      {checklist.map((item) => (
-        <View key={item.id} style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 5 }}>
-          <Checkbox status={item.completado ? 'checked' : 'unchecked'} onPress={() => {}} />
-          <Text>{item.descripcion}</Text>
+          {/* Personnel Section */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Personal Asignado</Text>
+            <View style={styles.personnelGrid}>
+              <PersonnelItem label="Técnico" value={reportData.tecnico} />
+              <PersonnelItem label="Ayudante" value={reportData.ayudante} />
+              <PersonnelItem label="Motorista" value={reportData.motorista} />
+              <PersonnelItem label="Supervisor" value={reportData.supervisor} />
+            </View>
+          </View>
+
+          {/* Checklist Section */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Checklist de Trabajo</Text>
+            {checklist.map((item) => (
+              <TouchableOpacity
+                key={item.id}
+                style={styles.checklistItem}
+                onPress={() => handleChecklistToggle(item.id)}
+              >
+                <View style={[
+                  styles.checkbox,
+                  item.completado && styles.checkboxChecked
+                ]} />
+                <Text style={[
+                  styles.checklistText,
+                  item.completado && styles.checklistTextCompleted
+                ]}>
+                  {item.descripcion}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          {/* System Form */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Formulario del Sistema</Text>
+            <FormField
+              label="Estado General"
+              value={formData.estadoGeneral}
+              onChange={(value) => handleFormChange('estadoGeneral', value)}
+            />
+            <FormField
+              label="Observaciones"
+              value={formData.observaciones}
+              onChange={(value) => handleFormChange('observaciones', value)}
+            />
+            <FormField
+              label="Recomendaciones"
+              value={formData.recomendaciones}
+              onChange={(value) => handleFormChange('recomendaciones', value)}
+            />
+          </View>
         </View>
-      ))}
-
-      <Text style={{ fontSize: 18, fontWeight: 'bold', marginTop: 20 }}>Formulario del Sistema</Text>
-      {sistemaForm.map((campo) => (
-        <View key={campo.id} style={{ marginBottom: 15 }}>
-          <Text>{campo.campo}</Text>
-          <TextInput style={{ borderWidth: 1, borderColor: '#ccc', padding: 10, borderRadius: 5 }}
-            placeholder={`Ingrese ${campo.campo.toLowerCase()}...`}
-            multiline
-            value={campo.valor}
-          />
-        </View>
-      ))}
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
+
+// Helper Components
+const InfoItem = ({ label, value }) => (
+  <View style={styles.infoItem}>
+    <Text style={styles.label}>{label}</Text>
+    <Text style={styles.value}>{value}</Text>
+  </View>
+);
+
+const PersonnelItem = ({ label, value }) => (
+  <View style={styles.personnelItem}>
+    <Text style={styles.label}>{label}</Text>
+    <Text style={styles.value}>{value}</Text>
+  </View>
+);
+
+const FormField = ({ label, value, onChange }) => (
+  <View style={styles.formField}>
+    <Text style={styles.label}>{label}</Text>
+    <TextInput
+      style={styles.input}
+      value={value}
+      onChangeText={onChange}
+      placeholder={`Ingrese ${label.toLowerCase()}...`}
+      multiline
+      numberOfLines={3}
+    />
+  </View>
+);
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#f3f4f6',
+  },
+  scrollView: {
+    flex: 1,
+  },
+  card: {
+    backgroundColor: 'white',
+    margin: 16,
+    borderRadius: 12,
+    padding: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e5e7eb',
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#1f2937',
+  },
+  downloadButton: {
+    backgroundColor: '#2563eb',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 8,
+  },
+  buttonText: {
+    color: 'white',
+    fontWeight: '500',
+  },
+  infoGrid: {
+    marginTop: 16,
+  },
+  section: {
+    marginTop: 24,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#1f2937',
+    marginBottom: 12,
+  },
+  infoItem: {
+    marginBottom: 16,
+  },
+  personnelGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginHorizontal: -8,
+  },
+  personnelItem: {
+    width: '50%',
+    paddingHorizontal: 8,
+    marginBottom: 16,
+  },
+  label: {
+    fontSize: 14,
+    color: '#6b7280',
+    marginBottom: 4,
+  },
+  value: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#1f2937',
+  },
+  checklistItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f9fafb',
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 8,
+  },
+  checkbox: {
+    width: 20,
+    height: 20,
+    borderWidth: 2,
+    borderColor: '#2563eb',
+    borderRadius: 4,
+    marginRight: 12,
+  },
+  checkboxChecked: {
+    backgroundColor: '#2563eb',
+  },
+  checklistText: {
+    fontSize: 16,
+    color: '#1f2937',
+  },
+  checklistTextCompleted: {
+    textDecorationLine: 'line-through',
+    color: '#6b7280',
+  },
+  formField: {
+    marginBottom: 16,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#d1d5db',
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 16,
+    backgroundColor: '#fff',
+    textAlignVertical: 'top',
+    minHeight: 100,
+  },
+});
 
 export default Abordaje;
