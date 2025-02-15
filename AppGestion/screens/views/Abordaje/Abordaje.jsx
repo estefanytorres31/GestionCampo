@@ -8,24 +8,21 @@ const { width } = Dimensions.get('window');
 
 const formatPERDate = (dateString) => {
   const date = new Date(dateString);
-  // Ajustar a la zona horaria de Perú (UTC-5)
   const peruDate = new Date(date.getTime() - (5 * 60 * 60 * 1000));
   return format(peruDate, "dd/MM/yyyy HH:mm", { locale: es });
 };
 
-const SectionTitle = ({ children, icon }) => (
+const SectionTitle = ({ children }) => (
   <View style={styles.sectionTitleContainer}>
     <View style={styles.sectionTitleContent}>
-      {icon && <Text style={styles.sectionIcon}>{icon}</Text>}
       <Text style={styles.sectionTitle}>{children}</Text>
     </View>
     <View style={styles.sectionTitleUnderline} />
   </View>
 );
 
-const DetailItem = ({ label, value, icon }) => (
+const DetailItem = ({ label, value }) => (
   <View style={styles.detailRow}>
-    {icon && <Text style={styles.detailIcon}>{icon}</Text>}
     <View style={styles.detailContent}>
       <Text style={styles.label}>{label}</Text>
       <Text style={styles.value}>{value || 'No especificado'}</Text>
@@ -178,29 +175,34 @@ const Abordaje = ({ route }) => {
 
         {/* Información General */}
         <View style={styles.card}>
-          <SectionTitle icon="ℹ️">Información General</SectionTitle>
+          <SectionTitle>Información General</SectionTitle>
           <View style={styles.cardContent}>
             <DetailItem 
-              icon="📅"
               label="Fecha de Abordaje" 
               value={formatPERDate(abordaje.fecha)}
             />
             <DetailItem 
-              icon="👨‍✈️"
               label="Motorista" 
               value={abordaje.motorista}
             />
             <DetailItem 
-              icon="👨‍💼"
               label="Supervisor" 
               value={abordaje.supervisor}
+            />
+            <DetailItem 
+              label="Técnico" 
+              value={abordaje.id_tecnico}
+            />
+            <DetailItem 
+              label="Ayudante" 
+              value={abordaje.id_ayudante}
             />
           </View>
         </View>
 
         {/* Detalles del Sistema */}
         <View style={styles.card}>
-          <SectionTitle icon="🔧">Detalles del Sistema</SectionTitle>
+          <SectionTitle>Detalles del Sistema</SectionTitle>
           {ordenTrabajoSistemaDetalle.map((detalle, index) => (
             <View key={index} style={styles.systemDetailCard}>
               <View style={styles.cardContent}>
@@ -237,25 +239,23 @@ const Abordaje = ({ route }) => {
         {/* Galería de Fotos */}
         {ordenTrabajoSistemaFoto.length > 0 && (
           <View style={styles.card}>
-            <SectionTitle icon="📸">Galería de Fotos</SectionTitle>
+            <SectionTitle>Galería de Fotos</SectionTitle>
             <PhotoGallery photos={ordenTrabajoSistemaFoto} />
           </View>
         )}
 
         {/* Partes de Trabajo */}
         <View style={styles.card}>
-          <SectionTitle icon="📋">Partes de Trabajo</SectionTitle>
+          <SectionTitle>Partes de Trabajo</SectionTitle>
           {ordenTrabajoPartes.map((parte, index) => (
             <View key={index} style={styles.workPartCard}>
               <StatusBadge status={parte.estado} />
               <View style={styles.workPartContent}>
                 <DetailItem 
-                  icon="📅"
                   label="Creado" 
                   value={formatPERDate(parte.creado_en)}
                 />
                 <DetailItem 
-                  icon="🔄"
                   label="Actualizado" 
                   value={formatPERDate(parte.actualizado_en)}
                 />
@@ -267,6 +267,7 @@ const Abordaje = ({ route }) => {
     </SafeAreaView>
   );
 };
+
 
 const styles = StyleSheet.create({
   container: {
@@ -346,10 +347,6 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#F0F2F5',
   },
-  detailIcon: {
-    fontSize: 20,
-    marginRight: 12,
-  },
   detailContent: {
     flex: 1,
   },
@@ -362,6 +359,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#1A1A1A',
     fontWeight: '500',
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#1A1A1A',
   },
   statusBadge: {
     paddingHorizontal: 12,
