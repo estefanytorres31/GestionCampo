@@ -61,7 +61,7 @@ const Abordaje = ({ route }) => {
           />
           <DetailItem 
             label="Fecha de Abordaje" 
-            value={formatPERDate(abordaje.fecha)}
+            value={abordaje.fecha}
           />
           <DetailItem 
             label="Motorista" 
