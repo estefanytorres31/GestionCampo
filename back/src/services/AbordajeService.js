@@ -183,7 +183,27 @@ export const getAbordajeById = async (id) => {
   }
 
   const abordaje = await prisma.abordaje.findFirst({
-    where: { id: parseInt(id, 10), estado: true },
+    where: { id: parseInt(id) },
+    include: {
+      ordenTrabajoUsuario: {
+        include: {
+          orden_trabajo: {
+            include: {
+              orden_trabajo_sistemas: {
+                include: {
+                  detalle: true, // Obtiene detalles del sistema
+                  fotos: true, // Obtiene fotos del sistema
+                  orden_trabajo_parte: true, // Obtiene partes de la orden
+                },
+              },
+            },
+          },
+        },
+      },
+      ordenTrabajoSistemaDetalle: true, // Detalles del sistema relacionados al abordaje
+      ordenTrabajoSistemaFoto: true, // Fotos del sistema relacionadas al abordaje
+      ordenTrabajoPartes: true, // Partes de orden de trabajo relacionadas al abordaje
+    }
   });
 
   if (!abordaje) {

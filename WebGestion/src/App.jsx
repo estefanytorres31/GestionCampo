@@ -33,9 +33,6 @@ const AppContent = () => {
     return isAuth ? children : <Navigate to="/login" />;
   };
 
-  console.log("usuario", usuario);
-  console.log("roles", roles);
-
   const permissionsUsuario = getUniquePermissions(roles);
 
   const PrivateRouteWrapper = ({
@@ -44,11 +41,10 @@ const AppContent = () => {
   }) => {
     // Si el usuario tiene el permiso "Ver Todo", se le permite el acceso
     const hasVerTodo = permissionsUsuario.includes("Ver Todo");
-    console.log("hasVerTodo", permissionsUsuario)
-    console.log("ver Todo", hasVerTodo)
+
     const hasPermission =
-      hasVerTodo ||
-      authorizedPermissions.some((perm) => permissionsUsuario.includes(perm));
+    hasVerTodo ||
+    authorizedPermissions.some((perm) => permissionsUsuario.includes(perm));
     console.log("hasPermission", hasPermission)
     return hasPermission ? <Component /> : <Navigate to="/dashboard" />;
   };

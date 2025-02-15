@@ -5,12 +5,12 @@ const Table = ({ columns, data, render = {}, loading, error }) => {
   return (
     <table
       className="table w-full border-collapse"
-      style={{ backgroundColor: "inherit" }}
+      style={{ background: "inherit" }}
     >
       <thead>
         <tr
           style={{
-            backgroundColor: "var(--table-header-bg)",
+            background: "var(--table-header-bg)",
             color: "var(--table-header-text)",
           }}
         >

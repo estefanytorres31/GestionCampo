@@ -10,7 +10,8 @@ const prisma = new PrismaClient();
 export const createOrdenTrabajoSistema = async (data) => {
   const {
     id_orden_trabajo,
-    id_embarcacion_sistema, // Ahora se espera este campo
+    id_embarcacion_sistema,
+    id_abordaje,
     materiales,
     proximo_abordaje,
     fallas,
@@ -57,40 +58,48 @@ export const createOrdenTrabajoSistema = async (data) => {
     );
   }
 
+  // Verificar el abordaje si se proporciona
+  if (id_abordaje) {
+    const abordaje = await prisma.abordaje.findUnique({
+      where: { id: parseInt(id_abordaje) },
+    });
+    if (!abordaje) {
+      throw new Error(`No se encontró el Abordaje con ID ${id_abordaje}.`);
+    }
+  }
+
   // Verificar que la embarcación de la OrdenTrabajo coincida con la del EmbarcacionSistema
-  if (
-    ordenTrabajo.id_embarcacion !==
-    embarcacionSistema.embarcacion.id_embarcacion
-  ) {
+  if (ordenTrabajo.id_embarcacion !== embarcacionSistema.embarcacion.id_embarcacion) {
     throw new Error(
       "La embarcación asociada al EmbarcacionSistema no coincide con la de la Orden de Trabajo."
     );
   }
 
-  // Verificar si ya existe la orden con la combinación de id_orden_trabajo e id_embarcacion_sistema
-  const existente = await prisma.ordenTrabajoSistema.findFirst({
-    where: {
-      id_orden_trabajo,
-      id_embarcacion_sistema,
-    },
-  });
+  return await prisma.$transaction(async (prisma) => {
+    // Verificar si ya existe la orden
+    const existente = await prisma.ordenTrabajoSistema.findFirst({
+      where: {
+        id_orden_trabajo,
+        id_embarcacion_sistema,
+      },
+      include: {
+        detalle: true,
+      },
+    });
 
-  if (existente) {
-    if (existente.estado !== "inactivo") {
-      throw new Error(
-        "Ya existe una orden de trabajo para este EmbarcacionSistema."
-      );
-    } else {
-      // Reactivar si estaba inactivo: se actualiza además id_abordaje a null por defecto
+    if (existente) {
+      if (existente.estado !== "inactivo") {
+        throw new Error(
+          "Ya existe una orden de trabajo activa para este EmbarcacionSistema."
+        );
+      }
+
+      // Reactivar orden existente
       const ordenReactivada = await prisma.ordenTrabajoSistema.update({
         where: { id_orden_trabajo_sistema: existente.id_orden_trabajo_sistema },
         data: {
           estado: "pendiente",
           actualizado_en: fechaActual,
-          materiales: materiales || existente.materiales,
-          proximo_abordaje: proximo_abordaje || existente.proximo_abordaje,
-          observaciones: observaciones || existente.observaciones,
-          id_abordaje: null, // Se establece por defecto en null
         },
         include: {
           fotos: true,
@@ -105,35 +114,45 @@ export const createOrdenTrabajoSistema = async (data) => {
         },
       });
 
-      // Reactivar o crear detalles si existen
-      if (fallas || causas || solucion || pendiente) {
-        await prisma.ordenTrabajoSistemaDetalle.upsert({
+      // Actualizar o crear detalles
+      if (existente.detalle) {
+        await prisma.ordenTrabajoSistemaDetalle.update({
           where: {
             id_orden_trabajo_sistema: existente.id_orden_trabajo_sistema,
           },
-          update: {
-            fallas: fallas || existente.detalle?.fallas,
-            causas: causas || existente.detalle?.causas,
-            solucion: solucion || existente.detalle?.solucion,
-            pendiente: pendiente || existente.detalle?.pendiente,
-            actualizado_en: fechaActual,
+          data: {
+            id_abordaje: id_abordaje ? parseInt(id_abordaje) : null,
+            observaciones: observaciones || existente.detalle.observaciones,
+            materiales: materiales || existente.detalle.materiales,
+            proximo_abordaje: proximo_abordaje || existente.detalle.proximo_abordaje,
+            fallas: fallas || existente.detalle.fallas,
+            causas: causas || existente.detalle.causas,
+            solucion: solucion || existente.detalle.solucion,
+            pendiente: pendiente || existente.detalle.pendiente,
           },
-          create: {
+        });
+      } else {
+        await prisma.ordenTrabajoSistemaDetalle.create({
+          data: {
             id_orden_trabajo_sistema: existente.id_orden_trabajo_sistema,
+            id_abordaje: id_abordaje ? parseInt(id_abordaje) : null,
+            observaciones,
+            materiales,
+            proximo_abordaje,
             fallas,
             causas,
             solucion,
             pendiente,
-            creado_en: fechaActual,
           },
         });
       }
 
-      // Manejar fotos si son provistas
-      if (fotos && fotos.length > 0) {
+      // Manejar fotos
+      if (fotos?.length > 0) {
         await prisma.ordenTrabajoSistemaFoto.createMany({
           data: fotos.map((url) => ({
             id_orden_trabajo_sistema: existente.id_orden_trabajo_sistema,
+            id_abordaje: id_abordaje ? parseInt(id_abordaje) : null,
             url,
             creado_en: fechaActual,
           })),
@@ -142,63 +161,55 @@ export const createOrdenTrabajoSistema = async (data) => {
 
       return ordenReactivada;
     }
-  }
 
-  // Crear nueva orden de trabajo, estableciendo id_abordaje en null por defecto
-  const nuevaOrdenTrabajoSistema = await prisma.ordenTrabajoSistema.create({
-    data: {
-      id_orden_trabajo,
-      id_embarcacion_sistema, // Usamos la nueva FK
-      id_abordaje: null, // Se asigna null por defecto
-      estado: "pendiente",
-      avance: 0,
-      materiales,
-      proximo_abordaje,
-      observaciones,
-      creado_en: fechaActual,
-      actualizado_en: fechaActual,
-      // Crear detalles si aplica
-      detalle:
-        fallas || causas || solucion || pendiente
-          ? {
-              create: {
-                fallas,
-                causas,
-                solucion,
-                pendiente,
-                creado_en: fechaActual,
-              },
-            }
-          : undefined,
-    },
-    include: {
-      fotos: true,
-      detalle: true,
-      embarcacion_sistema: {
-        include: {
-          sistema: true,
-          embarcacion: true,
+    // Crear nueva orden de trabajo
+    const nuevaOrden = await prisma.ordenTrabajoSistema.create({
+      data: {
+        id_orden_trabajo,
+        id_embarcacion_sistema,
+        estado: "pendiente",
+        detalle: {
+          create: {
+            id_abordaje: id_abordaje ? parseInt(id_abordaje) : null,
+            observaciones,
+            materiales,
+            proximo_abordaje,
+            fallas,
+            causas,
+            solucion,
+            pendiente,
+            avance: 0,
+          },
         },
       },
-      orden_trabajo: true,
-    },
-  });
-
-  // Si hay fotos, asociarlas
-  if (fotos && fotos.length > 0) {
-    await prisma.ordenTrabajoSistemaFoto.createMany({
-      data: fotos.map((url) => ({
-        id_orden_trabajo_sistema:
-          nuevaOrdenTrabajoSistema.id_orden_trabajo_sistema,
-        url,
-        creado_en: fechaActual,
-      })),
+      include: {
+        fotos: true,
+        detalle: true,
+        embarcacion_sistema: {
+          include: {
+            sistema: true,
+            embarcacion: true,
+          },
+        },
+        orden_trabajo: true,
+      },
     });
-  }
 
-  return nuevaOrdenTrabajoSistema;
+    // Crear fotos si existen
+    if (fotos?.length > 0) {
+      await prisma.ordenTrabajoSistemaFoto.createMany({
+        data: fotos.map((url) => ({
+          id_orden_trabajo_sistema: nuevaOrden.id_orden_trabajo_sistema,
+          id_abordaje: id_abordaje ? parseInt(id_abordaje) : null,
+          url,
+          creado_en: fechaActual,
+        })),
+      });
+    }
+
+    return nuevaOrden;
+  });
 };
-
 /**
  * Obtener todas las órdenes de trabajo activas
  */
@@ -323,140 +334,114 @@ export const getOrdenTrabajoSistemaById = async (id) => {
  * Actualizar una OrdenTrabajoSistema
  */
 export const updateOrdenTrabajoSistema = async (id, data) => {
-  const { 
-    avance, 
-    materiales, 
-    proximo_abordaje, 
-    fallas, 
-    causas, 
-    solucion, 
-    pendiente, 
+  const {
+    avance,
+    materiales,
+    proximo_abordaje,
+    fallas,
+    causas,
+    solucion,
+    pendiente,
     fotos,
     observaciones,
-    id_abordaje
+    id_abordaje,
   } = data;
 
-  const fechaActualizacion = getUTCTime(new Date().toISOString());
+  const fechaActual = getUTCTime(new Date().toISOString());
 
-  // Iniciar una transacción para asegurar la integridad de los datos
   return await prisma.$transaction(async (prisma) => {
-    // 1. Primero obtenemos las fotos actuales para eliminarlas de Cloudinary
-    const fotosActuales = await prisma.ordenTrabajoSistemaFoto.findMany({
-      where: { id_orden_trabajo_sistema: parseInt(id) }
+    // Validar que la orden exista
+    const ordenExistente = await prisma.ordenTrabajoSistema.findUnique({
+      where: { id_orden_trabajo_sistema: parseInt(id) },
+      include: { fotos: true },
     });
 
-    // 2. Eliminar las fotos existentes de Cloudinary y la base de datos
-    if (fotosActuales.length > 0) {
-      // Eliminar de Cloudinary
-      for (const foto of fotosActuales) {
-        try {
-          await deleteImage(foto.url);
-        } catch (error) {
-          console.error("Error eliminando imagen de Cloudinary:", error);
-          // Continuamos aunque falle la eliminación en Cloudinary
-        }
-      }
-
-      // Eliminar registros de la base de datos
-      await prisma.ordenTrabajoSistemaFoto.deleteMany({
-        where: { id_orden_trabajo_sistema: parseInt(id) }
-      });
+    if (!ordenExistente) {
+      throw new Error(`No se encontró la orden con ID ${id}`);
     }
 
-    // 3. Actualizar los datos básicos de la orden
-    const updateData = {
-      ...(avance !== undefined && { avance: parseInt(avance) }), 
-      ...(materiales !== undefined && { materiales }),
-      ...(proximo_abordaje !== undefined && { proximo_abordaje }),
-      ...(observaciones !== undefined && { observaciones }),
-      actualizado_en: fechaActualizacion,
-    };
-
-    // 3.1. Validar y actualizar id_abordaje si se proporciona
+    // Validar id_abordaje si se proporciona
     if (id_abordaje !== undefined) {
       if (id_abordaje !== null) {
-        const parsedAbordajeId = parseInt(id_abordaje, 10);
-        if (isNaN(parsedAbordajeId)) {
-          throw new Error("El id_abordaje debe ser un número válido o null.");
-        }
-        // Validar que el Abordaje exista y esté activo
-        const abordajeExistente = await prisma.abordaje.findFirst({
-          where: { id: parsedAbordajeId, estado: true },
+        const abordaje = await prisma.abordaje.findUnique({
+          where: { id: parseInt(id_abordaje) },
         });
-        if (!abordajeExistente) {
-          throw new Error(`No se encontró un Abordaje activo con id ${parsedAbordajeId}.`);
+        if (!abordaje) {
+          throw new Error(`No se encontró el Abordaje con ID ${id_abordaje}`);
         }
-        updateData.id_abordaje = parsedAbordajeId;
-      } else {
-        updateData.id_abordaje = null;
       }
     }
 
-    // 4. Actualizar la orden
-    let ordenActualizada = await prisma.ordenTrabajoSistema.update({
-      where: { id_orden_trabajo_sistema: parseInt(id) },
-      data: updateData,
-    });
-
-    // 5. Actualizar o crear detalle si aplica
-    if (fallas || causas || solucion || pendiente) {
-      await prisma.ordenTrabajoSistemaDetalle.upsert({
-        where: { id_orden_trabajo_sistema: ordenActualizada.id_orden_trabajo_sistema },
-        update: {
-          ...(fallas !== undefined && { fallas }),
-          ...(causas !== undefined && { causas }),
-          ...(solucion !== undefined && { solucion }),
-          ...(pendiente !== undefined && { pendiente }),
-          actualizado_en: fechaActualizacion,
-        },
-        create: {
-          id_orden_trabajo_sistema: ordenActualizada.id_orden_trabajo_sistema,
-          fallas: fallas || null,
-          causas: causas || null,
-          solucion: solucion || null,
-          pendiente: pendiente || null,
-          creado_en: fechaActualizacion,
+        // Crear nuevas fotos si existen
+        if (fotos?.length > 0) {
+          await prisma.ordenTrabajoSistemaFoto.createMany({
+            data: fotos.map((url) => ({
+              id_orden_trabajo_sistema: parseInt(id),
+              id_abordaje: id_abordaje ? parseInt(id_abordaje) : null,
+              url,
+              creado_en: fechaActual,
+            })),
+          });
         }
-      });
-    }
 
-    // 6. Agregar las nuevas fotos si existen
-    if (fotos && fotos.length > 0) {
-      await prisma.ordenTrabajoSistemaFoto.createMany({
-        data: fotos.map((url) => ({
-          id_orden_trabajo_sistema: ordenActualizada.id_orden_trabajo_sistema,
-          url,
-          creado_en: fechaActualizacion,
-        })),
-      });
-    }
 
-    // 7. Obtener la orden actualizada con todas las relaciones y las nuevas fotos
-    ordenActualizada = await prisma.ordenTrabajoSistema.findUnique({
+    // Actualizar orden y detalles
+    const ordenActualizada = await prisma.ordenTrabajoSistema.update({
       where: { id_orden_trabajo_sistema: parseInt(id) },
-      include: { 
+      data: {
+        actualizado_en: fechaActual,
+        detalle: {
+          upsert: {
+            create: {
+              id_abordaje: id_abordaje ? parseInt(id_abordaje) : null,
+              observaciones,
+              avance: avance !== undefined ? parseInt(avance) : 0,
+              materiales,
+              proximo_abordaje,
+              fallas,
+              causas,
+              solucion,
+              pendiente,
+            },
+            update: {
+              id_abordaje: id_abordaje !== undefined ? (id_abordaje ? parseInt(id_abordaje) : null) : undefined,
+              ...(observaciones !== undefined && { observaciones }),
+              ...(avance !== undefined && { avance: parseInt(avance) }),
+              ...(materiales !== undefined && { materiales }),
+              ...(proximo_abordaje !== undefined && { proximo_abordaje }),
+              ...(fallas !== undefined && { fallas }),
+              ...(causas !== undefined && { causas }),
+              ...(solucion !== undefined && { solucion }),
+              ...(pendiente !== undefined && { pendiente }),
+            },
+          },
+        },
+      },
+      include: {
         fotos: true,
         detalle: true,
         embarcacion_sistema: {
           include: {
             sistema: true,
-            embarcacion: true
-          }
+            embarcacion: true,
+          },
         },
         orden_trabajo: {
           include: {
             tipo_trabajo: true,
             embarcacion: true,
             puerto: true,
-            jefe_asigna: true
-          }
-        }
+            jefe_asigna: true,
+          },
+        },
       },
     });
+
 
     return ordenActualizada;
   });
 };
+
 
 /**
  * Desactivar una OrdenTrabajoSistema

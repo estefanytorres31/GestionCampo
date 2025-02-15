@@ -24,6 +24,7 @@
     "jspdf": "^2.5.2",
     "jspdf-autotable": "^3.8.4",
     "leaflet": "^1.9.4",
+    "lucide-react": "^0.475.0",
     "node-xlsx": "^0.24.0",
     "pigeon-maps": "^0.22.1",
     "react": "^18.3.1",

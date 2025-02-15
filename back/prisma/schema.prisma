@@ -378,7 +378,8 @@ model Abordaje {
   puerto                   Puerto                @relation("AbordajePuerto", fields: [id_puerto], references: [id_puerto], onDelete: NoAction, onUpdate: Cascade)
 
   // Relaciones a registros del sistema y partes realizados durante este abordaje
-  ordenTrabajoSistemas     OrdenTrabajoSistema[] @relation("AbordajeSistema")
+  ordenTrabajoSistemaDetalle     OrdenTrabajoSistemaDetalle[] @relation("AbordajeSistemaDetalle")
+  ordenTrabajoSistemaFoto        OrdenTrabajoSistemaFoto[]    @relation("AbordajeSistemaFotos")
   ordenTrabajoPartes       OrdenTrabajoParte[]   @relation("AbordajeParte")
 
   // Se garantiza un único abordaje por día para cada usuario asignado a la OT
@@ -390,12 +391,7 @@ model OrdenTrabajoSistema {
   id_orden_trabajo_sistema  Int                 @id @default(autoincrement())
   id_orden_trabajo          Int
   id_embarcacion_sistema    Int
-
   estado                    EstadoOrdenTrabajo  @default(pendiente)
-  observaciones             String?
-  avance                    Int                 @default(0)
-  materiales                String?
-  proximo_abordaje          String?
   creado_en                 DateTime            @default(now())
   actualizado_en            DateTime            @updatedAt
 
@@ -408,9 +404,6 @@ model OrdenTrabajoSistema {
   fotos                     OrdenTrabajoSistemaFoto[]
   orden_trabajo_parte       OrdenTrabajoParte[]
 
-  // Relación opcional con el abordaje en el que se completó este registro
-  id_abordaje               Int?                
-  abordaje                  Abordaje?           @relation("AbordajeSistema", fields: [id_abordaje], references: [id])
   
   @@unique([id_orden_trabajo, id_embarcacion_sistema], name: "orden_trabajo_sistema_unique")
   @@map("orden_trabajo_sistema")
@@ -421,11 +414,20 @@ model OrdenTrabajoSistema {
 model OrdenTrabajoSistemaDetalle {
   id_detalle               Int  @id @default(autoincrement()) @map("id_detalle")
   id_orden_trabajo_sistema Int  @unique @map("id_orden_trabajo_sistema")
+  observaciones             String?
+  avance                    Int                 @default(0)
+  materiales                String?
+  proximo_abordaje          String?
   fallas                   String? @map("fallas")
   causas                   String? @map("causas")
   solucion                 String? @map("solucion")
   pendiente                String? @map("pendiente")
   creado_en                DateTime @default(now()) @map("creado_en")
+
+
+    // Relación opcional con el abordaje en el que se completó este registro
+  id_abordaje               Int?                
+  abordaje                  Abordaje?           @relation("AbordajeSistemaDetalle", fields: [id_abordaje], references: [id])
 
   orden_trabajo_sistema    OrdenTrabajoSistema @relation(fields: [id_orden_trabajo_sistema], references: [id_orden_trabajo_sistema], onDelete: Cascade, onUpdate: Cascade)
 
@@ -437,6 +439,10 @@ model OrdenTrabajoSistemaFoto {
   id_orden_trabajo_sistema  Int     @map("id_orden_trabajo_sistema")
   url                       String  @map("url") // URL de la foto
   creado_en                 DateTime @default(now()) @map("creado_en")
+
+      // Relación opcional con el abordaje en el que se completó este registro
+  id_abordaje               Int?                
+  abordaje                  Abordaje?           @relation("AbordajeSistemaFotos", fields: [id_abordaje], references: [id])
 
   orden_trabajo_sistema     OrdenTrabajoSistema @relation(fields: [id_orden_trabajo_sistema], references: [id_orden_trabajo_sistema], onDelete: Cascade, onUpdate: Cascade)
 

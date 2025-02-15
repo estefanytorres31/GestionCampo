@@ -130,8 +130,9 @@ const CollapsibleSistema = ({ sistema, selectedParts, onTogglePart, comments, on
 };
 
 const SistemasPartes = ({ route, navigation }) => {
-  const { idOrden } = route.params;
-  const { obtenerOrdenTrabajoSistemaByOrdenTrabajo, actualizarOrdenTrabajoSistema } = useOrdenTrabajoSistema();
+  const { idOrden, idAbordaje } = route.params;
+  console.log('Abordaje',idAbordaje)
+  const { obtenerOrdenTrabajoSistemaByOrdenTrabajo, actualizarEstadoOrdenTrabajoSistema } = useOrdenTrabajoSistema();
   const { actualizarOrdenTrabajoParte } = useOrdenTrabajoParte();
   const {actualizarOrdenTrabajo, obtenerOrdenTrabajo}=useOrdenTrabajo();
   const { getTipoTrabajoPorID } = useTipoTrabajo();
@@ -202,13 +203,17 @@ const SistemasPartes = ({ route, navigation }) => {
   
     try {
       // Update all newly selected parts
+      console.log(idAbordaje)
       await Promise.all(newlySelectedParts.map(id_orden_trabajo_parte => 
         actualizarOrdenTrabajoParte(
-          id_orden_trabajo_parte, 
+          id_orden_trabajo_parte,
           "completado", 
-          comments[id_orden_trabajo_parte] || null
+          comments[id_orden_trabajo_parte] || null,
+          idAbordaje
         )
       ));
+
+      
   
       // Check each system's completion status
       const sistemasEstados = data.map((sistema) => {
@@ -226,7 +231,7 @@ const SistemasPartes = ({ route, navigation }) => {
       // Update systems status
       await Promise.all(
         sistemasEstados.map(({ id_orden_trabajo_sistema, allCompleted }) => 
-          actualizarOrdenTrabajoSistema(
+          actualizarEstadoOrdenTrabajoSistema(
             id_orden_trabajo_sistema, 
             allCompleted ? "completado" : "en_progreso"
           )
@@ -269,7 +274,7 @@ const SistemasPartes = ({ route, navigation }) => {
         [{ 
           text: "OK",
           onPress: () => {
-            navigation.navigate(destino, { selectedParts: newlySelectedParts, id_orden_trabajo_sistema: data[0].id_orden_trabajo_sistema });
+            navigation.navigate(destino, { selectedParts: newlySelectedParts, id_orden_trabajo_sistema: data[0].id_orden_trabajo_sistema, idAbordaje });
           }
         }]
       );
@@ -277,7 +282,7 @@ const SistemasPartes = ({ route, navigation }) => {
       Alert.alert("Error", "Hubo un problema al guardar las partes seleccionadas.");
       console.error('Error saving parts:', error);
     }
-  }, [selectedParts, comments, data, actualizarOrdenTrabajoParte, actualizarOrdenTrabajoSistema, actualizarOrdenTrabajo, navigation]);
+  }, [selectedParts, comments, data, actualizarOrdenTrabajoParte, actualizarEstadoOrdenTrabajoSistema, actualizarOrdenTrabajo, navigation]);
 
   if (loading) {
     return (

@@ -45,7 +45,7 @@ const Header = ({ title }) => {
             className="flex flex-row items-center gap-2 text-[var(--primary-text)] hover:text-[var(--button-hover-bg)]/50 transition-colors duration-300 cursor-pointer"
           >
             <MdKeyboardArrowLeft size={30} className="min-w-max" />
-            <h1 className="text-2xl font-bold">{title}</h1>
+            <h1 className="text-2xl">{title}</h1>
           </button>
         ) : (
           <h1
