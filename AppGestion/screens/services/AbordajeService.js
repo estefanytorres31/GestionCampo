@@ -35,3 +35,13 @@ export const getAbordajeByOrdenTrabajo=async(id)=>{
         throw new Error("Error al obtener abordajes por orden de trabajo");
     }
 }
+
+export const getAbordajeById=async(id)=>{
+    try{
+        const response=await apiClient.get(`/abordaje/${id}`);
+        return response.data;
+    }catch(e){
+        console.error(e);
+        throw new Error("Error al obtener abordajes por orden de trabajo");
+    }
+}

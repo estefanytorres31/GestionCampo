@@ -1,285 +1,119 @@
-import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  TextInput,
-  StyleSheet,
-  SafeAreaView,
-} from 'react-native';
+import React, { useState, useEffect } from "react";
+import { View, Text, ScrollView, StyleSheet, SafeAreaView, Image } from "react-native";
+import useAbordaje from "../../hooks/Abordaje/useAbordaje";
 
-const Abordaje = () => {
-  const reportData = {
-    tipoTrabajo: "Mantenimiento Preventivo",
-    codigoOT: "OT-2025-001",
-    empresa: "Naviera Pacífico S.A.",
-    embarcacion: "Pacific Star",
-    puerto: "Puerto Principal",
-    fecha: new Date().toLocaleDateString(),
-    hora: new Date().toLocaleTimeString(),
-    tecnico: "Solangel Tisza",
-    ayudante: "Estefany Torres",
-    motorista: "Yoiber Sanchez",
-    supervisor: "Sergio Dueñas"
-  };
+const Abordaje = ({ route }) => {
+  const { idAbordaje } = route.params;
+  const { obtenerAbordajePorId } = useAbordaje();
+  const [abordaje, setAbordaje] = useState(null);
 
-  const [checklist, setChecklist] = useState([
-    { id: 1, descripcion: "Verificación inicial de equipos", completado: false },
-    { id: 2, descripcion: "Inspección de sistemas", completado: false },
-    { id: 3, descripcion: "Pruebas de funcionamiento", completado: false }
-  ]);
+  useEffect(() => {
+    const fetchAbordaje = async () => {
+      try {
+        console.log("Obteniendo abordaje con ID:", idAbordaje);
+        const response = await obtenerAbordajePorId(idAbordaje);
 
-  const [formData, setFormData] = useState({
-    estadoGeneral: "",
-    observaciones: "",
-    recomendaciones: ""
-  });
+        if (!response || !response.data) {
+          throw new Error("El abordaje no fue encontrado");
+        }
 
-  const handleChecklistToggle = (id) => {
-    setChecklist(checklist.map(item => 
-      item.id === id ? { ...item, completado: !item.completado } : item
-    ));
-  };
+        setAbordaje(response.data);
+      } catch (error) {
+        console.error("Error al obtener los detalles del abordaje:", error.response?.data || error.message);
+      }
+    };
 
-  const handleFormChange = (field, value) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  };
+    if (idAbordaje) {
+      fetchAbordaje();
+    } else {
+      console.error("Error: idAbordaje no está definido.");
+    }
+  }, [idAbordaje]);
 
-  const handleDownloadPDF = () => {
-    console.log("Descargando PDF...", { reportData, checklist, formData });
-  };
+  if (!abordaje) {
+    return (
+      <View style={styles.loadingContainer}>
+        <Text style={styles.loadingText}>Cargando detalles del abordaje...</Text>
+      </View>
+    );
+  }
+
+  // Extraer datos correctamente de la estructura de `abordaje`
+  const { 
+    id, 
+    fecha, 
+    motorista, 
+    supervisor, 
+    id_puerto, 
+    ordenTrabajoUsuario 
+  } = abordaje;
+
+  const { 
+    orden_trabajo 
+  } = ordenTrabajoUsuario || {};
+
+  const { 
+    codigo, 
+    estado, 
+    orden_trabajo_sistemas = [] 
+  } = orden_trabajo || {};
+
+  const detalles = orden_trabajo_sistemas.map(sistema => sistema.detalle).filter(Boolean);
+  const fotos = orden_trabajo_sistemas.flatMap(sistema => sistema.fotos || []);
 
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.scrollView}>
         <View style={styles.card}>
-          {/* Header */}
-          <View style={styles.header}>
-            <Text style={styles.title}>{reportData.tipoTrabajo}</Text>
-          
+          <Text style={styles.title}>Detalles del Abordaje</Text>
+          <Text style={styles.label}>Código OT: <Text style={styles.value}>{codigo}</Text></Text>
+          <Text style={styles.label}>Puerto ID: <Text style={styles.value}>{id_puerto}</Text></Text>
+          <Text style={styles.label}>Técnico: <Text style={styles.value}>{ordenTrabajoUsuario?.rol_en_orden || "No disponible"}</Text></Text>
+          <Text style={styles.label}>Supervisor: <Text style={styles.value}>{supervisor}</Text></Text>
+          <Text style={styles.label}>Motorista: <Text style={styles.value}>{motorista}</Text></Text>
+          <Text style={styles.label}>Fecha: <Text style={styles.value}>{new Date(fecha).toLocaleString()}</Text></Text>
+          <Text style={styles.label}>Estado: <Text style={styles.value}>{estado}</Text></Text>
+        </View>
 
-
-          
-          </View>
-
-          {/* Main Information */}
-          <View style={styles.infoGrid}>
-            <InfoItem label="Código OT" value={reportData.codigoOT} />
-            <InfoItem label="Empresa" value={reportData.empresa} />
-            <InfoItem label="Embarcación" value={reportData.embarcacion} />
-            <InfoItem label="Puerto" value={reportData.puerto} />
-            <InfoItem label="Fecha y Hora" value={`${reportData.fecha} - ${reportData.hora}`} />
-          </View>
-
-          {/* Personnel Section */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Personal Asignado</Text>
-            <View style={styles.personnelGrid}>
-              <PersonnelItem label="Técnico" value={reportData.tecnico} />
-              <PersonnelItem label="Ayudante" value={reportData.ayudante} />
-              <PersonnelItem label="Motorista" value={reportData.motorista} />
-              <PersonnelItem label="Supervisor" value={reportData.supervisor} />
-            </View>
-          </View>
-
-          {/* Checklist Section */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Checklist de Trabajo</Text>
-            {checklist.map((item) => (
-              <TouchableOpacity
-                key={item.id}
-                style={styles.checklistItem}
-                onPress={() => handleChecklistToggle(item.id)}
-              >
-                <View style={[
-                  styles.checkbox,
-                  item.completado && styles.checkboxChecked
-                ]} />
-                <Text style={[
-                  styles.checklistText,
-                  item.completado && styles.checklistTextCompleted
-                ]}>
-                  {item.descripcion}
-                </Text>
-              </TouchableOpacity>
+        {detalles.length > 0 && (
+          <View style={styles.card}>
+            <Text style={styles.subTitle}>Detalles del Sistema</Text>
+            {detalles.map((detalle, index) => (
+              <View key={index} style={styles.detailItem}>
+                <Text style={styles.label}>Observaciones: <Text style={styles.value}>{detalle.observaciones}</Text></Text>
+                <Text style={styles.label}>Avance: <Text style={styles.value}>{detalle.avance}%</Text></Text>
+                <Text style={styles.label}>Materiales: <Text style={styles.value}>{detalle.materiales}</Text></Text>
+                <Text style={styles.label}>Próximo abordaje: <Text style={styles.value}>{detalle.proximo_abordaje}</Text></Text>
+              </View>
             ))}
           </View>
+        )}
 
-          {/* System Form */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Formulario del Sistema</Text>
-            <FormField
-              label="Estado General"
-              value={formData.estadoGeneral}
-              onChange={(value) => handleFormChange('estadoGeneral', value)}
-            />
-            <FormField
-              label="Observaciones"
-              value={formData.observaciones}
-              onChange={(value) => handleFormChange('observaciones', value)}
-            />
-            <FormField
-              label="Recomendaciones"
-              value={formData.recomendaciones}
-              onChange={(value) => handleFormChange('recomendaciones', value)}
-            />
+        {fotos.length > 0 && (
+          <View style={styles.card}>
+            <Text style={styles.subTitle}>Fotos del Abordaje</Text>
+            {fotos.map((foto, index) => (
+              <Image key={index} source={{ uri: foto.url }} style={styles.image} />
+            ))}
           </View>
-        </View>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
 };
 
-// Helper Components
-const InfoItem = ({ label, value }) => (
-  <View style={styles.infoItem}>
-    <Text style={styles.label}>{label}</Text>
-    <Text style={styles.value}>{value}</Text>
-  </View>
-);
-
-const PersonnelItem = ({ label, value }) => (
-  <View style={styles.personnelItem}>
-    <Text style={styles.label}>{label}</Text>
-    <Text style={styles.value}>{value}</Text>
-  </View>
-);
-
-const FormField = ({ label, value, onChange }) => (
-  <View style={styles.formField}>
-    <Text style={styles.label}>{label}</Text>
-    <TextInput
-      style={styles.input}
-      value={value}
-      onChangeText={onChange}
-      placeholder={`Ingrese ${label.toLowerCase()}...`}
-      multiline
-      numberOfLines={3}
-    />
-  </View>
-);
-
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f3f4f6',
-  },
-  scrollView: {
-    flex: 1,
-  },
-  card: {
-    backgroundColor: 'white',
-    margin: 16,
-    borderRadius: 12,
-    padding: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingBottom: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e5e7eb',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#1f2937',
-  },
-  downloadButton: {
-    backgroundColor: '#2563eb',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 8,
-  },
-  buttonText: {
-    color: 'white',
-    fontWeight: '500',
-  },
-  infoGrid: {
-    marginTop: 16,
-  },
-  section: {
-    marginTop: 24,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#1f2937',
-    marginBottom: 12,
-  },
-  infoItem: {
-    marginBottom: 16,
-  },
-  personnelGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginHorizontal: -8,
-  },
-  personnelItem: {
-    width: '50%',
-    paddingHorizontal: 8,
-    marginBottom: 16,
-  },
-  label: {
-    fontSize: 14,
-    color: '#6b7280',
-    marginBottom: 4,
-  },
-  value: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: '#1f2937',
-  },
-  checklistItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#f9fafb',
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 8,
-  },
-  checkbox: {
-    width: 20,
-    height: 20,
-    borderWidth: 2,
-    borderColor: '#2563eb',
-    borderRadius: 4,
-    marginRight: 12,
-  },
-  checkboxChecked: {
-    backgroundColor: '#2563eb',
-  },
-  checklistText: {
-    fontSize: 16,
-    color: '#1f2937',
-  },
-  checklistTextCompleted: {
-    textDecorationLine: 'line-through',
-    color: '#6b7280',
-  },
-  formField: {
-    marginBottom: 16,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#d1d5db',
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
-    backgroundColor: '#fff',
-    textAlignVertical: 'top',
-    minHeight: 100,
-  },
+  container: { flex: 1, backgroundColor: "#f5f5f5" },
+  scrollView: { padding: 16 },
+  card: { backgroundColor: "#fff", padding: 20, borderRadius: 10, elevation: 3, marginBottom: 20 },
+  title: { fontSize: 20, fontWeight: "bold", marginBottom: 10, textAlign: "center" },
+  subTitle: { fontSize: 18, fontWeight: "bold", marginBottom: 10 },
+  label: { fontSize: 16, fontWeight: "bold", marginTop: 10 },
+  value: { fontSize: 16, fontWeight: "400", color: "#555" },
+  loadingContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
+  loadingText: { fontSize: 16, color: "#666" },
+  detailItem: { marginBottom: 10, padding: 10, backgroundColor: "#f9f9f9", borderRadius: 8 },
+  image: { width: "100%", height: 200, marginTop: 10, borderRadius: 8 }
 });
 
 export default Abordaje;

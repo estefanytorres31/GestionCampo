@@ -14,6 +14,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import useOrdenTrabajo from "../../hooks/OrdenTrabajo/useOrdenTrabajo";
 import useEmpresa from "../../hooks/Empresa/useEmpresa";
 import useEmbarcacion from "../../hooks/Embarcacion/useEmbarcacion";
+import useAbordaje from "../../hooks/Abordaje/useAbordaje";
 import Filtrado from "../../components/Filtrado";
 
 const { width } = Dimensions.get('window');
@@ -54,7 +55,8 @@ const EstadoBadge = ({ estado }) => {
     );
 };
 
-function Historial({ navigation }) {
+function Historial({ route,navigation }) {
+    const {obtenerAbordajePorId} = useAbordaje();
     const { TrabajosCompletado, loading, error } = useOrdenTrabajo();
     const [ordenes, setOrdenes] = useState([]);
     const [filtroEstado, setFiltroEstado] = useState(null);

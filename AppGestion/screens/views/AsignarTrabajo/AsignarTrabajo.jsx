@@ -50,9 +50,7 @@ const AsignarTrabajoScreen = ({ route, navigation }) => {
     loadAbordajes();
   }, [ordenTrabajo.id_orden_trabajo]);
 
-  const handleAbordajeSelect = (idAbordaje) => {
-    navigation.navigate("Abordaje", { idAbordaje });
-  };
+
   
     const handleSeleccionarTecnico = () => {
       navigation.navigate("SeleccionarTecnico", {
@@ -132,6 +130,12 @@ const AsignarTrabajoScreen = ({ route, navigation }) => {
         console.log(error);
       }
     };
+
+    const handleAbordajeSelect = (idAbordaje) => {
+      console.log("ID del abordaje seleccionado:", idAbordaje);
+      navigation.navigate("Abordaje", { idAbordaje });
+    };
+    
     
 
   return (
@@ -150,17 +154,18 @@ const AsignarTrabajoScreen = ({ route, navigation }) => {
           <View style={styles.field}>
             <Text style={styles.label}>Abordajes Anteriores</Text>
             <View style={styles.abordajesContainer}>
-              {abordajes.map((abordaje, index) => (
-                <TouchableOpacity
-                  key={abordaje.id_abordaje}
-                  style={styles.abordajeButton}
-                  onPress={() => handleAbordajeSelect(abordaje.id_abordaje)}
-                >
-                  <Text style={styles.abordajeButtonText}>
-                    Abordaje {index + 1}
-                  </Text>
-                </TouchableOpacity>
-              ))}
+            {abordajes.map((abordaje, index) => (
+  <TouchableOpacity
+    key={index} 
+    style={styles.abordajeButton}
+    onPress={() => {
+      console.log("Abordaje seleccionado:", abordaje);
+      handleAbordajeSelect(abordaje.id);
+    }}
+  >
+    <Text style={styles.abordajeButtonText}>Abordaje {index + 1}</Text>
+  </TouchableOpacity>
+))}
             </View>
           </View>
         </View>
