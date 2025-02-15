@@ -98,7 +98,6 @@ const CreatePermissionModal = ({ isOpen, onClose, onSuccess }) => {
         try {
           const response = await axiosInstance.get(`/permiso/ar?recursoId=${selectedResource}`);
           const permisos = response.data.data;
-          console.log("permisos permisos", permisos)
           // Asegurarse de que el filtro se aplique correctamente
           const existing = permisos
             .filter((p) => Number(p.recursoId) === Number(selectedResource))

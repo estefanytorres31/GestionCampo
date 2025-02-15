@@ -120,8 +120,6 @@ export const getAllUsers = async (filters, page = 1, pageSize = 10) => {
         .map((r) => r.rol.nombre_rol), // Extraemos solo el nombre del rol
     }));
   
-    console.log("usuariosTransformados", usuariosTransformados);
-  
     return {
       total,
       page,
@@ -259,12 +257,9 @@ export const updateUser = async (
 
   // Si se proporciona una nueva contraseña, la hasheamos y la incluimos
   if (contrasena_hash && contrasena_hash.trim().length > 0) {
-    console.log("FUNCIONA")
     const hashedPassword = await bcrypt.hash(contrasena_hash, 10);
     updatedData.contrasena_hash = hashedPassword;
   }
-  console.log("FUNCIONA2")
-
   const updatedUser = await prisma.usuario.update({
     where: { id: userId },
     data: updatedData,

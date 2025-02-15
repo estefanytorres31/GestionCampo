@@ -51,7 +51,6 @@ const Login = () => {
         navigate("/dashboard");
       }
     } catch (error) {
-      console.log("error", error);
       setErrorMessage(error.response?.data?.message || "Error al iniciar sesión.");
     }
   };

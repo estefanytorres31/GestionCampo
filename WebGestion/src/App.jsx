@@ -45,7 +45,6 @@ const AppContent = () => {
     const hasPermission =
     hasVerTodo ||
     authorizedPermissions.some((perm) => permissionsUsuario.includes(perm));
-    console.log("hasPermission", hasPermission)
     return hasPermission ? <Component /> : <Navigate to="/dashboard" />;
   };
 

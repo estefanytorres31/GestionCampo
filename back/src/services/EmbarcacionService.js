@@ -24,7 +24,6 @@ export const createEmbarcacion = async (nombre, empresa_id) => {
   const fecha_creacion = new Date(todayISO);
 
   // Verificar si la empresa existe y está activa
-  console.log('empresa_id:', empresa_id);
   const empresa = await prisma.empresa.findUnique({
     where: { 
       id: parseInt(empresa_id, 10)

@@ -192,7 +192,6 @@ const AssignRolesForm = ({ onSuccess, onCancel }) => {
         );
     
         if (refetchAssigned) await refetchAssigned();
-        console.log("hola")
         await updateLocalStorageRolesFromSelectedRoles(selectedRoles, refreshUsuario);
     
         if (onSuccess) onSuccess();

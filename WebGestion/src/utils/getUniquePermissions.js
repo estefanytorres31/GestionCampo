@@ -10,9 +10,6 @@ export function getUniquePermissions(roles) {
         ? role.permisos.map((permission) => permission.nombre)
         : []
     ) || [];
-  console.log(
-    "Array.from(new Set(allPermissions))",
-    Array.from(new Set(allPermissions))
-  );
+
   return Array.from(new Set(allPermissions));
 }
