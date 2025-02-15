@@ -6,7 +6,9 @@ import Button from "@/components/Button";
 // Extraemos el componente de input y lo memorizamos para que no se recree en cada render.
 const FilterInput = memo(({ label, type, placeholder, value, onChange }) => (
   <div className="flex flex-col gap-2 w-full">
-    <label className="text-sm text-gray-600">{label}</label>
+    <label className="text-sm"
+      style={{ color: "var(--primary-text)" }}
+    >{label}</label>
     <Input
       type={type}
       placeholder={placeholder}
@@ -85,8 +87,7 @@ const FiltroAsistencias = ({ filters, setFilters }) => {
 
         {/* Segunda fila de filtros */}
         <div
-          className="flex flex-col w-full gap-2 border-t-2"
-          style={{ borderColor: "var(--primary-bg)" }}
+          className="flex flex-col w-full gap-2"
         >
           <div className="flex w-full gap-2">
             <FilterInput
