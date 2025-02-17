@@ -170,12 +170,12 @@ const Usuarios = () => {
             ]}
           />
           <div className="flex gap-2 flex-col justify-end md:flex-row">
-            <Button color="filter" onClick={exportToPDF}>
+            {/* <Button color="filter" onClick={exportToPDF}>
               <VscFilePdf size={20} className="min-w-max" />
             </Button>
             <Button color="filter" onClick={exportToExcel}>
               <RiFileExcel2Fill size={20} className="min-w-max" />
-            </Button>
+            </Button> */}
           </div>
           <Button onClick={() => setIsCreateModalOpen(true)}>
             <IoAdd size={20} className="min-w-max" />

@@ -1,9 +1,7 @@
 import React, { memo } from "react";
 import { Input } from "@/components/Input";
 import { X } from "lucide-react";
-import Button from "@/components/Button";
 
-// Extraemos el componente de input y lo memorizamos para que no se recree en cada render.
 const FilterInput = memo(({ label, type, placeholder, value, onChange }) => (
   <div className="flex flex-col gap-2 w-full">
     <label className="text-sm"
