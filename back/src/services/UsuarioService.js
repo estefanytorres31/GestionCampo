@@ -17,6 +17,9 @@ export const createUsuario = async (
     );
   }
 
+  const PEPPER = process.env.PEPPER_SECRET || "fallbackPepper";
+  const SALT_ROUNDS = parseInt(process.env.BCRYPT_SALT_ROUNDS) || 12;
+
   const usuarioExistente = await prisma.usuario.findUnique({
     where: { nombre_usuario },
   });
@@ -42,8 +45,9 @@ export const createUsuario = async (
     return usuarioReactivado;
   }
 
-  // Si el usuario no existe, lo creamos desde cero
-  const hashedPassword = await bcrypt.hash(contrasena_hash, 10);
+  const saltedPassword = contrasena_hash + PEPPER;
+  const salt = await bcrypt.genSalt(SALT_ROUNDS);
+  const hashedPassword = await bcrypt.hash(saltedPassword, salt);
   const fecha_creacion = getUTCTime(new Date().toISOString());
 
   const newUser = await prisma.usuario.create({
@@ -58,7 +62,17 @@ export const createUsuario = async (
     },
   });
 
-  return newUser;
+  const  usuario= {
+    id: newUser.id,
+    nombre_usuario: newUser.nombre_usuario,
+    nombre_completo: newUser.nombre_completo,
+    email: newUser.email,
+    estado: newUser.estado,
+    creado_en: newUser.creado_en,
+    actualizado_en: newUser.actualizado_en,
+  }
+
+  return usuario;
 };
 
 // 🔹 Obtener todos los usuarios con sus roles (filtrando roles inactivos y mostrando solo el nombre del rol)
@@ -222,12 +236,11 @@ export const updateUser = async (
   contrasena_hash
 ) => {
   const userId = parseInt(id, 10);
-
   if (isNaN(userId)) {
     throw new Error("El ID proporcionado no es válido.");
   }
 
-  // Buscamos el usuario a actualizar
+  // Buscar usuario
   const user = await prisma.usuario.findUnique({
     where: { id: userId },
   });
@@ -236,20 +249,23 @@ export const updateUser = async (
     throw new Error(`El usuario con ID ${id} no existe o está inactivo.`);
   }
 
-  // Verificamos si el nuevo nombre de usuario ya está en uso por otro usuario
-  if (nombre_usuario !== user.nombre_usuario) {
-    const existingUser = await prisma.usuario.findUnique({
-      where: { nombre_usuario },
+  // Verificar si el nuevo nombre de usuario ya existe en otro usuario
+  if (nombre_usuario && nombre_usuario !== user.nombre_usuario) {
+    const existingUser = await prisma.usuario.findFirst({
+      where: {
+        nombre_usuario,
+        id: { not: user.id }, 
+      },
     });
-
+  
     if (existingUser) {
       throw new Error("El nombre de usuario ya está en uso por otro usuario.");
     }
-  }
+  }  
 
   const fecha_actualizacion = getUTCTime(new Date().toISOString());
 
-  // Preparamos los datos a actualizar
+  // Construir datos a actualizar
   const updatedData = {
     nombre_usuario,
     nombre_completo,
@@ -257,20 +273,35 @@ export const updateUser = async (
     actualizado_en: fecha_actualizacion,
   };
 
-  // Si se proporciona una nueva contraseña, la hasheamos y la incluimos
+  // ⚡ Hashear la contraseña si se proporciona una nueva
   if (contrasena_hash && contrasena_hash.trim().length > 0) {
-    console.log("FUNCIONA")
-    const hashedPassword = await bcrypt.hash(contrasena_hash, 10);
-    updatedData.contrasena_hash = hashedPassword;
+    const PEPPER = process.env.PEPPER_SECRET || "fallbackPepper";
+    const SALT_ROUNDS = parseInt(process.env.BCRYPT_SALT_ROUNDS) || 12;
+    
+    // Verificar si la nueva contraseña es diferente de la actual
+    const passwordMatches = await bcrypt.compare(
+      contrasena_hash + PEPPER,
+      user.contrasena_hash
+    );
+    
+    if (!passwordMatches) {
+      const saltedPassword = contrasena_hash + PEPPER;
+      const salt = await bcrypt.genSalt(SALT_ROUNDS);
+      const hashedPassword = await bcrypt.hash(saltedPassword, salt);
+      updatedData.contrasena_hash = hashedPassword;
+    } else {
+      throw new Error("La nueva contraseña no puede ser igual a la actual.");
+    }
   }
-  console.log("FUNCIONA2")
 
+  // Actualizar usuario en la base de datos
   const updatedUser = await prisma.usuario.update({
     where: { id: userId },
     data: updatedData,
   });
 
-  const usuario = {
+  // Retornar usuario actualizado (sin la contraseña)
+  return {
     id: updatedUser.id,
     nombre_usuario: updatedUser.nombre_usuario,
     nombre_completo: updatedUser.nombre_completo,
@@ -278,8 +309,6 @@ export const updateUser = async (
     creado_en: updatedUser.creado_en,
     actualizado_en: updatedUser.actualizado_en,
   };
-
-  return usuario;
 };
 
 // Eliminar (desactivar) un usuario

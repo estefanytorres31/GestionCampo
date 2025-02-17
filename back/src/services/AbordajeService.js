@@ -193,7 +193,9 @@ export const getAbordajeById = async (id) => {
                 include: {
                   detalle: true, // Obtiene detalles del sistema
                   fotos: true, // Obtiene fotos del sistema
-                  orden_trabajo_parte: true, // Obtiene partes de la orden
+                  orden_trabajo_parte: {
+                    include: { parte: true}
+                  }, // Obtiene partes de la orden
                 },
               },
             },
@@ -202,7 +204,9 @@ export const getAbordajeById = async (id) => {
       },
       ordenTrabajoSistemaDetalle: true, // Detalles del sistema relacionados al abordaje
       ordenTrabajoSistemaFoto: true, // Fotos del sistema relacionadas al abordaje
-      ordenTrabajoPartes: true, // Partes de orden de trabajo relacionadas al abordaje
+      ordenTrabajoPartes: true, 
+      puerto: true, // Puerto relacionado al abordaje
+      
     }
   });
 
