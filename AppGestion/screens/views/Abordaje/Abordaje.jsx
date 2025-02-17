@@ -8,21 +8,24 @@ const { width } = Dimensions.get('window');
 
 const formatPERDate = (dateString) => {
   const date = new Date(dateString);
+  // Ajustar a la zona horaria de Perú (UTC-5)
   const peruDate = new Date(date.getTime() - (5 * 60 * 60 * 1000));
   return format(peruDate, "dd/MM/yyyy HH:mm", { locale: es });
 };
 
-const SectionTitle = ({ children }) => (
+const SectionTitle = ({ children, icon }) => (
   <View style={styles.sectionTitleContainer}>
     <View style={styles.sectionTitleContent}>
+      {icon && <Text style={styles.sectionIcon}>{icon}</Text>}
       <Text style={styles.sectionTitle}>{children}</Text>
     </View>
     <View style={styles.sectionTitleUnderline} />
   </View>
 );
 
-const DetailItem = ({ label, value }) => (
+const DetailItem = ({ label, value, icon }) => (
   <View style={styles.detailRow}>
+    {icon && <Text style={styles.detailIcon}>{icon}</Text>}
     <View style={styles.detailContent}>
       <Text style={styles.label}>{label}</Text>
       <Text style={styles.value}>{value || 'No especificado'}</Text>
@@ -126,13 +129,14 @@ const PhotoGallery = ({ photos }) => {
 
 const Abordaje = ({ route }) => {
   const { idAbordaje } = route.params;
+  console.log(idAbordaje);
   const { obtenerAbordajePorId } = useAbordaje();
   const [abordaje, setAbordaje] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
   
   useEffect(() => {
     fetchAbordaje();
-  }, [idAbordaje, obtenerAbordajePorId]);
+  }, [idAbordaje]);
 
   const fetchAbordaje = async () => {
     try {
@@ -155,8 +159,17 @@ const Abordaje = ({ route }) => {
     );
   }
 
-  const { ordenTrabajoUsuario, ordenTrabajoSistemaDetalle, ordenTrabajoSistemaFoto, ordenTrabajoPartes } = abordaje;
-  const { orden_trabajo } = ordenTrabajoUsuario;
+  const { 
+    ordenTrabajoUsuario, 
+    ordenTrabajoSistemaDetalle, 
+    ordenTrabajoSistemaFoto, 
+    ordenTrabajoPartes,
+    puerto 
+  } = abordaje;
+  
+  const { orden_trabajo, usuario } = ordenTrabajoUsuario;
+  const { embarcacion_sistema } = ordenTrabajoPartes[0].orden_trabajo_sistema;
+  const { sistema, embarcacion } = embarcacion_sistema;
 
   return (
     <SafeAreaView style={styles.container}>
@@ -175,34 +188,49 @@ const Abordaje = ({ route }) => {
 
         {/* Información General */}
         <View style={styles.card}>
-          <SectionTitle>Información General</SectionTitle>
+          <SectionTitle icon="ℹ️">Información General</SectionTitle>
           <View style={styles.cardContent}>
-            <DetailItem 
-              label="Fecha de Abordaje" 
-              value={formatPERDate(abordaje.fecha)}
-            />
-            <DetailItem 
-              label="Motorista" 
-              value={abordaje.motorista}
-            />
-            <DetailItem 
-              label="Supervisor" 
-              value={abordaje.supervisor}
-            />
-            <DetailItem 
-              label="Técnico" 
-              value={abordaje.id_tecnico}
-            />
-            <DetailItem 
-              label="Ayudante" 
-              value={abordaje.id_ayudante}
-            />
+          <DetailItem 
+            icon="👤"
+            label="Responsable" 
+            value={usuario.nombre_completo}
+          />
+          <DetailItem 
+            icon="🚢"
+            label="Embarcación" 
+            value={embarcacion.nombre}
+          />
+          <DetailItem 
+            icon="⚙️"
+            label="Sistema" 
+            value={sistema.nombre_sistema}
+          />
+          <DetailItem 
+            icon="🏠"
+            label="Puerto" 
+            value={puerto.nombre}
+          />
+          <DetailItem 
+            icon="📅"
+            label="Fecha de Abordaje" 
+            value={formatPERDate(abordaje.fecha)}
+          />
+          <DetailItem 
+            icon="👨‍✈️"
+            label="Motorista" 
+            value={abordaje.motorista}
+          />
+          <DetailItem 
+            icon="👨‍💼"
+            label="Supervisor" 
+            value={abordaje.supervisor}
+          />
           </View>
         </View>
 
         {/* Detalles del Sistema */}
         <View style={styles.card}>
-          <SectionTitle>Detalles del Sistema</SectionTitle>
+          <SectionTitle icon="🔧">Detalles del Sistema</SectionTitle>
           {ordenTrabajoSistemaDetalle.map((detalle, index) => (
             <View key={index} style={styles.systemDetailCard}>
               <View style={styles.cardContent}>
@@ -239,25 +267,22 @@ const Abordaje = ({ route }) => {
         {/* Galería de Fotos */}
         {ordenTrabajoSistemaFoto.length > 0 && (
           <View style={styles.card}>
-            <SectionTitle>Galería de Fotos</SectionTitle>
+            <SectionTitle icon="📸">Galería de Fotos</SectionTitle>
             <PhotoGallery photos={ordenTrabajoSistemaFoto} />
           </View>
         )}
 
         {/* Partes de Trabajo */}
         <View style={styles.card}>
-          <SectionTitle>Partes de Trabajo</SectionTitle>
+          <SectionTitle icon="📋">Partes de Trabajo</SectionTitle>
           {ordenTrabajoPartes.map((parte, index) => (
             <View key={index} style={styles.workPartCard}>
               <StatusBadge status={parte.estado} />
               <View style={styles.workPartContent}>
                 <DetailItem 
-                  label="Creado" 
-                  value={formatPERDate(parte.creado_en)}
-                />
-                <DetailItem 
-                  label="Actualizado" 
-                  value={formatPERDate(parte.actualizado_en)}
+                  icon="🔧"
+                  label="Parte" 
+                  value={parte.parte.nombre_parte}
                 />
               </View>
             </View>
@@ -267,7 +292,6 @@ const Abordaje = ({ route }) => {
     </SafeAreaView>
   );
 };
-
 
 const styles = StyleSheet.create({
   container: {
@@ -347,6 +371,10 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#F0F2F5',
   },
+  detailIcon: {
+    fontSize: 20,
+    marginRight: 12,
+  },
   detailContent: {
     flex: 1,
   },
@@ -359,11 +387,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#1A1A1A',
     fontWeight: '500',
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#1A1A1A',
   },
   statusBadge: {
     paddingHorizontal: 12,

@@ -1,8 +1,10 @@
-import React,{useState, useEffect} from "react";
+import React,{useState, useEffect, useContext} from "react";
 import AbordajeContext from "./AbordajeContext";
+import AuthContext from '../Auth/AuthContext';
 import { createAbordaje, getAllAbordajes,  getAbordajeByOrdenTrabajo, getAbordajeById } from "../../services/AbordajeService";
 
 const AbordajeProvider = ({ children }) => {
+    const {isAuth}=useContext(AuthContext);
     const [abordajes, setAbordajes] = useState([]);
     const [abordaje, setAbordaje] = useState(null);
 
@@ -29,7 +31,9 @@ const AbordajeProvider = ({ children }) => {
     }
 
     useEffect(()=>{
+        if(isAuth){
         obtenerTodosLosAbordajes();
+        }
     },[]);
 
     const obtenerAbordajePorOrdenTrabajo=async(id)=>{

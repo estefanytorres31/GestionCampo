@@ -14,13 +14,36 @@ import useUsuarioTecnico from "../../hooks/UsuarioTecnico/useUsuarioTecnico";
 
 const SeleccionarAyudantesScreen = ({ route, navigation }) => {
   const { ayudantesSeleccionados, onSelect, usuarioExcluido = [] } = route.params;
-  const { usuariosTecnicos } = useUsuarioTecnico();
+  const { usuariosTecnicos, setUsuariosTecnicos } = useUsuarioTecnico();
 
   const [busqueda, setBusqueda] = useState("");
   const [seleccionados, setSeleccionados] = useState(ayudantesSeleccionados || []);
 
   const fadeAnim = React.useRef(new Animated.Value(0)).current;
   const scaleAnim = React.useRef(new Animated.Value(0.95)).current;
+
+  useEffect(() => {
+    const cargarTecnicos = async () => {
+      setIsLoading(true);
+      try {
+        const response = await getAllUsuariosByRol(2); // Asumiendo que el rol 2 es para técnicos
+        if (response) {
+          setUsuariosTecnicos(response);
+        }
+      } catch (error) {
+        console.error('Error al cargar técnicos:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    cargarTecnicos();
+
+    // Efecto de limpieza cuando el componente se desmonta
+    return () => {
+      // Si necesitas hacer alguna limpieza cuando el componente se desmonte
+    };
+  }, [navigation, ayudantesSeleccionados]); 
 
   useEffect(() => {
     Animated.parallel([
