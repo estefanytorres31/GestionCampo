@@ -149,6 +149,14 @@ const AsignarTrabajoScreen = ({ route, navigation }) => {
         <View style={styles.divider} />
       </View>
 
+      <View style={styles.card}>
+        <View style={styles.field}>
+          <Text style={styles.label}>Código de OT</Text>
+          <Text style={styles.infoText}>{codigoOT}</Text>
+        </View>
+
+      </View>
+
       {abordajes.length > 0 && (
         <View style={styles.card}>
           <View style={styles.field}>
@@ -171,13 +179,7 @@ const AsignarTrabajoScreen = ({ route, navigation }) => {
         </View>
       )}
 
-      <View style={styles.card}>
-        <View style={styles.field}>
-          <Text style={styles.label}>Código de OT</Text>
-          <Text style={styles.infoText}>{codigoOT}</Text>
-        </View>
 
-      </View>
 
       <View style={styles.card}>
         <View style={styles.field}>
