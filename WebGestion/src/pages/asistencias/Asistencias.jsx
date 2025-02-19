@@ -42,6 +42,21 @@ const asistenciasFilters = [
   },
 ];
 
+// Función para extraer solo la hora de una cadena ISO mediante corte
+const extractTimeFromISO = (isoString) => {
+  if (!isoString) return "N/A";
+  try {
+    // Formato esperado: 2025-02-19T15:52:44.705Z
+    // Cortar solo la parte de la hora (15:52:44)
+    const timePart = isoString.split('T')[1]; // Obtiene la parte después de T
+    const timeWithoutMillis = timePart.split('.')[0]; // Elimina los milisegundos
+    return timeWithoutMillis;
+  } catch (error) {
+    console.error("Error extrayendo la hora:", error);
+    return "Formato inválido";
+  }
+};
+
 const Asistencias = () => {
   // Estado de filtros y de paginación
   const [filters, setFilters] = useState(
@@ -68,7 +83,12 @@ const Asistencias = () => {
     const doc = new jsPDF();
     doc.text("Reporte de Asistencias", 14, 10);
     const tableData = asistencias.map((row) =>
-      asistenciasColumns.map((col) => row[col.uuid] || "N/A")
+      asistenciasColumns.map((col) => {
+        if (col.uuid === "fecha_hora_entrada" || col.uuid === "fecha_hora_salida") {
+          return extractTimeFromISO(row[col.uuid]);
+        }
+        return row[col.uuid] || "N/A";
+      })
     );
     doc.autoTable({
       head: [asistenciasColumns.map((col) => col.name)],
@@ -86,7 +106,12 @@ const Asistencias = () => {
     }
     const header = asistenciasColumns.map((col) => col.name);
     const body = asistencias.map((row) =>
-      asistenciasColumns.map((col) => row[col.uuid] || "N/A")
+      asistenciasColumns.map((col) => {
+        if (col.uuid === "fecha_hora_entrada" || col.uuid === "fecha_hora_salida") {
+          return extractTimeFromISO(row[col.uuid]);
+        }
+        return row[col.uuid] || "N/A";
+      })
     );
     const sheetData = [header, ...body];
     const xlsx = require("node-xlsx");
@@ -147,9 +172,9 @@ const Asistencias = () => {
             nombre_completo: (row) => row.nombre_completo,
             fecha: (row) => row.fecha,
             fecha_hora_entrada: (row) =>
-              new Date(row.fecha_hora_entrada).toLocaleTimeString(),
+              extractTimeFromISO(row.fecha_hora_entrada),
             fecha_hora_salida: (row) =>
-              new Date(row.fecha_hora_salida).toLocaleTimeString(),
+              extractTimeFromISO(row.fecha_hora_salida),
             embarcacion: (row) => row.embarcacion || "Sin embarcación",
             horas_trabajo: (row) => row.horas_trabajo || "⏳ En proceso",
             ubicacion: (row) => (
