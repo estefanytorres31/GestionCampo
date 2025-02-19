@@ -4,8 +4,9 @@ import { createToken } from "../utils/Jwt.js";
 import { getPeruTime, getUTCTime } from "../utils/Time.js";
 
 const prisma = new PrismaClient();
+const PEPPER = process.env.PEPPER_SECRET || "fallbackPepper"; // Usa un valor por defecto si no está definido
 
-export const login = async (nombreUsuario, contrasena_hash) => {
+export const login = async (nombreUsuario, contrasena) => {
   // Buscar el usuario por nombre_usuario y obtener sus roles activos
   const usuario = await prisma.usuario.findUnique({
     where: { nombre_usuario: nombreUsuario },
@@ -21,8 +22,11 @@ export const login = async (nombreUsuario, contrasena_hash) => {
     throw new Error("Usuario no encontrado");
   }
 
-  // Verificar la contraseña
-  const valido = bcrypt.compareSync(contrasena_hash, usuario.contrasena_hash);
+  // 🔑 Agregar el pepper a la contraseña ingresada
+  const contrasenaPepper = contrasena + PEPPER;
+
+  // Verificar la contraseña con bcrypt.compare
+  const valido = await bcrypt.compare(contrasenaPepper, usuario.contrasena_hash);
   if (!valido) {
     throw new Error("Contraseña incorrecta");
   }
@@ -69,7 +73,7 @@ export const login = async (nombreUsuario, contrasena_hash) => {
     roles,
     rolesPorId,
     theme: userTheme,
-  };
+  };
 };
 
 export const logout = async (token) => {
