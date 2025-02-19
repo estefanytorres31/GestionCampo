@@ -47,10 +47,23 @@ const extractTimeFromISO = (isoString) => {
   if (!isoString) return "N/A";
   try {
     // Formato esperado: 2025-02-19T15:52:44.705Z
-    // Cortar solo la parte de la hora (15:52:44)
-    const timePart = isoString.split('T')[1]; // Obtiene la parte después de T
-    const timeWithoutMillis = timePart.split('.')[0]; // Elimina los milisegundos
-    return timeWithoutMillis;
+    // Primero extraemos la parte de la hora
+    const timePart = isoString.split('T')[1];
+    const timeWithoutMillis = timePart.split('.')[0]; // "15:52:44"
+    
+    // Separamos horas, minutos y segundos
+    const [hours, minutes, seconds] = timeWithoutMillis.split(':').map(Number);
+    
+    // Determinamos si es AM o PM
+    const period = hours >= 12 ? 'p.m.' : 'a.m.';
+    
+    // Convertimos a formato 12 horas
+    const displayHours = hours % 12 || 12; // Convertir 0 a 12
+    
+    // Formateamos la hora final con ceros a la izquierda si es necesario
+    const formattedTime = `${displayHours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')} ${period}`;
+    
+    return formattedTime;
   } catch (error) {
     console.error("Error extrayendo la hora:", error);
     return "Formato inválido";
