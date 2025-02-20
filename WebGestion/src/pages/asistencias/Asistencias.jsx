@@ -206,8 +206,8 @@ const Asistencias = () => {
                 // Si es técnico, solo muestra "⏳ En proceso"
                 if (isTecnico) {
                   return (
-                    <span className="text-amber-600 font-medium flex items-center">
-                      ⏳ En proceso
+                    <span className="text-amber-900 font-medium flex items-center">
+                      ⌛ En proceso
                     </span>
                   );
                 }
