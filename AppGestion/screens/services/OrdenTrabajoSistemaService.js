@@ -45,7 +45,6 @@ export const updateOrdenTrabajoSistema = async(id_orden_trabajo_sistema, data)=>
             data,
             config
         );
-        console.log('Back:', response.data);
         return response.data;
     } catch (error) {
         throw new Error(`Error al actualizar la orden de trabajo sistema: ${error.message}`);

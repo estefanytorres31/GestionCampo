@@ -12,6 +12,7 @@ import {
   Alert,
   Pressable,
   Modal,
+  ActivityIndicator
 } from 'react-native';
 import { Camera, Image as ImageIcon, Plus, Save, Percent } from 'lucide-react-native';
 import * as ImagePicker from 'expo-image-picker';
@@ -24,6 +25,7 @@ const PROGRESS_VALUES = [0, 25, 50, 75, 90, 100];
 const MaintenanceForm = ({route, navigation}) => {
   const {id_orden_trabajo_sistema, idAbordaje}=route.params;
   const {role}=useAuth();
+  const [loading, setLoading]=useState(false);
   const [formData, setFormData] = useState({
     material: '',
     observations: '',
@@ -96,6 +98,8 @@ const MaintenanceForm = ({route, navigation}) => {
         return;
     }
 
+    setLoading(true);
+
     try {
         const formDataToSend = new FormData();
         
@@ -121,14 +125,12 @@ const MaintenanceForm = ({route, navigation}) => {
             formDataToSend.append('imagenes', imageFile);
         }
 
-        console.log('Sending FormData:', formDataToSend);
         
         const result = await actualizarOrdenTrabajoSistemaCompleta(
             id_orden_trabajo_sistema,
             formDataToSend
         );
 
-        console.log('Response:', result);
 
         Alert.alert(
             'Éxito',
@@ -151,6 +153,9 @@ const MaintenanceForm = ({route, navigation}) => {
             'Error',
             'No se pudieron guardar los datos. Por favor intente nuevamente.'
         );
+    }
+    finally{
+      setLoading(false);
     }
 };
 const ProgressPicker = () => (
@@ -289,9 +294,16 @@ const ProgressPicker = () => (
         <TouchableOpacity 
           style={styles.saveButton}
           onPress={handleSave}
+          disabled={loading}
         >
+      {loading ? (
+        <ActivityIndicator size="small" color="#ffffff" />
+      ) : (
+        <>
           <Save size={24} color="#ffffff" />
           <Text style={styles.saveButtonText}>Guardar</Text>
+        </>
+      )}
         </TouchableOpacity>
         <ProgressPicker />
       </ScrollView>

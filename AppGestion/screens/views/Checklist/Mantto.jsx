@@ -9,6 +9,7 @@ import useTipoTrabajo from "../../hooks/TipoTrabajo/useTipoTabajo";
 const CollapsibleSistema = ({ sistema, selectedParts, onTogglePart, comments, onCommentChange, onSaveSystem }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [animation] = useState(new Animated.Value(0));
+  const[loading, setLoading]=useState(false);
 
   const toggleExpand = useCallback(() => {
     const toValue = isExpanded ? 0 : 1;
@@ -42,7 +43,7 @@ const CollapsibleSistema = ({ sistema, selectedParts, onTogglePart, comments, on
     );
   };
 
-  const handleSaveSystem = () => {
+  const handleSaveSystem = async() => {
     const selectedPartsForSystem = sistema.partes
       .filter(parte => selectedParts[parte.id_orden_trabajo_parte] && parte.estado_parte !== "completado")
       .map(parte => ({
@@ -54,8 +55,16 @@ const CollapsibleSistema = ({ sistema, selectedParts, onTogglePart, comments, on
       Alert.alert("Advertencia", "Por favor seleccione al menos una parte nueva para este sistema.");
       return;
     }
-
-    onSaveSystem(sistema.id_orden_trabajo_sistema, selectedPartsForSystem);
+    try {
+      setLoading(true); // Activa el loader antes de la operación
+      await onSaveSystem(sistema.id_orden_trabajo_sistema, selectedPartsForSystem);
+      //Alert.alert("Éxito", "El sistema ha sido guardado correctamente.");
+    } catch (error) {
+      //Alert.alert("Error", "Hubo un problema al guardar el sistema.");
+      console.error(error);
+    } finally {
+      setLoading(false); // Desactiva el loader después de la operación
+    }
   };
 
   return (
@@ -119,9 +128,16 @@ const CollapsibleSistema = ({ sistema, selectedParts, onTogglePart, comments, on
             style={styles.saveButton} 
             onPress={handleSaveSystem}
             activeOpacity={0.8}
+            disabled={loading}
           >
+                {loading ? (
+                    <ActivityIndicator size="small" color="#ffffff" />
+                  ) : (
+                    <>
             <Save size={24} color="#ffffff" />
             <Text style={styles.saveButtonText}>Guardar Sistema</Text>
+            </>
+          )}
           </TouchableOpacity>
         </View>
       )}
@@ -131,7 +147,6 @@ const CollapsibleSistema = ({ sistema, selectedParts, onTogglePart, comments, on
 
 const SistemasPartes = ({ route, navigation }) => {
   const { idOrden, idAbordaje } = route.params;
-  console.log('Abordaje',idAbordaje)
   const { obtenerOrdenTrabajoSistemaByOrdenTrabajo, actualizarEstadoOrdenTrabajoSistema } = useOrdenTrabajoSistema();
   const { actualizarOrdenTrabajoParte } = useOrdenTrabajoParte();
   const {actualizarOrdenTrabajo, obtenerOrdenTrabajo}=useOrdenTrabajo();
@@ -146,7 +161,6 @@ const SistemasPartes = ({ route, navigation }) => {
     try {
       setLoading(true)
       const response = await obtenerOrdenTrabajoSistemaByOrdenTrabajo(idOrden)
-      console.log(response)
       if (!response || !Array.isArray(response)) {
         throw new Error("Formato de respuesta inválido")
       }
@@ -202,8 +216,6 @@ const SistemasPartes = ({ route, navigation }) => {
     }
   
     try {
-      // Update all newly selected parts
-      console.log(idAbordaje)
       await Promise.all(newlySelectedParts.map(id_orden_trabajo_parte => 
         actualizarOrdenTrabajoParte(
           id_orden_trabajo_parte,

@@ -7,21 +7,21 @@ const UsuarioTecnicoProvider = ({ children }) => {
     const [usuariosTecnicos, setUsuariosTecnicos] = useState([]);
     const { isAuth } = useContext(AuthContext);
 
+    const fetchUsuariosTecnicos = async () => {
+        try {
+            const response = await getAllUsuariosByRol(2); // Rol técnico
+            if (response) {
+                setUsuariosTecnicos(response.data);
+            } else {
+                console.log('No se encontraron usuarios técnicos.');
+            }
+        } catch (error) {
+            console.error('Error al cargar usuarios técnicos:', error);
+        }
+    };
+
     useEffect(() => {
         if (isAuth) {
-            const fetchUsuariosTecnicos = async () => {
-                try {
-                    const response = await getAllUsuariosByRol(2); // Rol técnico = 1
-                    if (response) {
-                        setUsuariosTecnicos(response.data);
-                        console.log('Usuarios técnicos cargados correctamente:', response.data);
-                    } else {
-                        console.log('No se encontraron usuarios técnicos.');
-                    }
-                } catch (error) {
-                    console.error('Error al cargar usuarios técnicos:', error);
-                }
-            };
             fetchUsuariosTecnicos();
         }
     }, [isAuth]);
@@ -44,7 +44,7 @@ const UsuarioTecnicoProvider = ({ children }) => {
     }
 
     return (
-        <UsuarioTecnicoContext.Provider value={{ usuariosTecnicos, setUsuariosTecnicos, getUsuarioById }}>
+        <UsuarioTecnicoContext.Provider value={{ usuariosTecnicos, setUsuariosTecnicos,fetchUsuariosTecnicos, getUsuarioById }}>
             {children}
         </UsuarioTecnicoContext.Provider>
     );

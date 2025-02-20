@@ -13,7 +13,6 @@ export const EmbarcacionProvider = ({ children }) => {
             setError(null);
             const data = await getEmbarcacionesByEmpresa(empresa_id);
             setEmbarcaciones(data);
-            console.log(data);
             return data;
         } catch (err) {
             setError(err.message || "Error al cargar las embarcaciones");

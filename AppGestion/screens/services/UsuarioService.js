@@ -1,8 +1,6 @@
 import apiClient from "../API/apiClient";
 
 export const getUserById = async (id) => {
-    console.log('Fetching user with ID:', id);
-
     try {
         const response = await apiClient.get(`/usuario/${id}`);
         

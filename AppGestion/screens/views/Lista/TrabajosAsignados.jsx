@@ -1,199 +1,352 @@
-import React, { useEffect } from "react";
-import { 
-    View, 
-    Text, 
-    TouchableOpacity, 
-    StyleSheet, 
-    ScrollView, 
-    ActivityIndicator,
-    Dimensions,
-    Animated 
-} from "react-native";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
-import useTrabajoAsignado from "../../hooks/TrabajoAsignado/useTrabajoAsignado";
-import { LinearGradient } from 'expo-linear-gradient';
+import React, { useState, useEffect } from "react";
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, ActivityIndicator } from "react-native";
+import Input from "../../components/Input";
+import Select from "../../components/Select";
+import useUsuarioTecnico from "../../hooks/UsuarioTecnico/useUsuarioTecnico";
+import usePuerto from "../../hooks/Puerto/usePuerto";
+import useOrdenTrabajo from "../../hooks/OrdenTrabajo/useOrdenTrabajo";
+import useOrdenTrabajoUsuario from "../../hooks/OrdenTrabajoUsuario/useOrdenTrabajoUsuario";
+import useAbordaje from "../../hooks/Abordaje/useAbordaje";
 
-const { width } = Dimensions.get('window');
+const AsignarTrabajoScreen = ({ route, navigation }) => {
+  const { codigoOT, ordenTrabajo } = route.params;
+  const { idAbordaje } = route.params 
+  const [puerto, setPuerto] = useState(null);
+  const [tecnico, setTecnico] = useState(null);
+  const [motorista, setMotorista] = useState("");
+  const [supervisor, setSupervisor] = useState("");
+  const [ayudantes, setAyudantes] = useState([]);
+  const [selectedAbordaje, setSelectedAbordaje] = useState(null);
+  const [abordajesOptions, setAbordajesOptions] = useState([]);
 
-const TrabajosAsignadosScreen = ({ navigation }) => {
-    const { trabajos, loading, error, fetchTrabajosAsignados } = useTrabajoAsignado();
+  const { crearAbordaje, obtenerAbordajePorOrdenTrabajo } = useAbordaje();
+  const { puertos } = usePuerto();
+  const { updateOT} = useOrdenTrabajo();
+  const { guardarOrdenTrabajoUsuario, asignarOrdenTrabajo } = useOrdenTrabajoUsuario();
+  const [abordajes, setAbordajes] = useState([]);
+  const [puertosOptions, setPuertosOptions] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-    useEffect(() => {
-        fetchTrabajosAsignados();
-    }, []);
+  // Load ports options
+  useEffect(() => {
+    const options = puertos.map((puerto) => ({
+      label: puerto.nombre,
+      value: puerto.id_puerto,
+    }));
+    setPuertosOptions(options);
+  }, [puertos]);
 
-    const handleTrabajoPress = (idOrden) => {
-        navigation.navigate("Mantto", { idOrden });
+  // Load abordajes options
+  useEffect(() => {
+    const loadAbordajes = async () => {
+      try {
+        const abordajesData = await obtenerAbordajePorOrdenTrabajo(ordenTrabajo.id_orden_trabajo);
+        if (abordajesData && abordajesData.length > 0) {
+          setAbordajes(abordajesData);
+        }
+      } catch (error) {
+        console.error("Error al cargar abordajes:", error);
+      }
+    };
+    loadAbordajes();
+  }, [ordenTrabajo.id_orden_trabajo]);
+
+
+  
+    const handleSeleccionarTecnico = () => {
+      navigation.navigate("SeleccionarTecnico", {
+        tecnicoSeleccionado: tecnico,
+        onSelect: (nuevoTecnico) => setTecnico(nuevoTecnico),
+        usuariosExcluidos: ayudantes.map((a) => a.id),
+      });
+    };
+  
+    const handleSeleccionarAyudantes = () => {
+      navigation.navigate("SeleccionarAyudantes", {
+        ayudantesSeleccionados: ayudantes,
+        onSelect: (nuevosAyudantes) => setAyudantes(nuevosAyudantes),
+        usuarioExcluido: tecnico ? [tecnico.id] : [],
+      });
+    };
+  
+    const handleGuardar = async () => {
+      if (!puerto) {
+        alert("Debe seleccionar un puerto.");
+        return;
+      }
+    
+      try {
+        setLoading(true);
+    
+        const responseOT = await updateOT(ordenTrabajo.id_orden_trabajo, puerto);
+    
+        if (responseOT) {
+          const usuariosAsignados = [
+            {
+              id_usuario: tecnico.id,
+              rol_en_orden: "Responsable",
+            },
+            ...ayudantes.map((ayudante) => ({
+              id_usuario: ayudante.id,
+              rol_en_orden: "Ayudante",
+            })),
+          ];
+    
+          const responseAsignacion = await asignarOrdenTrabajo(
+            ordenTrabajo.id_orden_trabajo,
+            usuariosAsignados
+          );
+    
+          if (responseAsignacion) {
+            const responsable = responseAsignacion.find(
+              (u) => u.rol_en_orden === "Responsable"
+            );
+    
+
+            if (responsable && responsable.id_orden_trabajo_usuario) {
+    
+              const result=await crearAbordaje(
+                responsable.id_orden_trabajo_usuario,
+                motorista,
+                supervisor,
+                puerto,
+              );
+    
+              Alert.alert(
+                "Éxito",
+                "Registro guardado exitosamente",
+                [
+                  {
+                    text: "OK",
+                    onPress: () =>
+                      navigation.navigate("Mantto", {
+                        idOrden: ordenTrabajo.id_orden_trabajo,
+                        idAbordaje: result.id,
+                      }),
+                  },
+                ],
+                { cancelable: false }
+              );            
+            } else {
+              alert("No se encontró el id_orden_trabajo_usuario del responsable");
+            }
+          }
+        }
+      } catch (error) {
+        alert("Error al guardar la orden de trabajo: " + error);
+        console.log(error);
+      }
+      finally{
+        setLoading(false);
+      }
     };
 
-    if (loading) {
-        return (
-            <View style={styles.centered}>
-                <ActivityIndicator size="large" color="#3B82F6" />
-                <Text style={styles.loadingText}>Cargando trabajos...</Text>
-            </View>
-        );
-    }
+    const handleAbordajeSelect = (idAbordaje) => {
+      navigation.navigate("Abordaje", { idAbordaje });
+    };
+    
+    
 
-    if (error) {
-        return (
-            <View style={styles.centered}>
-                <MaterialCommunityIcons name="alert-circle" size={50} color="#EF4444" />
-                <Text style={styles.errorText}>{error}</Text>
-                <TouchableOpacity 
-                    style={styles.retryButton}
-                    onPress={fetchTrabajosAsignados}
-                >
-                    <LinearGradient
-                        colors={['#3B82F6', '#2563EB']}
-                        style={styles.gradientButton}
-                    >
-                        <Text style={styles.retryText}>Reintentar</Text>
-                    </LinearGradient>
-                </TouchableOpacity>
-            </View>
-        );
-    }
+  return (
+    <ScrollView 
 
-    return (
-        <ScrollView style={styles.container}>
-            <LinearGradient
-                colors={['#3B82F6', '#2563EB']}
-                style={styles.headerGradient}
-            >
-                <View style={styles.header}>
-                    <MaterialCommunityIcons name="clipboard-list" size={50} color="#fff" />
-                    <Text style={styles.headerTitle}>Trabajos Asignados</Text>
-                    <Text style={styles.headerSubtitle}>Seleccione un trabajo para comenzar</Text>
-                </View>
-            </LinearGradient>
+  contentContainerStyle={styles.container}
+      showsVerticalScrollIndicator={false}
+    >
+      <View style={styles.header}>
+        <Text style={styles.title}>Formulario</Text>
+        <View style={styles.divider} />
+      </View>
 
-            <View style={styles.buttonsContainer}>
-                {trabajos.map((trabajo, index) => (
-                    <TouchableOpacity
-                        key={trabajo.id_orden_trabajo}
-                        style={[styles.card, { marginTop: index === 0 ? -50 : 0 }]}
-                        onPress={() => handleTrabajoPress(trabajo.id_orden_trabajo)}
-                    >
-                        <View style={styles.cardContent}>
-                            <View style={styles.iconContainer}>
-                                <MaterialCommunityIcons name="wrench" size={32} color="#3B82F6" />
-                            </View>
-                            <View style={styles.textContainer}>
-                                <Text style={styles.cardTitle}>{trabajo.nombre_trabajo}</Text>
-                                <Text style={styles.cardSubtitle}>Toque para ver detalles</Text>
-                            </View>
-                            <MaterialCommunityIcons 
-                                name="chevron-right" 
-                                size={24} 
-                                color="#3B82F6" 
-                            />
-                        </View>
-                    </TouchableOpacity>
-                ))}
+      <View style={styles.card}>
+        <View style={styles.field}>
+          <Text style={styles.label}>Código de OT</Text>
+          <Text style={styles.infoText}>{codigoOT}</Text>
+        </View>
+      </View>
+
+      {abordajes.length > 0 && (
+        <View style={styles.card}>
+          <View style={styles.field}>
+            <Text style={styles.label}>Abordajes Anteriores</Text>
+            <View style={styles.abordajesContainer}>
+            {abordajes.map((abordaje, index) => (
+              <TouchableOpacity
+                key={index} 
+                style={styles.abordajeButton}
+                onPress={() => {
+                  handleAbordajeSelect(abordaje.id);
+                }}
+              >
+                <Text style={styles.abordajeButtonText}>Abordaje {index + 1}</Text>
+              </TouchableOpacity>
+            ))}
             </View>
-        </ScrollView>
-    );
+          </View>
+        </View>
+      )}
+    </ScrollView>
+  );
 };
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#F3F4F6',
+  container: {
+    flexGrow: 1,
+    padding: 16,
+    backgroundColor: "#f0f0f0",
+  },
+  header: {
+    marginBottom: 24,
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: "700",
+    color: "#1A237E",
+    textAlign: "center",
+    fontFamily: "System",
+    marginBottom: 8,
+  },
+  divider: {
+    height: 4,
+    backgroundColor: "#1A237E",
+    width: 60,
+    alignSelf: "center", 
+    borderRadius: 2,
+  },
+  card: {
+    backgroundColor: "#FFFF",
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 16,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
     },
-    headerGradient: {
-        paddingTop: 60,
-        paddingBottom: 80,
-        borderBottomLeftRadius: 30,
-        borderBottomRightRadius: 30,
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  field: {
+    marginBottom: 20,
+  },
+  label: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#666",
+    marginBottom: 8,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+  infoText: {
+    fontSize: 12.5,
+    color: "#333",
+    fontWeight: "500",
+  },
+  systemsContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    marginTop: 8,
+  },
+  systemItem: {
+    backgroundColor: "#E8EAF6",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    marginRight: 8,
+    marginBottom: 8,
+  },
+  systemText: {
+    color: "#3949AB",
+    fontSize: 14,
+    fontWeight: "500",
+  },
+  button: {
+    backgroundColor: "#5C6BC0",
+    borderRadius: 12,
+    paddingVertical: 12,
+    alignItems: "center",
+    marginVertical: 8,
+  },
+  buttonSelected: {
+    backgroundColor: "#3949AB",
+  },
+  buttonText: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  ayudantesContainer: {
+    marginTop: 8,
+  },
+  ayudanteItem: {
+    backgroundColor: "#E8EAF6",
+    padding: 12,
+    borderRadius: 12,
+    marginBottom: 8,
+  },
+  ayudanteText: {
+    color: "#3949AB",
+    fontSize: 14,
+    fontWeight: "500",
+  },
+  emptyText: {
+    color: "#999",
+    fontSize: 14,
+    fontStyle: "italic",
+  },
+  saveButton: {
+    backgroundColor: "#2E7D32",
+    borderRadius: 12,
+    paddingVertical: 16,
+    alignItems: "center",
+    marginTop: 24,
+    marginBottom: 32,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
     },
-    header: {
-        alignItems: "center",
-    },
-    headerTitle: {
-        fontSize: 28,
-        fontWeight: "bold",
-        color: "#fff",
-        marginTop: 15,
-    },
-    headerSubtitle: {
-        fontSize: 16,
-        color: "#fff",
-        opacity: 0.9,
-        marginTop: 5,
-    },
-    buttonsContainer: {
-        paddingHorizontal: 20,
-        paddingBottom: 20,
-    },
-    card: {
-        backgroundColor: "#fff",
-        marginVertical: 8,
-        borderRadius: 15,
-        elevation: 4,
-        shadowColor: "#000",
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.1,
-        shadowRadius: 3.84,
-    },
-    cardContent: {
-        flexDirection: "row",
-        alignItems: "center",
-        padding: 20,
-    },
-    iconContainer: {
-        backgroundColor: '#EBF5FF',
-        padding: 12,
-        borderRadius: 12,
-    },
-    textContainer: {
-        flex: 1,
-        marginLeft: 15,
-    },
-    cardTitle: {
-        fontSize: 18,
-        fontWeight: "600",
-        color: "#1F2937",
-    },
-    cardSubtitle: {
-        fontSize: 14,
-        color: "#6B7280",
-        marginTop: 2,
-    },
-    centered: {
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        padding: 20,
-    },
-    loadingText: {
-        fontSize: 18,
-        marginTop: 15,
-        color: "#6B7280",
-    },
-    errorText: {
-        fontSize: 16,
-        color: "#EF4444",
-        marginTop: 10,
-        textAlign: 'center',
-    },
-    retryButton: {
-        marginTop: 20,
-        overflow: 'hidden',
-        borderRadius: 10,
-    },
-    gradientButton: {
-        paddingVertical: 12,
-        paddingHorizontal: 24,
-    },
-    retryText: {
-        color: "#fff",
-        fontWeight: "600",
-        fontSize: 16,
-    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  saveButtonText: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "700",
+    letterSpacing: 1,
+  },
+  abordajeInfo: {
+    marginTop: 8,
+    padding: 12,
+    backgroundColor: "#E8EAF6",
+    borderRadius: 8,
+  },
+  abordajeInfoText: {
+    color: "#3949AB",
+    fontSize: 14,
+    marginBottom: 4,
+  },
+  abordajesContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+    marginTop: 8,
+  },
+  abordajeButton: {
+    backgroundColor: '#E8EAF6',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#3949AB',
+  },
+  abordajeButtonText: {
+    color: '#3949AB',
+    fontSize: 14,
+    fontWeight: '600',
+  },
 });
 
-export default TrabajosAsignadosScreen;
+export default AsignarTrabajoScreen;

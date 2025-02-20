@@ -129,7 +129,6 @@ const PhotoGallery = ({ photos }) => {
 
 const Abordaje = ({ route }) => {
   const { idAbordaje } = route.params;
-  console.log(idAbordaje);
   const { obtenerAbordajePorId } = useAbordaje();
   const [abordaje, setAbordaje] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
@@ -246,12 +245,51 @@ const Abordaje = ({ route }) => {
                   </View>
                 </View>
 
-                <View style={styles.materialsSection}>
-                  <Text style={styles.materialsTitle}>Materiales Utilizados</Text>
-                  <View style={styles.materialsContent}>
-                    <Text style={styles.materialsText}>{detalle.materiales}</Text>
+                {detalle.materiales && (
+                  <View style={styles.materialsSection}>
+                    <Text style={styles.materialsTitle}>Materiales Utilizados</Text>
+                    <View style={styles.materialsContent}>
+                      <Text style={styles.materialsText}>{detalle.materiales}</Text>
+                    </View>
                   </View>
-                </View>
+                )}
+
+                {detalle.fallas && (
+                  <View style={styles.materialsSection}>
+                    <Text style={styles.materialsTitle}>Fallas</Text>
+                    <View style={styles.materialsContent}>
+                      <Text style={styles.materialsText}>{detalle.fallas}</Text>
+                    </View>
+                  </View>
+                )}
+
+                {detalle.causas && (
+                  <View style={styles.materialsSection}>
+                    <Text style={styles.materialsTitle}>Causas</Text>
+                    <View style={styles.materialsContent}>
+                      <Text style={styles.materialsText}>{detalle.causas}</Text>
+                    </View>
+                  </View>
+                )}
+
+                {detalle.solucion && (
+                  <View style={styles.materialsSection}>
+                    <Text style={styles.materialsTitle}>Solución</Text>
+                    <View style={styles.materialsContent}>
+                      <Text style={styles.materialsText}>{detalle.solucion}</Text>
+                    </View>
+                  </View>
+                )}
+
+                {detalle.pendiente && (
+                  <View style={styles.materialsSection}>
+                    <Text style={styles.materialsTitle}>Pendiente</Text>
+                    <View style={styles.materialsContent}>
+                      <Text style={styles.materialsText}>{detalle.pendiente}</Text>
+                    </View>
+                  </View>
+                )}
+
 
                 <View style={styles.nextBoardingSection}>
                   <Text style={styles.nextBoardingTitle}>Próximo Abordaje</Text>

@@ -14,7 +14,6 @@ const EmpresaProvider = ({ children }) => {
                 try {
 
                     const response = await getAllEmpresas();
-                    console.log('Respuesta de getAllEmpresas:', response);
                     
                     if (response) {
 

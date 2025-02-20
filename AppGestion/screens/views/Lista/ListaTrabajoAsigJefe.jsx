@@ -83,6 +83,10 @@ const OrdenesTrabajoScreen = ({ navigation }) => {
     const {empresas}=useEmpresa();
     const {fetchEmbarcacionesByEmpresa}=useEmbarcacion();
     const [filteredOrdenes, setFilteredOrdenes] = useState([]);
+    const [activeFilters, setActiveFilters] = useState({
+        empresa: null,
+        embarcacion: null
+    });
 
     useEffect(() => {
         const cargarOrdenes = async() => {
@@ -100,6 +104,10 @@ const OrdenesTrabajoScreen = ({ navigation }) => {
 
     const handleOrdersFiltered = (filtered) => {
         setFilteredOrdenes(filtered);
+        const isFiltering = filtered.length !== ordenes.length;
+        if (!isFiltering) {
+            setActiveFilters({ empresa: null, embarcacion: null });
+        }
     };
     
 
@@ -194,6 +202,26 @@ const OrdenesTrabajoScreen = ({ navigation }) => {
         </LinearGradient>
     );
 
+        // Custom message based on whether there are active filters
+        const getNoResultsMessage = () => {
+            if (activeFilters.embarcacion) {
+                return "No se encontraron OT de esa embarcación";
+            }
+            if (activeFilters.empresa) {
+                return "No se encontraron OT de esa empresa";
+            }
+            return "No se encontraron órdenes con los filtros seleccionados";
+        };
+    
+        if (loading) {
+            return (
+                <View style={styles.centered}>
+                    <ActivityIndicator size="large" color="#000" />
+                    <Text style={styles.loadingText}>Cargando órdenes...</Text>
+                </View>
+            );
+        }
+
     return (
         <View style={styles.container}>
             <StatusBar barStyle="light-content" />
@@ -214,7 +242,14 @@ const OrdenesTrabajoScreen = ({ navigation }) => {
                         fetchEmbarcacionesByEmpresa={fetchEmbarcacionesByEmpresa}
                         onOrdersFiltered={handleOrdersFiltered}
                     />
-                    {(filteredOrdenes.length > 0 ? filteredOrdenes : ordenesFiltradas).map(renderItem)}
+                  {filteredOrdenes.length > 0 ? (
+                        filteredOrdenes.map(renderItem)
+                    ) : (
+                        <View style={styles.noResultsContainer}>
+                            <MaterialCommunityIcons name="filter-off" size={60} color="#9CA3AF" />
+                            <Text style={styles.noResultsText}>{getNoResultsMessage()}</Text>
+                        </View>
+                    )}                
                 </ScrollView>
             )}
         </View>
@@ -373,6 +408,22 @@ const OrdenesTrabajoScreen = ({ navigation }) => {
             borderBottomColor: "#F3F4F6",
             flexWrap: 'wrap', // Permite que los elementos se envuelvan si no hay espacio
             gap: 8, // Espacio entre elementos
+        },
+        noData: {
+            fontSize: 18,
+            color: "#9CA3AF",
+            marginTop: 16,
+            textAlign: "center",
+        },
+        noResultsContainer: {
+            padding: 40,
+            alignItems: 'center',
+        },
+        noResultsText: {
+            fontSize: 16,
+            color: "#6B7280",
+            marginTop: 16,
+            textAlign: "center",
         },
     });
 

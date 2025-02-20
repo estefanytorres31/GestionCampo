@@ -9,6 +9,7 @@ import {
   Image,
   Platform,
   SafeAreaView,
+  ActivityIndicator,
   Alert,
   Pressable,
   Modal,
@@ -25,6 +26,7 @@ const PROGRESS_VALUES = [0, 25, 50, 75, 90, 100];
 const MaintenanceForm = ({route, navigation}) => {
   const {id_orden_trabajo_sistema, idAbordaje}=route.params;
   const {role}=useAuth();
+  const [loading, setLoading]=useState(false);
   const [formData, setFormData] = useState({
     Observaciones: '',
     Llevar: '',
@@ -84,6 +86,7 @@ const MaintenanceForm = ({route, navigation}) => {
       Alert.alert('Error', 'Por favor ingrese los datos');
       return;
     }
+    setLoading(true);
     try{
       const formDataToSend=new FormData();
 
@@ -110,7 +113,6 @@ const MaintenanceForm = ({route, navigation}) => {
                 formDataToSend
             );
     
-            console.log('Response:', result);
     
             Alert.alert(
                 'Éxito',
@@ -128,7 +130,10 @@ const MaintenanceForm = ({route, navigation}) => {
             );
 
     }catch(error){
-
+      Alert.alert('Error', 'No se pudieron guardar los datos');
+    }
+    finally{
+      setLoading(false);
     }
   };
   const ProgressPicker = () => (
@@ -256,9 +261,16 @@ const MaintenanceForm = ({route, navigation}) => {
         <TouchableOpacity 
           style={styles.saveButton}
           onPress={handleSave}
+          disabled={loading}
         >
+      {loading ? (
+        <ActivityIndicator size="small" color="#ffffff" />
+      ) : (
+        <>
           <Save size={24} color="#ffffff" />
           <Text style={styles.saveButtonText}>Guardar</Text>
+        </>
+      )}
         </TouchableOpacity>
         <ProgressPicker />
       </ScrollView>

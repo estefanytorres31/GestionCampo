@@ -62,8 +62,6 @@ const ReasignarTrabajoScreen = ({route, navigation }) => {
           );
         }
       }
-  
-      console.log('Órdenes de trabajo por sistema y partes creadas exitosamente');
     } catch (error) {
       console.error('Detailed error:', error);
       throw new Error(`Error al crear órdenes de trabajo por sistema y partes: ${error.message}`);

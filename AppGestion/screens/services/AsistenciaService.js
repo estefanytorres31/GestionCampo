@@ -23,11 +23,9 @@ export const createAsistencia = async (id_embarcacion, tipo, latitud, longitud, 
         id_orden_trabajo: id_orden_trabajo || null // Asegurarse de que sea null si no se proporciona
     };
 
-    console.log('Payload being sent:', payload); // Para debugging
 
     try {
         const response = await apiClient.post('/asistencia', payload);
-        console.log('Response received:', response.data); // Para debugging
         return response.data;
     } catch (error) {
         console.error('Error details:', error.response?.data || error.message);

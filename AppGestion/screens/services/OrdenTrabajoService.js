@@ -31,7 +31,6 @@ export const getAllTrabajosByJefeAsig=async()=>{
         const userId = await AsyncStorage.getItem('userId');
         const userIdInt = parseInt(userId, 10);
         const response = await apiClient.get(`/ordenestrabajo?estados=en_progreso,pendiente`);
-        console.log(response.data);
         return response.data;
     } catch (error) {
         throw new Error(`Error al obtener las ordenes de trabajo: ${error.message}`);
@@ -50,7 +49,6 @@ export const getAllTrabajosByEmbarcacion=async(id_embarcacion)=>{
 export const updateOrdenTrabajo=async(id_orden_trabajo, estado)=>{
     try {
         const response = await apiClient.put(`/ordenestrabajo/${id_orden_trabajo}`, {estado});
-        console.log(id_orden_trabajo,'Estado',estado)
         return response.data;
     } catch (error) {
         throw new Error(`Error al actualizar la orden de trabajo: ${error.message}`);
@@ -61,7 +59,6 @@ export const updateOrdenTrabajo=async(id_orden_trabajo, estado)=>{
 export const updateAllOrdenTrabajo=async(id_orden_trabajo, id_puerto)=>{
     try {
         const response = await apiClient.put(`/ordenestrabajo/${id_orden_trabajo}`, {id_puerto});
-        console.log(id_orden_trabajo,'Puerto',id_puerto)
         return response.data;
     } catch (error) {
         throw new Error(`Error al actualizar la orden de trabajo: ${error.message}`);
@@ -74,7 +71,6 @@ export const getTrabajoCompletado=async()=>{
         const userId = await AsyncStorage.getItem('userId');
         const userIdInt = parseInt(userId, 10);
         const response = await apiClient.get(`/ordenestrabajo?estados=completado`);
-        console.log(response.data);
         return response.data;
     } catch (error) {
         throw new Error(`Error al obtener las ordenes de trabajo: ${error.message}`);

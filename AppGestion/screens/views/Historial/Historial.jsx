@@ -55,20 +55,25 @@ const EstadoBadge = ({ estado }) => {
     );
 };
 
-function Historial({ route,navigation }) {
-    const {obtenerAbordajePorId} = useAbordaje();
+function Historial({ route, navigation }) {
+    const { obtenerAbordajePorId } = useAbordaje();
     const { TrabajosCompletado, loading, error } = useOrdenTrabajo();
     const [ordenes, setOrdenes] = useState([]);
     const [filtroEstado, setFiltroEstado] = useState(null);
     const { empresas } = useEmpresa();
     const { fetchEmbarcacionesByEmpresa } = useEmbarcacion();
     const [filteredOrdenes, setFilteredOrdenes] = useState([]);
+    const [activeFilters, setActiveFilters] = useState({
+        empresa: null,
+        embarcacion: null
+    });
 
     useEffect(() => {
         const cargarOrdenes = async () => {
             const data = await TrabajosCompletado();
             if (data) {
                 setOrdenes(data);
+                setFilteredOrdenes(data);
             }
         };
         cargarOrdenes();
@@ -76,6 +81,12 @@ function Historial({ route,navigation }) {
 
     const handleOrdersFiltered = (filtered) => {
         setFilteredOrdenes(filtered);
+        
+        // Determine if filters are active based on filtered results
+        const isFiltering = filtered.length !== ordenes.length;
+        if (!isFiltering) {
+            setActiveFilters({ empresa: null, embarcacion: null });
+        }
     };
 
     const ordenesFiltradas = filtroEstado
@@ -83,7 +94,7 @@ function Historial({ route,navigation }) {
         : ordenes;
 
     const handleReasignarPress = (item) => {
-        navigation.navigate('Asignar', {
+        navigation.navigate('CompletoOT', {
             codigoOT: item.codigo,
             idOrden: item.id_orden_trabajo,
             ordenTrabajo: item
@@ -145,10 +156,21 @@ function Historial({ route,navigation }) {
             <MaterialCommunityIcons name="clipboard-list-outline" size={40} color="white" />
             <Text style={styles.title}>Historial</Text>
             <Text style={styles.subtitle}>
-                {ordenes.length} {ordenes.length === 1 ? 'tareas completadas' : 'tareas completadas'}
+                {filteredOrdenes.length} {filteredOrdenes.length === 1 ? 'tarea completada' : 'tareas completadas'}
             </Text>
         </LinearGradient>
     );
+
+    // Custom message based on whether there are active filters
+    const getNoResultsMessage = () => {
+        if (activeFilters.embarcacion) {
+            return "No se encontraron OT de esa embarcación";
+        }
+        if (activeFilters.empresa) {
+            return "No se encontraron OT de esa empresa";
+        }
+        return "No se encontraron órdenes con los filtros seleccionados";
+    };
 
     if (loading) {
         return (
@@ -188,7 +210,14 @@ function Historial({ route,navigation }) {
                         fetchEmbarcacionesByEmpresa={fetchEmbarcacionesByEmpresa}
                         onOrdersFiltered={handleOrdersFiltered}
                     />
-                    {(filteredOrdenes.length > 0 ? filteredOrdenes : ordenesFiltradas).map(renderItem)}
+                    {filteredOrdenes.length > 0 ? (
+                        filteredOrdenes.map(renderItem)
+                    ) : (
+                        <View style={styles.noResultsContainer}>
+                            <MaterialCommunityIcons name="filter-off" size={60} color="#9CA3AF" />
+                            <Text style={styles.noResultsText}>{getNoResultsMessage()}</Text>
+                        </View>
+                    )}
                 </ScrollView>
             )}
         </View>
@@ -265,6 +294,16 @@ const styles = StyleSheet.create({
     noData: {
         fontSize: 18,
         color: "#9CA3AF",
+        marginTop: 16,
+        textAlign: "center",
+    },
+    noResultsContainer: {
+        padding: 40,
+        alignItems: 'center',
+    },
+    noResultsText: {
+        fontSize: 16,
+        color: "#6B7280",
         marginTop: 16,
         textAlign: "center",
     },

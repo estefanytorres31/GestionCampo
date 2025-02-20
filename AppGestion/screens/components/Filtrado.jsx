@@ -33,21 +33,52 @@ const Filtrado = ({ empresas, ordenes, fetchEmbarcacionesByEmpresa, onOrdersFilt
       filteredOrders = ordenes.filter(orden => 
         orden.id_embarcacion && orden.id_embarcacion.toString() === selectedEmbarcacion.toString()
       );
+    } else if (selectedEmpresa) {
+      // Check if orders should be filtered by company
+      const empresaOrders = ordenes.filter(orden => 
+        orden.id_empresa && orden.id_empresa.toString() === selectedEmpresa.toString()
+      );
+      
+      if (empresaOrders.length > 0) {
+        filteredOrders = empresaOrders;
+      }
     } else {
       filteredOrders = ordenes;
     }
 
     onOrdersFiltered(filteredOrders);
-  }, [selectedEmbarcacion, ordenes]);
+  }, [selectedEmbarcacion, selectedEmpresa, ordenes]);
 
   const handleEmpresaChange = (empresaId) => {
     setSelectedEmpresa(empresaId);
     setSelectedEmbarcacion('');
-    onOrdersFiltered(ordenes);
+    
+    if (empresaId) {
+      const empresaOrders = ordenes.filter(orden => 
+        orden.id_empresa && orden.id_empresa.toString() === empresaId.toString()
+      );
+      onOrdersFiltered(empresaOrders);
+    } else {
+      onOrdersFiltered(ordenes);
+    }
   };
 
   const handleEmbarcacionChange = (embarcacionId) => {
     setSelectedEmbarcacion(embarcacionId);
+    
+    if (embarcacionId) {
+      const embarcacionOrders = ordenes.filter(orden => 
+        orden.id_embarcacion && orden.id_embarcacion.toString() === embarcacionId.toString()
+      );
+      onOrdersFiltered(embarcacionOrders);
+    } else if (selectedEmpresa) {
+      const empresaOrders = ordenes.filter(orden => 
+        orden.id_empresa && orden.id_empresa.toString() === selectedEmpresa.toString()
+      );
+      onOrdersFiltered(empresaOrders);
+    } else {
+      onOrdersFiltered(ordenes);
+    }
   };
 
   const handleClearFilters = () => {

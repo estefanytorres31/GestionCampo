@@ -21,7 +21,6 @@ export const login = async (usuario, contrasena) => {
     }
     try {
         const response = await apiClient.post('/auth/login', { usuario, contrasena });
-        console.log('Respuesta',response);
         const { data, status } = response;
         return { data, status };
     } catch (error) {

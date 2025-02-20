@@ -59,7 +59,6 @@ const AuthProvider = ({ children }) => {
             }
 
             const { roles, userId, token } = data;
-            console.log(data)
 
             // Store auth data
             await AsyncStorage.setItem('token', token);
@@ -72,7 +71,6 @@ const AuthProvider = ({ children }) => {
                 const userData = await getUserById(userId);
                 setUser(userData.data);
                 setRole(roles);
-                console.log('Roles: ',roles)
                 setIsAuth(true);
             } catch (userError) {
                 console.warn('Could not fetch full user data:', userError);
@@ -105,7 +103,6 @@ const AuthProvider = ({ children }) => {
     const logout = async () => {    
         try {
             const tokenBefore = await AsyncStorage.getItem('token');
-            console.log('Token antes de limpiar:', tokenBefore);
     
             await AsyncStorage.removeItem('token');
             await AsyncStorage.removeItem('userId');

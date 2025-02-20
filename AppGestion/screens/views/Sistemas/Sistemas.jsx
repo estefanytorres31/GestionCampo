@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView, Animated, ScrollView, ActivityIndicator, Dimensions } from "react-native";
+import { View, Text,Alert, TouchableOpacity, StyleSheet, SafeAreaView, Animated, ScrollView, ActivityIndicator, Dimensions } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import usePuerto from "../../hooks/Puerto/usePuerto";
 import useOrdenTrabajo from "../../hooks/OrdenTrabajo/useOrdenTrabajo";
@@ -19,13 +19,14 @@ const SistemasScreen = ({ route, navigation }) => {
         fetchPartsBySistema
     } = useTipoTrabajoESP();
 
-    const { guardarOrdenTrabajo, loading, error } = useOrdenTrabajo(); 
+    const { guardarOrdenTrabajo } = useOrdenTrabajo(); 
     const { guardarOrdenTrabajoSistema } = useOrdenTrabajoSistema();
     const { agregarOrdenTrabajoParte } = useOrdenTrabajoParte();
     
     // Estado para manejar las selecciones
     const [selectedSistemas, setSelectedSistemas] = useState(new Set());
     const [isLoading, setIsLoading] = useState(true);
+    const [loading, setLoading]= useState(false);
     
     const fadeAnim = React.useRef(new Animated.Value(0)).current;
     const scaleAnim = React.useRef(new Animated.Value(0.95)).current;
@@ -127,7 +128,6 @@ const SistemasScreen = ({ route, navigation }) => {
     const createOrdenTrabajoSistemas = async (ordenTrabajoId, sistemasSeleccionados) => {
         try {
             for (let sistema of sistemasSeleccionados) {
-                console.log(ordenTrabajoId, sistema.id_embarcacion_sistema);
     
                 const ordenTrabajoSistema = await guardarOrdenTrabajoSistema(
                     ordenTrabajoId,
@@ -141,7 +141,6 @@ const SistemasScreen = ({ route, navigation }) => {
                 );
     
                 const partes = partsResponse.data || partsResponse;
-                console.log("Orden trabajo sistema ID:", ordenTrabajoSistema.id_orden_trabajo_sistema);
     
                 for (let parte of partes) {
                     await agregarOrdenTrabajoParte(
@@ -150,7 +149,6 @@ const SistemasScreen = ({ route, navigation }) => {
                     );
                 }
             }
-            console.log('Órdenes de trabajo por sistema y partes creadas exitosamente');
         } catch (error) {
             console.error('Error al crear órdenes de trabajo por sistema y partes:', error);
             throw new Error(`Error al crear órdenes de trabajo por sistema y partes: ${error.message}`);
@@ -169,11 +167,6 @@ const SistemasScreen = ({ route, navigation }) => {
         }
         
         const codigoOT = generarCodigoOT(empresa, embarcacion, trabajo);
-        console.log("Código de la orden de trabajo:", codigoOT);
-
-
-        console.log(sistemasSeleccionados)
-    
 
         const response = await guardarOrdenTrabajo(
             trabajo.id_tipo_trabajo,
@@ -181,23 +174,22 @@ const SistemasScreen = ({ route, navigation }) => {
             codigoOT,
 
           );
-          console.log(trabajo.id_tipo_trabajo)
-          console.log(embarcacion.id_embarcacion)
-          console.log(codigoOT)
-          console.log(response.id_orden_trabajo)
-          console.log(response)
 
         if (response) {
+            setLoading(true);
             await createOrdenTrabajoSistemas(response.id_orden_trabajo, sistemasSeleccionados);
     
-          alert("Orden de trabajo y usuarios asociados guardados con éxito");
-          navigation.dispatch(
-            CommonActions.reset({
-              index: 1,
-              routes: [
-                { name: 'InicioJefe' }
-              ],
-            })
+            Alert.alert(
+                "Éxito",
+                "Orden de trabajo y usuarios asociados guardados con éxito",
+                [{ text: "OK", onPress: () => {
+                    navigation.dispatch(
+                        CommonActions.reset({
+                            index: 1,
+                            routes: [{ name: 'InicioJefe' }]
+                        })
+                    );
+                }}]
           );
         }
     };
@@ -302,17 +294,23 @@ const SistemasScreen = ({ route, navigation }) => {
                                 selectedSistemas.size === 0 && styles.guardarButtonDisabled
                             ]}
                             onPress={handleGuardarSeleccion}
-                            disabled={selectedSistemas.size === 0}
+                            disabled={selectedSistemas.size === 0 || isLoading}
                         >
-                            <MaterialCommunityIcons 
-                                name="content-save-outline" 
-                                size={24} 
-                                color="#fff" 
-                                style={styles.buttonIcon}
-                            />
-                            <Text style={styles.guardarButtonText}>
-                                Guardar Selección ({selectedSistemas.size})
-                            </Text>
+                    {loading ? (
+                        <ActivityIndicator size="small" color="#ffffff" />
+                    ) : (
+                        <>     
+                                    <MaterialCommunityIcons 
+                                        name="content-save-outline" 
+                                        size={24} 
+                                        color="#fff" 
+                                        style={styles.buttonIcon}
+                                    />
+                                    <Text style={styles.guardarButtonText}>
+                                        Guardar Selección ({selectedSistemas.size})
+                                    </Text>
+                                    </>
+                    )}
                         </TouchableOpacity>
                     </Animated.View>
                 )}

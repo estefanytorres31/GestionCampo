@@ -12,10 +12,8 @@ const TipoTrabajoProvider=({children})=>{
             const fetchTipoTrabajos=async ()=>{
                 try{
                     const response=await getAllTipoTrabajo();
-                    console.log(response)
                     if (response) {
                         setTipoTrabajos(response.data);
-                        console.log('Tipos de trabajo cargados correctamente.', response);
                     } else {
                         console.log('No se encontraron tipos de trabajo.');
                     }

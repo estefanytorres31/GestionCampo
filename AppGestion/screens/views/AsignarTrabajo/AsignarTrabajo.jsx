@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, ActivityIndicator } from "react-native";
 import Input from "../../components/Input";
 import Select from "../../components/Select";
 import useUsuarioTecnico from "../../hooks/UsuarioTecnico/useUsuarioTecnico";
@@ -21,10 +21,11 @@ const AsignarTrabajoScreen = ({ route, navigation }) => {
 
   const { crearAbordaje, obtenerAbordajePorOrdenTrabajo } = useAbordaje();
   const { puertos } = usePuerto();
-  const { updateOT, loading, error } = useOrdenTrabajo();
+  const { updateOT} = useOrdenTrabajo();
   const { guardarOrdenTrabajoUsuario, asignarOrdenTrabajo } = useOrdenTrabajoUsuario();
   const [abordajes, setAbordajes] = useState([]);
   const [puertosOptions, setPuertosOptions] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   // Load ports options
   useEffect(() => {
@@ -75,8 +76,7 @@ const AsignarTrabajoScreen = ({ route, navigation }) => {
       }
     
       try {
-        console.log("Puerto: ", puerto);
-        console.log(ordenTrabajo.id_orden_trabajo);
+        setLoading(true);
     
         const responseOT = await updateOT(ordenTrabajo.id_orden_trabajo, puerto);
     
@@ -104,12 +104,6 @@ const AsignarTrabajoScreen = ({ route, navigation }) => {
     
 
             if (responsable && responsable.id_orden_trabajo_usuario) {
-              console.log("Creando abordaje con:", {
-                id_orden_trabajo_usuario: responsable.id_orden_trabajo_usuario,
-                motorista,
-                supervisor,
-                id_puerto: puerto,
-              });
     
               const result=await crearAbordaje(
                 responsable.id_orden_trabajo_usuario,
@@ -118,8 +112,21 @@ const AsignarTrabajoScreen = ({ route, navigation }) => {
                 puerto,
               );
     
-              alert("Registro guardado exitosamente");
-              navigation.navigate("Mantto", { idOrden: ordenTrabajo.id_orden_trabajo, idAbordaje: result.id});
+              Alert.alert(
+                "Éxito",
+                "Registro guardado exitosamente",
+                [
+                  {
+                    text: "OK",
+                    onPress: () =>
+                      navigation.navigate("Mantto", {
+                        idOrden: ordenTrabajo.id_orden_trabajo,
+                        idAbordaje: result.id,
+                      }),
+                  },
+                ],
+                { cancelable: false }
+              );            
             } else {
               alert("No se encontró el id_orden_trabajo_usuario del responsable");
             }
@@ -129,10 +136,12 @@ const AsignarTrabajoScreen = ({ route, navigation }) => {
         alert("Error al guardar la orden de trabajo: " + error);
         console.log(error);
       }
+      finally{
+        setLoading(false);
+      }
     };
 
     const handleAbordajeSelect = (idAbordaje) => {
-      console.log("ID del abordaje seleccionado:", idAbordaje);
       navigation.navigate("Abordaje", { idAbordaje });
     };
     
@@ -154,7 +163,6 @@ const AsignarTrabajoScreen = ({ route, navigation }) => {
           <Text style={styles.label}>Código de OT</Text>
           <Text style={styles.infoText}>{codigoOT}</Text>
         </View>
-
       </View>
 
       {abordajes.length > 0 && (
@@ -163,23 +171,20 @@ const AsignarTrabajoScreen = ({ route, navigation }) => {
             <Text style={styles.label}>Abordajes Anteriores</Text>
             <View style={styles.abordajesContainer}>
             {abordajes.map((abordaje, index) => (
-  <TouchableOpacity
-    key={index} 
-    style={styles.abordajeButton}
-    onPress={() => {
-      console.log("Abordaje seleccionado:", abordaje);
-      handleAbordajeSelect(abordaje.id);
-    }}
-  >
-    <Text style={styles.abordajeButtonText}>Abordaje {index + 1}</Text>
-  </TouchableOpacity>
-))}
+              <TouchableOpacity
+                key={index} 
+                style={styles.abordajeButton}
+                onPress={() => {
+                  handleAbordajeSelect(abordaje.id);
+                }}
+              >
+                <Text style={styles.abordajeButtonText}>Abordaje {index + 1}</Text>
+              </TouchableOpacity>
+            ))}
             </View>
           </View>
         </View>
       )}
-
-
 
       <View style={styles.card}>
         <View style={styles.field}>
@@ -249,8 +254,15 @@ const AsignarTrabajoScreen = ({ route, navigation }) => {
       <TouchableOpacity 
         style={styles.saveButton} 
         onPress={handleGuardar}
+        disabled={loading}
       >
-        <Text style={styles.saveButtonText}>GUARDAR</Text>
+              {loading ? (
+                <ActivityIndicator size="small" color="#ffffff" />
+              ) : (
+                <>        
+                <Text style={styles.saveButtonText}>GUARDAR</Text>
+                </>
+              )}
       </TouchableOpacity>
     </ScrollView>
   );

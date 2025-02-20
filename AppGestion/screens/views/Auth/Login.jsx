@@ -130,6 +130,9 @@ const handleLogin = async () => {
               }}
               autoCapitalize="none"
               editable={!isLoading}
+              autoComplete="username"
+              textContentType="username"
+              importantForAutofill="yes"
             />
           </View>
 
@@ -145,7 +148,11 @@ const handleLogin = async () => {
                 setError("");
                 setCredentials({ ...credentials, password: text });
               }}
+              autoCapitalize="none"
               editable={!isLoading}
+              autoComplete="password"
+              textContentType="password"
+              importantForAutofill="yes"
             />
             <TouchableOpacity onPress={() => setShowPassword(!showPassword)} disabled={isLoading}>
               <Ionicons 

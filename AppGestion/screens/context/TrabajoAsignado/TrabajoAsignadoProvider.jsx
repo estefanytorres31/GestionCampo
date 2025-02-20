@@ -35,14 +35,12 @@ const TrabajoAsignadoProvider = ({ children }) => {
     
             // 🔍 Obtener asignaciones de órdenes de trabajo
             const ordenesResponse = await apiClient.get(`/ordenestrabajousuario?rol_en_orden=Responsable&id_usuario=${userIdInt}`);
-            console.log("ordenesResponse", ordenesResponse.data);
     
             if (!ordenesResponse.data || !Array.isArray(ordenesResponse.data.data)) {
                 throw new Error("La respuesta de órdenes de trabajo no es válida");
             }
     
             const ordenesIds = ordenesResponse.data.data.map(orden => orden.id_orden_trabajo);
-            console.log("Ordenes de trabajo obtenidas:", ordenesIds);
     
             if (ordenesIds.length === 0) {
                 console.warn("No hay órdenes de trabajo asignadas.");
@@ -65,8 +63,6 @@ const TrabajoAsignadoProvider = ({ children }) => {
             const ordenesData = await Promise.all(ordenesPromises);
             const ordenesValidas = ordenesData.filter(orden => orden !== null);
     
-            console.log("Órdenes de trabajo válidas:", ordenesValidas);
-    
             if (ordenesValidas.length === 0) {
                 console.warn("No se encontraron órdenes de trabajo válidas.");
                 setTrabajos([]);
@@ -78,7 +74,6 @@ const TrabajoAsignadoProvider = ({ children }) => {
             const tiposPromises = ordenesValidas.map(async (orden) => {
                 try {
                     const response = await apiClient.get(`/tipotrabajo/${orden.id_tipo_trabajo}`);
-                    console.log("response desde tiposPromises ", response.data)
                     return response.data;  // ✅ Retorna todo el objeto, no solo `data`
                 } catch (error) {
                     console.error(`Error obteniendo tipo de trabajo con ID ${orden.id_tipo_trabajo}:`, error.response?.data || error.message);
@@ -87,7 +82,6 @@ const TrabajoAsignadoProvider = ({ children }) => {
             });
     
             const tiposData = await Promise.all(tiposPromises);
-            console.log("Tipos de trabajo obtenidos:", tiposData);
     
             // 🔍 Construir la lista de trabajos asignados (Corrección aquí)
             const trabajosAsignados = ordenesValidas.map((orden, index) => ({

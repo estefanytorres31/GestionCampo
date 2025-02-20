@@ -14,10 +14,14 @@ import useUsuarioTecnico from "../../hooks/UsuarioTecnico/useUsuarioTecnico";
 
 const SeleccionarTecnicoScreen = ({ route, navigation }) => {
   const { tecnicoSeleccionado, onSelect, usuariosExcluidos = [] } = route.params;
-  const { usuariosTecnicos } = useUsuarioTecnico();
+  const { usuariosTecnicos, fetchUsuariosTecnicos  } = useUsuarioTecnico();
 
   const [busqueda, setBusqueda] = useState("");
   const [seleccionado, setSeleccionado] = useState(tecnicoSeleccionado || null);
+
+  useEffect(() => {
+    fetchUsuariosTecnicos(); // Llamar cuando se monte la pantalla
+}, []);
 
   const filteredData = usuariosTecnicos.filter(u =>
     !usuariosExcluidos.includes(u.id) &&

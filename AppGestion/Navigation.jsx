@@ -26,6 +26,7 @@ import InicioJefe from "./screens/views/Inicio/InicioJefe";
 import TrabajosAsignadosScreen from "./screens/views/Lista/TrabajosAsignados";
 import Historial from "./screens/views/Historial/Historial";
 import Abordaje from "./screens/views/Abordaje/Abordaje";
+import CompletoOT from "./screens/views/Lista/TrabajosAsignados"
 
 const Stack = createNativeStackNavigator();
 
@@ -69,13 +70,14 @@ export default function Navigation() {
       <Stack.Screen name="Trabajo" component={Trabajo} />
       <Stack.Screen name="Sistemas" component={SistemasScreen} options={{title:"Sistemas"}}/>
       <Stack.Screen name="Asignar" component={AsignarTrabajoScreen} options={{title:"Formulario"}}/>
-      <Stack.Screen name="SeleccionarAyudantes" component={SeleccionarAyudantesScreen} />
-      <Stack.Screen name="SeleccionarTecnico" component={SeleccionarTecnicoScreen} />
+      <Stack.Screen name="SeleccionarAyudantes" component={SeleccionarAyudantesScreen} options={{title:"Apoyo"}}/>
+      <Stack.Screen name="SeleccionarTecnico" component={SeleccionarTecnicoScreen} options={{title:"Técnico"}} />
       <Stack.Screen 
         name="TrabajosAsignados" 
         component={TrabajosAsignadosScreen} 
         options={{ title: "Mis Trabajos" }} 
       />
+      <Stack.Screen name="CompletoOT" component={CompletoOT} options={{ title: "Detalles"}}/>
       <Stack.Screen name="QRScann" component={QRScann} options={{ title: "Escaneo de QR" }} />
       <Stack.Screen name="Menu" component={Menu} options={{ title: "Menú"}} />
       <Stack.Screen name="Mantto" component={Mantto} options={{ title: "Mantenimiento Preventivo" }} />

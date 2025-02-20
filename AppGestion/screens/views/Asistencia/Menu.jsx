@@ -70,7 +70,6 @@ const Menu = ({ route }) => {
         id_orden_trabajo: null,
       });
   
-      console.log(response);
       if (response && !response.error) {
         Alert.alert(
           "Registro de Asistencia Exitoso",
