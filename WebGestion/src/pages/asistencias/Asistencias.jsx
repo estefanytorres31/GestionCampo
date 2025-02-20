@@ -11,6 +11,8 @@ import jsPDF from "jspdf";
 import "jspdf-autotable";
 import CustomFilterToggle from "../../components/CustomFilterToggle";
 import FiltroAsistencias from "./FiltroAsistencias";
+import DeleteStop from "./DeleteStop";
+import { useAuth } from "../../context/AuthContext"; // Importamos useAuth
 
 const asistenciasColumns = [
   { name: "ID", uuid: "id" },
@@ -41,26 +43,18 @@ const asistenciasFilters = [
     placeholder: "Buscar por Embarcación",
   },
 ];
-
-// Función para extraer solo la hora de una cadena ISO mediante corte
 const extractTimeFromISO = (isoString) => {
   if (!isoString) return "N/A";
   try {
-    // Formato esperado: 2025-02-19T15:52:44.705Z
-    // Primero extraemos la parte de la hora
     const timePart = isoString.split('T')[1];
     const timeWithoutMillis = timePart.split('.')[0]; // "15:52:44"
     
-    // Separamos horas, minutos y segundos
     const [hours, minutes, seconds] = timeWithoutMillis.split(':').map(Number);
     
-    // Determinamos si es AM o PM
     const period = hours >= 12 ? 'p.m.' : 'a.m.';
     
-    // Convertimos a formato 12 horas
-    const displayHours = hours % 12 || 12; // Convertir 0 a 12
-    
-    // Formateamos la hora final con ceros a la izquierda si es necesario
+    const displayHours = hours % 12 || 12;
+
     const formattedTime = `${displayHours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')} ${period}`;
     
     return formattedTime;
@@ -71,23 +65,38 @@ const extractTimeFromISO = (isoString) => {
 };
 
 const Asistencias = () => {
-  // Estado de filtros y de paginación
   const [filters, setFilters] = useState(
     asistenciasFilters.reduce((acc, field) => ({ ...acc, [field.key]: "" }), {})
   );
   const [page, setPage] = useState(1);
   const [pageSize] = useState(10);
-  // Estado para mostrar/ocultar el área de filtros
   const [showFilters, setShowFilters] = useState(false);
+  const [asistenciaToStop, setAsistenciaToStop] = useState(null);
+  const { roles } = useAuth(); // Obtenemos los roles del usuario actual
+
+  // Verificamos si el usuario tiene el rol de Técnico
+  const isTecnico = roles.some(role => role.nombre === "Técnico");
 
   const {
     data: asistencias,
     loading,
     error,
     pagination,
+    refetch,
   } = useAsistencias(filters, page, pageSize);
 
-  // Función para exportar a PDF
+  const handleStopAsistencia = (asistencia) => {
+    console.log("Abriendo modal para detener asistencia:", asistencia);
+    setAsistenciaToStop(asistencia);
+  };
+
+  const onStopComplete = (data) => {
+    console.log("Asistencia detenida exitosamente:", data);
+    setAsistenciaToStop(null);
+    refetch(); // Recargar los datos después de detener la asistencia
+  };
+
+  // PDF
   const exportToPDF = () => {
     if (!asistencias || asistencias.length === 0) {
       alert("No hay datos para exportar.");
@@ -111,7 +120,7 @@ const Asistencias = () => {
     doc.save("Asistencias.pdf");
   };
 
-  // Función para exportar a Excel
+  // Excel
   const exportToExcel = () => {
     if (!asistencias || asistencias.length === 0) {
       alert("No hay datos para exportar.");
@@ -136,7 +145,6 @@ const Asistencias = () => {
     FileSaver.saveAs(blob, "Asistencias.xlsx");
   };
 
-  // Componente custom de filtros para la cabecera:
   const customFiltersComponent = ({ filters, setFilters, filterFields }) => (
     <div className="flex flex-col items-center gap-2 w-full">
       <div className="flex justify-between w-full">
@@ -161,7 +169,6 @@ const Asistencias = () => {
 
   return (
     <>
-      {/* Cabecera con filtros y botones de exportación */}
       <section className="flex flex-col justify-between items-center gap-4 w-full">
         <div className="flex gap-2 items-center justify-between w-full overflow-auto">
           {customFiltersComponent({
@@ -169,7 +176,6 @@ const Asistencias = () => {
             setFilters,
             filterFields: asistenciasFilters,
           })}
-          {/* Aquí podrías agregar otros elementos, como un botón de "Crear" si es necesario */}
         </div>
       </section>
 
@@ -189,12 +195,41 @@ const Asistencias = () => {
             fecha_hora_salida: (row) =>
               extractTimeFromISO(row.fecha_hora_salida),
             embarcacion: (row) => row.embarcacion || "Sin embarcación",
-            horas_trabajo: (row) => row.horas_trabajo || "⏳ En proceso",
+            horas_trabajo: (row) => {
+              // Si ya tiene horas trabajadas, muestra las horas trabajadas
+              if (row.horas_trabajo) {
+                return row.horas_trabajo;
+              }
+              
+              // Si no tiene fecha de salida
+              if (!row.fecha_hora_salida) {
+                // Si es técnico, solo muestra "⏳ En proceso"
+                if (isTecnico) {
+                  return (
+                    <span className="text-amber-600 font-medium flex items-center">
+                      ⏳ En proceso
+                    </span>
+                  );
+                }
+                
+                // Para otros roles, muestra el botón Detener
+                return (
+                  <button 
+                    className="bg-orange-600 text-white px-3 py-1 rounded hover:bg-orange-700 transition flex items-center justify-center"
+                    onClick={() => handleStopAsistencia(row)}
+                  >
+                    Detener
+                  </button>
+                );
+              }
+              
+              return "Calculando...";
+            },
             ubicacion: (row) => (
               <div className="flex flex-col gap-1">
                 {row.coordenadas_entrada ? (
                   <button
-                    className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-700 transition"
+                    className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 transition"
                     onClick={() =>
                       window.open(
                         `https://www.google.com/maps?q=${row.coordenadas_entrada.latitud},${row.coordenadas_entrada.longitud}`,
@@ -209,7 +244,7 @@ const Asistencias = () => {
                 )}
                 {row.coordenadas_salida ? (
                   <button
-                    className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-700 transition"
+                    className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 transition"
                     onClick={() =>
                       window.open(
                         `https://www.google.com/maps?q=${row.coordenadas_salida.latitud},${row.coordenadas_salida.longitud}`,
@@ -227,6 +262,15 @@ const Asistencias = () => {
           }}
         />
       </main>
+
+      {/* Modal para detener la asistencia - no se mostrará para técnicos*/}
+      {asistenciaToStop && !isTecnico && (
+        <DeleteStop 
+          asistencia={asistenciaToStop} 
+          onClose={() => setAsistenciaToStop(null)}
+          onComplete={onStopComplete}
+        />
+      )}
 
       <Pagination pagination={pagination} setPage={setPage} />
     </>
