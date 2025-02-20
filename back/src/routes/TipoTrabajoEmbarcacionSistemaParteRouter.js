@@ -10,6 +10,7 @@ import {
     getPartesPorSistemaTipoTrabajoEmbarcacion,
     asignacionMultiple
 } from "../controllers/TipoTrabajoEmbarcacionSistemaParteController.js";
+import {verificarAuth } from "../middleware/verificarAuth.js"
 
 const tipoTrabajoESPRouter = Router();
 

@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { setUserTheme, getUserTheme } from "../controllers/UserConfigurationController.js";
+import {verificarAuth } from "../middleware/verificarAuth.js"
 
 const routerConfiguration = Router();
 

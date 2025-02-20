@@ -6,6 +6,7 @@ import {
     updateParte,
     deleteParte
 } from "../controllers/ParteController.js";
+import {verificarAuth } from "../middleware/verificarAuth.js"
 
 const parteRouter = Router();
 

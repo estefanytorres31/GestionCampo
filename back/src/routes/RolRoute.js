@@ -6,6 +6,7 @@ import {
   getAllRolesController,
 } from "../controllers/RolController.js";
 import { Router } from "express";
+import {verificarAuth } from "../middleware/verificarAuth.js"
 
 const rolRouter = Router();
 

@@ -5,6 +5,7 @@ import {
     obtenerPuertoActual,
     obtenerHistorialPuertos,
 } from "../controllers/HistorialPuertoController.js";
+import {verificarAuth } from "../middleware/verificarAuth.js"
 
 const historialPuertoRouter = express.Router();
 

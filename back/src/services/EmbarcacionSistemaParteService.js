@@ -66,6 +66,29 @@ export const getPartesByEmbarcacionSistema = async (id_embarcacion_sistema) => {
 };
 
 /**
+ * Obtener todas las Partes de un Sistema en una Embarcación
+ */
+export const getPartesByEmbarcacionSistemaPrimarios = async (id_embarcacion_sistema) => {
+    if (!id_embarcacion_sistema) {
+        throw { status: 400, message: "El ID de la embarcación-sistema es obligatorio." };
+    }
+
+    const partes = await prisma.embarcacionSistemaParte.findMany({
+        where: { id_embarcacion_sistema, estado: true },
+    });
+
+    if (!partes.length) {
+        throw { status: 404, message: `No se encontraron partes activas para la embarcación-sistema con ID ${id_embarcacion_sistema}.` };
+    }
+    
+    return partes.map(parte => ({
+        id_embarcacion_sistema_parte: parte.id_embarcacion_sistema_parte,
+        id_embarcacion_sistema: parte.id_embarcacion_sistema,
+        id_parte: parte.id_parte,
+    }));
+};
+
+/**
  * Actualizar una Asociación entre Embarcación, Sistema y Parte
  */
 export const updateEmbarcacionSistemaParte = async (id_embarcacion_sistema_parte, data) => {

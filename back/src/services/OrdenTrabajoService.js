@@ -291,3 +291,19 @@ export const desactivarOrdenTrabajo = async (id_orden_trabajo) => {
     data: { estado: "inactivo" },
   });
 };
+
+export const getOrdenTrabajoByEmpresa=async (id_empresa)=>{
+  const ordenesTrabajo = await prisma.ordenTrabajo.findMany({
+    where: {
+      estado: { not: "inactivo" },
+      embarcacion: {
+        empresa: {
+          id: parseInt(id_empresa),
+        },
+      },
+    },
+    orderBy: { fecha_asignacion: "desc" },
+  });
+
+  return ordenesTrabajo;
+}

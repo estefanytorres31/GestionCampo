@@ -3,10 +3,12 @@ import {
     getPartesByEmbarcacionSistema,
     updateEmbarcacionSistemaParte,
     deleteEmbarcacionSistemaParte,
-    asignacionMultiple
+    asignacionMultiple,
+    getPartesByEmbarcacionSistemaPrimario
 } from "../controllers/EmbarcacionSistemaParteController.js";
 
 import { Router } from "express";
+import {verificarAuth } from "../middleware/verificarAuth.js"
 
 const embarcacionSistemaParteRouter = Router();
 
@@ -24,5 +26,8 @@ embarcacionSistemaParteRouter.delete("/:id_embarcacion_sistema_parte", deleteEmb
 
 // Asignar múltiples partes a una embarcación-sistema
 embarcacionSistemaParteRouter.post("/asignacion_multiple", asignacionMultiple);
+
+// Obtener todas las partes activas de una embarcación-sistema (primarias)
+embarcacionSistemaParteRouter.get("/embarcacionsistema/:id_embarcacion_sistema", getPartesByEmbarcacionSistemaPrimario);
 
 export default embarcacionSistemaParteRouter;

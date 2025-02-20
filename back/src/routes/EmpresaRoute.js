@@ -6,6 +6,7 @@ import {
   deleteEmpresa,
 } from "../controllers/EmpresaController.js";
 import { Router } from "express";
+import {verificarAuth } from "../middleware/verificarAuth.js"
 
 const empresaRouter = Router();
 

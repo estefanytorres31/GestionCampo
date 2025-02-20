@@ -7,7 +7,7 @@ import {
     getUsersController
 } from "../controllers/UsuarioController.js";
 import { Router } from "express";
-import {verificarAuth, isAdmin } from "../middleware/verificarAuth.js"
+import {verificarAuth } from "../middleware/verificarAuth.js"
 
 const usuarioRouter = Router();
 

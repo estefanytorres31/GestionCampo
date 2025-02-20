@@ -7,6 +7,7 @@ import {
   seedResources,
   getAllRecursosController
 } from "../controllers/RecursoController.js";
+import {verificarAuth } from "../middleware/verificarAuth.js"
 
 const recursoRouter = Router();
 

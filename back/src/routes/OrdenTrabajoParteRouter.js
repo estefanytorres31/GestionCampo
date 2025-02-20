@@ -6,6 +6,7 @@ import {
     updateOrdenTrabajoParte,
     deleteOrdenTrabajoParte
 } from "../controllers/OrdenTrabajoParteController.js";
+import {verificarAuth } from "../middleware/verificarAuth.js"
 
 const ordenTrabajoParteRouter = Router();
 

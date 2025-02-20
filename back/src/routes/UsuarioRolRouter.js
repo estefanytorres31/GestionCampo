@@ -6,6 +6,7 @@ import {
     getUsuariosByRol,
     assignMultipleRolesToUsuario
 } from "../controllers/UsuarioRolController.js";
+import {verificarAuth } from "../middleware/verificarAuth.js"
 
 const usuarioRolRouter = Router();
 

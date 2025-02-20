@@ -7,6 +7,7 @@ import {
     getEmbarcacionesByEmpresa
   } from "../controllers/EmbarcacionController.js";
   import { Router } from "express";
+  import {verificarAuth } from "../middleware/verificarAuth.js"
   
   const embarcacionRouter = Router();
   

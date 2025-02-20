@@ -60,6 +60,18 @@ export const getActiveSistemasByEmbarcacion = async (req, res) => {
     }
 };
 
+// Consultar sistemas activos de una embarcación
+export const getIDSistemasEmbarcacion = async (req, res) => {
+    const { id_embarcacion } = req.params;
+
+    try {
+        const sistemas = await EmbarcacionSistemaService.getIDSistemasEmbarcacion(id_embarcacion);
+        res.status(200).json({ message: "ID de embarcacion_sistema de una embarcion obtenidos exitosamente.", data: sistemas });
+    } catch (error) {
+        res.status(404).json({ message: error.message });
+    }
+};
+
 // Consultar todas las embarcaciones con sus sistemas activos
 export const getAllEmbarcacionesWithSistemas = async (req, res) => {
     try {

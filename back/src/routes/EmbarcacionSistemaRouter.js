@@ -5,8 +5,10 @@ import {
     reactivateSistemaFromEmbarcacion,
     getActiveSistemasByEmbarcacion,
     getAllEmbarcacionesWithSistemas,
+    getIDSistemasEmbarcacion,
 } from "../controllers/EmbarcacionSistemaController.js";
 import { Router } from "express";
+import {verificarAuth } from "../middleware/verificarAuth.js"
 
 const embarcacionSistemaRouter = Router();
 
@@ -15,6 +17,7 @@ embarcacionSistemaRouter.post("/assign-multiple", assignMultipleSistemasToEmbarc
 embarcacionSistemaRouter.post("/deactivate", deactivateSistemaFromEmbarcacion);
 embarcacionSistemaRouter.post("/reactivate", reactivateSistemaFromEmbarcacion);
 embarcacionSistemaRouter.get("/active/:id_embarcacion", getActiveSistemasByEmbarcacion);
+embarcacionSistemaRouter.get("/ids/:id_embarcacion", getIDSistemasEmbarcacion);
 embarcacionSistemaRouter.get("/all", getAllEmbarcacionesWithSistemas);
 
 export default embarcacionSistemaRouter;

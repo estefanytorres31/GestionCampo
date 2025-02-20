@@ -162,7 +162,6 @@ export const getAbordajesByOrdenTrabajo = async (idOrdenTrabajo) => {
           id_orden_trabajo: orderId,
         },
       },
-      orderBy: { fecha: "desc" },
     });
   
     if (!abordajes || abordajes.length === 0) {
@@ -185,28 +184,33 @@ export const getAbordajeById = async (id) => {
   const abordaje = await prisma.abordaje.findFirst({
     where: { id: parseInt(id) },
     include: {
-      ordenTrabajoUsuario: {
+      ordenTrabajoUsuario: true, // Usuario relacionado al abordaje
+      ordenTrabajoUsuario:{
+        include:{
+          usuario:true,
+          orden_trabajo:true
+        }
+      },
+      ordenTrabajoSistemaDetalle: true,
+      ordenTrabajoSistemaFoto: true, // Fotos del sistema relacionadas al abordaje
+      ordenTrabajoPartes: true, // Partes de orden de trabajo relacionadas al abordaje
+      ordenTrabajoPartes: {
+        where: { id_abordaje: parseInt(id) },
         include: {
-          orden_trabajo: {
-            include: {
-              orden_trabajo_sistemas: {
-                include: {
-                  detalle: true, // Obtiene detalles del sistema
-                  fotos: true, // Obtiene fotos del sistema
-                  orden_trabajo_parte: {
-                    include: { parte: true}
-                  }, // Obtiene partes de la orden
-                },
-              },
-            },
-          },
+          parte:true,
+          orden_trabajo_sistema:{
+            include:{
+              embarcacion_sistema:{
+                include:{
+                  sistema:true,
+                  embarcacion: true
+                }
+              }
+            }
+          }
         },
       },
-      ordenTrabajoSistemaDetalle: true, // Detalles del sistema relacionados al abordaje
-      ordenTrabajoSistemaFoto: true, // Fotos del sistema relacionadas al abordaje
-      ordenTrabajoPartes: true, 
       puerto: true, // Puerto relacionado al abordaje
-      
     }
   });
 
@@ -238,18 +242,18 @@ export const getAbordajeUserSistemaParteById = async (id) => {
     const abordaje = await prisma.abordaje.findFirst({
       where: { id: abordajeId, estado: true },
       include: {
-        // Incluye el usuario asignado a la OT
         ordenTrabajoUsuario: true,
-        // Incluye los registros de sistema asociados a este abordaje
-        ordenTrabajoSistemas: {
+        ordenTrabajoSistemaDetalle:true,
+        ordenTrabajoSistemaFoto: true,
+        ordenTrabajoPartes: true,
+        ordenTrabajoPartes: {
+          where: { id_abordaje: abordajeId },
           include: {
-            // Dentro de cada registro de sistema, se incluyen las partes asociadas
-            // filtradas para que tengan el id_abordaje igual al abordaje consultado.
-            orden_trabajo_parte: {
-              where: { id_abordaje: abordajeId },
-            },
+            parte:true
           },
         },
+        puerto: true,
+
       },
     });
   

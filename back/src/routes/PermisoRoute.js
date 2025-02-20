@@ -7,6 +7,7 @@ import {
   getAllPermisosController,
 } from "../controllers/PermisoController.js";
 import { Router } from "express";
+import {verificarAuth } from "../middleware/verificarAuth.js"
 
 const permisoRouter = Router();
 

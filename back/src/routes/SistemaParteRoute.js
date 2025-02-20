@@ -8,6 +8,7 @@ import {
     reactivateSistemaParte,
     getAllSistemasWithPartes
 } from "../controllers/SistemaParteController.js";
+import {verificarAuth } from "../middleware/verificarAuth.js"
 
 const sistemaParteRouter = Router();
 

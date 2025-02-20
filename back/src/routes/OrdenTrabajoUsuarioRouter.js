@@ -7,6 +7,7 @@ import {
     updateOrdenTrabajoUsuario
 } from "../controllers/OrdenTrabajoUsuarioController.js";
 import { Router } from "express";
+import {verificarAuth } from "../middleware/verificarAuth.js"
 
 const ordenTrabajoUsuarioRouter = Router();
 

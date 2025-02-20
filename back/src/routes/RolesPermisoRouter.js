@@ -6,6 +6,7 @@ import {
     getRolesByPermiso,
 } from "../controllers/RolesPermisoController.js";
 import { Router } from "express";
+import {verificarAuth } from "../middleware/verificarAuth.js"
 
 const rolesPermisoRouter = Router();
 

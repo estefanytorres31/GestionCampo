@@ -92,3 +92,12 @@ export const desactivarOrdenTrabajo = async (req, res) => {
     res.status(400).json({ message: error.message });
   }
 };
+
+export const getOrdenTrabajoByEmpresa=async(req, res)=>{
+  try {
+    const ordenes = await OrdenTrabajoService.getOrdenTrabajoByEmpresa(req.params.id_empresa);
+    res.status(200).json({ message: "Ordenes de trabajo obtenidas exitosamente.", data: ordenes, count: ordenes.length});
+  } catch (error) {
+    res.status(404).json({ message: error.message });
+  }
+}

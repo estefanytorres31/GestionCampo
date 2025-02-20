@@ -7,6 +7,7 @@ import {
   deleteAccion,
   seedAcciones
 } from "../controllers/AccionController.js";
+import {verificarAuth } from "../middleware/verificarAuth.js"
 
 const accionRouter = Router();
 

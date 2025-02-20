@@ -8,6 +8,7 @@ import {
   getAbordajeUserSistemParteByIdController,
   getAbordajesByOrdenTrabajoController,
 } from "../controllers/AbordajeController.js";
+import {verificarAuth } from "../middleware/verificarAuth.js"
 
 const abordajeRouter = Router();
 

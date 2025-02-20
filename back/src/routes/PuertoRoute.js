@@ -6,6 +6,7 @@ import {
   deletePuerto,
 } from "../controllers/PuertoController.js";
 import { Router } from "express";
+import {verificarAuth } from "../middleware/verificarAuth.js"
 
 const puertoRouter = Router();
 

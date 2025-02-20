@@ -8,6 +8,7 @@ import {
     getAsistenciasController,
     getLastAsistenciaByUsusario
 } from "../controllers/AsistenciaController.js";
+import {verificarAuth } from "../middleware/verificarAuth.js"
 
 const asistenciaRouter = Router();
 

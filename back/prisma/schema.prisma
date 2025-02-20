@@ -400,7 +400,7 @@ model OrdenTrabajoSistema {
   embarcacion_sistema       EmbarcacionSistema  @relation(fields: [id_embarcacion_sistema], references: [id_embarcacion_sistema], onDelete: NoAction, onUpdate: Cascade)
   
   // Relaciones adicionales existentes
-  detalle                   OrdenTrabajoSistemaDetalle?
+  detalle                   OrdenTrabajoSistemaDetalle[]
   fotos                     OrdenTrabajoSistemaFoto[]
   orden_trabajo_parte       OrdenTrabajoParte[]
 
@@ -413,7 +413,7 @@ model OrdenTrabajoSistema {
 
 model OrdenTrabajoSistemaDetalle {
   id_detalle               Int  @id @default(autoincrement()) @map("id_detalle")
-  id_orden_trabajo_sistema Int  @unique @map("id_orden_trabajo_sistema")
+  id_orden_trabajo_sistema Int @map("id_orden_trabajo_sistema")
   observaciones             String?
   avance                    Int                 @default(0)
   materiales                String?
@@ -429,7 +429,7 @@ model OrdenTrabajoSistemaDetalle {
   id_abordaje               Int?                
   abordaje                  Abordaje?           @relation("AbordajeSistemaDetalle", fields: [id_abordaje], references: [id])
 
-  orden_trabajo_sistema    OrdenTrabajoSistema @relation(fields: [id_orden_trabajo_sistema], references: [id_orden_trabajo_sistema], onDelete: Cascade, onUpdate: Cascade)
+  orden_trabajo_sistema     OrdenTrabajoSistema @relation(fields: [id_orden_trabajo_sistema], references: [id_orden_trabajo_sistema], onDelete: Cascade, onUpdate: Cascade)
 
   @@map("orden_trabajo_sistema_detalle")
 }
@@ -500,6 +500,7 @@ model Asistencia {
   latitud              Decimal?         @db.Decimal(10, 6) @map("latitud")
   longitud             Decimal?         @db.Decimal(10, 6) @map("longitud")
   tipo                 TipoAsistencia   @map("tipo")
+  nota                 String?          @map("nota")
   creado_en            DateTime         @default(now()) @map("creado_en")
   usuario              Usuario          @relation(fields: [id_usuario], references: [id], onDelete: NoAction, onUpdate: Cascade)
   embarcacion          Embarcacion      @relation(fields: [id_embarcacion], references: [id_embarcacion], onDelete: NoAction, onUpdate: Cascade)

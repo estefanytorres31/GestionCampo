@@ -6,6 +6,7 @@ import {
     deleteSistema,
 } from "../controllers/SistemaController.js";
 import { Router } from "express";
+import {verificarAuth } from "../middleware/verificarAuth.js"
 
 const sistemaRouter = Router();
 

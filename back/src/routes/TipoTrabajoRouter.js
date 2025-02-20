@@ -6,6 +6,7 @@ import {
     deleteTipoTrabajo,
 } from "../controllers/TipoTrabajoController.js";
 import { Router } from "express";
+import {verificarAuth } from "../middleware/verificarAuth.js"
 
 const tipoTrabajoRouter = Router();
 

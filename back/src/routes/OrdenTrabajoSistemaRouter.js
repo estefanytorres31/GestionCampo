@@ -8,6 +8,7 @@ import {
     deleteOrdenTrabajoSistema,
     getSistemasYPartesPorOrdenTrabajo
 } from "../controllers/OrdenTrabajoSistemaController.js";
+import {verificarAuth } from "../middleware/verificarAuth.js"
 
 const ordenTrabajoSistemaRouter = Router();
 

@@ -21,6 +21,12 @@ export const login = async (nombreUsuario, contrasena) => {
   if (!usuario) {
     throw new Error("Usuario no encontrado");
   }
+  
+  // Verificar si el usuario está inactivo
+  if (usuario.estado === 0) {
+    throw new Error("El usuario está inactivo y no puede iniciar sesión");
+  }
+  
 
   // 🔑 Agregar el pepper a la contraseña ingresada
   const contrasenaPepper = contrasena + PEPPER;
@@ -73,7 +79,7 @@ export const login = async (nombreUsuario, contrasena) => {
     roles,
     rolesPorId,
     theme: userTheme,
-  };
+  };
 };
 
 export const logout = async (token) => {

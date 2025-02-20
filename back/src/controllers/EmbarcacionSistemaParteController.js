@@ -39,6 +39,21 @@ export const getPartesByEmbarcacionSistema = async (req, res) => {
 };
 
 /**
+ * Obtener Todas las Partes de un Sistema en una Embarcación
+ */
+export const getPartesByEmbarcacionSistemaPrimario = async (req, res) => {
+    const { id_embarcacion_sistema } = req.params;
+
+    try {
+        const partes = await EmbarcacionSistemaParteService.getPartesByEmbarcacionSistemaPrimarios(parseInt(id_embarcacion_sistema, 10));
+        res.status(200).json({ message: "Partes obtenidas exitosamente.", data: partes });
+    } catch (error) {
+        res.status(error.status || 500).json({ message: error.message });
+    }
+};
+
+
+/**
  * Actualizar una Asociación entre Embarcación, Sistema y Parte
  */
 export const updateEmbarcacionSistemaParte = async (req, res) => {
