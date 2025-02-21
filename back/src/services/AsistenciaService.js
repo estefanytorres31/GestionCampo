@@ -185,7 +185,7 @@ export const getAsistencias = async (filters, page = 1, pageSize = 10) => {
     prisma.asistencia.findMany({
       where: whereClause,
       include: {
-        usuario: { select: { nombre_completo: true } },
+        usuario: { select: { id:true, nombre_completo: true } },
         embarcacion: { 
           select: { 
             id_embarcacion: true, 
@@ -229,6 +229,7 @@ export const getAsistencias = async (filters, page = 1, pageSize = 10) => {
 
       return {
         id: entrada.id_asistencia,
+        id_usuario:entrada.id_usuario,
         nombre_completo: entrada.usuario.nombre_completo,
         fecha: entrada.fecha_hora.toISOString().split("T")[0],
         fecha_hora_entrada: entrada.fecha_hora,
@@ -243,6 +244,7 @@ export const getAsistencias = async (filters, page = 1, pageSize = 10) => {
               longitud: salida.longitud,
             }
           : null,
+        id_embarcacion: entrada.id_embarcacion,
         embarcacion: entrada.embarcacion.nombre,
         nota_entrada:entrada.nota,
         nota_salida:salida ? salida.nota : null,

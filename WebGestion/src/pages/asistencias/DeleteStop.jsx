@@ -25,6 +25,7 @@ const DeleteStop = ({ asistencia, onClose, onComplete }) => {
         id_usuario: asistencia.id_usuario,
         id_embarcacion: asistencia.id_embarcacion,
         tipo: "salida",
+        nota: null
       });
       
       // Show success animation
