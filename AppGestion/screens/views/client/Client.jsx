@@ -17,7 +17,7 @@ import useAuth from '../../hooks/Auth/useAuth';
 const { height, width } = Dimensions.get('window');
 
 // Colores que se asignarán dinámicamente a los botones
-const coloresBotones = ['#00A3E0', '#FF6B6B','#4CAF50', '#7E57C2','#FF9800'];
+const coloresBotones = ['#08879b', '#00897B','#2E7D32', '#C0911F','#1565C0'];
 
 const ClientScreen = ({ navigation }) => {
     const { empresas } = useEmpresa();
