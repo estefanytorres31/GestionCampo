@@ -8,11 +8,14 @@ import { VscFilePdf } from "react-icons/vsc";
 import { RiFileExcel2Fill } from "react-icons/ri";
 import { formatId } from "../../utils/formatId";
 import jsPDF from "jspdf";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
 import "jspdf-autotable";
 import CustomFilterToggle from "../../components/CustomFilterToggle";
 import FiltroAsistencias from "./FiltroAsistencias";
 import DeleteStop from "./DeleteStop";
 import { useAuth } from "../../context/AuthContext"; // Importamos useAuth
+import { watermarkDataUrl } from "./logoBases64";
 
 const asistenciasColumns = [
   { name: "ID", uuid: "id" },
@@ -98,55 +101,166 @@ const Asistencias = () => {
     refetch(); // Recargar los datos después de detener la asistencia
   };
 
-  // PDF
+  const formatRowForExport = (row) => {
+    return [
+      formatId(row.id),
+      row.nombre_completo,
+      row.fecha,
+      new Date(row.fecha_hora_entrada).toLocaleTimeString(),
+      new Date(row.fecha_hora_salida).toLocaleTimeString(),
+      row.embarcacion || "Sin embarcación",
+      row.empresa || "N/A",
+      // En lugar de las coordenadas, devolvemos un objeto con link y texto:
+      row.coordenadas_entrada
+        ? {
+            text: "Ver Ubicación",
+            url: `https://www.google.com/maps?q=${row.coordenadas_entrada.latitud},${row.coordenadas_entrada.longitud}`,
+          }
+        : { text: "Entrada no disponible", url: "" },
+      row.horas_trabajo || "En proceso",
+    ];
+  };
+  const exportHeaders = [
+    "ID",
+    "Nombre",
+    "Fecha",
+    "Entrada",
+    "Salida",
+    "Embarcación",
+    "Cliente",
+    "Ubicación",
+    "Horas Trabajadas",
+  ];
+
+  const getTimestamp = () => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, "0"); // Los meses van de 0 a 11
+    const day = String(now.getDate()).padStart(2, "0");
+    const hours = String(now.getHours()).padStart(2, "0");
+    const minutes = String(now.getMinutes()).padStart(2, "0");
+    const seconds = String(now.getSeconds()).padStart(2, "0");
+
+    return `${year}${month}${day}_${hours}${minutes}${seconds}`;
+  };
   const exportToPDF = () => {
     if (!asistencias || asistencias.length === 0) {
       alert("No hay datos para exportar.");
       return;
     }
+
     const doc = new jsPDF();
-    doc.text("Reporte de Asistencias", 14, 10);
-    const tableData = asistencias.map((row) =>
-      asistenciasColumns.map((col) => {
-        if (col.uuid === "fecha_hora_entrada" || col.uuid === "fecha_hora_salida") {
-          return extractTimeFromISO(row[col.uuid]);
-        }
-        return row[col.uuid] || "N/A";
-      })
-    );
+
+    // 1. Agregar una marca de agua de gran tamaño (opcional, para el fondo general)
+
+    // 2. Diseñar el título del PDF con fondo y línea decorativa
+    doc.setFillColor(230, 230, 230); // Fondo gris claro
+    doc.rect(10, 5, 190, 15, "F");
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(16);
+    doc.text("Reporte de Asistencias", 14, 16);
+    doc.setLineWidth(0.5);
+    doc.line(10, 22, 200, 22);
+
+    // 3. Preparar la tabla de datos
+    const startY = 25;
+    const tableData = asistencias.map((row) => formatRowForExport(row));
+
     doc.autoTable({
-      head: [asistenciasColumns.map((col) => col.name)],
+      head: [exportHeaders],
       body: tableData,
-      startY: 20,
+      startY,
+      didDrawCell: function (data) {
+        if (data.column.index === 7) {
+          const cellValue = data.cell.raw;
+          if (cellValue && cellValue.url) {
+            const textWidth = doc.getTextWidth(cellValue.text);
+            const xPos = data.cell.x + (data.cell.width - textWidth) / 2;
+            const yPos = data.cell.y + data.cell.height / 2 + 3;
+            doc.textWithLink(cellValue.text, xPos, yPos, {
+              url: cellValue.url,
+            });
+          }
+        }
+      },
+      didParseCell: function (data) {
+        if (data.column.index === 7 && typeof data.cell.raw === "object") {
+          data.cell.text = [""];
+        }
+      },
+      // Callback que se ejecuta en cada página (después de dibujar la tabla)
+      didDrawPage: function (data) {
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
+
+        // Configuración para la marca de agua:
+        // Imagen original: 148x33 píxeles. Queremos un ancho de 30 mm.
+        const watermarkWidth = 30; // mm
+        const originalWidth = 148;
+        const originalHeight = 33;
+        const aspectRatio = originalHeight / originalWidth;
+        const watermarkHeight = watermarkWidth * aspectRatio; // Aproximadamente 6.7 mm
+
+        const margin = 10; // margen desde el borde
+        // Ubicarla en la esquina inferior derecha
+        const x = pageWidth - watermarkWidth - margin;
+        const y = pageHeight - watermarkHeight - margin;
+
+        doc.addImage(
+          watermarkDataUrl, // Data URL de tu imagen PNG en base64
+          "PNG", // Formato
+          x, // Posición x
+          y, // Posición y
+          watermarkWidth, // Ancho en mm
+          watermarkHeight // Alto en mm
+        );
+      },
     });
-    doc.save("Asistencias.pdf");
+
+    const timestamp = getTimestamp();
+    const fileName = `Asistencias_${timestamp}.pdf`;
+    doc.save(fileName);
   };
 
-  // Excel
+  // Función para exportar a Excel
   const exportToExcel = () => {
     if (!asistencias || asistencias.length === 0) {
       alert("No hay datos para exportar.");
       return;
     }
-    const header = asistenciasColumns.map((col) => col.name);
+
+    const headers = asistenciasColumns.map((col) => col.name);
+
     const body = asistencias.map((row) =>
-      asistenciasColumns.map((col) => {
-        if (col.uuid === "fecha_hora_entrada" || col.uuid === "fecha_hora_salida") {
-          return extractTimeFromISO(row[col.uuid]);
+      formatRowForExport(row).map((cell) => {
+        if (cell && typeof cell === "object" && cell.text) {
+          return cell.text;
         }
-        return row[col.uuid] || "N/A";
+        return cell;
       })
     );
-    const sheetData = [header, ...body];
-    const xlsx = require("node-xlsx");
-    const buffer = xlsx.build([{ name: "Asistencias", data: sheetData }]);
-    const FileSaver = require("file-saver");
-    const blob = new Blob([buffer], {
+
+    const sheetData = [exportHeaders, ...body];
+
+    const worksheet = XLSX.utils.aoa_to_sheet(sheetData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Asistencias");
+
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: "xlsx",
+      type: "array",
+    });
+
+    const blob = new Blob([excelBuffer], {
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     });
-    FileSaver.saveAs(blob, "Asistencias.xlsx");
+
+    const timestamp = getTimestamp();
+    const fileName = `Asistencias_${timestamp}.xlsx`;
+    saveAs(blob, fileName);
   };
 
+  // Componente custom de filtros para la cabecera:
   const customFiltersComponent = ({ filters, setFilters, filterFields }) => (
     <div className="flex flex-col items-center gap-2 w-full">
       <div className="flex justify-between w-full">
