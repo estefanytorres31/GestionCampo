@@ -10,6 +10,7 @@ export const crearAsistencia = async (req, res) => {
     tipo, // 'entrada' o 'salida'
     latitud,
     longitud,
+    nota,
     id_orden_trabajo,
   } = req.body;
 
@@ -20,6 +21,7 @@ export const crearAsistencia = async (req, res) => {
       tipo,
       latitud,
       longitud,
+      nota,
       id_orden_trabajo,
     });
     res

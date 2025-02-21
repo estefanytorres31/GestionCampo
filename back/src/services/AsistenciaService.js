@@ -112,8 +112,8 @@ export const crearAsistencia = async ({
             tipo,
             latitud,
             longitud,
-            id_orden_trabajo,
             nota,
+            id_orden_trabajo,
             fecha_hora: fechaActual,
             creado_en: fechaActual
         },
@@ -244,7 +244,9 @@ export const getAsistencias = async (filters, page = 1, pageSize = 10) => {
             }
           : null,
         embarcacion: entrada.embarcacion.nombre,
-        nota:entrada.nota,
+        nota_entrada:entrada.nota,
+        nota_salida:salida ? salida.nota : null,
+
         // Se agrega el nombre de la empresa, si existe
         empresa: entrada.embarcacion.empresa ? entrada.embarcacion.empresa.nombre : null,
         horas_trabajo,

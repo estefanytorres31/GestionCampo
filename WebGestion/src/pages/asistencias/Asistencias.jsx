@@ -24,6 +24,8 @@ const asistenciasColumns = [
   { name: "📍 Cliente", uuid: "empresa" },
   { name: "🌍 Ubicación", uuid: "ubicacion" },
   { name: "⏳ Horas Trabajadas", uuid: "horas_trabajo" },
+  { name: "📝 Nota Entrada", uuid: "nota_entrada" },
+  { name: "📝 Nota Salida", uuid: "nota_salida" },
 ];
 
 const asistenciasFilters = [
@@ -259,6 +261,9 @@ const Asistencias = () => {
                 )}
               </div>
             ),
+            nota_entrada: (row) => row.nota_entrada || "Sin nota",
+            nota_salida: (row) => row.nota_salida || "Sin nota"
+
           }}
         />
       </main>

@@ -1,7 +1,7 @@
 import apiClient from "../API/apiClient";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export const createAsistencia = async (id_embarcacion, tipo, latitud, longitud, id_orden_trabajo) => {
+export const createAsistencia = async (id_embarcacion, tipo, latitud, longitud,nota, id_orden_trabajo) => {
     const userId = await AsyncStorage.getItem('userId');
     const userIdInt = parseInt(userId, 10);
     
@@ -20,6 +20,7 @@ export const createAsistencia = async (id_embarcacion, tipo, latitud, longitud, 
         tipo: tipo,
         latitud: lat,
         longitud: lng,
+        nota:nota,
         id_orden_trabajo: id_orden_trabajo || null // Asegurarse de que sea null si no se proporciona
     };
 

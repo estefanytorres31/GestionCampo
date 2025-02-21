@@ -69,8 +69,8 @@ const Menu = ({ route }) => {
         tipo,
         latitud: location.coords.latitude.toString(),
         longitud: location.coords.longitude.toString(),
-        id_orden_trabajo: null,
         nota: nota, // Enviamos la nota al backend
+        id_orden_trabajo: null,
       });
   
       if (response && !response.error) {

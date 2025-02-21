@@ -30,7 +30,8 @@ const AsistenciaProvider = ({ children }) => {
                 params.tipo,
                 params.latitud,
                 params.longitud,
-                params.id_orden_trabajo
+                params.nota,
+                params.id_orden_trabajo,
             );
 
             // Actualizar estado con el nuevo registro
