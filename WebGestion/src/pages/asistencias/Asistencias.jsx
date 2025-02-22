@@ -18,7 +18,7 @@ import { useAuth } from "../../context/AuthContext"; // Importamos useAuth
 import { watermarkDataUrl } from "./logoBases64";
 
 const asistenciasColumns = [
-  { name: "ID", uuid: "id" },
+  // { name: "ID", uuid: "id" },
   { name: "👤 Nombre", uuid: "nombre_completo" },
   { name: "📅 Fecha", uuid: "fecha" },
   { name: "🕰️ Entrada", uuid: "fecha_hora_entrada" },
@@ -103,7 +103,7 @@ const Asistencias = () => {
 
   const formatRowForExport = (row) => {
     return [
-      formatId(row.id),
+      // formatId(row.id),
       row.nombre_completo,
       row.fecha,
       new Date(row.fecha_hora_entrada).toLocaleTimeString(),
@@ -121,7 +121,7 @@ const Asistencias = () => {
     ];
   };
   const exportHeaders = [
-    "ID",
+    // "ID",
     "Nombre",
     "Fecha",
     "Entrada",

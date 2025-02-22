@@ -135,6 +135,7 @@ const OrdenesTrabajoScreen = ({ navigation }) => {
                     <Text style={styles.codigo}>{item.codigo}</Text>
                 </View>
                 <EstadoBadge estado={item.estado} />
+                {/* <Text >{item.avance}</Text> */}
             </View>
 
             <View style={styles.cardContent}>
