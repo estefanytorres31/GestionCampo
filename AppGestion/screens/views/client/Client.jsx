@@ -17,7 +17,7 @@ import useAuth from '../../hooks/Auth/useAuth';
 const { height, width } = Dimensions.get('window');
 
 // Colores que se asignarán dinámicamente a los botones
-const coloresBotones = ['#00897B', '#2E7D32','#1565C0', '#C0911F','#7fa23d'];
+const coloresBotones = ['#00A3E0', '#FF6B6B','#4CAF50', '#7E57C2','#FF9800'];
 
 const ClientScreen = ({ navigation }) => {
     const { empresas } = useEmpresa();
@@ -25,14 +25,6 @@ const ClientScreen = ({ navigation }) => {
     const fadeAnim = React.useRef(new Animated.Value(0)).current;
     const scaleAnim = React.useRef(new Animated.Value(0.95)).current;
 
-    const handleLogout = () => {
-        logout();
-        navigation.navigate('Login');
-    };
-
-    const handleMove = () => {
-        navigation.navigate('QRScann');
-    }
     
     useEffect(() => {
         Animated.parallel([
@@ -77,22 +69,32 @@ const ClientScreen = ({ navigation }) => {
     return (
         <SafeAreaView style={styles.safeArea}>
             <LinearGradient
-                colors={["#def8f6", "#e0e0e0"]}
+                colors={["#ffffff", "#f8f9fa"]}
                 style={styles.container}
-                start={{ x: 0.5, y: 0 }}
-                end={{ x: 0.5, y: 1 }}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
             >
                 <Animated.View 
                     style={[styles.contentContainer, { opacity: fadeAnim, transform: [{ scale: scaleAnim }] }]}
                 >
                     <View style={styles.headerContainer}>
-                        <Text style={styles.welcomeText}>¡Bienvenido!</Text>
                         <Text style={styles.subtitle}>Selecciona un cliente</Text>
                     </View>
 
                     <View style={styles.buttonContainer}>
                         {empresas.length > 0 ? (
                             empresas.map((empresa, index) => (
+                                <Animated.View
+                                key={empresa.id}
+                                style={{
+                                    transform: [{
+                                        translateY: fadeAnim.interpolate({
+                                            inputRange: [0, 1],
+                                            outputRange: [50 * (index + 1), 0]
+                                        })
+                                    }]
+                                }}
+                            >
                                 <TouchableOpacity
                                     key={empresa.id || index}
                                     style={[styles.button, { backgroundColor: coloresBotones[index % coloresBotones.length] }]} // Asignación dinámica de color
@@ -107,6 +109,7 @@ const ClientScreen = ({ navigation }) => {
                                         <Ionicons name="chevron-forward" size={24} color="rgba(255,255,255,0.8)" />
                                     </View>
                                 </TouchableOpacity>
+                                </Animated.View>
                             ))
                         ) : (
                             <Text style={styles.loadingText}>Cargando empresas...</Text>

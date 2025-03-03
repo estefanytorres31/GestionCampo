@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useRef } from "react";
+import React, { useState, useRef } from "react";
 import usePermisos from "../../hooks/permisos/usePermisos";
 import ListPage from "../../components/ListPage";
 import { BsSearch } from "react-icons/bs";
@@ -16,7 +16,7 @@ const permisosColumns = [
   { name: "ID", uuid: "id" },
   { name: "🔑 Nombre", uuid: "nombre" },
   { name: "📝 Descripción", uuid: "descripcion" },
-  { name: "⚙️ Acciones", uuid: "acciones" },
+  // Puedes agregar más columnas según lo requieras
 ];
 
 // Filtros de búsqueda
@@ -41,7 +41,7 @@ const Permisos = () => {
   const listPageRefetchRef = useRef(null);
 
   // Función para refrescar la lista tras una operación exitosa
-  const handleSuccess = async (data) => {
+  const handleSuccess = async () => {
     if (
       listPageRefetchRef.current &&
       typeof listPageRefetchRef.current === "function"
@@ -68,14 +68,16 @@ const Permisos = () => {
   return (
     <>
       {/* Modal para crear permiso */}
+      {/* 
       <CreatePermissionModal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         onSuccess={handleSuccess}
       />
+      */}
 
       {/* Modal para editar permiso */}
-      {permissionToEdit && (
+      {/* {permissionToEdit && (
         <EditPermissionModal
           isOpen={isEditModalOpen}
           onClose={() => {
@@ -85,10 +87,10 @@ const Permisos = () => {
           permission={permissionToEdit}
           onSuccess={handleSuccess}
         />
-      )}
+      )} */}
 
       {/* Modal para eliminar permiso */}
-      {permissionToDelete && (
+      {/* {permissionToDelete && (
         <DeletePermissionModal
           isOpen={isDeleteModalOpen}
           onClose={() => {
@@ -98,7 +100,7 @@ const Permisos = () => {
           permission={permissionToDelete}
           onSuccess={handleSuccess}
         />
-      )}
+      )} */}
 
       <ListPage
         useFetchHook={usePermisos}
@@ -106,12 +108,15 @@ const Permisos = () => {
         filterFields={permisosFilters}
         title="Permisos"
         createButton={
-          <Button onClick={() => setIsCreateModalOpen(true)}>
+          <>
+            {/* <Button onClick={() => setIsCreateModalOpen(true)}>
             <IoAdd size={20} className="min-w-max" />
             Crear Permiso
-          </Button>
+          </Button> */}
+          </>
         }
-        // Asignamos la función refetch al ref
+        showExportButtons={false}
+        // Asignamos la función refetch al ref para poder refrescar la lista
         onRefetch={(refetch) => {
           if (typeof refetch === "function") {
             listPageRefetchRef.current = refetch;
@@ -119,9 +124,11 @@ const Permisos = () => {
         }}
         render={{
           id: (row) => formatId(row.id),
-          acciones: (row) => (
-            <RowActions row={row} onEdit={handleEdit} onDelete={handleDelete} />
-          ),
+          // Ejemplo de cómo podrías renderizar acciones:
+          // acciones: (row) => (
+          //   <RowActions row={row} onEdit={handleEdit} onDelete={handleDelete} />
+          // ),
+          // Si usas un componente de RowActions, asegúrate de pasarlo en la columna correspondiente
         }}
       />
     </>

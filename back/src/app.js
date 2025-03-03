@@ -27,6 +27,7 @@ import tipoTrabajoESPRouter from './routes/TipoTrabajoEmbarcacionSistemaParteRou
 import asistenciaRouter from './routes/AsistenciaRouter.js';
 import ordenTrabajoParteRouter from './routes/OrdenTrabajoParteRouter.js';
 import routerConfiguration from './routes/UserConfigurationRouter.js';
+import abordajeRouter from './routes/AbordajeRouter.js';
 
 const app = express();
 
@@ -43,6 +44,7 @@ app.use(fileUpload({
 
 // Routes
 app.use('/api/rol', rolRouter);
+app.use('/api/permiso', permisoRouter);
 app.use('/api/usuario', usuarioRouter);
 app.use('/api/usuariorol', usuarioRolRouter);
 app.use('/api/auth', authRouter);
@@ -51,7 +53,6 @@ app.use('/api/puerto', puertoRouter);
 app.use('/api/empresa', empresaRouter);
 app.use('/api/historialpuerto', historialPuertoRouter);
 app.use('/api/embarcacion', embarcacionRouter);
-app.use('/api/permiso', permisoRouter);
 app.use('/api/rolespermisos', rolesPermisoRouter);
 app.use("/api/embarcacionsistemas", embarcacionSistemaRouter);
 app.use("/api/tipotrabajo", tipoTrabajoRouter);
@@ -67,5 +68,6 @@ app.use("/api/embarcacionsistemaparte", embarcacionSistemaParteRouter);
 app.use("/api/tipotrabajoesp", tipoTrabajoESPRouter);
 app.use("/api/asistencia", asistenciaRouter);
 app.use("/api/theme", routerConfiguration);
+app.use("/api/abordaje", abordajeRouter);
 
 export default app;

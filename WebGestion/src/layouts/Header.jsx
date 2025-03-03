@@ -10,7 +10,6 @@ const Header = ({ title }) => {
   const perfilCheckboxRef = useRef(null);
   const location = useLocation();
 
-  // Función para regresar a la ruta anterior
   const handleBack = () => {
     navigate(-1);
   };
@@ -28,7 +27,6 @@ const Header = ({ title }) => {
     }
   }, [location.pathname]);
 
-  // Si la ruta actual incluye "detalle-codigo", se mostrará el botón de retroceder
   const showBackButton = location.pathname.includes("detalle-codigo");
 
   return (
@@ -47,7 +45,7 @@ const Header = ({ title }) => {
             className="flex flex-row items-center gap-2 text-[var(--primary-text)] hover:text-[var(--button-hover-bg)]/50 transition-colors duration-300 cursor-pointer"
           >
             <MdKeyboardArrowLeft size={30} className="min-w-max" />
-            <h1 className="text-2xl font-bold">{title}</h1>
+            <h1 className="text-2xl">{title}</h1>
           </button>
         ) : (
           <h1

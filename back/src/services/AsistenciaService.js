@@ -121,104 +121,168 @@ export const crearAsistencia = async ({
 };
 
 export const getAsistencias = async (filters, page = 1, pageSize = 10) => {
-    const { nombre_completo, fecha, nombre_embarcacion } = filters;
-  
-    // Construcción dinámica de filtros: se inicia filtrando solo registros de "entrada"
-    const whereClause = { tipo: "entrada" };
-  
-    if (nombre_completo) {
-      whereClause.usuario = {
-        nombre_completo: { contains: nombre_completo },
-      };
-    }
-  
-    if (fecha) {
-      whereClause.fecha_hora = {
-        gte: new Date(`${fecha}T00:00:00.000Z`),
-        lt: new Date(`${fecha}T23:59:59.999Z`),
-      };
-    }
-  
-    if (nombre_embarcacion) {
-      whereClause.embarcacion = {
-        nombre: { contains: nombre_embarcacion },
-      };
-    }
-  
-    const skip = (page - 1) * pageSize;
-  
-    const [asistencias, total] = await Promise.all([
-      prisma.asistencia.findMany({
-        where: whereClause,
-        include: {
-          usuario: { select: { nombre_completo: true } },
-          embarcacion: { select: { id_embarcacion: true, nombre: true } },
-        },
-        orderBy: { fecha_hora: "desc" },
-        skip,
-        take: pageSize,
-      }),
-      prisma.asistencia.count({ where: whereClause }),
-    ]);
-  
-    const asistenciasConSalidas = await Promise.all(
-      asistencias.map(async (entrada) => {
-        // Buscar la salida correspondiente a la entrada
-        const salida = await prisma.asistencia.findFirst({
-          where: {
-            id_usuario: entrada.id_usuario,
-            id_embarcacion: entrada.id_embarcacion,
-            tipo: "salida",
-            fecha_hora: { gte: entrada.fecha_hora },
-          },
-          orderBy: { fecha_hora: "asc" },
-        });
-  
-        // Cálculo de las horas trabajadas
-        let horas_trabajo = null;
-        if (salida) {
-          const diffMs = new Date(salida.fecha_hora) - new Date(entrada.fecha_hora);
-          const hours = Math.floor(diffMs / 3600000);
-          const minutes = Math.floor((diffMs % 3600000) / 60000);
-          const seconds = Math.floor((diffMs % 60000) / 1000);
-          horas_trabajo = `${hours.toString().padStart(2, "0")}:${minutes
-            .toString()
-            .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
-        }
-  
-        return {
-          id: entrada.id_asistencia,
-          nombre_completo: entrada.usuario.nombre_completo,
-          fecha: entrada.fecha_hora.toISOString().split("T")[0],
-          fecha_hora_entrada: entrada.fecha_hora,
-          fecha_hora_salida: salida ? salida.fecha_hora : null,
-          // Coordenadas de la entrada y, en caso de existir, de la salida
-          coordenadas_entrada: {
-            latitud: entrada.latitud,
-            longitud: entrada.longitud,
-          },
-          coordenadas_salida: salida
-            ? {
-                latitud: salida.latitud,
-                longitud: salida.longitud,
-              }
-            : null,
-          embarcacion: entrada.embarcacion.nombre,
-          horas_trabajo,
-        };
-      })
-    );
-  
-    return {
-      total,
-      page,
-      pageSize,
-      totalPages: Math.ceil(total / pageSize),
-      data: asistenciasConSalidas,
-    };
-  };
-  
+  const {
+    nombre_completo,
+    fecha, // Fecha específica para la entrada
+    nombre_embarcacion,
+    empresa,            // Nuevo filtro: nombre de la empresa
+    fecha_salida,         // Fecha específica para la salida
+    fecha_inicio,         // Rango de fechas para la entrada (inicio)
+    fecha_fin,            // Rango de fechas para la entrada (fin)
+    fecha_salida_inicio,  // Rango de fechas para la salida (inicio)
+    fecha_salida_fin      // Rango de fechas para la salida (fin)
+  } = filters;
 
+  // Filtramos registros de "entrada"
+  const whereClause = { tipo: "entrada" };
+
+  if (nombre_completo) {
+    whereClause.usuario = {
+      nombre_completo: { contains: nombre_completo },
+    };
+  }
+
+  // Filtro por fecha de entrada: día específico
+  if (fecha) {
+    whereClause.fecha_hora = {
+      gte: new Date(`${fecha}T00:00:00.000Z`),
+      lt: new Date(`${fecha}T23:59:59.999Z`),
+    };
+  }
+
+  // Filtro por rango de fechas de entrada
+  if (fecha_inicio && fecha_fin) {
+    whereClause.fecha_hora = {
+      gte: new Date(`${fecha_inicio}T00:00:00.000Z`),
+      lt: new Date(`${fecha_fin}T23:59:59.999Z`),
+    };
+  }
+
+  // Filtro por nombre de embarcación
+  if (nombre_embarcacion) {
+    // Si ya existe una condición sobre "embarcacion", la combinamos.
+    whereClause.embarcacion = {
+      ...whereClause.embarcacion,
+      nombre: { contains: nombre_embarcacion },
+    };
+  }
+
+  // Filtro por nombre de empresa
+  if (empresa) {
+    // Aquí se añade la condición sobre la empresa dentro de la embarcación.
+    whereClause.embarcacion = {
+      ...whereClause.embarcacion,
+      empresa: { nombre: { contains: empresa } },
+    };
+  }
+
+  const skip = (page - 1) * pageSize;
+
+  // Consulta principal: registros de entrada, incluyendo la relación con la empresa a través de embarcacion
+  const [asistencias, total] = await Promise.all([
+    prisma.asistencia.findMany({
+      where: whereClause,
+      include: {
+        usuario: { select: { nombre_completo: true } },
+        embarcacion: { 
+          select: { 
+            id_embarcacion: true, 
+            nombre: true,
+            empresa: { select: { nombre: true } }  // Se incluye la empresa
+          } 
+        },
+      },
+      orderBy: { fecha_hora: "desc" },
+      skip,
+      take: pageSize,
+    }),
+    prisma.asistencia.count({ where: whereClause }),
+  ]);
+
+  // Para cada entrada se busca la salida correspondiente y se calcula el tiempo trabajado
+  let asistenciasConSalidas = await Promise.all(
+    asistencias.map(async (entrada) => {
+      // Buscamos la salida de la entrada
+      const salida = await prisma.asistencia.findFirst({
+        where: {
+          id_usuario: entrada.id_usuario,
+          id_embarcacion: entrada.id_embarcacion,
+          tipo: "salida",
+          fecha_hora: { gte: entrada.fecha_hora },
+        },
+        orderBy: { fecha_hora: "asc" },
+      });
+
+      // Cálculo de las horas trabajadas
+      let horas_trabajo = null;
+      if (salida) {
+        const diffMs = new Date(salida.fecha_hora) - new Date(entrada.fecha_hora);
+        const hours = Math.floor(diffMs / 3600000);
+        const minutes = Math.floor((diffMs % 3600000) / 60000);
+        const seconds = Math.floor((diffMs % 60000) / 1000);
+        horas_trabajo = `${hours.toString().padStart(2, "0")}:${minutes
+          .toString()
+          .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+      }
+
+      return {
+        id: entrada.id_asistencia,
+        nombre_completo: entrada.usuario.nombre_completo,
+        fecha: entrada.fecha_hora.toISOString().split("T")[0],
+        fecha_hora_entrada: entrada.fecha_hora,
+        fecha_hora_salida: salida ? salida.fecha_hora : null,
+        coordenadas_entrada: {
+          latitud: entrada.latitud,
+          longitud: entrada.longitud,
+        },
+        coordenadas_salida: salida
+          ? {
+              latitud: salida.latitud,
+              longitud: salida.longitud,
+            }
+          : null,
+        embarcacion: entrada.embarcacion.nombre,
+        // Se agrega el nombre de la empresa, si existe
+        empresa: entrada.embarcacion.empresa ? entrada.embarcacion.empresa.nombre : null,
+        horas_trabajo,
+      };
+    })
+  );
+
+  // Filtro adicional en memoria para la salida: día específico
+  if (fecha_salida) {
+    const salidaDate = new Date(`${fecha_salida}T00:00:00.000Z`);
+    asistenciasConSalidas = asistenciasConSalidas.filter((a) => {
+      if (a.fecha_hora_salida) {
+        const salida = new Date(a.fecha_hora_salida);
+        return salida.toISOString().split("T")[0] === salidaDate.toISOString().split("T")[0];
+      }
+      return false;
+    });
+  }
+
+  // Filtro adicional en memoria para rango de fechas de salida
+  if (fecha_salida_inicio && fecha_salida_fin) {
+    const inicioSalida = new Date(`${fecha_salida_inicio}T00:00:00.000Z`);
+    const finSalida = new Date(`${fecha_salida_fin}T23:59:59.999Z`);
+    asistenciasConSalidas = asistenciasConSalidas.filter((a) => {
+      if (a.fecha_hora_salida) {
+        const salida = new Date(a.fecha_hora_salida);
+        return salida >= inicioSalida && salida <= finSalida;
+      }
+      return false;
+    });
+  }
+
+  return {
+    total,
+    page,
+    pageSize,
+    totalPages: Math.ceil(total / pageSize),
+    data: asistenciasConSalidas,
+  };
+};
+  
 /**
  * 🔹 Obtener Asistencias con Filtros Opcionales (Usuario, Embarcación, OrdenTrabajo)
  * @param {Object} query - Parámetros de búsqueda

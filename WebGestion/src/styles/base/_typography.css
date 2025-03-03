@@ -208,6 +208,14 @@
 
 /* EStilos con JetBrains Mono */
 
+.h1-extra-jetbrains {
+  font-family: "JetBrains Mono", monospace;
+  font-weight: 800; /* ExtraBold */
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  line-height: 1.2;
+}
+
 .h1-jetbrains {
   font-family: "JetBrains Mono", monospace;
   font-weight: 600; /* SemiBold */

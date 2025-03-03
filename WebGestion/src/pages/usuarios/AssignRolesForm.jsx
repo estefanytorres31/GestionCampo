@@ -5,6 +5,7 @@ import Button from "@/components/Button";
 import axiosInstance from "@/config/axiosConfig";
 import useFetchData from "@/hooks/useFetchData";
 import { useAuth } from "@/context/AuthContext";
+import { updateLocalStorageRolesFromSelectedRoles } from "@/utils/updateLocalStorageRoles";
 
 const AssignRolesForm = ({ onSuccess, onCancel }) => {
   const { userId } = useParams();
@@ -130,84 +131,77 @@ const AssignRolesForm = ({ onSuccess, onCancel }) => {
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    // Verificar si no se han seleccionado roles.
-    if (selectedRoles.length === 0) {
-      setShowNoRolesModal(true);
-      return;
-    }
-
-    setLoading(true);
-    setLocalError("");
-    try {
-      // Roles a asignar: los que están en selectedRoles y NO en assignedRoles
-      const toAssign = selectedRoles.filter(
-        (sr) => !assignedRoles.find((ar) => ar.id === sr.id)
-      );
-      // Roles a remover: los que estaban asignados pero ya no están en selectedRoles
-      let toRemove = assignedRoles.filter(
-        (ar) => !selectedRoles.find((sr) => sr.id === ar.id)
-      );
-      // Si es el superadministrador (id "1"), se excluye el rol de Administrador de la remoción.
-      if (userId === "1") {
-        toRemove = toRemove.filter(
-          (role) => role.nombre.toLowerCase() !== "administrador"
-        );
+    const handleSubmit = async (e) => {
+      e.preventDefault();
+    
+      // Verificar si no se han seleccionado roles.
+      if (selectedRoles.length === 0) {
+        setShowNoRolesModal(true);
+        return;
       }
-
-      // Asignar nuevos roles
-      await Promise.all(
-        toAssign.map(async (role) => {
-          try {
-            await axiosInstance.post("/usuariorol/assign", {
+    
+      setLoading(true);
+      setLocalError("");
+      try {
+        // Roles a asignar: los que están en selectedRoles y NO en assignedRoles
+        const toAssign = selectedRoles.filter(
+          (sr) => !assignedRoles.find((ar) => ar.id === sr.id)
+        );
+        // Roles a remover: los que estaban asignados pero ya no están en selectedRoles
+        let toRemove = assignedRoles.filter(
+          (ar) => !selectedRoles.find((sr) => sr.id === ar.id)
+        );
+        // Si es el superadministrador (id "1"), se excluye el rol de Administrador de la remoción.
+        if (userId === "1") {
+          toRemove = toRemove.filter(
+            (role) => role.nombre.toLowerCase() !== "administrador"
+          );
+        }
+    
+        // Asignar nuevos roles
+        await Promise.all(
+          toAssign.map(async (role) => {
+            try {
+              await axiosInstance.post("/usuariorol/assign", {
+                usuario_id: parseInt(userId, 10),
+                rol_id: role.id,
+              });
+            } catch (err) {
+              if (
+                err.response &&
+                err.response.data &&
+                typeof err.response.data.message === "string" &&
+                err.response.data.message.includes("El rol ya está asignado")
+              ) {
+                console.warn("El rol ya está asignado:", role.id);
+              } else {
+                throw err;
+              }
+            }
+          })
+        );
+    
+        // Remover roles
+        await Promise.all(
+          toRemove.map((role) =>
+            axiosInstance.put("/usuariorol/remove", {
               usuario_id: parseInt(userId, 10),
               rol_id: role.id,
-            });
-          } catch (err) {
-            if (
-              err.response &&
-              err.response.data &&
-              typeof err.response.data.message === "string" &&
-              err.response.data.message.includes("El rol ya está asignado")
-            ) {
-              console.warn("El rol ya está asignado:", role.id);
-            } else {
-              throw err;
-            }
-          }
-        })
-      );
-
-      // Remover roles
-      await Promise.all(
-        toRemove.map((role) =>
-          axiosInstance.put("/usuariorol/remove", {
-            usuario_id: parseInt(userId, 10),
-            rol_id: role.id,
-          })
-        )
-      );
-
-      if (refetchAssigned) await refetchAssigned();
-
-      // Actualizar el usuario en localStorage y el contexto
-      const storedUser = localStorage.getItem("usuario");
-      if (storedUser) {
-        const userData = JSON.parse(storedUser);
-        userData.roles = selectedRoles.map((role) => role.nombre);
-        localStorage.setItem("usuario", JSON.stringify(userData));
-        refreshUsuario();
+            })
+          )
+        );
+    
+        if (refetchAssigned) await refetchAssigned();
+        await updateLocalStorageRolesFromSelectedRoles(selectedRoles, refreshUsuario);
+    
+        if (onSuccess) onSuccess();
+      } catch (err) {
+        console.error(err);
+        setLocalError("Error al actualizar los roles.");
+      } finally {
+        setLoading(false);
       }
-      if (onSuccess) onSuccess();
-    } catch (err) {
-      console.error(err);
-      setLocalError("Error al actualizar los roles.");
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
 
   if (userError) return <p className="text-red-500">{userError}</p>;
   if (!user) return <p>Cargando datos del usuario...</p>;

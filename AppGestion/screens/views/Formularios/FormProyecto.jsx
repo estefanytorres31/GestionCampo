@@ -10,6 +10,8 @@ import {
   Platform,
   SafeAreaView,
   Alert,
+  Pressable,
+  Modal,
 } from 'react-native';
 import { Camera, Image as ImageIcon, Plus, Save, Percent } from 'lucide-react-native';
 import * as ImagePicker from 'expo-image-picker';
@@ -18,7 +20,9 @@ import { CommonActions } from '@react-navigation/native';
 import useOrdenTrabajoSistema from "../../hooks/OrdenTrabajoSistema/useOrdenTrabajoSistema";
 import useAuth from "../../hooks/Auth/useAuth";
 
-const MaintenanceForm = () => {
+const PROGRESS_VALUES = [0, 25, 50, 75, 90, 100];
+
+const MaintenanceForm =({route, navigation})=> {
   const {id_orden_trabajo_sistema}=route.params;
   
   const {role}=useAuth();
@@ -29,7 +33,7 @@ const MaintenanceForm = () => {
     images: []
   });
 
-  const [showProgress, setShowProgress] = useState(false);
+  const [showProgressPicker, setShowProgressPicker] = useState(false);
   const {actualizarOrdenTrabajoSistemaCompleta}=useOrdenTrabajoSistema();
 
   const pickImage = async (useCamera = false) => {
@@ -115,7 +119,7 @@ const MaintenanceForm = () => {
                 CommonActions.reset({
                   index: 1,
                   routes: [
-                    { name: role.includes("Jefe") ? "InicioJefe" : "Inicio" },
+                    { name: "InicioJefe" },
                   ],
                 })
               ),
@@ -127,6 +131,50 @@ const MaintenanceForm = () => {
       Alert.alert('Error', 'No se pudo guardar los datos');
     }
   };
+
+  const ProgressPicker = () => (
+    <Modal
+      animationType="slide"
+      transparent={true}
+      visible={showProgressPicker}
+      onRequestClose={() => setShowProgressPicker(false)}
+    >
+      <View style={styles.modalOverlay}>
+        <View style={styles.modalContent}>
+          <Text style={styles.modalTitle}>Seleccionar Progreso</Text>
+          <View style={styles.progressOptionsContainer}>
+            {PROGRESS_VALUES.map((value) => (
+              <Pressable
+                key={value}
+                style={[
+                  styles.progressOption,
+                  formData.progress === value && styles.progressOptionSelected
+                ]}
+                onPress={() => {
+                  setFormData(prev => ({ ...prev, progress: value }));
+                  setShowProgressPicker(false);
+                }}
+              >
+                <Text style={[
+                  styles.progressOptionText,
+                  formData.progress === value && styles.progressOptionTextSelected
+                ]}>
+                  {value}%
+                </Text>
+              </Pressable>
+            ))}
+          </View>
+          <TouchableOpacity
+            style={styles.cancelButton}
+            onPress={() => setShowProgressPicker(false)}
+          >
+            <Text style={styles.cancelButtonText}>Cancelar</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
+  );
+  
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -196,20 +244,14 @@ const MaintenanceForm = () => {
         </View>
 
         <View style={styles.section}>
-          <View style={styles.progressHeader}>
-            <Text style={styles.sectionTitle}>Porcentaje de avance</Text>
-            <Text style={styles.progressText}>{`${Math.round(formData.progress)}%`}</Text>
-          </View>
-          <Slider
-            style={styles.slider}
-            minimumValue={0}
-            maximumValue={100}
-            value={formData.progress}
-            onValueChange={(value) => setFormData(prev => ({ ...prev, progress: value }))}
-            minimumTrackTintColor="#6366f1"
-            maximumTrackTintColor="#e2e8f0"
-            thumbTintColor="#6366f1"
-          />
+          <Text style={styles.sectionTitle}>Porcentaje de avance</Text>
+          <TouchableOpacity
+            style={styles.progressSelector}
+            onPress={() => setShowProgressPicker(true)}
+          >
+            <Text style={styles.progressValue}>{`${formData.progress}`}</Text>
+            <Percent size={24} color="#6366f1" />
+          </TouchableOpacity>
         </View>
 
         <TouchableOpacity 
@@ -219,6 +261,7 @@ const MaintenanceForm = () => {
           <Save size={24} color="#ffffff" />
           <Text style={styles.saveButtonText}>Guardar</Text>
         </TouchableOpacity>
+        <ProgressPicker />
       </ScrollView>
     </SafeAreaView>
   );
@@ -332,9 +375,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#6366f1',
   },
-  slider: {
-    height: 40,
-  },
   saveButton: {
     backgroundColor: '#6366f1',
     flexDirection: 'row',
@@ -354,6 +394,78 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
     marginLeft: 12,
+  },  
+  progressSelector: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#f8fafc',
+    borderRadius: 12,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+  },
+  progressValue: {
+    fontSize: 18,
+    fontWeight: 'semibold',
+    color: 'black',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: '#ffffff',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: 24,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#1e293b',
+    textAlign: 'center',
+    marginBottom: 24,
+  },
+  progressOptionsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    gap: 12,
+    marginBottom: 24,
+  },
+  progressOption: {
+    width: '30%',
+    backgroundColor: '#f8fafc',
+    borderRadius: 12,
+    padding: 16,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+  },
+  progressOptionSelected: {
+    backgroundColor: '#6366f1',
+    borderColor: '#6366f1',
+  },
+  progressOptionText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#334155',
+  },
+  progressOptionTextSelected: {
+    color: '#ffffff',
+  },
+  cancelButton: {
+    padding: 16,
+    borderRadius: 12,
+    backgroundColor: '#f1f5f9',
+    alignItems: 'center',
+  },
+  cancelButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#64748b',
   },
 });
 

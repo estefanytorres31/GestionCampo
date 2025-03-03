@@ -16,8 +16,7 @@ const trabajosColumns = [
   { name: "ID", uuid: "id_orden_trabajo" },
   { name: "Código", uuid: "codigo" },
   { name: "Fecha", uuid: "fecha_asignacion" },
-  { name: "Asignado por", uuid: "jefe_asigna" },
-  { name: "Responsable", uuid: "orden_trabajo_usuario" },
+  { name: "Creado por", uuid: "jefe_asigna" },
   { name: "Estado", uuid: "estado" },
 ];
 
@@ -50,23 +49,24 @@ const TrabajosAsignados = () => {
     orden_trabajo_usuario: (row) => {
       const responsable =
         row.orden_trabajo_usuario &&
-        row.orden_trabajo_usuario.find(
-          (u) => u.rol_en_orden === "Responsable"
-        );
+        row.orden_trabajo_usuario.find((u) => u.rol_en_orden === "Responsable");
       return responsable
         ? responsable.usuario.nombre_completo
         : "Sin responsable";
     },
-    jefe_asigna: (row) =>
-      row.jefe_asigna ? (
-        <UserAvatarRowTooltip
-          user={row.jefe_asigna}
-          size={40}
-          tooltipSize={60}
-        />
-      ) : (
-        "-"
-      ),
+    jefe_asigna: (row) => {
+      const jefe = row.jefe_asigna && row.jefe_asigna.nombre_completo;
+      return jefe ? jefe : "Sin jefe";
+    },
+    // row.jefe_asigna ? (
+    //   <UserAvatarRowTooltip
+    //     user={row.jefe_asigna}
+    //     size={40}
+    //     tooltipSize={60}
+    //   />
+    // ) : (
+    //   "-"
+    // ),
   };
 
   // Función personalizada para exportar a Excel evitando [object Object] en "Responsable"
@@ -97,8 +97,7 @@ const TrabajosAsignados = () => {
     const sheetData = [header, ...body];
     const buffer = xlsx.build([{ name: title, data: sheetData }]);
     const blob = new Blob([buffer], {
-      type:
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     });
     saveAs(blob, `${title}.xlsx`);
   };

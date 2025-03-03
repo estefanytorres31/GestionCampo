@@ -33,16 +33,14 @@ enum RolEnOrden {
   Ayudante
 }
 
-/// Modelos de Prisma
 model Permiso {
-  id             Int              @id @default(autoincrement())
-  nombre         String           @unique @map("nombre")
+  id             Int      @id @default(autoincrement())
+  nombre         String   @unique // Se marca como único
   descripcion    String?
-  estado         Boolean          @default(true)
-  creado_en      DateTime         @default(now()) @map("creado_en")
-  actualizado_en DateTime         @updatedAt @map("actualizado_en")
+  estado         Boolean  @default(true)
+  creado_en      DateTime @default(now())
+  actualizado_en DateTime @updatedAt
   roles_permisos RolesPermiso[]
-
   @@map("permisos")
   @@index([estado], name: "idx_permiso_estado")
 }
@@ -174,14 +172,17 @@ model Embarcacion {
 }
 
 model Puerto {
-  id_puerto        Int                @id @default(autoincrement()) @map("id_puerto")
-  nombre           String             @unique @map("nombre")
-  ubicacion        String?            @map("ubicacion")
-  estado           Boolean            @default(true) @map("estado")
-  creado_en        DateTime           @default(now()) @map("creado_en")
-  actualizado_en   DateTime           @updatedAt @map("actualizado_en")
+  id_puerto         Int                @id @default(autoincrement()) @map("id_puerto")
+  nombre            String             @unique @map("nombre")
+  ubicacion         String?            @map("ubicacion")
+  estado            Boolean            @default(true) @map("estado")
+  creado_en         DateTime           @default(now()) @map("creado_en")
+  actualizado_en    DateTime           @updatedAt @map("actualizado_en")
   historial_puertos HistorialPuerto[]
   orden_trabajo     OrdenTrabajo[]
+  
+  // Relación inversa a Abordaje
+  abordajes         Abordaje[]         @relation("AbordajePuerto")
 
   @@map("puerto")
 }
@@ -317,8 +318,6 @@ model OrdenTrabajo {
   fecha_asignacion        DateTime            @map("fecha_asignacion")
   estado                  EstadoOrdenTrabajo  @default(pendiente) @map("estado")
   comentarios             String?             @map("comentarios")
-  motorista               String?             @map("motorista")
-  supervisor              String?             @map("supervisor")
   codigo                  String?             @unique @map("codigo")
   creado_en               DateTime            @default(now()) @map("creado_en")
   actualizado_en          DateTime            @updatedAt @map("actualizado_en")
@@ -346,49 +345,78 @@ model OrdenTrabajoUsuario {
   id_usuario              Int         @map("id_usuario")
   rol_en_orden            RolEnOrden? @map("rol_en_orden")
   observaciones           String?     @map("observaciones")
-  estado                  Boolean     @default(true) @map("estado") // Nuevo campo para activación/desactivación
+  estado                  Boolean     @default(true) @map("estado")
   creado_en               DateTime    @default(now()) @map("creado_en")
   actualizado_en          DateTime    @updatedAt @map("actualizado_en")
+  
   orden_trabajo           OrdenTrabajo @relation(fields: [id_orden_trabajo], references: [id_orden_trabajo], onDelete: NoAction, onUpdate: Cascade)
   usuario                 Usuario     @relation(fields: [id_usuario], references: [id], onDelete: NoAction, onUpdate: Cascade)
 
+  abordajes               Abordaje[] 
+
   @@unique([id_orden_trabajo, id_usuario], name: "orden_trabajo_usuario_unique")
   @@map("orden_trabajo_usuario")
-  
-  // Índices adicionales
   @@index([id_orden_trabajo], name: "idx_orden_trabajo_usuario_orden_trabajo")
   @@index([id_usuario], name: "idx_orden_trabajo_usuario_usuario")
 }
 
+model Abordaje {
+  id                       Int                   @id @default(autoincrement())
+  id_orden_trabajo_usuario Int
+  fecha                    DateTime              // Fecha de la sesión de abordaje
+  motorista                String?               // Motorista asignado en este abordaje
+  supervisor               String?               // Supervisor asignado en este abordaje
+  id_puerto                Int                   // Puerto relacionado a este abordaje
+  estado                   Boolean               @default(true)
+  creado_en                DateTime              @default(now())
+  actualizado_en           DateTime              @updatedAt
+
+  // Relación con el usuario responsable asignado a la orden de trabajo
+  ordenTrabajoUsuario      OrdenTrabajoUsuario   @relation(fields: [id_orden_trabajo_usuario], references: [id_orden_trabajo_usuario], onDelete: Cascade, onUpdate: Cascade)
+  
+  // Relación con el puerto en el que se realizó este abordaje
+  puerto                   Puerto                @relation("AbordajePuerto", fields: [id_puerto], references: [id_puerto], onDelete: NoAction, onUpdate: Cascade)
+
+  // Relaciones a registros del sistema y partes realizados durante este abordaje
+  ordenTrabajoSistemas     OrdenTrabajoSistema[] @relation("AbordajeSistema")
+  ordenTrabajoPartes       OrdenTrabajoParte[]   @relation("AbordajeParte")
+
+  // Se garantiza un único abordaje por día para cada usuario asignado a la OT
+  @@unique([id_orden_trabajo_usuario, fecha], name: "unique_abordaje_usuario_fecha")
+  @@map("abordaje")
+}
+
 model OrdenTrabajoSistema {
   id_orden_trabajo_sistema  Int                 @id @default(autoincrement())
-  id_orden_trabajo          Int                 // FK a la orden principal
-  id_embarcacion_sistema    Int                 // Nueva FK a EmbarcacionSistema
+  id_orden_trabajo          Int
+  id_embarcacion_sistema    Int
 
-  estado             EstadoOrdenTrabajo @default(pendiente)
-  observaciones      String?
-  avance             Int                @default(0)
-  materiales         String?
-  proximo_abordaje   String?
-  creado_en          DateTime           @default(now())
-  actualizado_en     DateTime           @updatedAt
+  estado                    EstadoOrdenTrabajo  @default(pendiente)
+  observaciones             String?
+  avance                    Int                 @default(0)
+  materiales                String?
+  proximo_abordaje          String?
+  creado_en                 DateTime            @default(now())
+  actualizado_en            DateTime            @updatedAt
 
-  /// Relaciones
-  orden_trabajo      OrdenTrabajo       @relation(fields: [id_orden_trabajo], references: [id_orden_trabajo], onDelete: NoAction, onUpdate: Cascade)
-  embarcacion_sistema EmbarcacionSistema @relation(fields: [id_embarcacion_sistema], references: [id_embarcacion_sistema], onDelete: NoAction, onUpdate: Cascade)
-
+  /// Relaciones principales
+  orden_trabajo             OrdenTrabajo        @relation(fields: [id_orden_trabajo], references: [id_orden_trabajo], onDelete: NoAction, onUpdate: Cascade)
+  embarcacion_sistema       EmbarcacionSistema  @relation(fields: [id_embarcacion_sistema], references: [id_embarcacion_sistema], onDelete: NoAction, onUpdate: Cascade)
+  
   // Relaciones adicionales existentes
-  detalle            OrdenTrabajoSistemaDetalle?
-  fotos              OrdenTrabajoSistemaFoto[]
-  orden_trabajo_parte OrdenTrabajoParte[]
+  detalle                   OrdenTrabajoSistemaDetalle?
+  fotos                     OrdenTrabajoSistemaFoto[]
+  orden_trabajo_parte       OrdenTrabajoParte[]
 
-  // Constraint única ajustada para la nueva relación
+  // Relación opcional con el abordaje en el que se completó este registro
+  id_abordaje               Int?                
+  abordaje                  Abordaje?           @relation("AbordajeSistema", fields: [id_abordaje], references: [id])
+  
   @@unique([id_orden_trabajo, id_embarcacion_sistema], name: "orden_trabajo_sistema_unique")
   @@map("orden_trabajo_sistema")
   @@index([id_orden_trabajo], name: "idx_otsis_ot")
   @@index([estado], name: "idx_otsis_est")
 }
-
 
 model OrdenTrabajoSistemaDetalle {
   id_detalle               Int  @id @default(autoincrement()) @map("id_detalle")
@@ -417,19 +445,23 @@ model OrdenTrabajoSistemaFoto {
 }
 
 model OrdenTrabajoParte {
-  id_orden_trabajo_parte Int                @id @default(autoincrement()) @map("id_orden_trabajo_parte")
-  id_orden_trabajo_sistema Int             @map("id_orden_trabajo_sistema")
-  id_parte               Int                @map("id_parte")
-  estado                 EstadoOrdenTrabajo @default(pendiente) @map("estado")
-  comentario             String?            @map("comentario") // Nueva columna opcional
-  creado_en              DateTime           @default(now()) @map("creado_en")
-  actualizado_en         DateTime           @updatedAt @map("actualizado_en")
-  orden_trabajo_sistema  OrdenTrabajoSistema @relation(fields: [id_orden_trabajo_sistema], references: [id_orden_trabajo_sistema], onDelete: NoAction, onUpdate: Cascade)
-  parte                   Parte              @relation(fields: [id_parte], references: [id_parte], onDelete: NoAction, onUpdate: Cascade)
-  
+  id_orden_trabajo_parte  Int                  @id @default(autoincrement()) @map("id_orden_trabajo_parte")
+  id_orden_trabajo_sistema Int                  @map("id_orden_trabajo_sistema")
+  id_parte                Int                  @map("id_parte")
+  id_abordaje             Int?                 @map("id_abordaje") // Nuevo campo opcional para relacionar con Abordaje
+  estado                  EstadoOrdenTrabajo   @default(pendiente) @map("estado")
+  comentario              String?              @map("comentario")
+  creado_en               DateTime             @default(now()) @map("creado_en")
+  actualizado_en          DateTime             @updatedAt @map("actualizado_en")
+
+  orden_trabajo_sistema   OrdenTrabajoSistema  @relation(fields: [id_orden_trabajo_sistema], references: [id_orden_trabajo_sistema], onDelete: NoAction, onUpdate: Cascade)
+  parte                   Parte                @relation(fields: [id_parte], references: [id_parte], onDelete: NoAction, onUpdate: Cascade)
+  abordaje                Abordaje?            @relation("AbordajeParte", fields: [id_abordaje], references: [id])
+
   @@unique([id_orden_trabajo_sistema, id_parte], name: "orden_trabajo_parte_unique")
   @@map("orden_trabajo_parte")
 }
+
 
 model TipoTrabajoEmbarcacionSistemaParte {
   id_tipo_trabajo_embarcacion_sistema_parte Int  @id @default(autoincrement()) @map("id_tt_esp")

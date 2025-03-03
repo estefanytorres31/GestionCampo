@@ -27,6 +27,7 @@ import roleMapper from "@/utils/roleMapper";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGear } from "@fortawesome/free-solid-svg-icons";
+import { getUniquePermissions } from "@/utils/getUniquePermissions";
 
 // Variantes para la animación del submenú
 const subMenuVariants = {
@@ -76,93 +77,135 @@ const SideBar = () => {
         to: "/dashboard",
         icon: <FaMapLocationDot size={20} className="min-w-max" />,
         label: "Dashboard",
-        roles: ["Administrador", "Técnico", "Jefe"],
       },
       {
-        to: "/asistencias",
+        to: "/horas-hombre",
         icon: <RiUserLocationFill size={20} className="min-w-max" />,
-        label: "Asistencias",
-        roles: ["Administrador", "Técnico", "Jefe"],
+        label: "Horas Hombre",
+        permisos: ["Ver Todo", "Ver Horas Hombre"],
       },
       {
-        to: "/trabajos-asignados",
+        to: "/orden-trabajo",
         icon: <HiClipboardList size={20} className="min-w-max" />,
-        label: "Trabajos Asignados",
-        roles: ["Administrador", "Técnico", "Jefe"],
+        label: "Orden Trabajo",
+        permisos: ["Ver Todo", "Ver Orden Trabajo"],
       },
+      //   // Ítem contenedor para subitems
+      //   icon: <MdAssignment size={20} className="min-w-max" />,
+      //   label: "Asignaciones",
+      //   roles: ["admin"],
+      //   subItems: [
+      //     {
+      //       to: "/asignaciones",
+      //       icon: <GiCargoShip size={20} className="min-w-max" />,
+      //       label: "Asignaciones",
+      //       roles: ["admin"],
+      //     },
+      //     {
+      //       to: "/puertos",
+      //       icon: <GiHarborDock size={20} className="min-w-max" />,
+      //       label: "Puerto",
+      //       roles: ["admin"],
+      //     },
+      //     {
+      //       to: "/historial-puertos",
+      //       label: "Historial de Puertos",
+      //       icon: <LuShipWheel size={18} className="min-w-max" />,
+      //     },
+      //   ],
+      // },
+      // {
+      //   // Ítem contenedor para subitems
+      //   icon: <BiSolidShip size={20} className="min-w-max" />,
+      //   label: "Embarcacion",
+      //   roles: ["admin"],
+      //   subItems: [
+      //     {
+      //       to: "/embarcacion",
+      //       icon: <GiCargoShip size={20} className="min-w-max" />,
+      //       label: "Embarcación",
+      //       roles: ["admin"],
+      //     },
+      //     {
+      //       to: "/puerto",
+      //       icon: <GiHarborDock size={20} className="min-w-max" />,
+      //       label: "Puerto",
+      //       roles: ["admin"],
+      //     },
+      //     {
+      //       to: "/historial-puertos",
+      //       label: "Historial de Puertos",
+      //       icon: <LuShipWheel size={18} className="min-w-max" />,
+      //     },
+      //   ],
+      // },
+      // {
+      //   to: "/sistema",
+      //   icon: <FontAwesomeIcon icon={faGear} style={{ fontSize: "17px" }} />,
+      //   label: "Sistema",
+      //   roles: ["admin"],
+      // },
       {
         icon: <RiShieldUserFill size={20} className="min-w-max" />,
         label: "Usuarios",
-        roles: ["Administrador"],
+        permisos: ["Ver Todo", "Ver Usuarios"],
         subItems: [
           {
             to: "/usuarios",
             label: "Usuarios",
             icon: <FaUserFriends size={18} className="min-w-max" />,
-            roles: ["Administrador"],
+            permisos: ["Ver Todo", "Ver Usuarios"],
           },
           {
             to: "/roles",
             label: "Roles",
             icon: <RiShieldUserFill size={18} className="min-w-max" />,
-            roles: ["Administrador"],
+            permisos: ["Ver Todo", "Ver Roles"],
           },
           {
             to: "/permisos",
             label: "Permisos",
-            icon: <RiShieldUserFill size={18} className="min-w-max" />,
-            roles: ["Administrador"],
+            icon: <RiGroup2Fill size={18} className="min-w-max" />,
+            permisos: ["Ver Todo", "Ver Permisos"],
           },
         ],
       },
     ];
 
-    // Usuario de ejemplo; normalmente proviene del contexto
-
-    console.log("roles", roles)
-    const rolesUsuario = roles?.map((r) => r.nombre) || [];
-
-    const allPermissions = roles?.flatMap((r) =>
-      Array.isArray(r.permisos)
-        ? r.permisos.map((p) => ({
-            id: p.id,
-            nombre: p.nombre,
-          }))
-        : []
-    ) || [];
-    
-    const uniquePermissions = Array.from(
-      new Map(allPermissions.map((permiso) => [permiso.id, permiso])).values()
-    );
-    
-    console.log("uniquePermissions", uniquePermissions);
+    const permissionsUsuario = getUniquePermissions(roles);
 
     function filterElements(elements) {
       return elements.reduce((acc, item) => {
-        // Si el elemento tiene la propiedad `roles`, se verifica la intersección:
-        if (item.roles && !item.roles.some((rol) => rolesUsuario.includes(rol))) {
-          // Si no hay coincidencia, se omite el elemento.
+        // Si es Dashboard, se agrega sin filtrar
+        if (item.to === "/dashboard" || item.label === "Dashboard") {
+          const newItem = { ...item };
+          if (newItem.subItems) {
+            newItem.subItems = filterElements(newItem.subItems);
+          }
+          acc.push(newItem);
           return acc;
         }
 
-        // Clonamos el elemento para no modificar el original
-        const newItem = { ...item };
+        // Para los demás elementos, si se definen permisos y ninguno coincide, se descarta
+        if (
+          item.permisos &&
+          !item.permisos.some((perm) => permissionsUsuario.includes(perm))
+        ) {
+          return acc;
+        }
 
-        // Si el elemento tiene subItems, se filtran recursivamente.
+        const newItem = { ...item };
         if (newItem.subItems) {
           newItem.subItems = filterElements(newItem.subItems);
         }
-
-        // Se agrega el elemento filtrado.
         acc.push(newItem);
         return acc;
       }, []);
     }
 
-    // Se filtran los elementos de navegación.
     const elementsFiltered = filterElements(navigationElements);
     setLink(elementsFiltered);
-  }, []);
+  }, [roles]);
 
   return (
     <aside>

@@ -76,11 +76,11 @@ const OrdenTrabajoProvider = ({ children }) => {
       }
     }
 
-    const updateOT=async(id_orden_trabajo, id_puerto, motorista, supervisor)=>{
+    const updateOT=async(id_orden_trabajo, id_puerto)=>{
       setLoading(true);
       setError(null);
       try {
-        const response = await updateAllOrdenTrabajo(id_orden_trabajo, id_puerto, motorista, supervisor);
+        const response = await updateAllOrdenTrabajo(id_orden_trabajo, id_puerto);
         return response.data;
       } catch (err) {
         setError(err.message);

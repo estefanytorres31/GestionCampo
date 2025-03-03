@@ -17,3 +17,17 @@
     border-color: var(--input-focus-border);
   }
 }
+.input-label,
+.select-label,
+.button-label,
+.tag-label {
+  @apply flex flex-col gap-1 whitespace-nowrap text-ellipsis;
+}
+
+.label {
+  @apply text-lg;
+}
+
+.button-label ~ .button {
+  @apply w-full;
+}

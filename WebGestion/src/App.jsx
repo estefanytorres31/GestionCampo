@@ -21,6 +21,7 @@ import HistorialPuerto from "./pages/puerto/HistorialPuerto";
 import TrabajosAsignados from "./pages/trabajosasignados/TrabajosAsignados";
 import Configuración from "./pages/configuracion/Configuración";
 import CodigoDetalle from "./pages/trabajosasignados/CodigoDetalle";
+import { getUniquePermissions } from "./utils/getUniquePermissions";
 
 const AppContent = () => {
   const { isAuth, usuario, roles } = useAuth();
@@ -32,18 +33,21 @@ const AppContent = () => {
     return isAuth ? children : <Navigate to="/login" />;
   };
 
-  console.log("usuario", usuario);
-  console.log("roles", roles)
-  const PrivateRouteWrapper = ({ element: Component, authorizedRoles }) => {
-    // const rol = roleMapper(user?.rol || 0);
-    
-  
-    return authorizedRoles ? (
-      <Component />
-    ) : (
-      <Navigate to="/dashboard" />
-    );
+  const permissionsUsuario = getUniquePermissions(roles);
+
+  const PrivateRouteWrapper = ({
+    element: Component,
+    authorizedPermissions,
+  }) => {
+    // Si el usuario tiene el permiso "Ver Todo", se le permite el acceso
+    const hasVerTodo = permissionsUsuario.includes("Ver Todo");
+
+    const hasPermission =
+    hasVerTodo ||
+    authorizedPermissions.some((perm) => permissionsUsuario.includes(perm));
+    return hasPermission ? <Component /> : <Navigate to="/dashboard" />;
   };
+
   return (
     <>
       <Routes>
@@ -71,7 +75,7 @@ const AppContent = () => {
             </PrivateRoute>
           }
         />
-        <Route
+        {/* <Route
           path="/puerto"
           element={
             <PrivateRoute>
@@ -80,8 +84,8 @@ const AppContent = () => {
               </PrivateLayout>
             </PrivateRoute>
           }
-        />
-        <Route
+        /> */}
+        {/* <Route
           path="/historial-puertos"
           element={
             <PrivateRoute>
@@ -90,8 +94,8 @@ const AppContent = () => {
               </PrivateLayout>
             </PrivateRoute>
           }
-        />
-        <Route
+        /> */}
+        {/* <Route
           path="/embarcacion"
           element={
             <PrivateRoute>
@@ -100,33 +104,42 @@ const AppContent = () => {
               </PrivateLayout>
             </PrivateRoute>
           }
-        />
+        /> */}
         <Route
-          path="/asistencias"
+          path="/horas-hombre"
           element={
             <PrivateRoute>
               <PrivateLayout>
-                <Asistencias />
+                <PrivateRouteWrapper
+                  authorizedPermissions={["Ver Todo", "Ver Horas Hombre"]}
+                  element={Asistencias}
+                />
               </PrivateLayout>
             </PrivateRoute>
           }
         />
         <Route
-          path="/trabajos-asignados"
+          path="/orden-trabajo"
           element={
             <PrivateRoute>
               <PrivateLayout>
-                <TrabajosAsignados />
+                <PrivateRouteWrapper
+                  authorizedPermissions={["Ver Todo", "Ver Orden Trabajo"]}
+                  element={TrabajosAsignados}
+                />
               </PrivateLayout>
             </PrivateRoute>
           }
         />
-        <Route 
+        <Route
           path="/trabajos-asignados/:id_orden_trabajo/detalle-codigo"
           element={
             <PrivateRoute>
               <PrivateLayout>
-                <CodigoDetalle />
+                <PrivateRouteWrapper
+                  authorizedPermissions={["Ver Todo", "Ver Orden Trabajo"]}
+                  element={CodigoDetalle}
+                />
               </PrivateLayout>
             </PrivateRoute>
           }
@@ -136,7 +149,10 @@ const AppContent = () => {
           element={
             <PrivateRoute>
               <PrivateLayout>
-                <Usuarios />
+                <PrivateRouteWrapper
+                  authorizedPermissions={["Ver Todo", "Ver Usuarios"]}
+                  element={Usuarios}
+                />
               </PrivateLayout>
             </PrivateRoute>
           }
@@ -146,7 +162,10 @@ const AppContent = () => {
           element={
             <PrivateRoute>
               <PrivateLayout>
-                <AssignRolesForm />
+                <PrivateRouteWrapper
+                  authorizedPermissions={["Ver Todo", "Ver Usuarios"]}
+                  element={AssignRolesForm}
+                />
               </PrivateLayout>
             </PrivateRoute>
           }
@@ -156,7 +175,10 @@ const AppContent = () => {
           element={
             <PrivateRoute>
               <PrivateLayout>
-                <Roles />
+                <PrivateRouteWrapper
+                  authorizedPermissions={["Ver Todo", "Ver Roles"]}
+                  element={Roles}
+                />
               </PrivateLayout>
             </PrivateRoute>
           }
@@ -166,7 +188,10 @@ const AppContent = () => {
           element={
             <PrivateRoute>
               <PrivateLayout>
-                <AssignPermissionsPage />
+                <PrivateRouteWrapper
+                  authorizedPermissions={["Ver Todo", "Ver Roles"]}
+                  element={AssignPermissionsPage}
+                />
               </PrivateLayout>
             </PrivateRoute>
           }
@@ -176,7 +201,10 @@ const AppContent = () => {
           element={
             <PrivateRoute>
               <PrivateLayout>
-                <Permisos />
+                <PrivateRouteWrapper
+                  authorizedPermissions={["Ver Todo", "Ver Permisos"]}
+                  element={Permisos}
+                />
               </PrivateLayout>
             </PrivateRoute>
           }

@@ -57,7 +57,7 @@ export const createEmpresa = async (nombre) => {
 export const getAllEmpresas = async () => {
     const empresas = await prisma.empresa.findMany({
         where: { estado: true },
-        orderBy: { creado_en: "desc" },
+        orderBy: { creado_en: "asc" },
     });
 
     if (empresas.length === 0) {

@@ -120,8 +120,6 @@ export const getAllUsers = async (filters, page = 1, pageSize = 10) => {
         .map((r) => r.rol.nombre_rol), // Extraemos solo el nombre del rol
     }));
   
-    console.log("usuariosTransformados", usuariosTransformados);
-  
     return {
       total,
       page,
@@ -218,7 +216,8 @@ export const updateUser = async (
   id,
   nombre_usuario,
   nombre_completo,
-  email
+  email,
+  contrasena_hash
 ) => {
   const userId = parseInt(id, 10);
 
@@ -226,6 +225,7 @@ export const updateUser = async (
     throw new Error("El ID proporcionado no es válido.");
   }
 
+  // Buscamos el usuario a actualizar
   const user = await prisma.usuario.findUnique({
     where: { id: userId },
   });
@@ -234,16 +234,35 @@ export const updateUser = async (
     throw new Error(`El usuario con ID ${id} no existe o está inactivo.`);
   }
 
+  // Verificamos si el nuevo nombre de usuario ya está en uso por otro usuario
+  if (nombre_usuario !== user.nombre_usuario) {
+    const existingUser = await prisma.usuario.findUnique({
+      where: { nombre_usuario },
+    });
+
+    if (existingUser) {
+      throw new Error("El nombre de usuario ya está en uso por otro usuario.");
+    }
+  }
+
   const fecha_actualizacion = getUTCTime(new Date().toISOString());
 
+  // Preparamos los datos a actualizar
+  const updatedData = {
+    nombre_usuario,
+    nombre_completo,
+    email,
+    actualizado_en: fecha_actualizacion,
+  };
+
+  // Si se proporciona una nueva contraseña, la hasheamos y la incluimos
+  if (contrasena_hash && contrasena_hash.trim().length > 0) {
+    const hashedPassword = await bcrypt.hash(contrasena_hash, 10);
+    updatedData.contrasena_hash = hashedPassword;
+  }
   const updatedUser = await prisma.usuario.update({
     where: { id: userId },
-    data: {
-      nombre_usuario,
-      nombre_completo,
-      email,
-      actualizado_en: fecha_actualizacion,
-    },
+    data: updatedData,
   });
 
   const usuario = {
@@ -254,6 +273,7 @@ export const updateUser = async (
     creado_en: updatedUser.creado_en,
     actualizado_en: updatedUser.actualizado_en,
   };
+
   return usuario;
 };
 

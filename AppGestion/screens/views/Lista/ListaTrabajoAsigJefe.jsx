@@ -121,7 +121,6 @@ const OrdenesTrabajoScreen = ({ navigation }) => {
         <TouchableOpacity 
             key={item.id_orden_trabajo}
             style={styles.card}
-            onPress={() => handleDetailsPress(item)}
             activeOpacity={0.7}
         >
             <View style={styles.cardHeader}>
@@ -150,7 +149,7 @@ const OrdenesTrabajoScreen = ({ navigation }) => {
                     onPress={() => handleReasignarPress(item)}
                 >
                     {<MaterialCommunityIcons 
-                        name="swap-horizontal" 
+                        name="arrow-right-thick" 
                         size={20} 
                         color={getEstadoConfig(item.estado).textColor} 
                     /> }
